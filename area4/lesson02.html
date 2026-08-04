@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2차시 계획이 반이다 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+/* 이 차시에서만 쓰는 보조 클래스 */
+.step-bar { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 6px; }
+.step-dot { flex: 1 1 0; min-width: 118px; padding: 8px 9px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); font: inherit; font-size: 12.5px; font-weight: 700; color: var(--ink-3); text-align: center; cursor: pointer; line-height: 1.35; }
+.step-dot[aria-current="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
+.step-dot.done { border-color: var(--ok); }
+.step-dot.done::before { content: "✓ "; color: var(--ok); font-weight: 900; }
+.step-prog { font-size: 12.5px; font-weight: 700; color: var(--ink-3); margin: 0 0 13px; }
+.step-prog b { color: var(--accent-ink); font-family: var(--font-mono); }
+.step-panel { padding: 15px 16px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); }
+.step-panel h5 { font-size: 15.5px; margin: 0 0 4px; }
+.step-panel .sp-help { font-size: 13.5px; color: var(--ink-3); margin: 0 0 4px; }
+.step-panel .sp-out { font-size: 12.5px; font-weight: 700; color: var(--accent-ink); background: var(--accent-soft); border-radius: 7px; padding: 5px 10px; display: inline-block; margin: 0 0 8px; }
+.fb-list { margin: 12px 0 0; display: flex; flex-direction: column; gap: 7px; }
+.fb { padding: 10px 13px; border-radius: 9px; font-size: 13.8px; line-height: 1.7; border: 1px solid var(--line); background: var(--surface-2); }
+.fb.no { background: var(--no-soft); border-color: var(--no-line); }
+.fb.warn { background: var(--warn-soft); border-color: var(--warn-line); }
+.fb.ok { background: var(--ok-soft); border-color: var(--ok-line); }
+.fb b.lv { font-weight: 800; margin-right: 4px; }
+.mchk { display: flex; flex-wrap: wrap; gap: 7px; }
+.mchk label { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 650; padding: 5px 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); cursor: pointer; }
+.mchk input { width: auto; accent-color: var(--accent); }
+.prev-box { margin: 16px 0 0; padding: 16px 18px; border-radius: var(--radius); border: 2px solid var(--accent-line); background: var(--surface); }
+.prev-box h4 { font-size: 16.5px; margin: 0 0 3px; }
+.prev-box .pm { font-size: 12.5px; color: var(--ink-3); margin: 0 0 12px; }
+.prev-box .pg { font-size: 13px; font-weight: 800; color: var(--accent-ink); margin: 14px 0 5px; padding-bottom: 3px; border-bottom: 1px solid var(--line); }
+.prev-box dl { margin: 0; font-size: 14.2px; }
+.prev-box dt { font-weight: 750; color: var(--ink-2); font-size: 12.5px; margin-top: 7px; }
+.prev-box dd { margin: 1px 0 0; color: var(--ink); }
+.prev-box dd.empty { color: var(--no); font-weight: 650; }
+.drop-grid { display: grid; gap: 9px; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); margin: 12px 0 0; }
+.drop-col { border: 1px dashed var(--line-strong); border-radius: var(--radius-sm); background: var(--surface-2); padding: 9px; min-height: 118px; cursor: pointer; }
+.drop-col.armed { border-color: var(--accent); background: var(--accent-soft); }
+.drop-col .dch { font-size: 12.3px; font-weight: 800; color: var(--ink-2); margin: 0 0 7px; display: block; line-height: 1.35; }
+.task-pool { display: flex; flex-wrap: wrap; gap: 7px; padding: 11px; border: 1px dashed var(--line-strong); border-radius: var(--radius-sm); background: var(--surface-2); min-height: 54px; }
+.task-card { font: inherit; font-size: 13px; font-weight: 650; padding: 6px 11px; border-radius: 9px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); cursor: pointer; text-align: left; line-height: 1.45; }
+.task-card[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); box-shadow: 0 0 0 3px var(--accent-soft); }
+.task-card.ok { border-color: var(--ok); background: var(--ok-soft); color: var(--ok); }
+.task-card.no { border-color: var(--no); background: var(--no-soft); color: var(--no); }
+.drop-col .task-card { display: block; width: 100%; margin-bottom: 6px; }
+.loop-svg { width: 100%; height: auto; display: block; color: var(--ink-3); }
+.btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>두 모둠이 같은 주제로 프로젝트를 시작했습니다.</p>
+      <ul>
+        <li><b>가온 모둠</b>은 곧바로 코드를 짜기 시작했습니다. 이틀 뒤 “그런데 우리 데이터에 정답이 없는데?”라는 말이 나왔습니다.</li>
+        <li><b>나리 모둠</b>은 첫 시간에 <b>계획서</b>를 썼습니다. 무엇을 판단할지, 데이터를 어디서 몇 개 모을지, 무엇으로 성능을 평가할지 적었습니다.</li>
+      </ul>
+      <p>2주 뒤, 가온 모둠은 데이터를 처음부터 다시 모으고 있었고 나리 모둠은 모델을 두 번째로 고치는 중이었습니다. 두 모둠의 차이는 <b>능력</b>이 아니라 <b>순서</b>였습니다.</p>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 가온 모둠이 놓친 것은 정확히 무엇일까?</summary>
+        <div class="more-body">
+          가온 모둠은 “무엇을 판단할 것인가”와 “그 판단을 배우려면 어떤 자료가 필요한가”를 정하지 않은 채 도구부터 잡았습니다. 이 차시에서는 이런 낭비를 막는 <b>다섯 단계의 문제 해결 절차</b>를 배우고, 그 절차대로 계획서를 직접 완성합니다.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 절차가 필요한 이유 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>계획이 반인 이유</h2></div>
+
+    <p>인공지능 프로젝트는 보통 학기의 절반을 쓰는 긴 활동입니다. 이런 활동에서 가장 큰 손실은 <b>코드가 틀리는 것</b>이 아니라 <b>엉뚱한 것을 만들어 놓고 나서야 그것을 아는 것</b>입니다. 사진 3,000장을 다 모은 뒤 “우리가 판단하려던 게 이게 아니었네”를 깨달으면 되돌릴 시간이 없습니다.</p>
+
+    <p>그래서 인공지능 분야에는 오랫동안 다듬어진 <b>표준 절차</b>가 있습니다. 이 절차의 첫 단계가 <b class="blank" data-a="문제 정의" data-hint="무엇을 판단할지 한 문장으로 정하는 첫 단계">문제 정의</b>인 이유도 같습니다. 무엇을 판단할지 정하지 않으면 데이터도, 알고리즘도, 평가 방법도 고를 수 없습니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 — 인공지능 문제 해결 절차 5단계</div>
+      <p><b>문제 정의 → 문제 해결에 적합한 데이터 수집 및 전처리 → 기계학습 유형과 알고리즘 선정 → 기계학습을 통한 모델 생성 → 성능 평가 및 수정</b></p>
+      <p>이 다섯 단계는 <b>순서대로 진행하지만 한 방향으로만 흐르지는 않는다.</b> 뒤 단계에서 문제가 드러나면 앞 단계로 되돌아가 고치고 다시 내려온다.</p>
+    </div>
+
+    <p>계획서를 쓰는 목적은 “계획대로만 하기”가 아닙니다. 오히려 계획서는 <b>어디로 되돌아가야 할지 알려 주는 지도</b>입니다. 성능이 낮게 나왔을 때, 계획서에 데이터 수집 방법과 평가 기준이 적혀 있으면 무엇을 바꿔야 하는지 금방 찾을 수 있습니다. 계획서가 없으면 “그냥 다시 해 보자”밖에 남지 않습니다.</p>
+  </section>
+
+  <!-- ============ 2. 다섯 단계 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>다섯 단계, 산출물과 함정</h2></div>
+
+    <p>각 단계는 반드시 <b>손에 잡히는 산출물</b>을 남겨야 합니다. 산출물이 없는 단계는 “했다고 생각했지만 안 한 단계”입니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>인공지능 문제 해결 절차 5단계 — 산출물과 흔한 실수</caption>
+        <thead><tr><th>단계</th><th>하는 일</th><th>산출물</th><th>흔한 실수</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>① 문제 정의</b></td>
+            <td>무엇을 입력하면 무엇을 내놓을지, 성공 기준은 무엇인지 정한다</td>
+            <td>주제 한 문장, 판단 문장, 성공 기준(예: 정확도 80%)</td>
+            <td class="bad">“환경을 지킨다”처럼 판단이 없는 문장을 쓴다</td>
+          </tr>
+          <tr>
+            <td><b>② 데이터 수집 및 전처리</b></td>
+            <td>필요한 데이터를 모으고 결측치·이상치를 정리하고 속성을 가공한다</td>
+            <td>정리된 데이터 표(또는 폴더), 레이블, 전처리 기록</td>
+            <td class="bad">데이터 개수를 세어 보지 않고 “인터넷에서 찾는다”로 넘긴다</td>
+          </tr>
+          <tr>
+            <td><b>③ 기계학습 유형과 알고리즘 선정</b></td>
+            <td>지도·비지도·강화 중 유형을 정하고 그에 맞는 알고리즘을 고른다</td>
+            <td>선택한 유형·알고리즘과 <b>고른 이유</b></td>
+            <td class="bad">유행하는 알고리즘을 먼저 정하고 문제를 억지로 맞춘다</td>
+          </tr>
+          <tr>
+            <td><b>④ 모델 생성</b></td>
+            <td>훈련 데이터로 학습시키고 하이퍼파라미터를 조정한다</td>
+            <td>학습된 모델, 학습 설정 기록</td>
+            <td class="bad">테스트 데이터까지 학습에 써 버려 성능이 부풀려진다</td>
+          </tr>
+          <tr>
+            <td><b>⑤ 성능 평가 및 수정</b></td>
+            <td>테스트 데이터로 지표를 계산하고, 원인을 찾아 앞 단계를 고친다</td>
+            <td>평가 지표 값, 개선 계획과 재실행 결과</td>
+            <td class="bad">숫자만 적고 “왜 낮은지”를 따지지 않는다</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub-head">② 데이터 수집과 전처리</h3>
+    <p>모은 데이터는 대부분 그대로 쓸 수 없습니다. 비어 있는 값인 <b class="blank" data-a="결측치|결측값" data-hint="비어 있는 값. 영어로 missing value">결측치</b>를 채우거나 지우고, 지나치게 튀는 값인 이상치를 확인하고, 단위가 다른 속성의 범위를 맞추는 정규화를 합니다. 이렇게 데이터를 학습에 쓸 수 있는 모양으로 다듬는 작업을 <b class="blank" data-a="전처리|데이터 전처리" data-hint="데이터를 학습 가능한 모양으로 다듬는 작업">전처리</b>라고 합니다.</p>
+
+    <p>2단원에서 배웠듯이, 이 단계에 쓰는 시간이 프로젝트 전체의 절반을 넘는 일이 흔합니다. “좋은 모델”보다 “좋은 데이터”가 성능을 더 크게 바꾸기 때문입니다.</p>
+
+    <h3 class="sub-head">③ 유형과 알고리즘 선정 — 결과의 형태가 결정한다</h3>
+    <p>이 단계는 감으로 고르는 것이 아니라 <b>규칙에 따라 정해집니다.</b> 판단의 결과가 <b>범주</b>(가능/불가능, 개/고양이)이면 <b class="blank" data-a="분류" data-hint="결과가 범주인 지도학습 문제">분류</b> 문제이고, 결과가 <b>수치</b>(내일 잔반량 몇 kg)이면 <b class="blank" data-a="회귀" data-hint="결과가 수치인 지도학습 문제">회귀</b> 문제입니다. 이 두 가지는 정답이 붙은 데이터로 배우므로 모두 <b class="blank" data-a="지도학습|지도 학습" data-hint="정답 레이블이 있는 데이터로 학습하는 유형">지도학습</b>에 속합니다.</p>
+
+    <p>반대로 정답 레이블이 없고 비슷한 것끼리 묶기만 한다면 군집 문제이므로 <b class="blank" data-a="비지도학습|비지도 학습" data-hint="정답 레이블 없이 데이터의 구조를 찾는 유형">비지도학습</b>을 골라야 합니다. 정답이 없는데 지도학습 알고리즘을 고르면 학습 자체가 시작되지 않습니다. 유형이 정해지면 <b class="blank" data-a="알고리즘" data-hint="k-NN, 선형 회귀, k-평균 같은 학습 방법의 이름">알고리즘</b>은 그 유형 안에서만 고르면 됩니다.</p>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 자주 나오는 잘못된 조합</div>
+      <ul>
+        <li>결과가 <b>범주</b>인데 <b>선형 회귀</b>를 고른다 → 선형 회귀는 수치를 내놓는 알고리즘입니다. 로지스틱 회귀·의사결정 트리·k-NN 같은 분류 알고리즘을 써야 합니다.</li>
+        <li><b>레이블이 없다</b>고 적어 놓고 <b>지도학습</b>을 고른다 → 레이블을 붙이는 작업을 2단계 계획에 넣거나 비지도학습으로 바꿔야 합니다.</li>
+        <li>결과가 <b>수치</b>인데 <b>k-평균 군집</b>을 고른다 → 군집은 묶기만 하고 값을 예측하지 않습니다.</li>
+      </ul>
+    </div>
+
+    <h3 class="sub-head">④ 모델 생성 — 데이터를 나누는 이유</h3>
+    <p>모델을 학습시킬 때는 데이터를 <b class="blank" data-a="훈련 데이터|학습 데이터" data-hint="모델을 학습시키는 데 쓰는 데이터">훈련 데이터</b>와 <b class="blank" data-a="테스트 데이터|시험 데이터|평가 데이터" data-hint="학습에 쓰지 않고 남겨 두어 성능을 확인하는 데이터">테스트 데이터</b>로 나눕니다. 보통 훈련 70~80%, 테스트 20~30% 정도로 나눕니다. 테스트 데이터를 학습에 섞어 쓰면 시험 문제를 미리 보고 시험을 치는 것과 같아서, 성능이 실제보다 훨씬 좋게 나옵니다.</p>
+
+    <h3 class="sub-head">⑤ 성능 평가 및 수정 — 문제 유형에 맞는 지표를 쓴다</h3>
+    <p>평가 지표는 문제 유형에 따라 다릅니다. 분류 문제는 혼동 행렬을 만들어 정확도·정밀도·재현율을 계산하고, 회귀 문제는 평균 절대 오차나 결정계수를 씁니다. 회귀 문제에 “정확도”를 쓰겠다고 적으면 계산 자체가 되지 않습니다. 지표를 정하는 것까지가 <b class="blank" data-a="성능 평가|평가" data-hint="테스트 데이터로 모델이 얼마나 잘 맞히는지 재는 단계">성능 평가</b> 단계의 계획입니다.</p>
+  </section>
+
+  <!-- ============ 3. 되돌아가는 절차 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>절차는 한 방향이 아니다</h2></div>
+
+    <p>다섯 단계를 계단처럼 한 번만 내려가는 프로젝트는 거의 없습니다. 5단계에서 성능이 낮게 나오면 그 원인에 따라 <b>어느 단계로든 되돌아갑니다.</b> 이렇게 앞 단계로 돌아가 고치고 다시 내려오는 성질을 절차의 <b class="blank" data-a="반복|반복성|순환" data-hint="같은 과정을 여러 번 되돌아 도는 성질">반복</b>적 성격이라고 합니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>성능이 낮을 때, 원인별로 되돌아갈 단계</caption>
+        <thead><tr><th>드러난 증상</th><th>추정 원인</th><th>되돌아갈 단계</th></tr></thead>
+        <tbody>
+          <tr><td>훈련 데이터에서는 잘 맞히는데 테스트에서 크게 떨어진다</td><td>과대적합 · 데이터가 너무 적다</td><td><b>② 데이터 수집</b> — 데이터를 더 모은다</td></tr>
+          <tr><td>훈련 데이터에서도 성능이 낮다</td><td>모델이 문제에 비해 너무 단순하다</td><td><b>③ 알고리즘 선정</b> — 다른 알고리즘으로 바꾼다</td></tr>
+          <tr><td>특정 범주만 계속 틀린다</td><td>범주별 데이터 수가 크게 치우쳐 있다</td><td><b>② 전처리</b> — 데이터 균형을 맞춘다</td></tr>
+          <tr><td>학습이 아예 진행되지 않는다</td><td>학습률 등 하이퍼파라미터 설정 문제</td><td><b>④ 모델 생성</b> — 설정을 조정한다</td></tr>
+          <tr><td>성능은 높은데 쓸모가 없다</td><td>판단 자체를 잘못 정의했다</td><td><b>① 문제 정의</b> — 문제를 다시 쓴다</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 “성능은 높은데 쓸모가 없다”는 어떤 경우일까?</div>
+      <p>급식 잔반량을 예측하는 모델이 정확도 98%를 냈다고 해 봅시다. 그런데 확인해 보니 모델은 “거의 항상 평균값을 답한다”는 방식으로 맞히고 있었습니다. 조리실에서 필요한 것은 <b>잔반이 많은 날을 미리 아는 것</b>이었는데, 정작 그 날들을 전부 놓쳤습니다. 이럴 때는 지표를 바꾸거나 문제 정의로 되돌아가야 합니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4. 계획서와 협력 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>계획서에 담을 것, 그리고 함께 하는 방법</h2></div>
+
+    <p>프로젝트 계획서는 길 필요가 없습니다. 다만 다음 일곱 가지는 빠지면 곤란합니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card"><span class="icon">🎯</span><h4>주제와 목표</h4><p>주제 한 문장과, 무엇을 성공으로 볼지(성공 기준)를 숫자로 적습니다.</p></div>
+      <div class="mini-card"><span class="icon">👥</span><h4>역할 분담</h4><p>데이터 · 모델 · 검증 · 기록·발표의 네 역할을 나눕니다.</p></div>
+      <div class="mini-card"><span class="icon">📅</span><h4>일정</h4><p>단계별로 언제까지 무엇을 끝낼지 정합니다. 되돌아갈 여유 기간도 남깁니다.</p></div>
+      <div class="mini-card"><span class="icon">📦</span><h4>데이터 확보 방안</h4><p>무엇을 몇 개, 어디서, 어떻게 모을지. 개인정보 처리 방침도 함께 적습니다.</p></div>
+      <div class="mini-card"><span class="icon">📏</span><h4>평가 기준</h4><p>문제 유형에 맞는 지표와 목표 수치를 미리 정해 둡니다.</p></div>
+      <div class="mini-card"><span class="icon">⚠️</span><h4>예상 위험</h4><p>데이터가 부족할 때, 성능이 안 나올 때의 대비책을 적습니다.</p></div>
+      <div class="mini-card"><span class="icon">🌍</span><h4>사회적 영향</h4><p>이 해법이 누구에게 불리할 수 있는지, 어떤 목표를 해칠 수 있는지 적습니다.</p></div>
+    </div>
+
+    <h3 class="sub-head">역할은 나누되, 지식은 나누지 않는다</h3>
+    <p>역할을 나누면 효율은 올라가지만, 각자 자기 부분만 알게 되는 위험이 생깁니다. 그래서 프로젝트 중간에 <b>역할을 한 번 바꿔 보는 것</b>이 좋습니다. 데이터를 다루던 사람이 모델을 만들어 보면, 왜 그렇게 전처리해야 했는지 스스로 알게 됩니다.</p>
+
+    <p>두 사람이 한 컴퓨터 앞에서 한 사람은 코드를 쓰고 다른 사람은 옆에서 검토하며 번갈아 역할을 바꾸는 방법을 <b class="blank" data-a="짝 프로그래밍|페어 프로그래밍|pair programming" data-hint="두 사람이 한 컴퓨터로 번갈아 코딩하며 서로 검토하는 방법">짝 프로그래밍</b>이라고 합니다. 혼자 짤 때보다 코드를 쓰는 속도는 느리지만, 실수를 찾는 시간이 크게 줄고 두 사람 모두 코드 전체를 이해하게 됩니다.</p>
+
+    <div class="box box-ok">
+      <div class="box-label">✅ 실제로 잘 굴러가는 모둠의 습관</div>
+      <ul>
+        <li>수업 시작 5분은 <b>지난 시간에 무엇을 했고 지금 어디에 막혔는지</b> 한 사람씩 말한다.</li>
+        <li>모든 결정을 계획서에 <b>한 줄로 기록</b>한다. “왜 이 알고리즘을 골랐는가”가 나중에 발표 자료가 된다.</li>
+        <li>데이터 파일과 코드에 <b>날짜를 붙여</b> 보관한다. 되돌아갈 때 이전 상태로 돌아갈 수 있다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 5·6. 시뮬레이터 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>계획서를 직접 완성하기</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim1"></div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>세부 작업을 단계에 배치하기</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim2"></div>
+  </section>
+
+  <!-- ============ 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">9</span><h2>활동 기록</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 성공 기준을 숫자로 정하는 요령</summary>
+      <div class="more-body">
+        <p>“정확도 90% 이상”처럼 목표 수치를 정할 때는 <b>기준선(baseline)</b>과 비교해야 의미가 생깁니다. 기준선은 “아무 것도 학습하지 않은 가장 단순한 방법”의 성능입니다.</p>
+        <ul>
+          <li><b>분류</b>에서 가장 많은 범주로만 답하는 방법의 정확도가 이미 85%라면, 90%는 별로 좋은 목표가 아닙니다.</li>
+          <li><b>회귀</b>에서는 항상 평균값으로 답하는 방법의 오차를 먼저 계산해 보고, 그보다 얼마나 줄일지를 목표로 삼습니다.</li>
+        </ul>
+        <p style="margin-top:9px">또한 문제에 따라 <b>어떤 실수가 더 위험한지</b>를 정해야 합니다. 재활용 가능한 것을 불가능으로 잘못 판단하는 것과, 불가능한 것을 가능으로 잘못 판단하는 것 중 무엇이 더 나쁜지에 따라 <b>정밀도</b>와 <b>재현율</b> 중 무엇을 더 중시할지가 달라집니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">코드</span> 다섯 단계를 파이썬 골격으로 옮기면</summary>
+      <div class="more-body">
+        <p>계획서의 다섯 단계는 실제 코드에서도 그대로 다섯 덩어리가 됩니다. 주석만 먼저 써 두고 아래에서 위로 채워 가면 길을 잃지 않습니다.</p>
+        <pre style="margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;white-space:pre-wrap"># ① 문제 정의 — 코드가 아니라 주석으로 남긴다
+#   입력: 쓰레기 사진 1장  →  출력: 재활용 가능 / 불가능
+#   성공 기준: 테스트 정확도 0.85 이상
+
+# ② 데이터 수집 및 전처리
+data = load_images('photos/')          # 300장
+data = drop_missing(data)              # 결측치 제거
+data = normalize(data)                 # 정규화
+labels = load_labels('labels.csv')     # 정답 레이블
+
+# ③ 기계학습 유형과 알고리즘 선정
+#   결과가 범주 → 분류 → 지도학습
+model = DecisionTreeClassifier(max_depth=6)
+
+# ④ 모델 생성
+x_train, x_test, y_train, y_test = split(data, labels, test_size=0.2)
+model.fit(x_train, y_train)            # 훈련 데이터만 사용
+
+# ⑤ 성능 평가 및 수정
+pred = model.predict(x_test)           # 테스트 데이터로 평가
+print(confusion_matrix(y_test, pred))  # 혼동 행렬
+print(accuracy(y_test, pred), recall(y_test, pred))
+#   → 성능이 낮으면 ②·③·④ 중 어디로 되돌아갈지 판단한다</pre>
+        <p style="margin-top:11px"><span class="mono">model.fit</span>에 <span class="mono">x_test</span>를 넣지 않는 것이 4단계의 핵심 규칙입니다. 이 한 줄을 어기면 평가 결과 전체가 의미를 잃습니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 다음 차시로 — 계획서가 코드가 되는 순간</summary>
+      <div class="more-body">
+        <p>이 차시에서 완성한 계획서는 다음 차시에서 <b>파이프라인</b>으로 조립됩니다. 데이터를 넣으면 전처리 → 학습 → 예측이 한 줄기로 흐르게 만드는 작업입니다. 계획서의 2·3·4단계 항목이 그대로 파이프라인의 부품 이름이 됩니다.</p>
+        <p>워크벤치에 입력한 내용은 브라우저에 저장되므로, 다음 차시에도 그대로 이어서 볼 수 있습니다. 완성한 계획서는 <b>복사</b>나 <b>인쇄</b> 버튼으로 내보내 모둠 문서에 붙여 두세요.</p>
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 4, lesson: 2,
+  title: '계획이 반이다',
+  sub: '인공지능 문제 해결 절차와 수행 계획',
+  lead: '<b>문제 정의 → 데이터 수집 및 전처리 → 기계학습 유형과 알고리즘 선정 → 모델 생성 → 성능 평가 및 수정</b>. 이 다섯 단계에 맞추어 프로젝트 계획서를 직접 완성합니다. 워크벤치가 잘못된 선택에는 <b>왜 안 되는지</b>까지 알려 줍니다.',
+  standards: ['12인기04-02'],
+  keywords: ['문제 정의', '데이터 수집', '알고리즘 선정', '모델 생성', '성능 평가'],
+  goals: [
+    '인공지능 문제 해결 절차의 다섯 단계를 순서대로 말하고, 각 단계의 산출물을 설명할 수 있다.',
+    '문제의 결과 형태와 레이블 유무에 따라 기계학습 유형과 알고리즘을 규칙에 맞게 선정할 수 있다.',
+    '문제 유형에 맞는 성능 평가 지표를 고르고, 성능이 낮을 때 되돌아갈 단계를 판단할 수 있다.',
+    '주제 · 역할 · 일정 · 데이터 확보 방안 · 평가 기준 · 예상 위험을 담은 프로젝트 수행 계획서를 구안할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 시뮬레이터 1: 5단계 프로젝트 기획 워크벤치 ===================== -->
+<script>
+(function () {
+  const KEY = 'aibasics.a4l2.plan';       // ← 이 워크벤치의 저장 키
+  const PREV = 'aibasics.a4l1.topic';     // ← 1차시 주제 워크시트의 저장 키
+
+  const OUT_LABEL = { cat: '범주(분류)', num: '수치(회귀)', grp: '묶음(군집)', act: '행동 선택(제어)' };
+
+  const ALGOS = [
+    { name: 'k-최근접 이웃(k-NN)', type: '지도학습', out: ['cat'] },
+    { name: '로지스틱 회귀', type: '지도학습', out: ['cat'] },
+    { name: '의사결정 트리', type: '지도학습', out: ['cat', 'num'] },
+    { name: '선형 회귀', type: '지도학습', out: ['num'] },
+    { name: '인공신경망(딥러닝)', type: '지도학습', out: ['cat', 'num'] },
+    { name: 'k-평균 군집', type: '비지도학습', out: ['grp'] },
+    { name: '주성분 분석(PCA)', type: '비지도학습', out: ['grp'] },
+    { name: 'Q러닝', type: '강화학습', out: ['act'] }
+  ];
+
+  const METRICS = [
+    { k: '정확도', fit: 'cat' }, { k: '정밀도', fit: 'cat' }, { k: '재현율', fit: 'cat' },
+    { k: 'F1 점수', fit: 'cat' }, { k: '혼동 행렬', fit: 'cat' },
+    { k: '평균 절대 오차(MAE)', fit: 'num' }, { k: '평균 제곱근 오차(RMSE)', fit: 'num' }, { k: '결정계수(R²)', fit: 'num' },
+    { k: '실루엣 계수', fit: 'grp' }, { k: '군집 내 거리 합', fit: 'grp' },
+    { k: '누적 보상', fit: 'act' }
+  ];
+
+  const BLANK = {
+    team: '', period: '', risk: '',
+    topic: '', judge: '', success: '',
+    dataKind: '', source: '', amount: '', prep: '',
+    outType: '', label: '', mlType: '', algo: '', reason: '',
+    split: 80, tool: '', trainPlan: '',
+    metrics: [], target: '', backTo: '', improve: ''
+  };
+
+  const state = (function () {
+    let s = null;
+    try { s = JSON.parse(localStorage.getItem(KEY)); } catch (_) { s = null; }
+    s = (s && typeof s === 'object') ? Object.assign({}, BLANK, s) : Object.assign({}, BLANK);
+    if (!Array.isArray(s.metrics)) s.metrics = [];
+    return s;
+  })();
+
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (_) { /* 무시 */ } }
+
+  function prevTopic() {
+    try {
+      const t = JSON.parse(localStorage.getItem(PREV));
+      if (t && t.sentence && t.sentence.indexOf('미선택') < 0 && t.sentence.indexOf('미작성') < 0) return t.sentence;
+      if (t && t.sentence) return t.sentence;
+    } catch (_) { /* 무시 */ }
+    return '';
+  }
+  if (!state.topic) { const p = prevTopic(); if (p) { state.topic = p; save(); } }
+
+  const body = AI.sim.panel('#sim1', {
+    title: '5단계 프로젝트 기획 워크벤치',
+    tag: '자동 저장 · 내보내기',
+    desc: '다섯 단계를 좌우로 넘기며 계획서를 채웁니다. <b>3단계</b>에서는 문제 유형과 알고리즘의 조합을 검사해 <b>왜 안 되는지</b> 설명해 주고, <b>5단계</b>에서는 문제 유형에 맞지 않는 평가 지표를 알려 줍니다. 마지막에 계획서 전체를 미리 보고 복사·인쇄할 수 있습니다.'
+  });
+
+  /* ---------- 계획서 공통 항목 ---------- */
+  function textField(label, key, ph, rows) {
+    const ctrl = rows ? AI.h('textarea', { rows: rows, placeholder: ph }) : AI.h('input', { type: 'text', placeholder: ph });
+    ctrl.value = state[key] || '';
+    ctrl.addEventListener('input', () => { state[key] = ctrl.value; save(); refreshBar(); });
+    return AI.h('div', { class: 'field', style: { marginTop: '10px' } }, AI.h('label', { text: label }), ctrl);
+  }
+
+  const head = AI.h('details', { class: 'more-box', style: { margin: '0 0 14px' } },
+    AI.h('summary', {}, AI.h('span', { class: 'plus-tag', text: '공통' }), ' 계획서 머리말 — 모둠 · 일정 · 예상 위험'),
+    AI.h('div', { class: 'more-body' },
+      textField('모둠원과 역할 분담 (데이터 · 모델 · 검증 · 기록·발표)', 'team', '예) 김가온-데이터 수집·전처리 / 이나리-모델 생성 / 박다온-검증·평가 / 최여름-기록·발표', 3),
+      textField('수행 기간', 'period', '예) 5월 2주 ~ 7월 1주 (8주), 6월 3주는 되돌아가기 여유 기간'),
+      textField('예상 위험과 대비책', 'risk', '예) 사진이 200장을 넘기지 못할 수 있다 → 다른 학급에 협조 요청, 좌우 반전으로 데이터를 늘린다', 3)
+    )
+  );
+  body.appendChild(head);
+
+  /* ---------- 단계 표시 ---------- */
+  const STEPS = [
+    { n: 1, name: '① 문제 정의', out: '산출물: 주제 한 문장 · 판단 문장 · 성공 기준' },
+    { n: 2, name: '② 데이터 수집·전처리', out: '산출물: 정리된 데이터와 전처리 기록' },
+    { n: 3, name: '③ 유형·알고리즘 선정', out: '산출물: 선택한 유형·알고리즘과 고른 이유' },
+    { n: 4, name: '④ 모델 생성', out: '산출물: 학습된 모델과 학습 설정 기록' },
+    { n: 5, name: '⑤ 성능 평가·수정', out: '산출물: 평가 지표 값과 개선 계획' }
+  ];
+  let step = 1;
+
+  const stepBar = AI.h('div', { class: 'step-bar' });
+  const dots = STEPS.map(s => {
+    const b = AI.h('button', { class: 'step-dot', type: 'button', onclick: () => { step = s.n; renderStep(); } }, s.name);
+    stepBar.appendChild(b);
+    return b;
+  });
+  body.appendChild(stepBar);
+
+  const prog = AI.h('p', { class: 'step-prog' });
+  body.appendChild(prog);
+
+  const panel = AI.h('div', { class: 'step-panel' });
+  body.appendChild(panel);
+
+  const prevBox = AI.h('div', { class: 'prev-box', style: { display: 'none' } });
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('← 이전 단계', () => { if (step > 1) { step--; renderStep(); } }, 'ghost'),
+    AI.ui.btn('다음 단계 →', () => { if (step < 5) { step++; renderStep(); } }, 'primary'),
+    AI.ui.btn('📄 계획서 미리보기', () => { buildPreview(); prevBox.scrollIntoView({ behavior: 'smooth', block: 'center' }); }),
+    AI.ui.btn('↺ 계획서 비우기', () => {
+      if (!confirm('계획서에 적은 모든 내용을 지울까요?')) return;
+      Object.keys(BLANK).forEach(k => { state[k] = Array.isArray(BLANK[k]) ? [] : BLANK[k]; });
+      save(); step = 1; renderStep(); prevBox.style.display = 'none'; AI.toast('계획서를 비웠어요');
+    }, 'ghost')
+  ));
+  body.appendChild(prevBox);
+
+  /* ---------- 3단계 진단 규칙 ---------- */
+  function algoObj(name) { return ALGOS.filter(a => a.name === name)[0] || null; }
+
+  function diagnose() {
+    const m = [];
+    const ot = state.outType, lb = state.label, ml = state.mlType, ag = state.algo;
+    const A = ag ? algoObj(ag) : null;
+
+    if (!ot) m.push(['warn', '먼저 <b>결과의 형태</b>를 고르세요. 범주인지 수치인지에 따라 쓸 수 있는 알고리즘이 완전히 달라집니다.']);
+    if (!lb) m.push(['warn', '<b>정답 레이블</b>이 있는지 고르세요. 레이블 유무가 지도학습과 비지도학습을 가릅니다.']);
+
+    if (lb === 'no' && ml === '지도학습') {
+      m.push(['no', '<b>지도학습은 입력마다 정답 레이블이 있어야</b> 학습할 수 있습니다. 레이블이 없다고 했으므로 (가) 2단계 계획에 <b>레이블을 붙이는 작업</b>을 넣거나, (나) 비지도학습으로 바꾸어야 합니다.']);
+    }
+    if (lb === 'yes' && ml === '비지도학습') {
+      m.push(['warn', '정답 레이블이 있는데 비지도학습을 고르면 <b>애써 모은 정답을 버리는 셈</b>입니다. 분류나 회귀로 바꾸면 정확도 같은 지표로 성능을 숫자로 평가할 수 있습니다.']);
+    }
+    if (ot === 'grp' && ml && ml !== '비지도학습') {
+      m.push(['no', '비슷한 것끼리 묶는 <b>군집은 정답이 없는 문제</b>이므로 비지도학습입니다. ' + ml + '으로는 묶음 자체를 만들 수 없습니다.']);
+    }
+    if ((ot === 'cat' || ot === 'num') && ml === '비지도학습') {
+      m.push(['no', '결과가 ' + OUT_LABEL[ot] + '로 정해져 있으면 <b>정답이 있는 문제</b>이므로 지도학습입니다. 비지도학습은 정답을 맞히는 것이 목적이 아닙니다.']);
+    }
+    if (ot === 'act' && ml && ml !== '강화학습') {
+      m.push(['no', '상황을 보고 <b>행동을 골라 보상을 최대화</b>하는 문제는 강화학습 영역입니다.']);
+    }
+    if (A && ml && A.type !== ml) {
+      m.push(['no', '「' + A.name + '」는 <b>' + A.type + '</b>에 속하는 알고리즘입니다. 위에서 고른 유형 <b>' + ml + '</b>과(와) 맞지 않습니다.']);
+    }
+    if (A && ot && A.out.indexOf(ot) < 0) {
+      const fits = ALGOS.filter(a => a.out.indexOf(ot) >= 0).map(a => a.name).join(' · ');
+      let extra = '';
+      if (ot === 'cat' && A.out.indexOf('num') >= 0) extra = ' 선형 회귀처럼 <b>수치를 내놓는 알고리즘</b>은 “가능/불가능” 같은 범주를 직접 고를 수 없습니다.';
+      if (ot === 'num' && A.name.indexOf('군집') >= 0) extra = ' 군집은 데이터를 <b>묶기만</b> 하고 값을 예측하지 않습니다.';
+      m.push(['no', '결과가 <b>' + OUT_LABEL[ot] + '</b>인 문제에는 「' + A.name + '」를 쓸 수 없습니다.' + extra + ' 이 문제에 맞는 알고리즘: <b>' + (fits || '해당 없음') + '</b>']);
+    }
+    if (ot === 'cat' && lb === 'no') {
+      m.push(['warn', '범주를 맞히려면 <b>어떤 범주가 정답인지</b> 알려 주는 레이블이 필요합니다. 2단계 계획에 “사람이 직접 레이블을 붙인다”를 반드시 넣으세요.']);
+    }
+    if (ml === '강화학습') {
+      m.push(['warn', '강화학습은 <b>보상 설계와 환경 시뮬레이션</b>이 필요해 한 학기 프로젝트에서는 난도가 높습니다. 꼭 필요한 문제인지 다시 확인해 보세요.']);
+    }
+    if (ot && lb && ml && ag && !m.some(x => x[0] === 'no')) {
+      m.push(['ok', '결과 형태(<b>' + OUT_LABEL[ot] + '</b>) · 레이블(<b>' + (lb === 'yes' ? '있음' : '없음') + '</b>) · 유형(<b>' + ml + '</b>) · 알고리즘(<b>' + ag + '</b>)의 조합이 서로 어긋나지 않습니다. 이제 <b>고른 이유</b>를 한 문장으로 적어 두면 3단계가 끝납니다.']);
+    }
+    return m;
+  }
+
+  function metricCheck() {
+    const m = [];
+    const ot = state.outType;
+    if (!ot) { m.push(['warn', '3단계에서 <b>결과의 형태</b>를 먼저 정해야 어떤 지표가 맞는지 검사할 수 있습니다.']); return m; }
+    if (!state.metrics.length) { m.push(['warn', '평가 지표를 <b>하나 이상</b> 고르세요. 지표가 없으면 성능이 좋아졌는지 나빠졌는지 말할 수 없습니다.']); return m; }
+    const good = METRICS.filter(x => x.fit === ot).map(x => x.k).join(' · ');
+    let bad = 0;
+    state.metrics.forEach(k => {
+      const M = METRICS.filter(x => x.k === k)[0];
+      if (!M || M.fit === ot) return;
+      bad++;
+      m.push(['no', '「' + k + '」는 <b>' + OUT_LABEL[M.fit] + '</b> 문제에 쓰는 지표입니다. 지금 문제는 <b>' + OUT_LABEL[ot] + '</b> 문제이므로 계산 자체가 맞지 않습니다. 대신 <b>' + good + '</b> 중에서 고르세요.']);
+    });
+    if (!bad) m.push(['ok', '고른 지표가 모두 <b>' + OUT_LABEL[ot] + '</b> 문제에 맞습니다. 이제 <b>목표 수치</b>를 정하고, 성능이 낮을 때 되돌아갈 단계를 적어 두세요.']);
+    return m;
+  }
+
+  function fbList(msgs) {
+    const box = AI.h('div', { class: 'fb-list' });
+    msgs.forEach(x => {
+      const lv = x[0];
+      const tag = lv === 'no' ? '✗ 맞지 않습니다' : (lv === 'warn' ? '⚠ 확인하세요' : '✓ 좋습니다');
+      box.appendChild(AI.h('div', { class: 'fb ' + lv }, AI.h('b', { class: 'lv', text: tag }), AI.h('span', { html: x[1] })));
+    });
+    return box;
+  }
+
+  /* ---------- 단계 화면 ---------- */
+  function renderStep() {
+    dots.forEach((d, i) => {
+      d.setAttribute('aria-current', (i + 1) === step ? 'true' : 'false');
+      d.classList.toggle('done', doneStep(i + 1));
+    });
+    refreshBar();
+    panel.innerHTML = '';
+    const S = STEPS[step - 1];
+    panel.appendChild(AI.h('h5', { text: S.name }));
+    panel.appendChild(AI.h('span', { class: 'sp-out', text: S.out }));
+
+    if (step === 1) {
+      panel.appendChild(AI.h('p', { class: 'sp-help', html: '1차시 워크시트에 적은 <b>주제 한 문장</b>이 자동으로 불려 옵니다. 필요하면 고쳐 쓰세요.' }));
+      panel.appendChild(textField('주제 한 문장', 'topic', '예) SDGs 목표 12와 관련해, 우리 학교 분리배출장에서 …'));
+      panel.appendChild(AI.h('div', { class: 'sim-controls' },
+        AI.ui.btn('⤵ 1차시 주제 문장 다시 불러오기', () => {
+          const p = prevTopic();
+          if (!p) { AI.toast('1차시 워크시트에 저장된 문장이 없어요'); return; }
+          state.topic = p; save(); renderStep(); AI.toast('1차시 주제 문장을 불러왔어요');
+        }, 'small ghost')));
+      panel.appendChild(textField('인공지능이 대신할 판단 (무엇을 입력하면 무엇이 나온다)', 'judge', '예) 쓰레기 사진 1장을 입력하면 재활용 가능 / 불가능 중 하나를 내놓는다'));
+      panel.appendChild(textField('성공 기준 (숫자로)', 'success', '예) 테스트 데이터 정확도 0.85 이상, 재현율 0.80 이상'));
+    }
+
+    if (step === 2) {
+      panel.appendChild(AI.h('p', { class: 'sp-help', html: '<b>몇 개</b>를 <b>어디서</b> 모을지, 그리고 <b>어떻게 다듬을지</b>까지 적어야 이 단계가 끝납니다.' }));
+      panel.appendChild(textField('필요한 데이터의 종류와 개수', 'dataKind', '예) 쓰레기 사진 300장 (가능 150 / 불가능 150)'));
+      const sel = AI.h('select', {}, ...['', '직접 촬영·측정', '설문 조사', '공공 데이터 포털', '학교 기록·대장', '센서 기록', '공개된 데이터셋'].map(o => AI.h('option', { value: o }, o || '— 수집 방법 선택 —')));
+      sel.value = state.source || '';
+      sel.addEventListener('change', () => { state.source = sel.value; save(); refreshBar(); dots.forEach((d, i) => d.classList.toggle('done', doneStep(i + 1))); });
+      panel.appendChild(AI.h('div', { class: 'field', style: { marginTop: '10px' } }, AI.h('label', { text: '주된 수집 방법' }), sel));
+      panel.appendChild(textField('수집 일정과 담당', 'amount', '예) 5월 3주까지 학급별 60장씩, 데이터 담당이 취합'));
+      panel.appendChild(textField('전처리 계획 (결측치 · 이상치 · 정규화 · 레이블)', 'prep', '예) 흐릿한 사진은 제외한다(이상치). 사람 얼굴이 찍힌 사진은 삭제한다. 사진 크기를 224×224로 맞춘다. 두 사람이 각각 레이블을 붙여 다른 것만 다시 논의한다.', 3));
+    }
+
+    if (step === 3) {
+      panel.appendChild(AI.h('p', { class: 'sp-help', html: '아래 네 가지를 고르면 <b>조합이 맞는지 자동으로 검사</b>합니다. 빨간 칸이 남아 있으면 이 단계는 완성되지 않습니다.' }));
+
+      const fb = AI.h('div', {});
+      function upd() {
+        fb.innerHTML = '';
+        fb.appendChild(fbList(diagnose()));
+        save(); refreshBar();
+        dots.forEach((d, i) => d.classList.toggle('done', doneStep(i + 1)));
+      }
+
+      const segOut = AI.ui.seg({
+        label: '결과의 형태',
+        options: [{ value: 'cat', label: '범주 (분류)' }, { value: 'num', label: '수치 (회귀)' }, { value: 'grp', label: '묶음 (군집)' }, { value: 'act', label: '행동 선택 (제어)' }],
+        value: state.outType, onChange: v => { state.outType = v; upd(); }
+      });
+      const segLab = AI.ui.seg({
+        label: '정답 레이블',
+        options: [{ value: 'yes', label: '레이블이 있다' }, { value: 'no', label: '레이블이 없다' }],
+        value: state.label, onChange: v => { state.label = v; upd(); }
+      });
+      const segMl = AI.ui.seg({
+        label: '기계학습 유형',
+        options: ['지도학습', '비지도학습', '강화학습'],
+        value: state.mlType, onChange: v => { state.mlType = v; upd(); }
+      });
+      const selAlgo = AI.h('select', {}, ...[''].concat(ALGOS.map(a => a.name)).map(o => AI.h('option', { value: o }, o || '— 알고리즘 선택 —')));
+      selAlgo.value = state.algo || '';
+      selAlgo.addEventListener('change', () => { state.algo = selAlgo.value; upd(); });
+
+      panel.appendChild(AI.h('div', { class: 'field', style: { marginTop: '10px' } }, AI.h('label', { text: '① 우리 모델이 내놓을 결과의 형태' }), segOut.el));
+      panel.appendChild(AI.h('div', { class: 'field', style: { marginTop: '10px' } }, AI.h('label', { text: '② 모은 데이터에 정답 레이블이 있는가' }), segLab.el));
+      panel.appendChild(AI.h('div', { class: 'field', style: { marginTop: '10px' } }, AI.h('label', { text: '③ 기계학습 유형' }), segMl.el));
+      panel.appendChild(AI.h('div', { class: 'field', style: { marginTop: '10px' } }, AI.h('label', { text: '④ 알고리즘' }), selAlgo));
+      panel.appendChild(fb);
+      panel.appendChild(textField('이 유형·알고리즘을 고른 이유', 'reason', '예) 결과가 두 범주이고 레이블을 직접 붙일 수 있어 지도학습 분류로 정했다. 데이터가 300장뿐이라 해석이 쉬운 의사결정 트리를 먼저 쓴다.', 2));
+      upd();
+    }
+
+    if (step === 4) {
+      panel.appendChild(AI.h('p', { class: 'sp-help', html: '테스트 데이터는 <b>학습에 절대 쓰지 않습니다.</b> 비율과 도구, 학습 계획을 적어 두세요.' }));
+      const sl = AI.ui.slider({
+        label: '훈련 데이터 비율', min: 50, max: 90, step: 5, value: state.split || 80, unit: '%',
+        onInput: v => { state.split = v; save(); splitTxt.textContent = '훈련 ' + v + '% · 테스트 ' + (100 - v) + '%'; }
+      });
+      const splitTxt = AI.h('b', { style: { color: 'var(--accent-ink)' }, text: '훈련 ' + (state.split || 80) + '% · 테스트 ' + (100 - (state.split || 80)) + '%' });
+      panel.appendChild(AI.h('div', { class: 'sim-controls' }, sl.el, splitTxt));
+      const sel = AI.h('select', {}, ...['', '엔트리 인공지능 블록', '티처블 머신', '파이썬 + scikit-learn', '파이썬 + 딥러닝 라이브러리', '스프레드시트(간단한 회귀)'].map(o => AI.h('option', { value: o }, o || '— 사용할 도구 선택 —')));
+      sel.value = state.tool || '';
+      sel.addEventListener('change', () => { state.tool = sel.value; save(); refreshBar(); dots.forEach((d, i) => d.classList.toggle('done', doneStep(i + 1))); });
+      panel.appendChild(AI.h('div', { class: 'field', style: { marginTop: '10px' } }, AI.h('label', { text: '사용할 도구' }), sel));
+      panel.appendChild(textField('학습 계획과 조정할 설정(하이퍼파라미터)', 'trainPlan', '예) 트리 깊이를 3·6·9로 바꿔 세 번 학습하고 검증 성능이 가장 좋은 값을 고른다. 학습은 모델 담당이, 결과 기록은 검증 담당이 맡는다.', 3));
+    }
+
+    if (step === 5) {
+      panel.appendChild(AI.h('p', { class: 'sp-help', html: '문제 유형에 맞는 지표를 고르세요. 맞지 않는 지표를 고르면 <b>왜 안 되는지</b> 알려 줍니다.' }));
+      const mbox = AI.h('div', { class: 'mchk' });
+      const fb = AI.h('div', {});
+      function upd() {
+        fb.innerHTML = '';
+        fb.appendChild(fbList(metricCheck()));
+        save(); refreshBar();
+        dots.forEach((d, i) => d.classList.toggle('done', doneStep(i + 1)));
+      }
+      METRICS.forEach(M => {
+        const cb = AI.h('input', { type: 'checkbox' });
+        cb.checked = state.metrics.indexOf(M.k) >= 0;
+        cb.addEventListener('change', () => {
+          const i = state.metrics.indexOf(M.k);
+          if (cb.checked && i < 0) state.metrics.push(M.k);
+          if (!cb.checked && i >= 0) state.metrics.splice(i, 1);
+          upd();
+        });
+        mbox.appendChild(AI.h('label', {}, cb, AI.h('span', { text: M.k })));
+      });
+      panel.appendChild(AI.h('div', { class: 'field', style: { marginTop: '10px' } }, AI.h('label', { text: '사용할 평가 지표 (여러 개 선택 가능)' }), mbox));
+      panel.appendChild(fb);
+      panel.appendChild(textField('목표 수치', 'target', '예) 테스트 정확도 0.85 이상 · 재현율 0.80 이상'));
+      const sel = AI.h('select', {}, ...['', '① 문제 정의 — 판단 자체를 다시 정한다', '② 데이터 수집·전처리 — 더 모으거나 다시 다듬는다', '③ 유형·알고리즘 선정 — 다른 알고리즘으로 바꾼다', '④ 모델 생성 — 설정을 조정해 다시 학습한다'].map(o => AI.h('option', { value: o }, o || '— 되돌아갈 단계 선택 —')));
+      sel.value = state.backTo || '';
+      sel.addEventListener('change', () => { state.backTo = sel.value; save(); refreshBar(); dots.forEach((d, i) => d.classList.toggle('done', doneStep(i + 1))); });
+      panel.appendChild(AI.h('div', { class: 'field', style: { marginTop: '10px' } }, AI.h('label', { text: '목표 수치에 못 미치면 먼저 되돌아갈 단계' }), sel));
+      panel.appendChild(textField('개선 계획', 'improve', '예) 범주별 데이터 수가 치우쳐 있으면 적은 쪽을 더 촬영한다. 그래도 낮으면 트리 깊이를 늘리고, 마지막으로 알고리즘을 인공신경망으로 바꿔 본다.', 3));
+      upd();
+    }
+  }
+
+  function doneStep(n) {
+    const f = k => String(state[k] || '').trim().length > 0;
+    if (n === 1) return f('topic') && f('judge') && f('success');
+    if (n === 2) return f('dataKind') && f('source') && f('amount') && f('prep');
+    if (n === 3) return f('outType') && f('label') && f('mlType') && f('algo') && f('reason') && !diagnose().some(x => x[0] === 'no');
+    if (n === 4) return f('tool') && f('trainPlan');
+    if (n === 5) return state.metrics.length > 0 && f('target') && f('backTo') && f('improve') && !metricCheck().some(x => x[0] === 'no');
+    return false;
+  }
+
+  function refreshBar() {
+    const done = [1, 2, 3, 4, 5].filter(doneStep).length;
+    prog.innerHTML = '현재 <b>' + step + ' / 5</b> 단계 · 완성된 단계 <b>' + done + ' / 5</b>' +
+      (done === 5 ? ' — <span style="color:var(--ok);font-weight:800">계획서가 완성되었습니다. 미리보기로 확인하세요.</span>' : '');
+  }
+
+  /* ---------- 계획서 미리보기 ---------- */
+  function planRows() {
+    const v = k => String(state[k] || '').trim();
+    return [
+      ['계획서 머리말', [
+        ['모둠원과 역할', v('team')], ['수행 기간', v('period')], ['예상 위험과 대비책', v('risk')]
+      ]],
+      ['① 문제 정의', [
+        ['주제 한 문장', v('topic')], ['인공지능이 대신할 판단', v('judge')], ['성공 기준', v('success')]
+      ]],
+      ['② 데이터 수집 및 전처리', [
+        ['데이터 종류와 개수', v('dataKind')], ['수집 방법', v('source')], ['수집 일정과 담당', v('amount')], ['전처리 계획', v('prep')]
+      ]],
+      ['③ 기계학습 유형과 알고리즘 선정', [
+        ['결과의 형태', state.outType ? OUT_LABEL[state.outType] : ''],
+        ['정답 레이블', state.label ? (state.label === 'yes' ? '있음' : '없음') : ''],
+        ['기계학습 유형', v('mlType')], ['알고리즘', v('algo')], ['고른 이유', v('reason')]
+      ]],
+      ['④ 모델 생성', [
+        ['훈련 / 테스트 비율', (state.split || 80) + '% / ' + (100 - (state.split || 80)) + '%'],
+        ['사용할 도구', v('tool')], ['학습 계획과 설정', v('trainPlan')]
+      ]],
+      ['⑤ 성능 평가 및 수정', [
+        ['평가 지표', state.metrics.join(' · ')], ['목표 수치', v('target')],
+        ['먼저 되돌아갈 단계', v('backTo')], ['개선 계획', v('improve')]
+      ]]
+    ];
+  }
+
+  function buildPreview() {
+    prevBox.style.display = '';
+    prevBox.innerHTML = '';
+    prevBox.appendChild(AI.h('h4', { text: '인공지능 프로젝트 수행 계획서' }));
+    prevBox.appendChild(AI.h('p', { class: 'pm', text: '인공지능 문제 해결 절차 5단계 기반 · 완성된 단계 ' + [1, 2, 3, 4, 5].filter(doneStep).length + ' / 5' }));
+    planRows().forEach(g => {
+      prevBox.appendChild(AI.h('div', { class: 'pg', text: g[0] }));
+      const dl = AI.h('dl', {});
+      g[1].forEach(r => {
+        dl.appendChild(AI.h('dt', { text: r[0] }));
+        dl.appendChild(AI.h('dd', { class: r[1] ? '' : 'empty', text: r[1] || '(작성하지 않음)' }));
+      });
+      prevBox.appendChild(dl);
+    });
+    prevBox.appendChild(AI.h('div', { class: 'sim-controls' },
+      AI.ui.btn('📋 계획서 복사', () => copy(planText()), 'primary'),
+      AI.ui.btn('🖨 계획서 인쇄', printPlan)
+    ));
+  }
+
+  function planText() {
+    let s = '인공지능 프로젝트 수행 계획서\n(인공지능 문제 해결 절차 5단계 기반)\n';
+    planRows().forEach(g => {
+      s += '\n■ ' + g[0] + '\n';
+      g[1].forEach(r => { s += '  · ' + r[0] + ': ' + (r[1] || '(작성하지 않음)') + '\n'; });
+    });
+    return s;
+  }
+
+  function copy(txt) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(() => AI.toast('계획서를 복사했어요'), () => fallback(txt));
+    } else fallback(txt);
+  }
+  function fallback(txt) {
+    const ta = AI.h('textarea', { style: { position: 'fixed', left: '-9999px' } });
+    ta.value = txt;
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); AI.toast('계획서를 복사했어요'); } catch (_) { AI.toast('복사를 지원하지 않는 환경이에요'); }
+    ta.remove();
+  }
+
+  function esc(s) { return String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
+
+  function printPlan() {
+    let h = '<h1>인공지능 프로젝트 수행 계획서</h1><p class="m">인공지능 문제 해결 절차 5단계 기반 &middot; 문제 정의 → 데이터 수집 및 전처리 → 기계학습 유형과 알고리즘 선정 → 모델 생성 → 성능 평가 및 수정</p>';
+    planRows().forEach(g => {
+      h += '<h2>' + esc(g[0]) + '</h2><table>';
+      g[1].forEach(r => { h += '<tr><th>' + esc(r[0]) + '</th><td>' + (r[1] ? esc(r[1]) : '<i>(작성하지 않음)</i>') + '</td></tr>'; });
+      h += '</table>';
+    });
+    const w = window.open('', '_blank', 'width=820,height=960');
+    if (!w) { AI.toast('새 창이 막혀 있어요 — 복사 버튼을 이용하세요'); return; }
+    w.document.write('<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>인공지능 프로젝트 수행 계획서</title>' +
+      '<style>body{font-family:"Malgun Gothic","맑은 고딕",sans-serif;margin:32px;color:#111;line-height:1.7}' +
+      'h1{font-size:22px;margin:0 0 4px}p.m{font-size:12px;color:#555;margin:0 0 18px}' +
+      'h2{font-size:15px;margin:20px 0 6px;padding-bottom:4px;border-bottom:2px solid #333}' +
+      'table{width:100%;border-collapse:collapse;font-size:13px}' +
+      'th,td{border:1px solid #bbb;padding:7px 9px;text-align:left;vertical-align:top}' +
+      'th{width:170px;background:#f2f2f2;font-weight:700}i{color:#999}</style></head><body>' + h + '</body></html>');
+    w.document.close();
+    w.focus();
+    setTimeout(() => { try { w.print(); } catch (_) { /* 무시 */ } }, 350);
+  }
+
+  window.addEventListener('ai:redraw', () => { renderStep(); if (prevBox.style.display !== 'none') buildPreview(); });
+
+  renderStep();
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 절차 순서 맞추기와 되돌아가기 ===================== -->
+<script>
+(function () {
+  const STAGES = [
+    { n: 1, name: '① 문제 정의' },
+    { n: 2, name: '② 데이터 수집·전처리' },
+    { n: 3, name: '③ 유형·알고리즘 선정' },
+    { n: 4, name: '④ 모델 생성' },
+    { n: 5, name: '⑤ 성능 평가·수정' }
+  ];
+
+  const CARDS = [
+    { id: 'a', t: '문제를 한 문장으로 쓰기', s: 1, why: '무엇을 입력하면 무엇이 나오는지 정하는 일이므로 문제 정의 단계다.' },
+    { id: 'b', t: '무엇을 성공으로 볼지 기준 정하기', s: 1, why: '성공 기준은 문제 정의의 산출물이다. 기준이 없으면 5단계에서 잘했는지 판단할 수 없다.' },
+    { id: 'c', t: '데이터 모으기', s: 2, why: '데이터 수집은 2단계의 앞부분이다. 무엇을 판단할지 정한 뒤에 모아야 헛수고가 없다.' },
+    { id: 'd', t: '결측치 처리', s: 2, why: '비어 있는 값을 채우거나 지우는 것은 전처리이므로 2단계다.' },
+    { id: 'e', t: '데이터에 정답 레이블 정하기', s: 2, why: '레이블을 붙이는 것은 데이터를 학습 가능한 형태로 만드는 일이므로 2단계에 속한다.' },
+    { id: 'f', t: '기계학습 유형(지도·비지도) 정하기', s: 3, why: '결과 형태와 레이블 유무를 보고 유형을 정하는 것이 3단계의 첫 일이다.' },
+    { id: 'g', t: '알고리즘 고르기', s: 3, why: '유형이 정해진 다음, 그 유형 안에서 알고리즘을 고른다. 3단계다.' },
+    { id: 'h', t: '학습 직전에 훈련 데이터와 테스트 데이터로 나누기', s: 4, why: '학습을 시작하기 위한 준비이므로 모델 생성 단계에서 한다. 테스트 데이터는 이때부터 봉인한다.' },
+    { id: 'i', t: '훈련 데이터로 모델을 학습시키기', s: 4, why: '실제로 모델을 만드는 일이므로 4단계의 핵심이다.' },
+    { id: 'j', t: '하이퍼파라미터 조정', s: 4, why: '학습 설정을 바꿔 다시 학습하는 것이므로 모델 생성 단계 안에서 반복한다.' },
+    { id: 'k', t: '테스트 데이터로 정확도·재현율 계산하기', s: 5, why: '봉인해 둔 테스트 데이터를 꺼내 지표를 계산하는 일이므로 5단계다.' },
+    { id: 'l', t: '평가 결과를 보고 고칠 곳 찾기', s: 5, why: '“성능 평가 및 수정”의 수정에 해당한다. 여기서 앞 단계로 되돌아갈 곳을 결정한다.' }
+  ];
+
+  const body = AI.sim.panel('#sim2', {
+    title: '절차 순서 맞추기와 되돌아가기',
+    tag: '분류 · 채점',
+    desc: '아래 12개의 세부 작업 카드를 <b>알맞은 단계</b>에 배치해 보세요. 카드를 누른 뒤 단계 칸을 누르면 옮겨집니다. 배치한 카드를 다시 누르면 아래로 되돌아옵니다. 채점하면 <b>실제 프로젝트에서 어느 단계로 되돌아가는지</b>를 그림으로 보여 줍니다.'
+  });
+
+  let placed = {};                  // cardId → stage
+  let armed = null;                 // 선택된 카드 id
+  let graded = false;
+
+  const cols = AI.h('div', { class: 'drop-grid' });
+  const pool = AI.h('div', { class: 'task-pool' });
+  const stats = AI.ui.stats([{ key: 'p', label: '배치한 카드' }, { key: 'c', label: '맞은 카드' }]);
+  const fb = AI.h('div', { style: { marginTop: '14px' } });
+  const loop = AI.h('div', { style: { display: 'none', marginTop: '16px' } });
+
+  body.appendChild(cols);
+  body.appendChild(AI.h('p', { style: { fontSize: '12.5px', fontWeight: '750', color: 'var(--ink-3)', margin: '14px 0 5px' }, text: '아직 배치하지 않은 카드' }));
+  body.appendChild(pool);
+  body.appendChild(stats.el);
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('✅ 채점하기', grade, 'primary'),
+    AI.ui.btn('↺ 다시 하기', () => { placed = {}; armed = null; graded = false; fb.innerHTML = ''; loop.style.display = 'none'; render(); }, 'ghost'),
+    AI.ui.btn('💡 정답 보기', () => {
+      CARDS.forEach(c => { placed[c.id] = c.s; });
+      armed = null; graded = true; render(); showResult(CARDS.length);
+    }, 'ghost')
+  ));
+  body.appendChild(fb);
+  body.appendChild(loop);
+
+  function card(c, inCol) {
+    const cls = ['task-card'];
+    if (graded && placed[c.id]) cls.push(placed[c.id] === c.s ? 'ok' : 'no');
+    const b = AI.h('button', {
+      class: cls.join(' '), type: 'button',
+      'aria-pressed': armed === c.id ? 'true' : 'false',
+      onclick: ev => {
+        ev.stopPropagation();
+        if (inCol) {
+          if (graded) return;
+          delete placed[c.id]; armed = null; render(); return;
+        }
+        armed = (armed === c.id) ? null : c.id;
+        render();
+      }
+    }, c.t);
+    return b;
+  }
+
+  function render() {
+    cols.innerHTML = '';
+    STAGES.forEach(S => {
+      const col = AI.h('div', {
+        class: 'drop-col' + (armed ? ' armed' : ''),
+        onclick: () => { if (!armed || graded) return; placed[armed] = S.n; armed = null; render(); }
+      }, AI.h('span', { class: 'dch', text: S.name }));
+      CARDS.forEach(c => { if (placed[c.id] === S.n) col.appendChild(card(c, true)); });
+      cols.appendChild(col);
+    });
+
+    pool.innerHTML = '';
+    let left = 0;
+    CARDS.forEach(c => { if (!placed[c.id]) { pool.appendChild(card(c, false)); left++; } });
+    if (!left) pool.appendChild(AI.h('span', { style: { fontSize: '13px', color: 'var(--ink-4)' }, text: '모든 카드를 배치했습니다 — 채점해 보세요.' }));
+
+    const p = CARDS.length - left;
+    stats.set('p', p + ' / ' + CARDS.length);
+    if (graded) {
+      stats.set('c', CARDS.filter(c => placed[c.id] === c.s).length + ' / ' + CARDS.length);
+    } else stats.set('c', '–');
+  }
+
+  function grade() {
+    const left = CARDS.filter(c => !placed[c.id]).length;
+    if (left) { AI.toast('아직 배치하지 않은 카드가 ' + left + '개 있어요'); return; }
+    graded = true;
+    const correct = CARDS.filter(c => placed[c.id] === c.s).length;
+    render();
+    showResult(correct);
+  }
+
+  function showResult(correct) {
+    const wrong = CARDS.filter(c => placed[c.id] !== c.s);
+    fb.innerHTML = '';
+    const box = AI.h('div', { class: 'box ' + (wrong.length ? 'box-warn' : 'box-ok') });
+    box.appendChild(AI.h('div', { class: 'box-label', text: (wrong.length ? '📊 채점 결과' : '🎉 채점 결과') }));
+    box.appendChild(AI.h('p', { html: '<b>' + correct + ' / ' + CARDS.length + '</b> 개를 알맞은 단계에 배치했습니다.' }));
+    if (wrong.length) {
+      const ul = AI.h('ul', { style: { margin: '6px 0 0' } });
+      wrong.forEach(c => ul.appendChild(AI.h('li', {
+        html: '「' + c.t + '」 → 정답은 <b>' + STAGES[c.s - 1].name + '</b>. ' + c.why
+      })));
+      box.appendChild(ul);
+    } else {
+      box.appendChild(AI.h('p', { text: '모두 맞혔습니다. 그런데 실제 프로젝트에서는 이 순서를 한 번만 내려가지 않습니다. 아래 그림을 보세요.' }));
+    }
+    fb.appendChild(box);
+    drawLoop();
+  }
+
+  /* ---- 되돌아가기 그림 (인라인 SVG) ---- */
+  const BACKS = [
+    { from: 5, to: 4, dip: 118, label: '학습이 잘 안 된다 → 설정을 다시 조정' },
+    { from: 3, to: 2, dip: 118, label: '고른 알고리즘에 맞게 속성을 다시 가공' },
+    { from: 5, to: 3, dip: 156, label: '훈련에서도 성능이 낮다 → 알고리즘 교체' },
+    { from: 5, to: 2, dip: 194, label: '테스트에서만 크게 떨어진다 → 데이터를 더 모은다' },
+    { from: 5, to: 1, dip: 232, label: '성능은 높은데 쓸모가 없다 → 문제 정의를 다시 쓴다' }
+  ];
+
+  function drawLoop() {
+    loop.style.display = '';
+    loop.innerHTML = '';
+    const cx = n => (n - 1) * 150 + 60;
+    let s = '<svg class="loop-svg" viewBox="0 0 720 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="다섯 단계 사이의 되돌아가기 흐름">' +
+      '<defs><marker id="a4l2-ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">' +
+      '<path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>';
+
+    STAGES.forEach(S => {
+      const x = (S.n - 1) * 150;
+      s += '<rect x="' + x + '" y="18" width="120" height="60" rx="10" fill="var(--surface-2)" stroke="var(--accent)" stroke-width="1.5"/>' +
+        '<text x="' + (x + 60) + '" y="42" text-anchor="middle" font-size="15" font-weight="800" fill="var(--accent-ink)">' + S.n + '단계</text>' +
+        '<text x="' + (x + 60) + '" y="62" text-anchor="middle" font-size="10.5" fill="var(--ink-2)">' + S.name.replace(/^[①②③④⑤]\s*/, '') + '</text>';
+      if (S.n < 5) {
+        s += '<line x1="' + (x + 122) + '" y1="48" x2="' + (x + 146) + '" y2="48" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#a4l2-ah)"/>';
+      }
+    });
+
+    BACKS.forEach((b, i) => {
+      const x1 = cx(b.from), x2 = cx(b.to), mx = (x1 + x2) / 2;
+      s += '<path d="M' + x1 + ',80 Q' + mx + ',' + b.dip + ' ' + x2 + ',80" fill="none" stroke="var(--no)" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#a4l2-ah)" opacity="0.85"/>' +
+        '<circle cx="' + mx + '" cy="' + (b.dip - 14) + '" r="9" fill="var(--no)"/>' +
+        '<text x="' + mx + '" y="' + (b.dip - 10) + '" text-anchor="middle" font-size="10.5" font-weight="800" fill="var(--surface)">' + (i + 1) + '</text>';
+    });
+    s += '</svg>';
+
+    const wrap = AI.h('div', { class: 'box box-info' });
+    wrap.appendChild(AI.h('div', { class: 'box-label', text: '🔁 절차는 되돌아가며 반복된다' }));
+    wrap.appendChild(AI.h('p', { html: '실제 프로젝트에서 5단계는 끝이 아니라 <b>되돌아갈 곳을 정하는 단계</b>입니다. 빨간 점선이 실제로 자주 일어나는 되돌아가기입니다.' }));
+    wrap.appendChild(AI.el('<div style="overflow-x:auto">' + s + '</div>'));
+    const ol = AI.h('ol', { style: { margin: '10px 0 0', fontSize: '14px' } });
+    BACKS.forEach(b => ol.appendChild(AI.h('li', { html: '<b>' + b.from + ' → ' + b.to + '단계</b> — ' + b.label })));
+    wrap.appendChild(ol);
+    wrap.appendChild(AI.h('p', { style: { marginTop: '10px', fontSize: '14px', color: 'var(--ink-3)' }, html: '되돌아가는 것은 실패가 아니라 <b>절차가 제대로 굴러가고 있다는 신호</b>입니다. 그래서 계획서에는 “먼저 되돌아갈 단계”를 미리 적어 둡니다.' }));
+    loop.appendChild(wrap);
+  }
+
+  window.addEventListener('ai:redraw', () => { render(); if (loop.style.display !== 'none') drawLoop(); });
+
+  render();
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a4l2-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['문제 정의', '전처리', '분류', '회귀', '비지도학습', '훈련 데이터', '테스트 데이터', '혼동 행렬', '짝 프로그래밍'],
+  sents: [
+    { text: '인공지능 문제 해결 절차의 첫 단계는 {0}이며, 주제 한 문장과 성공 기준이 산출물이다.', answers: [['문제 정의']] },
+    { text: '수집한 데이터에서 결측치와 이상치를 다루고 정규화하는 작업을 {0}(이)라고 한다.', answers: [['전처리']] },
+    { text: '결과가 범주일 때는 {0}, 결과가 수치일 때는 {1} 문제로 보고 알고리즘을 고른다.', answers: [['분류'], ['회귀']] },
+    { text: '정답 레이블이 없고 비슷한 것끼리 묶기만 한다면 {0}을(를) 선택해야 한다.', answers: [['비지도학습']] },
+    { text: '모델을 학습시킬 때는 {0}만 쓰고, 성능을 평가할 때는 {1}를 쓴다.', answers: [['훈련 데이터'], ['테스트 데이터']] },
+    { text: '분류 문제의 성능은 {0}에서 계산한 정확도·정밀도·재현율로 평가한다.', answers: [['혼동 행렬']] },
+    { text: '두 사람이 한 컴퓨터로 번갈아 코딩하며 서로 검토하는 방법을 {0}(이)라고 한다.', answers: [['짝 프로그래밍']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '2차시 확인 문제',
+  items: [
+    {
+      type: 'order',
+      q: '인공지능 문제 해결 절차를 <b>올바른 순서</b>로 배열하시오.',
+      items: [
+        '문제 정의',
+        '문제 해결에 적합한 데이터 수집 및 전처리',
+        '기계학습 유형과 알고리즘 선정',
+        '기계학습을 통한 모델 생성',
+        '성능 평가 및 수정'
+      ],
+      answer: [0, 1, 2, 3, 4],
+      why: '무엇을 판단할지 정해야(①) 어떤 데이터가 필요한지 알 수 있고(②), 데이터의 형태가 정해져야 유형과 알고리즘을 고를 수 있습니다(③). 그다음 학습하고(④) 평가·수정합니다(⑤). 순서를 뒤집으면 반드시 되돌아오게 됩니다.'
+    },
+    {
+      type: 'mc',
+      q: '“쓰레기 사진을 보고 <b>재활용 가능 / 불가능</b> 중 하나를 판정한다”는 문제에 알맞은 조합은?',
+      choices: [
+        '지도학습 · 회귀 · 선형 회귀',
+        '지도학습 · 분류 · 의사결정 트리',
+        '비지도학습 · 군집 · k-평균 군집',
+        '강화학습 · 제어 · Q러닝'
+      ],
+      answer: 1,
+      why: '결과가 “가능/불가능”이라는 <b>범주</b>이므로 분류 문제이고, 사진마다 정답을 붙일 수 있으므로 <b>지도학습</b>입니다. 선형 회귀는 수치를 내놓는 알고리즘이라 범주를 고를 수 없고, k-평균은 정답 없이 묶기만 하며, Q러닝은 행동을 골라 보상을 최대화하는 문제에 씁니다.'
+    },
+    {
+      type: 'ox',
+      q: '성능 평가 결과가 목표에 못 미치면, 반드시 알고리즘을 바꾸는 것으로만 해결해야 한다.',
+      answer: false,
+      why: '원인에 따라 되돌아갈 단계가 다릅니다. 훈련에서는 잘 맞는데 테스트에서만 떨어지면 <b>② 데이터를 더 모으고</b>, 훈련에서도 낮으면 <b>③ 알고리즘을 바꾸고</b>, 학습이 진행되지 않으면 <b>④ 설정을 조정</b>하며, 판단 자체가 잘못됐으면 <b>① 문제 정의</b>로 돌아갑니다.'
+    },
+    {
+      type: 'match',
+      q: '다음 산출물을 만들어 내는 단계와 짝지으시오.',
+      left: [
+        '주제 한 문장과 성공 기준(정확도 0.85 이상)',
+        '결측치를 지우고 크기를 맞춘 사진 300장과 레이블',
+        '“결과가 범주이므로 의사결정 트리를 쓴다”는 선택과 이유',
+        '테스트 데이터로 계산한 혼동 행렬과 재현율'
+      ],
+      right: ['① 문제 정의', '② 데이터 수집 및 전처리', '③ 유형·알고리즘 선정', '⑤ 성능 평가 및 수정'],
+      answer: [0, 1, 2, 3],
+      why: '각 단계는 반드시 <b>손에 잡히는 산출물</b>을 남겨야 합니다. 산출물이 없으면 그 단계를 “했다고 생각했지만 안 한” 것입니다.'
+    },
+    {
+      type: 'multi',
+      q: '프로젝트 수행 계획서에 <b>반드시 담아야 할 항목</b>을 모두 고르시오.',
+      choices: [
+        '주제와 목표(성공 기준)',
+        '모둠원의 역할 분담',
+        '단계별 일정',
+        '데이터 확보 방안',
+        '최종 발표에서 받을 점수',
+        '평가 기준(지표와 목표 수치)',
+        '예상 위험과 대비책'
+      ],
+      answer: [0, 1, 2, 3, 5, 6],
+      why: '계획서에는 주제·목표, 역할, 일정, 데이터 확보 방안, 평가 기준, 예상 위험을 담습니다. ⑤ 받을 점수는 계획할 수 있는 항목이 아니며, 계획서의 목적은 <b>되돌아갈 곳을 알려 주는 지도</b>를 만드는 것입니다.'
+    },
+    {
+      type: 'short',
+      q: '학습에는 쓰지 않고 남겨 두어, 모델이 처음 보는 자료에서도 잘 맞히는지 확인하는 데 쓰는 데이터를 무엇이라 하는가?',
+      answer: ['테스트 데이터', '시험 데이터', '평가 데이터', 'test data'],
+      placeholder: '예: ○○○ 데이터',
+      why: '<b>테스트 데이터</b>입니다. 이 데이터를 학습에 섞어 쓰면 시험 문제를 미리 보고 시험을 치는 것과 같아, 성능이 실제보다 훨씬 높게 나옵니다. 보통 전체의 20~30%를 남겨 둡니다.'
+    },
+    {
+      type: 'mc',
+      q: '어떤 모둠이 “모은 데이터에 정답 레이블이 없다”고 적어 놓고 <b>지도학습</b>을 골랐다. 이때 알맞은 조치는?',
+      choices: [
+        '레이블 없이 그대로 지도학습을 진행한다',
+        '평가 지표를 정확도 대신 실루엣 계수로 바꾼다',
+        '레이블을 붙이는 작업을 2단계 계획에 넣거나, 비지도학습으로 바꾼다',
+        '훈련 데이터 비율을 90%로 올린다'
+      ],
+      answer: 2,
+      why: '지도학습은 입력마다 <b>정답 레이블</b>이 있어야 학습이 시작됩니다. 따라서 사람이 레이블을 붙이는 작업을 <b>② 데이터 수집 및 전처리</b> 계획에 넣거나, 정답 없이 구조를 찾는 <b>비지도학습</b>으로 유형을 바꿔야 합니다. 지표나 비율을 바꾸는 것으로는 해결되지 않습니다.'
+    },
+    {
+      type: 'multi',
+      q: '결과가 <b>수치</b>인 회귀 문제(예: 내일 급식 잔반량 예측)에 쓸 수 있는 평가 지표를 모두 고르시오.',
+      choices: [
+        '평균 절대 오차(MAE)',
+        '정확도',
+        '결정계수(R²)',
+        '재현율',
+        '평균 제곱근 오차(RMSE)'
+      ],
+      answer: [0, 2, 4],
+      why: '정확도와 재현율은 <b>범주를 맞혔는지 세는</b> 분류 지표라서, 예측값과 실제값의 차이를 다루는 회귀 문제에는 쓸 수 없습니다. 회귀에서는 오차의 크기(MAE·RMSE)나 설명력(R²)을 봅니다.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a4l2-note',
+  title: '프로젝트 수행 계획 기록',
+  prompt: '위 <b>기획 워크벤치</b>와 <b>순서 맞추기</b>를 실제로 조작한 뒤 아래를 채워 보세요. 워크벤치가 준 경고 메시지를 그대로 적는 것이 이 활동의 핵심입니다.',
+  fields: [
+    { key: 'topic', label: '우리 프로젝트 주제 한 문장', type: 'text', placeholder: '1차시에서 조립한 문장을 그대로 옮겨 적어도 됩니다.' },
+    { key: 'type', label: '결과의 형태 · 기계학습 유형 · 고른 알고리즘', type: 'text', placeholder: '예: 범주(분류) · 지도학습 · 의사결정 트리' },
+    { key: 'metric', label: '평가 지표와 목표 수치', type: 'text', placeholder: '예: 정확도 0.85 이상, 재현율 0.80 이상' },
+    { key: 'score', label: '순서 맞추기 점수와 틀린 카드', type: 'text', placeholder: '예: 10 / 12 · 「레이블 정하기」와 「훈련/테스트 분할」을 틀렸다' },
+    { key: 'warn', label: '워크벤치 3·5단계에서 받은 경고 메시지와, 무엇을 어떻게 고쳤는지', type: 'textarea', rows: 4, placeholder: '예) “결과가 범주인 문제에는 선형 회귀를 쓸 수 없습니다”라는 경고가 나와서, 의사결정 트리로 바꿨다. 이유는 …' },
+    { key: 'role', label: '모둠원 역할 분담과 일정', type: 'textarea', rows: 3, placeholder: '데이터 · 모델 · 검증 · 기록·발표 네 역할로 나누고, 단계별 마감일을 적어 보세요.' },
+    { key: 'back', label: '성능이 목표에 못 미치면 어느 단계로 되돌아갈지, 그 이유는 무엇인지', type: 'textarea', rows: 3, placeholder: '예) 훈련에서는 잘 맞는데 테스트에서 떨어지면 데이터가 적다는 뜻이므로 ②단계로 돌아가 …' }
+  ]
+});
+</script>
+</body>
+</html>

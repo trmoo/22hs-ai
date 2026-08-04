@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>단원 마무리 · 인공지능의 사회적 영향 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+  .cmap-wrap { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); padding: 14px 16px 10px; margin: 0 0 16px; overflow-x: auto; }
+  .cmap { width: 100%; min-width: 660px; height: auto; display: block; color: var(--line-strong); }
+  .cmap .ed { fill: none; stroke: currentColor; stroke-width: 1.8; marker-end: url(#a3arw); }
+  .cmap .nb { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1.6; }
+  .cmap .nb.acc { fill: var(--accent-soft); stroke: var(--accent-line); }
+  .cmap .nb.risk { fill: var(--no-soft); stroke: var(--no-line); }
+  .cmap .nb.fin { fill: var(--ok-soft); stroke: var(--ok-line); }
+  .cmap .nt { fill: var(--ink); font-weight: 750; font-size: 14px; text-anchor: middle; }
+  .cmap .nl { fill: var(--ink); font-weight: 700; font-size: 13px; text-anchor: middle; }
+  .cmap .ns { fill: var(--ink-3); font-weight: 600; font-size: 11.5px; text-anchor: middle; }
+  .cmap .bd { fill: var(--accent-soft); stroke: var(--accent-line); stroke-width: 1; }
+  .cmap .bt { fill: var(--accent-ink); font-weight: 800; font-size: 9.5px; text-anchor: middle; }
+  .cmap .el { fill: var(--accent-ink); font-weight: 700; font-size: 11px; text-anchor: middle; }
+  .lesson-card .lc-title, .lesson-card .lc-sub { display: block; }
+  .essay-q { padding: 14px 16px; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--radius); background: var(--surface); margin: 0 0 12px; }
+  .essay-q .eq-no { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; color: var(--accent-ink); margin-bottom: 6px; }
+  .essay-q p:last-child { margin-bottom: 0; }
+  .prin-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); margin: 0 0 18px; }
+  .prin { padding: 14px 16px; border-radius: var(--radius); border: 1px solid var(--accent-line); background: var(--accent-soft); }
+  .prin h4 { font-size: 15px; margin: 0 0 6px; color: var(--accent-ink); }
+  .prin p { font-size: 13.8px; color: var(--ink-2); margin: 0; line-height: 1.68; }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 돌아보며 열기</div>
+      <p>1단원과 2단원에서 우리는 인공지능을 <b>만드는 법</b>을 배웠습니다. 3단원은 질문이 달랐습니다.</p>
+      <p style="font-size:18px;font-weight:750;color:var(--accent-ink);text-align:center;margin:14px 0">“잘 작동하는 인공지능이라면, 그것으로 충분한가?”</p>
+      <p>정확도 95%인 채용 심사 모델이 있다고 합시다. 성능은 훌륭합니다. 그런데 이 모델이 특정 학교 출신을 계속 떨어뜨리고 있다면, 우리는 이 모델을 써도 될까요? 성능 지표는 이 질문에 답하지 못합니다.</p>
+      <p>이 단원에서 배운 것은 <b>기술을 멈추게 하는 방법</b>이 아니라, 기술을 <b>더 좋게 쓰기 위해 무엇을 따져야 하는가</b>였습니다.</p>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 네 차시를 하나의 흐름으로 이어 보기</summary>
+        <div class="more-body">
+          인공지능이 빠르게 발전하면서 사회가 바뀌고(1차시), 그 변화는 우리의 일과 진로를 바꾸며(2차시), 동시에 새로운 문제와 위험을 만들어 냅니다(4차시). 그래서 우리는 받아들이기 전에 따져 보는 태도로 공존의 방식을 정해야 합니다(3차시).
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 개념 지도 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>한 장으로 보는 3단원 개념 지도</h2><span class="sec-tag">1~4차시</span></div>
+
+    <p>이 단원의 지도는 <b>기술에서 시작해 사람의 판단으로 끝납니다</b>. 위에서 아래로 내려오며 “그래서 우리는 무엇을 해야 하는가”로 좁혀집니다. 빨간 상자는 인공지능이 만들어 내는 <b>새로운 문제</b>입니다.</p>
+
+    <div class="cmap-wrap">
+      <svg class="cmap" viewBox="0 0 920 610" role="img" aria-label="3단원 인공지능의 사회적 영향 개념 지도. 기술의 발전이 사회 변화를 낳고, 이것이 일과 직업의 변화와 진로 탐색, 그리고 새로 생기는 문제와 위험으로 이어지며, 비판적 자세와 인공지능 윤리를 거쳐 인간과 인공지능의 공존 방안으로 수렴한다.">
+        <defs>
+          <marker id="a3arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="currentColor"></path>
+          </marker>
+        </defs>
+
+        <!-- 간선 -->
+        <path class="ed" d="M460,88 V132"></path>
+        <path class="ed" d="M460,206 V228 H160 V250"></path>
+        <path class="ed" d="M460,206 V228 H740 V250"></path>
+        <text class="el" x="252" y="223">일하는 방식이 바뀐다</text>
+        <text class="el" x="620" y="223">새로운 위험이 생긴다</text>
+        <path class="ed" d="M300,293 H320"></path>
+        <path class="ed" d="M160,336 V386"></path>
+        <path class="ed" d="M440,336 V386"></path>
+        <path class="ed" d="M740,336 V386"></path>
+        <text class="el" x="292" y="368">그대로 받아들일까?</text>
+        <text class="el" x="592" y="368">무엇이 문제인가?</text>
+        <path class="ed" d="M460,470 V506"></path>
+
+        <!-- 노드 -->
+        <g>
+          <rect class="nb acc" x="310" y="14" width="300" height="74" rx="12"></rect>
+          <rect class="bd" x="320" y="23" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="341" y="35.5">1차시</text>
+          <text class="nt" x="460" y="58">인공지능 기술의 빠른 발전</text>
+          <text class="ns" x="460" y="76">데이터 · 컴퓨팅 성능 · 알고리즘</text>
+        </g>
+        <g>
+          <rect class="nb" x="310" y="132" width="300" height="74" rx="12"></rect>
+          <rect class="bd" x="320" y="141" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="341" y="153.5">1차시</text>
+          <text class="nt" x="460" y="176">사회의 변화</text>
+          <text class="ns" x="460" y="194">산업 · 의료 · 교육 · 행정 · 문화</text>
+        </g>
+        <g>
+          <rect class="nb" x="20" y="250" width="280" height="86" rx="12"></rect>
+          <rect class="bd" x="30" y="259" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="51" y="271.5">2차시</text>
+          <text class="nl" x="160" y="296">일과 직업의 변화</text>
+          <text class="ns" x="160" y="314">사라지는 일 · 바뀌는 일</text>
+          <text class="ns" x="160" y="328">새로 생기는 일</text>
+        </g>
+        <g>
+          <rect class="nb" x="320" y="250" width="240" height="86" rx="12"></rect>
+          <rect class="bd" x="330" y="259" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="351" y="271.5">2차시</text>
+          <text class="nl" x="440" y="296">나의 진로 탐색</text>
+          <text class="ns" x="440" y="314">인공지능과 함께 일하는</text>
+          <text class="ns" x="440" y="328">역량 준비</text>
+        </g>
+        <g>
+          <rect class="nb risk" x="580" y="250" width="320" height="86" rx="12"></rect>
+          <rect class="bd" x="590" y="259" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="611" y="271.5">4차시</text>
+          <text class="nl" x="740" y="296">새로 생기는 문제와 위험</text>
+          <text class="ns" x="740" y="314">편향 · 프라이버시 · 책임 소재</text>
+          <text class="ns" x="740" y="328">딥페이크 · 오남용</text>
+        </g>
+        <g>
+          <rect class="nb acc" x="140" y="386" width="640" height="84" rx="12"></rect>
+          <rect class="bd" x="150" y="395" width="60" height="17" rx="5"></rect>
+          <text class="bt" x="180" y="407.5">3·4차시</text>
+          <text class="nt" x="460" y="430">비판적 자세와 인공지능 윤리</text>
+          <text class="ns" x="460" y="448">근거 확인 · 한계 인식 · 이해관계자 고려</text>
+          <text class="ns" x="460" y="462">인간의 존엄성 · 사회의 공공선 · 기술의 합목적성</text>
+        </g>
+        <g>
+          <rect class="nb fin" x="200" y="506" width="520" height="84" rx="12"></rect>
+          <rect class="bd" x="210" y="515" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="231" y="527.5">3차시</text>
+          <text class="nt" x="460" y="550">인간과 인공지능의 공존 방안</text>
+          <text class="ns" x="460" y="568">제도 · 기술 · 교육 · 개인의 실천</text>
+          <text class="ns" x="460" y="582">딜레마 상황에서 근거를 갖춘 판단</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">🧭 지도를 읽는 세 가지 방법</div>
+      <ul style="margin:0">
+        <li><b>위에서 아래로</b> — 기술 → 사회 → 나의 삶 → 판단의 순서입니다. 이 단원의 모든 활동은 마지막 칸, 즉 <b>근거를 갖춘 판단</b>에 도달하기 위한 준비였습니다.</li>
+        <li><b>가운데 세 상자를 나란히</b> — 같은 기술 발전이 어떤 사람에게는 <b>기회</b>(새로 생기는 일), 어떤 사람에게는 <b>위험</b>(일자리 대체, 편향의 피해)이 됩니다. 누구에게 어떤 영향인지를 나누어 보는 것이 분석의 출발점입니다.</li>
+        <li><b>아래에서 위로 거꾸로</b> — 공존 방안을 하나 떠올렸다면, 그것이 위쪽의 어떤 문제를 겨냥한 것인지 되짚어 보세요. 문제와 짝이 맞지 않는 대책은 실제로 작동하지 않습니다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 2. 차시별 핵심 정리 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>차시별 핵심 정리</h2></div>
+
+    <p>이 단원은 외울 공식이 없는 대신, <b>판단의 기준</b>을 익히는 단원입니다. 마지막 열의 오해들은 대부분 “너무 단순하게 결론 내리기”에서 나옵니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>3단원 인공지능의 사회적 영향 — 차시별 정리</caption>
+        <thead><tr><th>차시</th><th>꼭 알아야 할 개념</th><th>한 줄 요약</th><th>자주 나오는 오해</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>1차시</b><br>세상을 바꾸는 속도</td>
+            <td>인공지능의 발전 배경(데이터·컴퓨팅 성능·알고리즘), 사회 변화, 인공지능으로 해결 가능한 사회적 문제</td>
+            <td>인공지능은 특정 산업의 도구가 아니라 <b>사회 전 영역의 작동 방식</b>을 바꾸는 기반 기술이다.</td>
+            <td class="bad">“인공지능이 갑자기 등장했다” → 개념은 1950년대부터 있었고, 데이터와 연산 능력이 갖춰지면서 <b>성능이 급격히 좋아진</b> 것입니다. 변한 것은 아이디어가 아니라 조건입니다.</td>
+          </tr>
+          <tr>
+            <td><b>2차시</b><br>사라지는 일, 생겨나는 일</td>
+            <td>직무 단위의 변화, 일자리 대체와 보완, 새로 생기는 직업, 인공지능 소양</td>
+            <td>직업이 통째로 사라지기보다 <b>직무의 일부가 기계로 옮겨 가고</b>, 사람의 역할이 재배치된다.</td>
+            <td class="bad">“인공지능이 모든 직업을 없앤다” 또는 “내 직업은 안전하다” → 둘 다 지나친 단순화입니다. 같은 직업 안에서도 <b>반복적·규칙적인 직무</b>가 먼저 영향을 받습니다.</td>
+          </tr>
+          <tr>
+            <td><b>3차시</b><br>받아들이기 전에 따져보기</td>
+            <td>비판적 자세, 인간 중심, 공존 방안(제도·기술·교육·개인 실천)</td>
+            <td>비판은 반대가 아니다. <b>근거를 확인하고 한계를 인식하는 태도</b>가 더 나은 활용으로 이어진다.</td>
+            <td class="bad">“비판적 자세 = 인공지능 반대” → 비판적 자세는 <b>무엇을 믿을지 판단하는 능력</b>입니다. 인공지능의 출력을 검증 없이 받아들이지 않는 것이 핵심입니다.</td>
+          </tr>
+          <tr>
+            <td><b>4차시</b><br>공정한 인공지능은 가능한가</td>
+            <td>데이터 편향, 알고리즘 편향, 프라이버시, 설명 가능성, 책임 소재, 윤리 딜레마, 인공지능 윤리기준 3대 원칙</td>
+            <td>편향은 대개 <b>사람이 만든 데이터</b>에서 들어오고, 모델은 그것을 정확하게 재현한다.</td>
+            <td class="bad">“알고리즘은 사람과 달라서 공정하다” → 알고리즘은 과거 데이터에 담긴 차별까지 학습합니다. 게다가 <b>일관되게 대규모로</b> 적용되므로 피해가 더 넓게 퍼질 수 있습니다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub-head">인공지능 윤리기준 3대 기본 원칙 다시 보기</h3>
+    <p>과학기술정보통신부의 「인공지능(AI) 윤리기준」은 최고 가치로 <b>인간성</b>을 두고, 아래 세 가지 기본 원칙과 10대 핵심 요건을 제시합니다. 딜레마를 분석할 때 이 세 원칙을 <b>서로 부딪히는 축</b>으로 쓰면 논의가 훨씬 분명해집니다.</p>
+
+    <div class="prin-grid">
+      <div class="prin">
+        <h4>① 인간의 존엄성 원칙</h4>
+        <p>인공지능은 인간의 생명과 신체적·정신적 안전을 침해하지 않아야 하며, 인간을 수단으로 다루지 않아야 합니다.</p>
+      </div>
+      <div class="prin">
+        <h4>② 사회의 공공선 원칙</h4>
+        <p>인공지능의 혜택은 되도록 많은 사람에게 골고루 돌아가야 하며, 사회적 약자와 취약 계층의 접근성을 배려해야 합니다.</p>
+      </div>
+      <div class="prin">
+        <h4>③ 기술의 합목적성 원칙</h4>
+        <p>인공지능은 인류의 삶에 도움이 되는 <b>선한 목적</b>으로 개발·활용되어야 하며, 그 과정과 결과가 목적에 맞아야 합니다.</p>
+      </div>
+    </div>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">🧪</span>
+        <h4>편향을 확인하는 방법</h4>
+        <p>전체 정확도 하나만 보지 말고 <b>집단별로 나누어</b> 성능을 재 봅니다. 성별·지역·연령별 정확도가 크게 다르면 편향의 신호입니다. 2단원의 혼동 행렬을 집단마다 따로 그려 보는 것이 가장 쉬운 점검법입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🔍</span>
+        <h4>설명 가능성이 필요한 이유</h4>
+        <p>대출 거절, 채용 탈락, 진단처럼 <b>사람의 삶에 영향을 주는 판단</b>에서는 이유를 설명할 수 없으면 이의 제기와 시정이 불가능합니다. 성능이 조금 낮아도 설명 가능한 모델을 택하는 경우가 있습니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🤝</span>
+        <h4>공존은 네 층에서</h4>
+        <p><b>제도</b>(법·지침), <b>기술</b>(편향 완화·개인정보 보호 기술), <b>교육</b>(인공지능 소양), <b>개인의 실천</b>(출처 확인·비판적 수용)이 함께 움직여야 합니다. 한 층만으로는 부족합니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. 핵심 용어 빈칸 점검 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>핵심 용어 빈칸 점검</h2><span class="sec-tag">본문 빈칸 13개</span></div>
+
+    <p>아래 네 문단은 3단원 전체를 압축한 요약입니다. 위쪽의 <b>빈칸 채우기 모드</b>를 켜고 채워 보세요.</p>
+
+    <h3 class="sub-head">① 기술이 사회를 바꾸는 방식</h3>
+    <p>인공지능은 데이터와 컴퓨팅 성능, 알고리즘이 함께 발전하면서 성능이 크게 좋아졌습니다. 그 결과 사람이 하던 일을 기계가 대신 처리하는 <b class="blank" data-a="자동화|오토메이션" data-hint="사람의 개입 없이 기계가 처리하게 만드는 것">자동화</b>가 산업·의료·교육·행정으로 넓게 퍼졌습니다. 동시에 인공지능은 재난 예측, 감염병 확산 분석, 에너지 절약처럼 혼자서는 풀기 어려운 <b class="blank" data-a="사회적 문제|사회 문제" data-hint="여러 사람에게 영향을 주는 공동의 문제">사회적 문제</b>를 다루는 도구가 되기도 합니다.</p>
+
+    <h3 class="sub-head">② 일과 진로의 변화</h3>
+    <p>인공지능이 도입되면 직업이 통째로 없어지기보다 하나의 직업 안에서 <b>반복적이고 규칙적인 직무</b>가 먼저 기계로 옮겨 갑니다. 이렇게 사람의 일이 기계로 넘어가는 현상을 일자리 <b class="blank" data-a="대체|대체(치환)" data-hint="사람의 일을 기계가 대신 맡는 것">대체</b>라고 하지만, 반대로 인공지능이 사람의 판단을 돕는 보완 관계도 늘어나고, 인공지능을 만들고 관리하는 새로운 직업도 생겨납니다. 그래서 지금 필요한 것은 특정 기술 하나가 아니라, 인공지능을 이해하고 목적에 맞게 활용하고 그 결과를 판단할 수 있는 <b class="blank" data-a="인공지능 소양|AI 소양|인공지능 리터러시|AI 리터러시" data-hint="인공지능을 이해하고 활용하고 비판적으로 판단하는 능력">인공지능 소양</b>입니다.</p>
+
+    <h3 class="sub-head">③ 받아들이기 전에 따져보기</h3>
+    <p>인공지능의 출력은 언제나 확률적인 판단이므로 틀릴 수 있습니다. 근거와 출처를 확인하고 한계를 인식하며 대안을 견주어 보는 태도를 <b class="blank" data-a="비판적|비판적 자세|비판적인" data-hint="근거를 따져 보는 태도. 반대한다는 뜻이 아니다">비판적</b> 자세라고 합니다. 이 태도를 바탕으로 인간과 인공지능이 서로의 강점을 살려 함께 살아가는 방식을 찾는 것이 <b class="blank" data-a="공존|상생" data-hint="함께 살아가기">공존</b>입니다. 공존 방안은 제도, 기술, 교육, 개인의 실천이라는 네 층에서 함께 마련되어야 합니다.</p>
+
+    <h3 class="sub-head">④ 윤리적으로 따져야 할 것들</h3>
+    <p>학습 데이터가 특정 집단에 치우쳐 있거나 과거의 차별을 담고 있으면, 모델의 판단도 한쪽으로 기웁니다. 이 현상을 <b class="blank" data-a="편향|바이어스|편견" data-hint="한쪽으로 치우침. 영어로 bias">편향</b>이라고 합니다. 또 인공지능이 위치·구매·건강 정보를 대량으로 모으는 과정에서 개인의 사생활, 즉 <b class="blank" data-a="프라이버시|사생활|개인정보" data-hint="개인의 사적인 영역이 보호받을 권리">프라이버시</b>가 침해될 수 있습니다. 사람의 삶에 영향을 주는 판단에서는 인공지능이 왜 그렇게 판단했는지 사람이 이해할 수 있어야 하는데, 이 성질을 <b class="blank" data-a="설명 가능성|설명가능성|투명성" data-hint="판단의 이유를 밝힐 수 있는 성질">설명 가능성</b>이라고 합니다.</p>
+
+    <p>어느 쪽을 선택해도 어떤 가치를 포기해야 하는 상황을 <b class="blank" data-a="딜레마|윤리적 딜레마" data-hint="자율주행 자동차의 사고 상황이 대표적인 예">딜레마</b>라고 합니다. 이런 상황을 분석할 때는 과학기술정보통신부 「인공지능(AI) 윤리기준」의 세 원칙이 좋은 기준이 됩니다. 인간의 생명과 안전을 침해하지 않아야 한다는 <b class="blank" data-a="인간의 존엄성|인간 존엄성|존엄성" data-hint="사람을 수단으로 다루지 않는다">인간의 존엄성</b> 원칙, 혜택이 되도록 많은 사람에게 골고루 돌아가야 한다는 <b class="blank" data-a="사회의 공공선|공공선" data-hint="사회 전체의 이익과 약자 배려">사회의 공공선</b> 원칙, 그리고 인류의 삶에 도움이 되는 선한 목적으로 개발·활용해야 한다는 <b class="blank" data-a="기술의 합목적성|합목적성" data-hint="목적에 맞게 쓰였는가">기술의 합목적성</b> 원칙입니다.</p>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 여기서 헷갈리면 반드시 다시 보기</div>
+      <p><b>데이터 편향</b>과 <b>알고리즘 편향</b>은 원인이 다릅니다. 데이터 편향은 <b>수집된 데이터 자체</b>가 특정 집단에 치우쳐 생기고, 알고리즘 편향은 데이터가 고르더라도 <b>모델의 설계나 평가 방식</b> 때문에 특정 집단에 불리한 결과가 나오는 경우입니다. 대책도 달라지므로 원인을 먼저 구분해야 합니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>단원 용어 낱말 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 5. 단원 평가 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>단원 평가</h2><span class="sec-tag">11문항 · 기본 4 · 적용 4 · 통합 3</span></div>
+
+    <div class="box box-info">
+      <div class="box-label">📋 5·11번 문항에서 함께 볼 사례</div>
+      <p><b>사례 — 어느 회사의 서류 심사 모델</b><br>
+      A 회사는 지난 10년간의 <b>합격자 서류</b>를 학습 데이터로 써서 서류 심사 모델을 만들었습니다. 테스트 정확도는 92%로 높았습니다. 그런데 실제로 써 보니 특정 지역 출신 지원자의 합격률이 눈에 띄게 낮았습니다. 지난 10년간 그 지역 출신의 합격자가 적었다는 사실도 뒤늦게 확인되었습니다.</p>
+    </div>
+
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 6. 서·논술형 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>서·논술형 문항</h2></div>
+
+    <p>이 단원의 서·논술형에는 <b>모범 답 하나</b>가 없습니다. 대신 <b>근거의 질</b>로 평가합니다. 각 문항의 평가 기준을 먼저 펼쳐 확인하세요.</p>
+
+    <div class="essay-q">
+      <div class="eq-no">문항 1 · 분석형</div>
+      <p>우리 지역이나 우리 학교에서 <b>인공지능으로 개선할 수 있는 문제</b> 하나를 고르시오. 그 문제를 어떻게 개선할 수 있는지 밝히고, 동시에 그 방법이 만들 수 있는 <b>부작용이나 위험</b>도 함께 서술하시오.</p>
+      <details class="more-box" style="margin:10px 0 0">
+        <summary><span class="plus-tag">평가 기준</span> 좋은 답에 반드시 들어가야 할 요소</summary>
+        <div class="more-body">
+          <ul style="margin:0">
+            <li>문제가 <b>구체적</b>인가(“교통 문제”가 아니라 “학교 앞 하교 시간대 보행 안전” 수준).</li>
+            <li>인공지능이 그 문제의 <b>어느 부분</b>을 맡는지 분명한가(예측·분류·추천·탐지 중 무엇인가).</li>
+            <li>필요한 <b>데이터</b>와 그 데이터를 얻는 방법을 언급했는가.</li>
+            <li>부작용을 최소 한 가지 이상, 그리고 <b>누구에게 생기는 피해</b>인지 밝혔는가(개인정보 노출, 특정 집단 불이익, 오작동 시 위험 등).</li>
+            <li>부작용을 줄이기 위한 대책을 제도·기술·교육·개인 실천 중 하나 이상으로 제시했는가.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="essay-q">
+      <div class="eq-no">문항 2 · 진로형</div>
+      <p>내가 관심 있는 직업 하나를 정하고, 그 직업의 <b>직무를 세 가지 이상으로 나누어</b> 각각이 인공지능의 영향을 어떻게 받을지 예측하시오. 그리고 그 변화에 대비해 지금부터 기를 역량 세 가지를 근거와 함께 쓰시오.</p>
+      <details class="more-box" style="margin:10px 0 0">
+        <summary><span class="plus-tag">평가 기준</span> 좋은 답에 반드시 들어가야 할 요소</summary>
+        <div class="more-body">
+          <ul style="margin:0">
+            <li>직업을 <b>직무 단위로 쪼갰는가</b>(“의사”가 아니라 “영상 판독 · 환자 상담 · 치료 계획 결정 · 기록 정리”).</li>
+            <li>직무별로 <b>대체·보완·유지</b> 중 어느 쪽인지 판단하고 이유를 댔는가. 반복적·규칙적 직무가 먼저 영향받는다는 원리를 적용했는가.</li>
+            <li>“모두 사라진다” 또는 “전혀 영향 없다”는 <b>단순한 결론을 피했는가</b>.</li>
+            <li>역량 세 가지가 서로 다른 성격인가(예: 인공지능 도구 활용 능력 + 사람과의 소통 능력 + 결과를 검증하는 판단력).</li>
+            <li>각 역량이 <b>어느 직무의 변화에 대응하는 것</b>인지 연결했는가.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="essay-q">
+      <div class="eq-no">문항 3 · 논술형</div>
+      <p>다음 중 하나를 골라 윤리적 딜레마를 분석하시오. (가) 자율주행 자동차의 사고 회피 판단 &nbsp;·&nbsp; (나) 인공지능 서류 심사의 도입 &nbsp;·&nbsp; (다) 생성형 인공지능이 만든 창작물의 저작권<br>
+      선택한 상황에서 <b>어떤 가치가 서로 충돌하는지</b> 인공지능 윤리기준의 세 원칙으로 밝히고, 자신의 판단과 그 근거, 그리고 반대 입장에서 나올 수 있는 반론에 대한 답을 쓰시오.</p>
+      <details class="more-box" style="margin:10px 0 0">
+        <summary><span class="plus-tag">평가 기준</span> 좋은 답에 반드시 들어가야 할 요소</summary>
+        <div class="more-body">
+          <ul style="margin:0">
+            <li>상황에서 <b>이해관계자를 세 주체 이상</b> 찾아냈는가(예: 탑승자 · 보행자 · 제조사 · 사회 전체).</li>
+            <li>충돌하는 가치를 <b>세 원칙 중 어느 것과 어느 것</b>인지 이름을 들어 지목했는가.</li>
+            <li>자신의 판단이 분명한가. 그리고 그 판단이 <b>어떤 원칙을 더 중요하게 본 결과</b>인지 밝혔는가.</li>
+            <li><b>반대 입장의 가장 강한 반론</b>을 스스로 제시하고, 그에 대한 답을 썼는가. (이 항목이 가장 큰 비중입니다.)</li>
+            <li>“무조건 금지” 또는 “기술 발전이 우선”처럼 한쪽 가치를 아예 없는 것으로 취급하지 않았는가.</li>
+            <li>판단을 개인의 감정이 아니라 <b>확인 가능한 사실과 원칙</b>에 근거해 세웠는가.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 7. 자가평가 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>성취기준 자가평가</h2></div>
+    <p>성취기준마다 지금 내 상태를 솔직하게 고릅니다. <b>D 나 E 를 고른 성취기준</b>은 아래에서 해당 차시로 돌아가 다시 확인하세요.</p>
+    <div id="self1"></div>
+  </section>
+
+  <!-- ============ 8. 돌아가기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>부족한 곳으로 돌아가기</h2></div>
+
+    <div class="lesson-list">
+      <a class="lesson-card" href="lesson01.html">
+        <span class="lc-no"><b>1</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">세상을 바꾸는 속도</span>
+          <span class="lc-sub">인공지능이 어떤 영역을 어떻게 바꾸는지 예를 들지 못한다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기03-01</span><span class="lc-sim">🎯 단원 평가 1·2번, 서·논술형 1번이 막혔다면</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card" href="lesson02.html">
+        <span class="lc-no"><b>2</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">사라지는 일, 생겨나는 일</span>
+          <span class="lc-sub">직무 단위의 변화와 나의 진로를 연결하지 못했다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기03-02</span><span class="lc-sim">🎯 단원 평가 3·9번, 서·논술형 2번이 막혔다면</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card" href="lesson03.html">
+        <span class="lc-no"><b>3</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">받아들이기 전에 따져보기</span>
+          <span class="lc-sub">비판적 자세가 무엇인지, 공존 방안을 어떻게 세우는지 흐릿하다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기03-03</span><span class="lc-sim">🎯 단원 평가 6·7·10번이 어려웠다면</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card" href="lesson04.html">
+        <span class="lc-no"><b>4</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">공정한 인공지능은 가능한가</span>
+          <span class="lc-sub">편향의 원인과 윤리 원칙 적용이 자신 없다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기03-04</span><span class="lc-sim">🎯 단원 평가 4·5·8·11번, 서·논술형 3번이 막혔다면</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card closing" href="index.html">
+        <span class="lc-no"><b>★</b></span>
+        <span class="lc-body">
+          <span class="lc-title">3단원 목차로</span>
+          <span class="lc-sub">내용 요소와 성취기준 전체를 다시 훑어보기</span>
+          <span class="lc-meta"><span class="lc-sim">📋 무엇을 배웠는지 한눈에 확인</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ 9. 다음 단원 예고 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>다음 단원 예고</h2></div>
+
+    <div class="box box-concept">
+      <div class="box-label">🚪 4단원으로 가는 문</div>
+      <p>3단원에서 우리는 “인공지능을 어떻게 써야 하는가”를 따져 보았습니다. 그런데 따져 보기만 하면 세상은 바뀌지 않습니다. <b>직접 만들어 보아야</b> 합니다.</p>
+      <p>4단원 <b>인공지능 프로젝트</b>에서는 유엔의 <b>지속가능발전목표(SDGs) 17개</b> 중에서 문제를 골라, 1단원의 문제 해결 절차와 2단원의 기계학습 파이프라인을 실제로 조립합니다. 그리고 3단원에서 배운 윤리 기준으로 <b>내가 만든 것을 스스로 검토</b>합니다.</p>
+      <p>세 단원이 모두 필요한 이유가 여기서 드러납니다. 문제를 정의하는 힘(1단원), 데이터로 모델을 만드는 힘(2단원), 그리고 <b>만들어도 되는지 판단하는 힘</b>(3단원). 프로젝트는 이 셋을 한꺼번에 요구합니다.</p>
+    </div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 공정성은 하나로 정의되지 않는다</summary>
+      <div class="more-body">
+        <p>“공정하게 판단하라”는 요구는 당연해 보이지만, 막상 수식으로 옮기면 <b>여러 가지 공정성이 서로 충돌</b>합니다.</p>
+        <ul>
+          <li><b>집단별 합격률을 같게</b> 맞추는 공정성</li>
+          <li><b>집단별 재현율(놓치는 비율)을 같게</b> 맞추는 공정성</li>
+          <li><b>같은 조건의 개인은 같게</b> 대하는 공정성</li>
+        </ul>
+        <p>연구에 따르면 집단 간 실제 비율이 다를 때 이 기준들을 <b>동시에 모두 만족시키는 것은 수학적으로 불가능</b>합니다. 그래서 “어떤 공정성을 택할 것인가”는 기술 문제가 아니라 <b>사회적 합의의 문제</b>가 됩니다. 인공지능 윤리에 사람의 토론이 반드시 필요한 이유입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">활동</span> 편향 점검 체크리스트 — 프로젝트에서 그대로 쓰기</summary>
+      <div class="more-body">
+        <p>4단원 프로젝트에서 모델을 만들 때 아래 다섯 항목을 점검표로 쓰세요. 3단원의 내용을 실제 개발에 연결하는 가장 간단한 방법입니다.</p>
+        <ol style="margin:0">
+          <li><b>수집</b> — 데이터가 특정 집단·시기·지역에 치우쳐 있지 않은가? 빠진 집단은 누구인가?</li>
+          <li><b>라벨</b> — 정답(라벨)을 누가 어떤 기준으로 붙였는가? 그 기준에 과거의 차별이 담겨 있지 않은가?</li>
+          <li><b>평가</b> — 전체 정확도만 보지 않고 <b>집단별로 나누어</b> 성능을 재 보았는가?</li>
+          <li><b>설명</b> — 판단의 이유를 사람에게 설명할 수 있는가? 이의를 제기할 통로가 있는가?</li>
+          <li><b>영향</b> — 이 모델이 틀렸을 때 가장 큰 피해를 입는 사람은 누구인가? 그 피해를 되돌릴 수 있는가?</li>
+        </ol>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> 이 단원의 개념이 실제로 문제가 된 곳</summary>
+      <div class="more-body">
+        <ul style="margin:0">
+          <li><b>채용 심사 자동화</b> — 과거 합격자 데이터로 학습한 모델이 특정 집단에 불리하게 작동해 사용이 중단된 사례들이 보고되었습니다. 원인은 알고리즘이 아니라 <b>학습 데이터</b>였습니다.</li>
+          <li><b>얼굴 인식</b> — 학습 데이터에 특정 인종·성별의 사진이 적으면 그 집단의 인식 정확도가 크게 떨어집니다. 전체 정확도만 보면 드러나지 않습니다.</li>
+          <li><b>생성형 인공지능과 딥페이크</b> — 실제로 하지 않은 말과 행동을 영상으로 만들 수 있어, 명예 훼손과 선거 개입 등 새로운 위험이 생겼습니다. 출처 확인과 표시 의무가 논의됩니다.</li>
+          <li><b>추천 알고리즘</b> — 볼 만한 것을 잘 골라 주지만, 비슷한 정보만 반복해 보여 주면서 관점이 좁아지는 문제가 지적됩니다.</li>
+          <li><b>자율주행 사고의 책임</b> — 운전자, 제조사, 소프트웨어 개발자 중 누가 책임을 지는지에 대한 제도 정비가 여러 나라에서 진행 중입니다.</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 3, lesson: 'closing',
+  title: '단원 마무리',
+  sub: '인공지능의 사회적 영향 — 핵심 정리와 단원 평가',
+  lead: '네 차시를 한 장의 지도로 잇습니다. 기술의 발전에서 시작해 사회와 직업의 변화를 거쳐, <b>근거를 갖춘 판단</b>에 도달하는 길입니다. 단원 평가와 서·논술형으로 그 판단력을 스스로 점검해 봅시다.',
+  standards: ['12인기03-01', '12인기03-02', '12인기03-03', '12인기03-04'],
+  keywords: ['사회 변화', '자동화', '일자리 대체', '인공지능 소양', '비판적 자세', '공존', '편향', '프라이버시', '설명 가능성', '윤리 딜레마'],
+  goals: [
+    '인공지능의 발전이 사회 각 영역을 바꾸는 방식을 예를 들어 설명하고, 인공지능으로 해결할 사회적 문제를 찾아 분석할 수 있다.',
+    '관심 직업을 직무 단위로 나누어 인공지능의 영향을 예측하고, 준비할 역량을 근거와 함께 제시할 수 있다.',
+    '인공지능의 출력을 비판적으로 검토하고, 제도·기술·교육·개인 실천의 네 층에서 공존 방안을 세울 수 있다.',
+    '편향·프라이버시·책임 소재의 쟁점을 인공지능 윤리기준의 세 원칙으로 분석하고 자신의 판단을 근거와 함께 밝힐 수 있다.'
+  ]
+});
+</script>
+
+<script>
+AI.cloze('#cloze1', {
+  id: 'a3c-cloze',
+  title: '3단원 핵심 용어 8개',
+  sub: '낱말을 누른 뒤 빈칸을 눌러 채웁니다. 낱말은 한 번씩만 쓰입니다.',
+  bank: ['편향', '프라이버시', '딥페이크', '설명 가능성', '딜레마', '공존', '인간의 존엄성', '일자리 대체'],
+  sents: [
+    { text: '학습 데이터가 특정 집단에 치우쳐 있어 모델의 판단이 한쪽으로 기우는 현상을 {0}(이)라고 한다.', answers: [['편향']] },
+    { text: '인공지능이 위치·구매·건강 정보를 대량으로 모으는 과정에서 침해될 수 있는, 개인의 사적인 영역에 대한 권리를 {0}(이)라고 한다.', answers: [['프라이버시']] },
+    { text: '실제로 존재하지 않는 영상이나 음성을 진짜처럼 만들어 내는 기술을 {0}(이)라고 한다.', answers: [['딥페이크']] },
+    { text: '인공지능이 왜 그렇게 판단했는지 사람이 이해할 수 있도록 밝힐 수 있는 성질을 {0}(이)라고 한다.', answers: [['설명 가능성']] },
+    { text: '어느 쪽을 선택해도 어떤 가치를 포기해야 하는 상황을 {0}(이)라고 한다.', answers: [['딜레마']] },
+    { text: '인공지능 윤리기준의 3대 기본 원칙 중 첫째는 사람을 수단으로 다루지 않아야 한다는 {0} 원칙이다.', answers: [['인간의 존엄성']] },
+    { text: '반복적이고 규칙적인 직무가 기계로 넘어가는 현상을 {0}(이)라고 하며, 인간과 인공지능이 서로의 강점을 살려 함께 살아가는 방식을 찾는 것을 {1}(이)라고 한다.', answers: [['일자리 대체'], ['공존']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '3단원 단원 평가',
+  sub: '11문항입니다. 5·11번은 위의 서류 심사 모델 사례를 보고 푸세요. 해설에 관련 차시를 적어 두었습니다.',
+  items: [
+    {
+      type: 'mc',
+      q: '최근 인공지능의 성능이 급격히 좋아진 배경으로 <b>가장 적절한</b> 설명은?',
+      choices: [
+        '인공지능이라는 개념이 2020년대에 처음 등장했기 때문',
+        '대량의 데이터, 향상된 컴퓨팅 성능, 발전한 알고리즘이 함께 갖춰졌기 때문',
+        '사람이 규칙을 더 꼼꼼하게 적게 되었기 때문',
+        '컴퓨터의 크기가 작아졌기 때문'
+      ],
+      answer: 1,
+      why: '인공지능의 개념은 1950년대부터 있었습니다. 달라진 것은 아이디어가 아니라 <b>조건</b>입니다. 데이터가 쌓이고 연산 장치가 빨라지고 학습 알고리즘이 개선되면서 성능이 도약했습니다. <b>1차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'ox',
+      q: '인공지능은 산업 분야에만 영향을 주고, 교육이나 행정처럼 사람의 판단이 중요한 영역에는 거의 영향을 주지 않는다.',
+      answer: false,
+      why: '그렇지 않습니다. 인공지능은 <b>기반 기술</b>이므로 의료(영상 판독), 교육(맞춤 학습), 행정(민원 처리와 예측), 문화(창작 보조)까지 폭넓게 영향을 줍니다. 사람의 판단이 중요한 영역에서는 <b>판단을 대체하는 것이 아니라 보조하는 방식</b>으로 쓰이는 경우가 많습니다. <b>1차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'mc',
+      q: '인공지능이 일과 직업에 미치는 영향을 설명한 것으로 <b>가장 정확한</b> 것은?',
+      choices: [
+        '거의 모든 직업이 10년 안에 사라진다',
+        '창의성이 필요한 직업은 어떤 영향도 받지 않는다',
+        '직업이 통째로 사라지기보다 직무의 일부가 기계로 옮겨 가며 사람의 역할이 재배치된다',
+        '인공지능은 새로운 직업을 만들지 못하고 기존 직업만 없앤다'
+      ],
+      answer: 2,
+      why: '변화의 단위는 <b>직업이 아니라 직무</b>입니다. 한 직업 안에서도 반복적·규칙적인 직무가 먼저 영향을 받고, 사람은 판단·소통·책임이 필요한 직무로 옮겨 갑니다. 또 인공지능을 개발·운영·감리하는 새로운 직업도 생깁니다. <b>2차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'match',
+      q: '다음 상황을 가장 관련이 깊은 윤리 쟁점과 짝지으시오.',
+      left: [
+        '과거 합격자 데이터로 학습한 채용 모델이 특정 집단을 계속 탈락시킨다',
+        '스마트 스피커가 대화 내용을 저장해 서버로 보낸다',
+        '유명인이 하지 않은 말을 한 것처럼 만든 영상이 퍼진다',
+        '자율주행 자동차 사고에서 누가 책임을 지는지 정해지지 않았다'
+      ],
+      right: ['편향', '프라이버시 침해', '딥페이크', '책임 소재'],
+      answer: [0, 1, 2, 3],
+      why: '네 쟁점은 원인과 대책이 각각 다릅니다. 편향은 <b>데이터와 설계</b>에서, 프라이버시는 <b>수집과 보관</b>에서, 딥페이크는 <b>생성 기술의 오남용</b>에서, 책임 소재는 <b>제도의 공백</b>에서 발생합니다. <b>4차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'mc',
+      q: '위 사례에서 특정 지역 출신의 합격률이 낮게 나온 <b>가장 근본적인 원인</b>은?',
+      choices: [
+        '모델의 정확도가 92%로 낮았기 때문',
+        '학습 데이터인 과거 합격자 서류에 이미 그 지역이 적게 포함되어 있었기 때문',
+        '지원자들이 서류를 성실하게 쓰지 않았기 때문',
+        '모델이 지역 정보를 아예 사용하지 않았기 때문'
+      ],
+      answer: 1,
+      why: '모델은 <b>학습 데이터의 패턴을 정확하게 재현</b>합니다. 과거에 특정 지역 출신이 적게 합격했다면 모델은 그 경향을 규칙으로 배웁니다. 즉 이것은 성능 문제가 아니라 <b>데이터 편향</b> 문제입니다. 지역 정보를 지우더라도 학교명이나 주소처럼 연관된 속성으로 간접 반영될 수 있습니다. <b>4차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'multi',
+      q: '인간과 인공지능의 공존 방안으로 <b>적절한 것을 모두</b> 고르시오.',
+      choices: [
+        '사람의 삶에 큰 영향을 주는 판단에는 사람이 최종적으로 확인하는 절차를 둔다',
+        '인공지능 관련 법과 지침을 마련해 책임과 절차를 분명히 한다',
+        '모든 사람이 인공지능 기술을 전혀 사용하지 못하도록 제한한다',
+        '학교 교육에서 인공지능 소양을 길러 스스로 판단할 수 있게 한다'
+      ],
+      answer: [0, 1, 3],
+      why: '③은 공존이 아니라 <b>단절</b>입니다. 3차시에서 배운 공존 방안은 제도·기술·교육·개인의 실천이라는 네 층에서 마련됩니다. 비판적 자세는 사용을 금지하는 태도가 아니라, <b>어떻게 쓸지 스스로 정하는 능력</b>입니다. <b>3차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'order',
+      q: '윤리적 딜레마 상황을 분석하는 절차를 올바른 순서로 배열하시오.',
+      items: [
+        '상황에서 확인 가능한 사실과 확인되지 않은 주장을 구분한다',
+        '영향을 받는 이해관계자를 모두 찾아낸다',
+        '이해관계자별로 어떤 가치가 충돌하는지 정리한다',
+        '선택 가능한 대안을 여러 개 만들고 각 대안의 결과를 예측한다',
+        '원칙에 근거해 판단을 정하고, 반대 입장의 반론에 답한다'
+      ],
+      answer: [0, 1, 2, 3, 4],
+      why: '사실 확인 → 이해관계자 → 가치 충돌 → 대안 비교 → 근거를 갖춘 판단 순서입니다. 특히 <b>첫 단계를 건너뛰면</b> 잘못된 정보 위에서 토론하게 되고, <b>마지막 단계의 반론 검토</b>가 없으면 주장은 설득력을 잃습니다. <b>3·4차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'short',
+      q: '대출 거절이나 채용 탈락처럼 사람의 삶에 영향을 주는 판단에서, 인공지능이 왜 그렇게 판단했는지 사람이 이해할 수 있도록 밝힐 수 있어야 한다는 성질을 무엇이라고 하는가?',
+      answer: ['설명 가능성', '설명가능성', '투명성', 'explainability', '설명 가능성(투명성)'],
+      placeholder: '예: ○○ ○○○',
+      why: '<b>설명 가능성</b>입니다. 이유를 설명할 수 없으면 당사자가 <b>이의를 제기하거나 잘못을 바로잡을 수 없습니다</b>. 그래서 어떤 분야에서는 성능이 다소 낮아도 설명 가능한 모델을 선택합니다. <b>4차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'mc',
+      q: '“내가 하고 싶은 일은 사람을 상대하는 일이라 인공지능과 상관없다”고 말하는 친구에게 해 줄 수 있는 <b>가장 적절한</b> 조언은?',
+      choices: [
+        '맞는 말이니 인공지능은 몰라도 된다고 말해 준다',
+        '그 직업도 곧 사라질 것이라고 말해 준다',
+        '그 직업 안의 직무를 나누어 보면 기록 정리나 일정 조정처럼 인공지능이 맡을 부분이 있으니, 사람만 할 수 있는 직무에 집중하면서 도구로서 인공지능을 익히자고 말해 준다',
+        '인공지능은 사람의 감정을 완벽히 이해하므로 결국 대체된다고 말해 준다'
+      ],
+      answer: 2,
+      why: '①과 ②는 모두 <b>지나친 단순화</b>이고, ④는 사실과 다릅니다. 2차시의 핵심은 직업을 <b>직무 단위로 나누어 보는 것</b>입니다. 사람과의 소통이 중심인 직업에서도 문서 작업·일정·기록은 인공지능이 도울 수 있고, 그만큼 사람은 본래의 역할에 더 집중할 수 있습니다. <b>2차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'ox',
+      q: '어떤 인공지능 모델의 테스트 정확도가 매우 높다면, 그 모델은 윤리적으로도 문제가 없다고 볼 수 있다.',
+      answer: false,
+      why: '성능과 윤리는 <b>다른 축</b>입니다. 정확도가 높아도 특정 집단에 불리하게 작동할 수 있고(편향), 판단의 이유를 설명할 수 없을 수 있고(설명 가능성), 개인정보를 과하게 모았을 수도 있습니다(프라이버시). 그래서 성능 평가와 <b>윤리적 검토</b>를 따로 해야 합니다. <b>3·4차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'multi',
+      q: '위 서류 심사 모델의 편향을 줄이기 위해 A 회사가 할 수 있는 조치로 <b>적절한 것을 모두</b> 고르시오.',
+      choices: [
+        '지역·성별 등 집단별로 나누어 합격률과 재현율을 따로 측정해 본다',
+        '학습 데이터를 다시 살펴 빠져 있던 집단의 자료를 보완한다',
+        '전체 정확도가 92%이므로 그대로 사용하되 정확도만 계속 관리한다',
+        '모델의 판단 근거를 지원자에게 설명하고 이의를 제기할 통로를 만든다'
+      ],
+      answer: [0, 1, 3],
+      why: '③이 부적절합니다. 전체 정확도는 <b>편향을 감지하지 못하는 지표</b>입니다. 편향 점검의 기본은 2단원에서 배운 혼동 행렬을 <b>집단마다 따로 그려 보는 것</b>이고, 데이터 보완과 설명·이의 절차가 함께 필요합니다. <b>4차시</b>와 2단원 6차시를 함께 확인해 보세요.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a3c-note',
+  title: '3단원 서·논술형 답안',
+  prompt: '위의 세 문항에 대한 답을 씁니다. 자동 저장되며, <b>복사</b> 버튼으로 한 번에 옮길 수 있습니다.',
+  fields: [
+    { key: 'issue', label: '문항 1에서 고른 지역·학교의 문제 (한 줄로)', type: 'text', placeholder: '예: 학교 앞 하교 시간대 보행 안전' },
+    { key: 'job', label: '문항 2에서 고른 관심 직업', type: 'text', placeholder: '예: 물리치료사' },
+    { key: 'case', label: '문항 3에서 고른 딜레마 상황', type: 'select', options: ['(가) 자율주행 자동차의 사고 회피 판단', '(나) 인공지능 서류 심사의 도입', '(다) 생성형 인공지능 창작물의 저작권'] },
+    { key: 'q1', label: '문항 1 — 개선 방안과 예상되는 부작용·대책', type: 'textarea', rows: 6, placeholder: '문제: … / 인공지능이 맡을 일: … / 필요한 데이터: … / 예상 부작용과 피해 대상: … / 줄이기 위한 대책: …' },
+    { key: 'q2', label: '문항 2 — 직무별 영향 예측과 기를 역량 세 가지', type: 'textarea', rows: 6, placeholder: '직무1: … → 대체/보완/유지 · 이유: … / 직무2: … / 직무3: … / 역량 세 가지와 근거: …' },
+    { key: 'q3', label: '문항 3 — 가치 충돌, 나의 판단과 근거, 반론에 대한 답', type: 'textarea', rows: 7, placeholder: '이해관계자: … / 충돌하는 원칙: (   ) 대 (   ) / 나의 판단: … / 근거: … / 가장 강한 반론: … / 그에 대한 나의 답: …' },
+    { key: 'weak', label: '단원 평가에서 틀린 문항 번호와, 다시 볼 차시', type: 'text', placeholder: '예: 5번·11번 → 4차시' }
+  ]
+});
+
+AI.rubric('#self1', {
+  id: 'a3c-rubric',
+  items: [
+    { std: '12인기03-01', text: '나는 인공지능의 발전이 산업·의료·교육·행정 등을 어떻게 바꾸는지 예를 들어 설명하고, 인공지능으로 해결할 수 있는 사회적 문제를 찾아 분석할 수 있다.' },
+    { std: '12인기03-02', text: '나는 인공지능 때문에 일과 직업이 어떻게 바뀌는지 직무 단위로 설명하고, 그 변화에 맞추어 나의 진로와 준비할 역량을 말할 수 있다.' },
+    { std: '12인기03-03', text: '나는 인공지능의 출력을 근거를 따져 비판적으로 받아들이고, 제도·기술·교육·개인의 실천을 아우르는 공존 방안을 제안할 수 있다.' },
+    { std: '12인기03-04', text: '나는 인공지능 활용 사례와 윤리적 딜레마 상황을 인공지능 윤리기준의 원칙으로 분석하고, 나의 판단과 근거를 밝힐 수 있다.' }
+  ]
+});
+</script>
+</body>
+</html>

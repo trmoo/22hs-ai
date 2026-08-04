@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4차시 눈치껏 찾아가기 — 정보 이용 탐색 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+  /* 이 페이지에서만 쓰는 최소한의 보조 스타일 */
+  .fig { display:flex; justify-content:center; padding:6px 0 2px; overflow-x:auto; }
+  .fig svg { max-width:100%; height:auto; }
+  .fig-cap { text-align:center; font-size:13px; color:var(--ink-3); margin:2px 0 0; }
+  .fnote { font-size:13.5px; color:var(--ink-3); margin:8px 0 0; }
+  .eq { font-family:var(--font-mono); font-size:15px; font-weight:700; color:var(--accent-ink); }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>지난 차시의 미로에서 두 사람은 출구가 어디인지 <b>전혀 몰랐습니다</b>. 그래서 목표와 아무 상관없는 방향까지 부지런히 뒤져야 했지요.</p>
+      <p>이번에는 조건이 하나 달라졌습니다. 미로 천장이 유리로 되어 있어서, 어느 칸에 서 있든 <b>출구가 대략 어느 쪽에 있는지 보인다</b>고 해 봅시다. 벽에 막혀 실제로 몇 걸음이 걸릴지는 모르지만, <b>직선거리는 눈으로 짐작할 수 있습니다</b>.</p>
+      <ul>
+        <li><b>가온</b>은 “출구에 가까워 보이는 칸부터” 무조건 먼저 가 봅니다.</li>
+        <li><b>나리</b>는 “여기까지 <b>이미 걸어온 걸음 수</b>”와 “출구까지 <b>남았을 것 같은 걸음 수</b>”를 <b>더해서</b> 가장 작은 칸부터 가 봅니다.</li>
+      </ul>
+      <p>둘 중 누가 더 빨리 도착할까요? 그리고 누가 더 <b>짧은 길</b>로 도착할까요? 두 질문의 답은 서로 다릅니다.</p>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 가온의 방법에 어떤 함정이 있을까?</summary>
+        <div class="more-body">
+          출구에 가까워 보이는 칸이 <b>막다른 골목 입구</b>일 수도 있습니다. 가온은 “지금까지 얼마나 멀리 돌아왔는지”를 전혀 계산하지 않기 때문에, 조금 가까워 보이는 쪽으로 계속 끌려가다가 크게 돌아가는 길을 답으로 내놓을 수 있습니다. 나리의 방법이 바로 이 차시의 주인공 <b>A* 알고리즘</b>입니다.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 정보 이용 탐색 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>정보를 쓰면 탐색이 달라진다</h2></div>
+
+    <p>지난 차시의 너비 우선 탐색과 깊이 우선 탐색은 목표가 어디 있는지에 대한 정보를 전혀 쓰지 않는 <span class="term">맹목적 탐색</span>이었습니다. 그래서 상태 공간이 조금만 커져도 확인해야 할 상태 수가 폭발적으로 늘어납니다.</p>
+
+    <p>이미 알고 있는 경험이나 지식을 탐색에 활용하여 목표 상태를 찾는 방법을 <b class="blank" data-a="정보 이용 탐색|정보이용 탐색|휴리스틱 탐색" data-hint="맹목적 탐색의 반대말 · 다섯 글자">정보 이용 탐색</b>이라고 합니다. 여기서 쓰는 “경험적 지식”을 <b class="blank" data-a="휴리스틱|heuristic|휴리스틱값" data-hint="heuristic의 우리말 음역">휴리스틱</b>이라고 부릅니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념</div>
+      <p><b>휴리스틱</b>은 문제를 해결할 때 쓰는 경험적 지식이다. 어떤 상태 <span class="mono">n</span>에서 목표 상태까지 <b>남은 비용을 추정한 값</b>을 그 상태의 <b>휴리스틱값</b>이라 하고, 이를 계산하는 함수를 <b>휴리스틱 함수 h(n)</b>이라고 한다.</p>
+    </div>
+
+    <p>휴리스틱값은 <b>정확한 답이 아니라 추측</b>입니다. 벽이 어디 있는지 모른 채 “직선거리로 12칸쯤 남았네”라고 어림하는 것이지요. 실제로는 벽을 돌아가야 하므로 15칸이 걸릴 수도 있습니다. 그래서 휴리스틱값은 사람마다 다르게 정의할 수 있고, <b>어떻게 정의하느냐가 탐색 성능을 좌우</b>합니다.</p>
+
+    <h3 class="sub-head">좋은 휴리스틱의 조건</h3>
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">🎯</span>
+        <h4>① 실제 비용을 넘지 않는다</h4>
+        <p>추정값이 실제 남은 비용보다 <b>크지 않아야</b> 합니다. 즉 절대 <b class="blank" data-a="과대평가|과대 평가|과대추정" data-hint="실제보다 크게 어림잡는 일">과대평가</b>하지 않아야 합니다. 이 조건을 지키면 A* 알고리즘이 최적 경로를 보장합니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">📈</span>
+        <h4>② 그러면서도 실제에 가깝다</h4>
+        <p>항상 0을 내놓는 휴리스틱도 조건 ①은 지킵니다. 하지만 아무 정보도 주지 않으므로 쓸모가 없습니다. 실제 비용에 <b>가까울수록</b> 확인하는 상태 수가 줄어듭니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">⚡</span>
+        <h4>③ 계산이 빠르다</h4>
+        <p>휴리스틱값은 상태마다 계산합니다. 한 번 계산하는 데 시간이 오래 걸리면, 탐색 횟수를 줄여서 얻은 이득이 사라집니다.</p>
+      </div>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 값이 클수록 좋은 걸까, 작을수록 좋은 걸까?</div>
+      <p>교과서마다 표기가 다릅니다. “목표와 일치하는 칸 수”처럼 <b>클수록 좋은</b> 평가 함수를 쓰는 경우도 있고, “남은 거리”처럼 <b>작을수록 좋은</b> 평가 함수를 쓰는 경우도 있습니다. 이 차시에서는 <b>남은 비용을 추정</b>하므로 <b>값이 작을수록 목표에 가깝다</b>고 봅니다. 중요한 것은 숫자의 방향이 아니라 “<b>어떤 기준으로 다음 상태를 고르는가</b>”입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. 평가 함수와 두 알고리즘 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>평가 함수 — 다음에 어느 칸을 열어 볼까</h2></div>
+
+    <p>탐색은 결국 “후보 상태 중 <b>어느 것을 먼저 확인할지</b>”를 정하는 일입니다. 이 우선순위를 계산하는 함수를 <b class="blank" data-a="평가 함수|평가함수" data-hint="f(n)으로 쓰는 함수의 이름">평가 함수</b> <span class="mono">f(n)</span>이라고 합니다.</p>
+
+    <div class="fig">
+      <svg viewBox="0 0 620 190" role="img" aria-label="f(n)=g(n)+h(n) 개념도">
+        <defs>
+          <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L7,3 L0,6 z" fill="var(--ink-3)"/>
+          </marker>
+        </defs>
+        <!-- 실제 지나온 경로 -->
+        <path d="M70,120 C120,60 160,150 210,95 C250,55 275,120 300,95" fill="none" stroke="var(--accent)" stroke-width="3" marker-end="url(#ar)"/>
+        <!-- 추정 경로 -->
+        <path d="M330,95 L540,95" fill="none" stroke="var(--ink-3)" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#ar)"/>
+        <circle cx="60" cy="120" r="21" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="60" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent-ink)">시작</text>
+        <circle cx="315" cy="95" r="21" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2"/>
+        <text x="315" y="100" text-anchor="middle" font-size="14" font-weight="700" fill="var(--warn)">n</text>
+        <circle cx="558" cy="95" r="21" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="2"/>
+        <text x="558" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ok)">목표</text>
+        <text x="150" y="42" font-size="14" font-weight="700" fill="var(--accent)">g(n)</text>
+        <text x="150" y="60" font-size="12" fill="var(--ink-3)">시작부터 n까지 이미 쓴 실제 비용</text>
+        <text x="400" y="70" font-size="14" font-weight="700" fill="var(--ink-3)">h(n)</text>
+        <text x="368" y="132" font-size="12" fill="var(--ink-3)">n부터 목표까지 남은 비용의 추정값</text>
+        <text x="310" y="175" text-anchor="middle" font-size="15" font-weight="800" fill="var(--ink)">f(n) = g(n) + h(n)</text>
+      </svg>
+    </div>
+    <p class="fig-cap">그림 1. 평가 함수의 두 부분 — 실선은 <b>이미 걸어온 길(사실)</b>, 점선은 <b>남았다고 짐작한 길(추정)</b></p>
+
+    <p>여기서 <b class="blank" data-a="g(n)|g|gn" data-hint="시작부터 현재까지의 '실제' 비용을 나타내는 기호">g(n)</b>은 시작 상태에서 상태 <span class="mono">n</span>까지 <b>실제로 지나온 비용</b>이고, <b class="blank" data-a="h(n)|h|hn" data-hint="남은 비용의 '추정값'을 나타내는 기호">h(n)</b>은 상태 <span class="mono">n</span>에서 목표까지 <b>남았다고 추정한 비용</b>입니다. 무엇을 평가 함수로 쓰는지에 따라 알고리즘의 이름이 달라집니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>평가 함수에 따른 탐색 알고리즘의 분류</caption>
+        <thead><tr><th>평가 함수</th><th>알고리즘 이름</th><th>성격</th><th>최적 경로</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">쓰지 않음</td><td>너비 우선 탐색</td><td>맹목적 · 가까운 층부터 전부</td><td class="good">보장 ○</td></tr>
+          <tr><td class="mono">f(n) = g(n)</td><td>균일 비용 탐색</td><td>싸게 온 순서대로</td><td class="good">보장 ○</td></tr>
+          <tr><td class="mono">f(n) = h(n)</td><td>최상 우선 탐색</td><td>목표에 가까워 <b>보이는</b> 순서대로</td><td class="bad">보장 ×</td></tr>
+          <tr><td class="mono">f(n) = g(n) + h(n)</td><td>A* 알고리즘</td><td>온 비용과 남은 추정을 <b>함께</b></td><td class="good">보장 ○ (조건부)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub-head">최상 우선 탐색 — 빠르지만 성급하다</h3>
+    <p><b class="blank" data-a="최상 우선 탐색|최상우선 탐색|탐욕적 최상 우선 탐색" data-hint="h(n)만 보고 고르는 탐색 · 여섯 글자">최상 우선 탐색</b>은 후보 중에서 <b>h(n)이 가장 작은</b> 상태를 고릅니다. 목표에 가까워 보이는 쪽으로만 달려가므로 확인하는 상태 수가 매우 적고 빠릅니다. 하지만 <b>여기까지 얼마나 돌아왔는지를 아예 무시</b>하기 때문에, 벽에 막혀 크게 우회한 길을 답으로 내놓을 수 있습니다. 그래서 <b>최단 경로를 보장하지 않습니다</b>.</p>
+
+    <h3 class="sub-head">A* 알고리즘 — 사실과 추정을 함께 본다</h3>
+    <p><b class="blank" data-a="A*|A* 알고리즘|에이스타|A스타|A* 탐색" data-hint="별표가 붙은 두 글자 기호">A*</b> 알고리즘은 <span class="eq">f(n) = g(n) + h(n)</span>이 가장 작은 상태를 고릅니다. <span class="mono">g(n)</span>이 들어 있으므로 “많이 돌아온 길”에는 자동으로 벌점이 붙고, <span class="mono">h(n)</span>이 들어 있으므로 목표와 반대 방향은 잘 열어 보지 않습니다. 두 정보를 함께 쓰는 덕분에 <b>빠르면서도 최적</b>일 수 있습니다.</p>
+
+    <div class="box box-ok">
+      <div class="box-label">✅ A*가 최적 경로를 보장하는 조건</div>
+      <p>모든 상태에서 <b>h(n) ≤ (실제 남은 최소 비용)</b>이면, 즉 휴리스틱이 실제 비용을 <b>과대평가하지 않으면</b> A*가 찾은 경로는 항상 <b>최적 경로</b>입니다. 반대로 h(n)을 실제보다 크게 잡으면 A*는 더 빨라지지만 최적을 놓칠 수 있습니다.</p>
+      <p class="fnote">왜 그럴까요? f(n)은 “이 상태를 거쳐 가는 전체 비용의 <b>낙관적 예상치</b>”입니다. h가 과대평가하지 않으면 f는 실제 전체 비용보다 크지 않으므로, 진짜 최적 경로 위의 상태들은 <b>다른 후보보다 f가 작게 유지</b>되어 결국 먼저 열립니다.</p>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 h(n) = 0으로 두면?</div>
+      <p>휴리스틱을 무조건 0으로 두면 f(n) = g(n)이 되어, A*는 “가까운 것부터 차례로” 꺼내게 됩니다. 이동 비용이 모두 같은 격자에서는 이것이 <b class="blank" data-a="너비 우선 탐색|BFS|너비우선 탐색" data-hint="3차시에서 배운 큐를 쓰는 맹목적 탐색">너비 우선 탐색</b>과 사실상 같습니다. 즉 <b>A*는 맹목적 탐색을 특별한 경우로 포함하는 더 넓은 알고리즘</b>입니다. 시뮬레이터에서 휴리스틱을 <span class="mono">h = 0</span>으로 바꿔 직접 확인해 보세요.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. 거리 재는 법 · 열린 목록과 닫힌 목록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>거리는 어떻게 재고, 후보는 어디에 담을까</h2></div>
+
+    <h3 class="sub-head">맨해튼 거리와 유클리드 거리</h3>
+    <p>격자에서 위·아래·왼쪽·오른쪽으로만 움직일 수 있다면, 두 칸 사이의 거리는 가로 차이와 세로 차이를 <b>더한 값</b>입니다. 이를 <b class="blank" data-a="맨해튼 거리|맨해튼|맨하탄 거리" data-hint="바둑판처럼 구획된 미국 도시의 이름">맨해튼 거리</b>라고 합니다. 반면 자를 대고 직선으로 잰 거리는 <b class="blank" data-a="유클리드 거리|유클리드|직선거리" data-hint="기하학의 아버지로 불리는 수학자의 이름">유클리드 거리</b>입니다.</p>
+
+    <div class="fig">
+      <svg viewBox="0 0 520 210" role="img" aria-label="맨해튼 거리와 유클리드 거리 비교">
+        <g stroke="var(--line)" stroke-width="1">
+          <!-- 격자 -->
+          <path d="M40,20 H400 M40,52 H400 M40,84 H400 M40,116 H400 M40,148 H400 M40,180 H400"/>
+          <path d="M40,20 V180 M72,20 V180 M104,20 V180 M136,20 V180 M168,20 V180 M200,20 V180 M232,20 V180 M264,20 V180 M296,20 V180 M328,20 V180 M360,20 V180 M392,20 V180"/>
+        </g>
+        <!-- 맨해튼 경로 -->
+        <path d="M56,164 H184 V100 H280 V36" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linejoin="round"/>
+        <!-- 유클리드 직선 -->
+        <path d="M56,164 L280,36" fill="none" stroke="var(--warn)" stroke-width="3" stroke-dasharray="8 5"/>
+        <circle cx="56" cy="164" r="9" fill="var(--accent)"/>
+        <circle cx="280" cy="36" r="9" fill="var(--ok)"/>
+        <text x="56" y="198" text-anchor="middle" font-size="12" fill="var(--ink-3)">시작</text>
+        <text x="290" y="20" font-size="12" fill="var(--ink-3)">목표</text>
+        <text x="412" y="80" font-size="13" font-weight="700" fill="var(--accent)">맨해튼</text>
+        <text x="412" y="98" font-size="12" fill="var(--ink-3)">|Δx| + |Δy|</text>
+        <text x="412" y="116" font-size="12" fill="var(--ink-3)">= 7 + 4 = 11</text>
+        <text x="412" y="146" font-size="13" font-weight="700" fill="var(--warn)">유클리드</text>
+        <text x="412" y="164" font-size="12" fill="var(--ink-3)">√(Δx²+Δy²)</text>
+        <text x="412" y="182" font-size="12" fill="var(--ink-3)">≈ 8.06</text>
+      </svg>
+    </div>
+    <p class="fig-cap">그림 2. 같은 두 칸 사이의 거리 — 파란 선은 맨해튼 거리(11), 노란 점선은 유클리드 거리(약 8.06)</p>
+
+    <p>가로·세로로만 움직이는 격자에서는 <b>맨해튼 거리가 유클리드 거리보다 실제 이동 횟수에 더 가깝습니다</b>. 유클리드 거리는 대각선으로 날아가는 것을 가정하므로 언제나 맨해튼 거리보다 작거나 같고, 그만큼 <b>더 느슨한 추정</b>이 됩니다. 둘 다 실제 비용을 과대평가하지 않으므로 A*의 최적성은 지켜지지만, 맨해튼 쪽이 <b>더 적은 칸을 확인</b>합니다.</p>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 대각선 이동이 가능하다면?</div>
+      <p>대각선으로도 한 걸음에 갈 수 있는 격자에서는 맨해튼 거리가 실제 비용을 <b>과대평가</b>할 수 있습니다. 예를 들어 대각선 한 칸은 실제로 1걸음인데 맨해튼 거리는 2로 계산합니다. 이때는 최적성이 깨지므로 유클리드 거리나 다른 거리를 써야 합니다. <b>휴리스틱은 문제의 이동 규칙에 맞게 골라야 합니다.</b></p>
+    </div>
+
+    <h3 class="sub-head">열린 목록과 닫힌 목록</h3>
+    <p>정보 이용 탐색은 후보를 두 개의 목록으로 관리합니다. 아직 확인하지 않은 후보 상태를 담는 곳이 <b class="blank" data-a="열린 목록|OPEN 리스트|open|개방 목록|오픈 리스트" data-hint="영어로 OPEN 리스트라고 부른다">열린 목록</b>이고, 확인이 끝난 상태를 담는 곳이 <b class="blank" data-a="닫힌 목록|CLOSED 리스트|closed|폐쇄 목록|클로즈드 리스트" data-hint="영어로 CLOSED 리스트라고 부른다">닫힌 목록</b>입니다.</p>
+
+    <ol>
+      <li>시작 상태를 <b>열린 목록</b>에 넣는다.</li>
+      <li>열린 목록에서 평가 함숫값이 <b>가장 작은</b> 상태를 꺼낸다. (동점이면 h가 작은 쪽)</li>
+      <li>꺼낸 상태를 <b>닫힌 목록</b>에 넣는다. 그 상태가 목표면 종료하고 경로를 되짚어 만든다.</li>
+      <li>이웃 상태의 g를 계산해, 처음 보는 상태이거나 <b>더 싸게 오는 길</b>을 찾았으면 갱신하여 열린 목록에 넣는다.</li>
+      <li>열린 목록이 빌 때까지 2~4를 반복한다. 비었는데도 목표를 못 찾았다면 <b>경로가 없다</b>.</li>
+    </ol>
+
+    <p class="fnote">4단계에서 “더 싸게 오는 길을 찾았으면 갱신”하는 부분이 A*의 중요한 장치입니다. 최상 우선 탐색은 g를 보지 않으므로 이 갱신을 하지 않고, 처음 발견한 길을 그대로 씁니다. 바로 이 차이가 최적성의 유무를 만듭니다.</p>
+  </section>
+
+  <!-- ============ 4. 시뮬레이터 1 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>A* 길찾기 시뮬레이터</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim1"></div>
+  </section>
+
+  <!-- ============ 5. 시뮬레이터 2 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>세 알고리즘 한판 비교</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim2"></div>
+  </section>
+
+  <!-- ============ 6. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 7. 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 8. 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>활동 기록</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 8-퍼즐의 휴리스틱 — 어떤 것이 더 좋을까</summary>
+      <div class="more-body">
+        <p>3×3 판에 1~8이 흩어져 있는 <b>8-퍼즐</b>에서도 휴리스틱을 정의할 수 있습니다. 대표적으로 두 가지가 있습니다.</p>
+        <ul>
+          <li><b>h₁ — 제자리에 없는 타일 수</b>: 목표 위치와 일치하지 않는 타일의 개수(빈칸 제외). 계산이 아주 간단합니다.</li>
+          <li><b>h₂ — 타일별 맨해튼 거리의 합</b>: 각 타일이 제 위치까지 가야 하는 칸 수를 모두 더합니다.</li>
+        </ul>
+        <p>타일 하나를 옮기려면 최소 한 번은 움직여야 하므로 둘 다 실제 비용을 과대평가하지 않습니다. 그런데 언제나 <b>h₂ ≥ h₁</b>입니다. 제자리에 없는 타일은 맨해튼 거리가 최소 1이니까요. 더 큰 쪽이 <b>실제 비용에 더 가까운 추정</b>이므로, h₂를 쓰면 A*가 확인하는 상태 수가 크게 줄어듭니다.</p>
+        <p>이처럼 두 휴리스틱이 모두 과대평가하지 않을 때, <b>더 큰 값을 주는 휴리스틱이 더 좋은 휴리스틱</b>입니다. 시뮬레이터에서 맨해튼(큰 값)과 유클리드(작은 값)를 번갈아 골라 보면 같은 원리를 확인할 수 있습니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">코드</span> 파이썬으로 쓴 A* — 3차시 코드에서 무엇이 바뀌었나</summary>
+      <div class="more-body">
+        <p>3차시의 탐색 뼈대에서 “꺼내는 기준”만 <span class="mono">f = g + h</span>로 바꾸면 A*가 됩니다.</p>
+        <pre style="margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;white-space:pre-wrap">import heapq
+
+def astar(start, goal, neighbors, cost, h):
+    open_list = [(h(start), 0, start)]   # (f, g, 상태) 우선순위 큐
+    g = {start: 0}
+    came = {}
+    closed = set()
+
+    while open_list:
+        f, gn, node = heapq.heappop(open_list)   # f 가 가장 작은 것
+        if node in closed:
+            continue
+        closed.add(node)
+        if node == goal:
+            break
+
+        for nb in neighbors(node):
+            ng = gn + cost(node, nb)             # 이웃까지의 새 g
+            if nb not in g or ng &lt; g[nb]:       # 더 싸게 오는 길이면 갱신
+                g[nb] = ng
+                came[nb] = node
+                heapq.heappush(open_list, (ng + h(nb), ng, nb))
+    return g, came</pre>
+        <p style="margin-top:12px">여기서 <span class="mono">h</span>를 <span class="mono">lambda n: 0</span>으로 주면 균일 비용 탐색이 되고, <span class="mono">f</span> 자리에 <span class="mono">h(nb)</span>만 넣으면 최상 우선 탐색이 됩니다. <b>세 알고리즘이 사실 한 가족</b>이라는 뜻입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> 우리 주변의 A* — 내비게이션과 게임</summary>
+      <div class="more-body">
+        <p>지도 앱이 경로를 찾을 때, 전국의 모든 도로를 다 뒤지지는 않습니다. 목적지 방향의 도로부터 우선 살펴보는 정보 이용 탐색을 쓰기 때문입니다. 이때 휴리스틱으로는 <b>목적지까지의 직선거리 ÷ 최고 제한 속도</b> 같은 값을 씁니다. 실제 도로는 직선보다 길고 제한 속도보다 느리므로, 이 값은 실제 소요 시간을 <b>과대평가하지 않습니다</b>.</p>
+        <p>게임 속 캐릭터가 장애물을 피해 클릭한 지점으로 걸어가는 것도 대부분 A*입니다. 지형을 격자나 그래프로 나누고, 지형별로 이동 비용을 다르게 주면(늪 3, 길 1) 자연스럽게 “늪을 피해 길로 돌아가는” 행동이 나타납니다. 이것이 <b>g(n)에 비용을 넣는다</b>는 말의 실제 의미입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 다음 차시로 — 탐색으로는 풀 수 없는 문제</summary>
+      <div class="more-body">
+        지금까지는 “좋은 길을 찾는” 문제를 다뤘습니다. 그런데 “<b>새의 특징을 가졌으니 이 동물은 새다</b>”처럼, <b>알고 있는 사실에서 새로운 사실을 이끌어 내는</b> 일은 길찾기가 아닙니다. 다음 차시에서는 지식을 규칙과 사실로 표현하고, 추론으로 새 지식을 만들어 내는 <b>규칙 기반 시스템</b>을 직접 돌려 봅니다.
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 1, lesson: 4,
+  title: '눈치껏 찾아가기',
+  sub: '정보 이용 탐색 — 최상 우선과 A*',
+  lead: '목표가 어느 쪽에 있는지 <b>어림잡을 수 있다면</b> 탐색은 어떻게 달라질까요? 휴리스틱 h(n)과 실제 비용 g(n)을 더한 평가 함수 <b>f(n)=g(n)+h(n)</b> 하나로, 맹목적 탐색이 <b>A* 알고리즘</b>이 됩니다.',
+  standards: ['12인기01-03', '12인기01-04'],
+  keywords: ['휴리스틱', '최상 우선 탐색', 'A* 알고리즘', '평가 함수', '맨해튼 거리'],
+  goals: [
+    '맹목적 탐색과 정보 이용 탐색의 차이를 휴리스틱의 사용 여부로 설명할 수 있다.',
+    '평가 함수 <span class="mono">f(n)=g(n)+h(n)</span>의 각 항이 뜻하는 바를 말하고, 최상 우선 탐색과 A* 알고리즘을 구별할 수 있다.',
+    '휴리스틱이 실제 비용을 과대평가하지 않을 때 A*가 최적 경로를 보장하는 까닭을 설명할 수 있다.',
+    '길찾기 문제에 정보 이용 탐색 알고리즘을 적용하고, 확인한 칸 수와 경로 길이를 근거로 알고리즘을 비교·평가할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 시뮬레이터 1: A* 길찾기 ===================== -->
+<script>
+(function () {
+  const COLS = 17, ROWS = 11, CELL = 30;
+  const W = COLS * CELL, H = ROWS * CELL;
+  const START = 0, GOAL = COLS * ROWS - 1;
+
+  const idx = (x, y) => y * COLS + x;
+  const XY = i => ({ x: i % COLS, y: Math.floor(i / COLS) });
+
+  let walls = new Set();
+  let seed = 20260804;
+  let alg = 'astar';      // 'bfs' | 'best' | 'astar'
+  let hKind = 'manhattan';// 'manhattan' | 'euclid' | 'zero'
+  let showMode = 'f';     // 'f' | 'ghf' | 'none'
+
+  const body = AI.sim.panel('#sim1', {
+    title: 'A* 길찾기 시뮬레이터 — f(n) = g(n) + h(n)',
+    tag: '핵심 활동',
+    desc: '알고리즘과 휴리스틱을 고르고 <b>한 단계</b>씩 눌러 보세요. 각 칸에 적힌 숫자가 g·h·f 값입니다. ' +
+          '미로 위에서 <b>마우스를 누른 채 끌면</b> 벽을 그리거나 지울 수 있습니다(출발·목표 칸은 보호됩니다). ' +
+          '같은 미로에서 알고리즘만 바꿔 보며 <b>확인한 칸 수</b>와 <b>경로 길이</b>가 어떻게 달라지는지 관찰하세요.'
+  });
+
+  /* ---------- 미로 ---------- */
+  function neighbors(i) {
+    const { x, y } = XY(i), out = [];
+    const cand = [[x, y - 1], [x + 1, y], [x, y + 1], [x - 1, y]];
+    for (const c of cand) {
+      const nx = c[0], ny = c[1];
+      if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) continue;
+      const j = idx(nx, ny);
+      if (walls.has(j)) continue;
+      out.push(j);
+    }
+    return out;
+  }
+
+  /** 순수 BFS로 최적 비용 계산 (정답 비교용) */
+  function optimalCost() {
+    if (walls.has(START) || walls.has(GOAL)) return null;
+    const dist = new Map([[START, 0]]), q = [START];
+    while (q.length) {
+      const n = q.shift();
+      if (n === GOAL) return dist.get(n);
+      for (const nb of neighbors(n)) if (!dist.has(nb)) { dist.set(nb, dist.get(n) + 1); q.push(nb); }
+    }
+    return null;
+  }
+
+  function genMaze(s) {
+    const r = AI.sim.rng(s);
+    for (let attempt = 0; attempt < 400; attempt++) {
+      walls = new Set();
+      for (let i = 0; i < COLS * ROWS; i++) {
+        if (i === START || i === GOAL) continue;
+        if (r() < 0.26) walls.add(i);
+      }
+      if (optimalCost() !== null) return;
+    }
+    walls = new Set();
+  }
+
+  /* ---------- 휴리스틱 ---------- */
+  function hOf(i) {
+    if (hKind === 'zero') return 0;
+    const a = XY(i), b = XY(GOAL);
+    const dx = Math.abs(a.x - b.x), dy = Math.abs(a.y - b.y);
+    if (hKind === 'euclid') return Math.sqrt(dx * dx + dy * dy);
+    return dx + dy;
+  }
+  const isInt = () => hKind !== 'euclid';
+  const num = v => isInt() ? String(Math.round(v)) : (Math.round(v * 10) / 10).toFixed(1);
+
+  /* ---------- 탐색 상태 ---------- */
+  let S = null;
+  function newSearch() {
+    return {
+      open: [START], closed: new Set(), g: new Map([[START, 0]]), came: new Map(),
+      cur: null, done: false, found: false, path: [], expanded: 0, openMax: 1
+    };
+  }
+
+  /** 열린 목록에서 다음에 꺼낼 항목의 위치를 알고리즘 규칙대로 고른다 */
+  function pickIndex() {
+    if (alg === 'bfs') return 0;                       // 큐(선입선출) — 맹목적
+    let best = 0;
+    for (let k = 1; k < S.open.length; k++) {
+      const a = S.open[k], b = S.open[best];
+      if (alg === 'best') {                            // 최상 우선 — h 만 비교
+        if (hOf(a) < hOf(b)) best = k;
+      } else {                                         // A* — f 최소, 동점이면 h 최소
+        const fa = S.g.get(a) + hOf(a), fb = S.g.get(b) + hOf(b);
+        if (fa < fb - 1e-9 || (Math.abs(fa - fb) < 1e-9 && hOf(a) < hOf(b))) best = k;
+      }
+    }
+    return best;
+  }
+
+  function stepSearch() {
+    if (S.done) return false;
+    if (!S.open.length) {
+      S.done = true; S.cur = null;
+      log.add('열린 목록이 비었습니다 — <b>목표에 갈 수 있는 경로가 없습니다</b>', true);
+      return false;
+    }
+    const node = S.open.splice(pickIndex(), 1)[0];
+    if (S.closed.has(node)) return true;               // 이미 확인이 끝난 칸은 버린다
+    S.closed.add(node);
+    S.cur = node;
+    S.expanded++;
+
+    const p = XY(node), gn = S.g.get(node), hn = hOf(node);
+    log.add('(' + p.x + ',' + p.y + ') 꺼냄 · g=' + num(gn) + ' h=' + num(hn) + ' f=' + num(gn + hn));
+
+    if (node === GOAL) {
+      S.done = true; S.found = true;
+      let n = node; const path = [n];
+      while (S.came.has(n)) { n = S.came.get(n); path.push(n); }
+      S.path = path.reverse();
+      log.add('🎯 <b>목표 도달!</b> 경로 비용 ' + gn + ' · 확인한 칸 ' + S.expanded, true);
+      return false;
+    }
+
+    for (const nb of neighbors(node)) {
+      if (S.closed.has(nb)) continue;
+      const ng = gn + 1;                               // 격자의 한 칸 이동 비용 = 1
+      if (!S.g.has(nb)) {                              // 처음 보는 칸 → 열린 목록에 추가
+        S.g.set(nb, ng); S.came.set(nb, node); S.open.push(nb);
+      } else if (alg === 'astar' && ng < S.g.get(nb)) { // 더 싸게 오는 길 발견 → 갱신
+        S.g.set(nb, ng); S.came.set(nb, node); S.open.push(nb);
+      }
+    }
+    if (S.open.length > S.openMax) S.openMax = S.open.length;
+    return true;
+  }
+
+  /* ---------- 화면 ---------- */
+  const cv = AI.sim.canvas(W, H);
+  const stats = AI.ui.stats([
+    { key: 'v', label: '확인한 칸' },
+    { key: 'o', label: '열린 목록' },
+    { key: 'p', label: '경로 길이' },
+    { key: 'c', label: '경로 비용' }
+  ]);
+  const log = AI.ui.log();
+
+  body.appendChild(cv.wrap);
+  body.appendChild(stats.el);
+  body.appendChild(AI.ui.legend([
+    { color: 'var(--surface)', label: '아직 안 봄' },
+    { color: '#8b93a5', label: '벽' },
+    { color: '#c3cdf7', label: '열린 목록(후보)' },
+    { color: '#e4e9fb', label: '닫힌 목록(확인 끝)' },
+    { color: 'var(--warn)', label: '지금 꺼낸 칸' },
+    { color: 'var(--ok)', label: '찾은 경로' }
+  ]));
+
+  function draw() {
+    const C = AI.sim.colors(), ctx = cv.ctx;
+    cv.clear(C.bg);
+    const openSet = new Set(S.open);
+    const pathSet = new Set(S.path);
+    const fam = getComputedStyle(document.body).fontFamily;
+
+    for (let i = 0; i < COLS * ROWS; i++) {
+      const p = XY(i), px = p.x * CELL, py = p.y * CELL;
+      let fill = C.bg;
+      if (walls.has(i)) fill = C.dark ? '#4a5162' : '#8b93a5';
+      else if (pathSet.has(i)) fill = C.dark ? '#1f4a3a' : '#cdeee0';
+      else if (S.cur === i) fill = C.dark ? '#5d4823' : '#fbe6bd';
+      else if (S.closed.has(i)) fill = C.dark ? '#232a44' : '#e4e9fb';
+      else if (openSet.has(i)) fill = C.dark ? '#33406e' : '#c3cdf7';
+      ctx.fillStyle = fill;
+      ctx.fillRect(px, py, CELL, CELL);
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      ctx.strokeRect(px + .5, py + .5, CELL - 1, CELL - 1);
+
+      // g / h / f 숫자
+      if (showMode !== 'none' && !walls.has(i) && S.g.has(i) && i !== START && i !== GOAL) {
+        const gv = S.g.get(i), hv = hOf(i);
+        ctx.textBaseline = 'middle';
+        if (showMode === 'ghf') {
+          ctx.fillStyle = C.ink3;
+          ctx.font = '600 8px ' + fam;
+          ctx.textAlign = 'left';  ctx.fillText(num(gv), px + 2.5, py + 6);
+          ctx.textAlign = 'right'; ctx.fillText(num(hv), px + CELL - 2.5, py + 6);
+          ctx.fillStyle = pathSet.has(i) ? (C.dark ? '#9ae8c6' : '#0a6b45') : C.ink;
+          ctx.font = '800 11px ' + fam;
+          ctx.textAlign = 'center'; ctx.fillText(num(gv + hv), px + CELL / 2, py + CELL / 2 + 5);
+        } else {
+          ctx.fillStyle = pathSet.has(i) ? (C.dark ? '#9ae8c6' : '#0a6b45') : C.ink;
+          ctx.font = '700 11px ' + fam;
+          ctx.textAlign = 'center'; ctx.fillText(num(gv + hv), px + CELL / 2, py + CELL / 2 + 1);
+        }
+      }
+    }
+
+    function tag(i, txt, col) {
+      const p = XY(i);
+      ctx.fillStyle = col;
+      ctx.fillRect(p.x * CELL + 2, p.y * CELL + 2, CELL - 4, CELL - 4);
+      ctx.fillStyle = C.dark ? '#12151c' : '#ffffff';
+      ctx.font = '800 11px ' + fam;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(txt, p.x * CELL + CELL / 2, p.y * CELL + CELL / 2 + 1);
+    }
+    tag(START, '출발', C.a);
+    tag(GOAL, '목표', C.dark ? '#e0885f' : '#b3541e');
+
+    stats.set('v', S.expanded);
+    stats.set('o', S.open.length);
+    stats.set('p', S.found ? S.path.length + '칸' : (S.done ? '없음' : '–'));
+    stats.set('c', S.found ? S.g.get(GOAL) : (S.done ? '없음' : '–'));
+  }
+
+  /* ---------- 결과 해설 ---------- */
+  const verdict = AI.h('div', { class: 'box box-info', style: { display: 'none', marginTop: '14px' } });
+  const ALG_NAME = { bfs: '너비 우선 탐색', best: '최상 우선 탐색', astar: 'A* 알고리즘' };
+  const H_NAME = { manhattan: '맨해튼 거리', euclid: '유클리드 거리', zero: 'h = 0' };
+
+  function finish() {
+    if (!S.done) return;
+    const opt = optimalCost();
+    verdict.style.display = '';
+    if (!S.found) {
+      verdict.innerHTML = '<div class="box-label">📊 결과</div><p>벽에 완전히 막혀 <b>목표에 도달할 수 없었습니다</b>. 열린 목록이 비면 탐색은 “경로 없음”으로 끝납니다. 벽을 조금 지우고 다시 실행해 보세요.</p>';
+      return;
+    }
+    const cost = S.g.get(GOAL);
+    const optTxt = (opt !== null && cost === opt)
+      ? '이 경로는 <b class="mono">최적 경로</b>입니다(최소 비용 ' + opt + ').'
+      : '이 경로의 비용은 ' + cost + '로, 최적 경로(' + opt + ')보다 <b>' + (cost - opt) + '만큼 깁니다</b>.';
+    let msg = '<div class="box-label">📊 결과 — ' + ALG_NAME[alg] + ' · ' + H_NAME[hKind] + '</div>';
+    msg += '<p>확인한 칸 <b>' + S.expanded + '개</b>, 경로 길이 <b>' + S.path.length + '칸</b>, 경로 비용 <b>' + cost + '</b>. ' + optTxt + '</p>';
+    if (alg === 'best' && opt !== null && cost > opt) {
+      msg += '<p>최상 우선 탐색은 <b>h(n)만</b> 보고 목표에 가까워 보이는 칸으로만 달려갑니다. 지금까지 얼마나 돌아왔는지(g)를 세지 않으므로, 이렇게 <b>최적이 아닌 경로</b>를 답으로 내놓을 수 있습니다.</p>';
+    } else if (alg === 'best') {
+      msg += '<p>이번에는 최상 우선 탐색이 우연히 최적 경로를 찾았습니다. 하지만 이는 <b>운이 좋았을 뿐</b> 보장이 아닙니다. 벽을 ㄷ자 모양으로 그려 함정을 만들어 보세요.</p>';
+    }
+    if (alg === 'astar') {
+      msg += '<p>A*는 g와 h를 함께 보므로, 휴리스틱이 실제 비용을 과대평가하지 않는 한 <b>항상 최적 경로</b>를 찾습니다. 같은 미로에서 휴리스틱만 <b>유클리드</b>나 <b>h = 0</b>으로 바꿔 확인한 칸 수를 비교해 보세요.</p>';
+    }
+    if (alg === 'bfs') {
+      msg += '<p>너비 우선 탐색은 휴리스틱을 쓰지 않으므로 목표 반대 방향까지 넓게 확인합니다. 최적 경로는 얻지만 <b>확인한 칸 수</b>가 가장 많습니다.</p>';
+    }
+    verdict.innerHTML = msg;
+  }
+
+  /* ---------- 컨트롤 ---------- */
+  const loop = AI.sim.loop({
+    fps: 8,
+    step() { const go = stepSearch(); draw(); if (!go) { finish(); return false; } return true; },
+    onState(playing) { playBtn.textContent = playing ? '⏸ 멈춤' : '▶ 자동 실행'; }
+  });
+
+  function resetSearch(quiet) {
+    loop.pause();
+    S = newSearch();
+    verdict.style.display = 'none';
+    if (!quiet) { log.clear(); log.add(ALG_NAME[alg] + ' · ' + H_NAME[hKind] + ' 준비 — 열린 목록에 출발 칸을 넣었습니다'); }
+    draw();
+  }
+
+  const algSeg = AI.ui.seg({
+    label: '알고리즘',
+    options: [{ value: 'bfs', label: '너비 우선' }, { value: 'best', label: '최상 우선(h)' }, { value: 'astar', label: 'A*(g+h)' }],
+    value: 'astar',
+    onChange(v) { alg = v; resetSearch(); }
+  });
+  const hSeg = AI.ui.seg({
+    label: '휴리스틱',
+    options: [{ value: 'manhattan', label: '맨해튼' }, { value: 'euclid', label: '유클리드' }, { value: 'zero', label: 'h = 0' }],
+    value: 'manhattan',
+    onChange(v) { hKind = v; resetSearch(); }
+  });
+  const showSeg = AI.ui.seg({
+    label: '칸 안 숫자',
+    options: [{ value: 'f', label: 'f 만' }, { value: 'ghf', label: 'g · h · f' }, { value: 'none', label: '숨기기' }],
+    value: 'f',
+    onChange(v) { showMode = v; draw(); }
+  });
+
+  const playBtn = AI.ui.btn('▶ 자동 실행', () => loop.toggle(), 'primary');
+  const speed = AI.ui.slider({ label: '속도', min: 1, max: 40, value: 8, unit: ' 단계/초', onInput: v => loop.setFps(v) });
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.h('div', { class: 'ctl' }, AI.h('label', {}, AI.h('span', { text: '알고리즘' })), algSeg.el),
+    AI.h('div', { class: 'ctl' }, AI.h('label', {}, AI.h('span', { text: '휴리스틱 h(n)' })), hSeg.el),
+    AI.h('div', { class: 'ctl' }, AI.h('label', {}, AI.h('span', { text: '칸 안 숫자' })), showSeg.el)
+  ));
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    playBtn,
+    AI.ui.btn('⏭ 한 단계', () => { loop.step(); if (S.done) finish(); }),
+    AI.ui.btn('⏩ 끝까지', () => {
+      loop.pause();
+      let guard = 0;
+      while (!S.done && guard++ < 20000) stepSearch();
+      draw(); finish();
+    }, 'ghost'),
+    AI.ui.btn('↺ 처음부터', () => resetSearch(), 'ghost'),
+    AI.ui.btn('🎲 새 미로', () => { seed = (seed * 31 + 17) % 999983; genMaze(seed); resetSearch(); }, 'ghost'),
+    AI.ui.btn('🧱 벽 모두 지우기', () => { walls = new Set(); resetSearch(); }, 'ghost'),
+    speed.el
+  ));
+  body.appendChild(log.el);
+  body.appendChild(verdict);
+
+  /* ---------- 벽 그리기 (드래그) ---------- */
+  cv.canvas.style.cursor = 'crosshair';
+  cv.canvas.style.touchAction = 'none';
+  let mode = null;   // 'add' | 'del' | null
+
+  function cellAt(ev) {
+    const p = cv.pos(ev);
+    const x = Math.floor(p.x / CELL), y = Math.floor(p.y / CELL);
+    if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return -1;
+    return idx(x, y);
+  }
+  function apply(i) {
+    if (i < 0 || i === START || i === GOAL) return;
+    if (mode === 'add') { if (walls.has(i)) return; walls.add(i); }
+    else { if (!walls.has(i)) return; walls.delete(i); }
+    resetSearch(true);
+  }
+  function down(ev) {
+    const i = cellAt(ev);
+    if (i < 0 || i === START || i === GOAL) return;
+    ev.preventDefault();
+    mode = walls.has(i) ? 'del' : 'add';
+    log.clear();
+    log.add(mode === 'add' ? '벽을 세웁니다 — 끌어서 계속 그릴 수 있어요' : '벽을 지웁니다 — 끌어서 계속 지울 수 있어요');
+    apply(i);
+  }
+  function move(ev) { if (!mode) return; ev.preventDefault(); apply(cellAt(ev)); }
+  function up() { if (mode) { mode = null; resetSearch(); } }
+
+  cv.canvas.addEventListener('mousedown', down);
+  cv.canvas.addEventListener('mousemove', move);
+  cv.canvas.addEventListener('touchstart', down, { passive: false });
+  cv.canvas.addEventListener('touchmove', move, { passive: false });
+  window.addEventListener('mouseup', up);
+  window.addEventListener('touchend', up);
+
+  window.addEventListener('ai:redraw', draw);
+
+  genMaze(seed);
+  S = newSearch();
+  resetSearch();
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 세 알고리즘 한판 비교 ===================== -->
+<script>
+(function () {
+  const COLS = 17, ROWS = 11, CELL = 13;
+  const W = COLS * CELL, H = ROWS * CELL;
+  const START = 0, GOAL = COLS * ROWS - 1;
+  const KINDS = [
+    { k: 'bfs', name: '너비 우선 탐색', note: '휴리스틱 없음' },
+    { k: 'best', name: '최상 우선 탐색', note: 'f = h (맨해튼)' },
+    { k: 'astar', name: 'A* 알고리즘', note: 'f = g + h (맨해튼)' }
+  ];
+
+  const idx = (x, y) => y * COLS + x;
+  const XY = i => ({ x: i % COLS, y: Math.floor(i / COLS) });
+
+  let walls = new Set();
+  let seed = 777;
+
+  const body = AI.sim.panel('#sim2', {
+    title: '세 알고리즘 한판 비교 — 같은 미로, 다른 발자국',
+    tag: '자동 실험',
+    desc: '똑같은 미로에서 세 알고리즘을 <b>끝까지</b> 돌려 결과를 표로 정리합니다. ' +
+          '작은 지도에서 <b>회색으로 칠해진 부분이 각 알고리즘이 확인한 칸</b>입니다. ' +
+          '<b>미로 10개 실험</b>을 눌러 평균을 쌓아 보면 세 알고리즘의 성격이 숫자로 드러납니다.'
+  });
+
+  function neighbors(i) {
+    const p = XY(i), out = [];
+    const cand = [[p.x, p.y - 1], [p.x + 1, p.y], [p.x, p.y + 1], [p.x - 1, p.y]];
+    for (const c of cand) {
+      const nx = c[0], ny = c[1];
+      if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) continue;
+      const j = idx(nx, ny);
+      if (walls.has(j)) continue;
+      out.push(j);
+    }
+    return out;
+  }
+  function hOf(i) {
+    const a = XY(i), b = XY(GOAL);
+    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+  }
+  function reachable() {
+    const seen = new Set([START]), q = [START];
+    while (q.length) {
+      const n = q.shift();
+      if (n === GOAL) return true;
+      for (const nb of neighbors(n)) if (!seen.has(nb)) { seen.add(nb); q.push(nb); }
+    }
+    return false;
+  }
+  function genMaze(s) {
+    const r = AI.sim.rng(s);
+    for (let a = 0; a < 400; a++) {
+      walls = new Set();
+      for (let i = 0; i < COLS * ROWS; i++) {
+        if (i === START || i === GOAL) continue;
+        if (r() < 0.27) walls.add(i);
+      }
+      if (reachable()) return;
+    }
+    walls = new Set();
+  }
+
+  /** 한 알고리즘을 끝까지 실행 → 결과 반환 */
+  function run(alg) {
+    const open = [START], closed = new Set(), g = new Map([[START, 0]]), came = new Map();
+    let expanded = 0, openMax = 1;
+    while (open.length) {
+      let best = 0;
+      if (alg !== 'bfs') {
+        for (let k = 1; k < open.length; k++) {
+          const a = open[k], b = open[best];
+          if (alg === 'best') { if (hOf(a) < hOf(b)) best = k; }
+          else {
+            const fa = g.get(a) + hOf(a), fb = g.get(b) + hOf(b);
+            if (fa < fb || (fa === fb && hOf(a) < hOf(b))) best = k;
+          }
+        }
+      }
+      const node = open.splice(best, 1)[0];
+      if (closed.has(node)) continue;
+      closed.add(node); expanded++;
+      if (node === GOAL) {
+        let n = node; const path = [n];
+        while (came.has(n)) { n = came.get(n); path.push(n); }
+        return { expanded, openMax, closed, cost: g.get(GOAL), len: path.length, path: new Set(path), found: true };
+      }
+      for (const nb of neighbors(node)) {
+        if (closed.has(nb)) continue;
+        const ng = g.get(node) + 1;
+        if (!g.has(nb)) { g.set(nb, ng); came.set(nb, node); open.push(nb); }
+        else if (alg === 'astar' && ng < g.get(nb)) { g.set(nb, ng); came.set(nb, node); open.push(nb); }
+      }
+      if (open.length > openMax) openMax = open.length;
+    }
+    return { expanded, openMax, closed, cost: null, len: null, path: new Set(), found: false };
+  }
+
+  /* ---------- 작은 지도 3개 ---------- */
+  const boards = KINDS.map(K => {
+    const cv = AI.sim.canvas(W, H);
+    const cap = AI.h('p', { style: { fontSize: '12.5px', color: 'var(--ink-3)', margin: '4px 0 0', textAlign: 'center' }, text: '–' });
+    const wrap = AI.h('div', {},
+      AI.h('h4', { class: 'mini-head', style: { marginTop: 0, textAlign: 'center' }, text: K.name }),
+      AI.h('p', { style: { fontSize: '12px', color: 'var(--ink-3)', margin: '0 0 6px', textAlign: 'center' }, text: K.note }),
+      cv.wrap, cap
+    );
+    return { K, cv, cap, wrap, res: null };
+  });
+  body.appendChild(AI.h('div', { class: 'sim-grid' }, ...boards.map(b => b.wrap)));
+
+  function drawBoard(b) {
+    const C = AI.sim.colors(), ctx = b.cv.ctx;
+    b.cv.clear(C.bg);
+    const res = b.res;
+    for (let i = 0; i < COLS * ROWS; i++) {
+      const p = XY(i), px = p.x * CELL, py = p.y * CELL;
+      let fill = C.bg;
+      if (walls.has(i)) fill = C.dark ? '#4a5162' : '#8b93a5';
+      else if (res && res.path.has(i)) fill = C.dark ? '#2f7a5c' : '#7fd6b1';
+      else if (res && res.closed.has(i)) fill = C.dark ? '#2b3350' : '#dde3f8';
+      ctx.fillStyle = fill;
+      ctx.fillRect(px, py, CELL, CELL);
+      ctx.strokeStyle = C.grid; ctx.lineWidth = .6;
+      ctx.strokeRect(px + .3, py + .3, CELL - .6, CELL - .6);
+    }
+    ctx.fillStyle = C.a; ctx.fillRect(1, 1, CELL - 2, CELL - 2);
+    const gp = XY(GOAL);
+    ctx.fillStyle = C.dark ? '#e0885f' : '#b3541e';
+    ctx.fillRect(gp.x * CELL + 1, gp.y * CELL + 1, CELL - 2, CELL - 2);
+  }
+
+  /* ---------- 결과 표 ---------- */
+  const tableHolder = AI.h('div', { style: { marginTop: '14px' } });
+  const avgHolder = AI.h('div', { style: { marginTop: '10px' } });
+  const verdict = AI.h('div', { class: 'box box-info', style: { marginTop: '14px' } });
+  body.appendChild(tableHolder);
+  body.appendChild(avgHolder);
+  body.appendChild(verdict);
+
+  const acc = { runs: 0, sum: [{ e: 0, l: 0, opt: 0 }, { e: 0, l: 0, opt: 0 }, { e: 0, l: 0, opt: 0 }] };
+
+  function runOnce(collect) {
+    const results = KINDS.map(K => run(K.k));
+    boards.forEach((b, i) => { b.res = results[i]; drawBoard(b); });
+    const opt = results[0].cost;   // 너비 우선 탐색의 비용 = 최적 비용
+    boards.forEach((b, i) => {
+      const r = results[i];
+      b.cap.innerHTML = r.found
+        ? '확인 <b>' + r.expanded + '칸</b> · 경로 <b>' + r.len + '칸</b>'
+        : '경로 없음';
+    });
+
+    const rows = KINDS.map((K, i) => {
+      const r = results[i];
+      const optOk = r.found && r.cost === opt;
+      return [
+        '<b>' + K.name + '</b><br><span style="font-size:12px;color:var(--ink-3)">' + K.note + '</span>',
+        '<span class="mono">' + r.expanded + '</span>',
+        '<span class="mono">' + r.openMax + '</span>',
+        r.found ? '<span class="mono">' + r.len + '</span>' : '–',
+        r.found ? '<span class="mono">' + r.cost + '</span>' : '–',
+        { cls: optOk ? 'good' : 'bad', html: optOk ? '최적 ○' : '최적 ×' }
+      ];
+    });
+    tableHolder.innerHTML = '';
+    tableHolder.appendChild(AI.ui.table(
+      ['알고리즘', '확인한 칸', '열린 목록 최대', '경로 길이(칸)', '경로 비용', '최적 여부'],
+      rows,
+      { caption: '미로 씨앗 ' + seed + ' — 같은 미로에서 세 알고리즘을 끝까지 실행한 결과' }
+    ));
+
+    if (collect) {
+      acc.runs++;
+      results.forEach((r, i) => {
+        acc.sum[i].e += r.expanded;
+        acc.sum[i].l += r.found ? r.len : 0;
+        acc.sum[i].opt += (r.found && r.cost === opt) ? 1 : 0;
+      });
+      renderAvg();
+    }
+    explain(results, opt);
+  }
+
+  function renderAvg() {
+    avgHolder.innerHTML = '';
+    if (!acc.runs) return;
+    const rows = KINDS.map((K, i) => [
+      '<b>' + K.name + '</b>',
+      '<span class="mono">' + AI.sim.fmt(acc.sum[i].e / acc.runs, 1) + '</span>',
+      '<span class="mono">' + AI.sim.fmt(acc.sum[i].l / acc.runs, 1) + '</span>',
+      {
+        cls: acc.sum[i].opt === acc.runs ? 'good' : 'bad',
+        html: Math.round(acc.sum[i].opt / acc.runs * 100) + '%'
+      }
+    ]);
+    avgHolder.appendChild(AI.ui.table(
+      ['알고리즘', '평균 확인한 칸', '평균 경로 길이', '최적 경로를 찾은 비율'],
+      rows,
+      { caption: '누적 평균 — 서로 다른 미로 ' + acc.runs + '개에서 실험' }
+    ));
+  }
+
+  function explain(res, opt) {
+    const b = res[0], g = res[1], a = res[2];
+    let s = '<div class="box-label">🔍 왜 이런 차이가 나는가</div>';
+    s += '<p><b>확인한 칸 수</b>는 보통 너비 우선(' + b.expanded + ') &gt; A*(' + a.expanded + ') &gt; 최상 우선(' + g.expanded + ') 순입니다. ' +
+      '너비 우선은 목표 방향을 전혀 모르므로 <b>사방으로 동그랗게</b> 퍼져 나갑니다. 최상 우선은 h만 보고 목표 쪽으로 <b>일직선으로</b> 달려가므로 가장 적게 확인합니다. ' +
+      'A*는 그 중간이지만, 방문 모양이 <b>목표 방향으로 눌린 타원</b>이 됩니다.</p>';
+    s += '<p><b>경로 길이</b>는 다릅니다. 너비 우선(' + (b.found ? b.cost : '–') + ')과 A*(' + (a.found ? a.cost : '–') + ')는 언제나 최적 비용 ' + opt + '와 같습니다. ' +
+      '최상 우선은 ' + (g.found ? g.cost : '–') + '로, ' + (g.found && g.cost === opt ? '이번에는 우연히 최적과 같았습니다' : '<b>최적보다 ' + (g.cost - opt) + ' 만큼 깁니다</b>') + '. ' +
+      '최상 우선 탐색은 <b>여기까지 온 비용 g(n)을 세지 않기</b> 때문에, 목표에 가까워 보이는 쪽으로 끌려가다 크게 돌아온 길을 그대로 답으로 씁니다.</p>';
+    s += '<p><b>정리하면</b> — 최상 우선은 <b>빠르지만 부정확</b>, 너비 우선은 <b>정확하지만 느림</b>, A*는 <b>정확하면서 빠름</b>입니다. ' +
+      'A*가 두 장점을 함께 얻는 까닭은 평가 함수에 <b>사실(g)</b>과 <b>추정(h)</b>을 모두 담았기 때문입니다.</p>';
+    verdict.innerHTML = s;
+  }
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('▶ 이 미로로 실험', () => runOnce(true), 'primary'),
+    AI.ui.btn('🎲 다른 미로로 실험', () => { seed = (seed * 37 + 11) % 999983; genMaze(seed); runOnce(true); }),
+    AI.ui.btn('🔁 미로 10개 실험', () => {
+      for (let n = 0; n < 10; n++) {
+        seed = (seed * 37 + 11) % 999983;
+        genMaze(seed);
+        runOnce(true);
+      }
+      AI.toast('미로 10개를 더 실험해 평균에 반영했어요');
+    }),
+    AI.ui.btn('↺ 평균 초기화', () => {
+      acc.runs = 0; acc.sum = [{ e: 0, l: 0, opt: 0 }, { e: 0, l: 0, opt: 0 }, { e: 0, l: 0, opt: 0 }];
+      renderAvg(); AI.toast('누적 평균을 지웠어요');
+    }, 'ghost')
+  ));
+
+  window.addEventListener('ai:redraw', () => boards.forEach(drawBoard));
+
+  genMaze(seed);
+  runOnce(true);
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a1l4-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['휴리스틱', '평가 함수', '최상 우선', 'A*', '맨해튼', '과대평가', '열린 목록', '닫힌 목록'],
+  sents: [
+    { text: '목표까지 남은 비용을 경험적으로 어림잡은 값을 {0}값이라고 한다.', answers: [['휴리스틱']] },
+    { text: '후보 상태 중 어느 것을 먼저 확인할지 정하기 위해 계산하는 함수를 {0}(이)라고 한다.', answers: [['평가 함수']] },
+    { text: 'h(n)만 보고 다음 상태를 고르는 탐색은 {0} 탐색이고, f(n)=g(n)+h(n)을 쓰는 알고리즘은 {1} 알고리즘이다.', answers: [['최상 우선'], ['A*']] },
+    { text: '격자에서 가로·세로로만 움직일 때 두 칸 사이의 거리는 {0} 거리로 잰다.', answers: [['맨해튼']] },
+    { text: 'h(n)이 실제 남은 비용을 {0}하지 않으면 A*는 최적 경로를 보장한다.', answers: [['과대평가']] },
+    { text: '아직 확인하지 않은 후보를 담는 곳은 {0}이고, 확인이 끝난 상태를 담는 곳은 {1}이다.', answers: [['열린 목록'], ['닫힌 목록']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '4차시 확인 문제',
+  items: [
+    {
+      type: 'mc',
+      q: '최상 우선 탐색과 A* 알고리즘의 <b>가장 본질적인 차이</b>는 무엇인가?',
+      choices: [
+        '최상 우선 탐색은 열린 목록을 쓰지 않는다',
+        'A*는 평가 함수에 시작부터 현재까지의 실제 비용 g(n)을 함께 더한다',
+        '최상 우선 탐색은 휴리스틱을 쓰지 않는다',
+        'A*는 목표 상태를 미리 알고 있어야 한다'
+      ],
+      answer: 1,
+      why: '두 알고리즘 모두 휴리스틱을 쓰고 열린 목록·닫힌 목록을 씁니다. 차이는 <b>평가 함수</b>뿐입니다. 최상 우선은 <span class="mono">f(n)=h(n)</span>, A*는 <span class="mono">f(n)=g(n)+h(n)</span>입니다. g(n)이 들어가는 덕분에 A*는 “많이 돌아온 길”에 벌점을 주어 최적 경로를 찾아냅니다.'
+    },
+    {
+      type: 'ox',
+      q: '최상 우선 탐색은 확인하는 상태 수가 적으므로, 언제나 최단 경로를 찾아 준다.',
+      answer: false,
+      why: '앞부분은 맞지만 뒷부분이 틀렸습니다. 최상 우선 탐색은 <b>h(n)만</b> 보고 목표에 가까워 <b>보이는</b> 쪽으로 달려갑니다. 지금까지 온 비용 g(n)을 세지 않으므로, 벽을 크게 돌아온 길도 그대로 답이 됩니다. 즉 <b>빠르지만 최적을 보장하지 않습니다</b>.'
+    },
+    {
+      type: 'mc',
+      q: '격자에서 (2, 3)에 있는 칸에서 (7, 9)에 있는 목표까지의 <b>맨해튼 거리</b>는?',
+      choices: ['5', '6', '11', '약 7.8'],
+      answer: 2,
+      why: '맨해튼 거리는 가로 차이와 세로 차이를 더합니다. |7−2| + |9−3| = 5 + 6 = <b>11</b>입니다. 참고로 유클리드 거리는 √(5²+6²) ≈ 7.81로, 언제나 맨해튼 거리보다 작거나 같습니다.'
+    },
+    {
+      type: 'short',
+      q: 'A* 알고리즘에서 휴리스틱을 <span class="mono">h(n) = 0</span>으로 두면, 이동 비용이 모두 같은 격자에서는 어떤 맹목적 탐색과 사실상 같아지는가?',
+      answer: ['너비 우선 탐색', 'BFS', '너비우선탐색', '너비 우선'],
+      placeholder: '예: ○○ ○○ ○○',
+      why: 'h가 0이면 <span class="mono">f(n)=g(n)</span>이 되어, 시작에서 가까운 순서대로 꺼내게 됩니다. 이동 비용이 모두 1인 격자에서는 이것이 <b>너비 우선 탐색</b>과 같은 순서입니다. 즉 <b>A*는 맹목적 탐색을 특별한 경우로 포함</b>합니다.'
+    },
+    {
+      type: 'multi',
+      q: '좋은 휴리스틱 함수의 조건으로 <b>옳은 것을 모두</b> 고르시오.',
+      choices: [
+        '실제 남은 비용을 과대평가하지 않는다',
+        '값이 항상 0이어야 한다',
+        '실제 남은 비용에 가까울수록 좋다',
+        '계산이 빨라야 한다',
+        '문제의 이동 규칙에 맞게 정의해야 한다'
+      ],
+      answer: [0, 2, 3, 4],
+      why: '②가 틀렸습니다. h가 항상 0이면 과대평가하지 않는 조건은 지키지만 <b>아무 정보도 주지 않으므로</b> 탐색이 맹목적 탐색으로 되돌아갑니다. 좋은 휴리스틱은 “과대평가하지 않으면서 <b>가능한 한 큰 값</b>”을 주는 것입니다. 또한 대각선 이동이 가능한 격자에서 맨해튼 거리를 쓰면 과대평가가 되므로 ⑤도 중요한 조건입니다.'
+    },
+    {
+      type: 'order',
+      q: 'A* 알고리즘이 한 상태를 처리하는 과정을 <b>올바른 순서</b>로 배열하시오.',
+      items: [
+        '열린 목록에서 f(n)이 가장 작은 상태를 꺼낸다',
+        '꺼낸 상태를 닫힌 목록에 넣는다',
+        '목표 상태인지 확인한다',
+        '이웃 상태의 g 값을 계산해 더 싸면 갱신한다',
+        '갱신된 이웃을 열린 목록에 넣는다'
+      ],
+      answer: [0, 1, 2, 3, 4],
+      why: '꺼내기 → 닫힌 목록에 넣기 → 목표 검사 → 이웃의 g 계산·갱신 → 열린 목록에 넣기 순서입니다. <b>목표 검사를 “꺼낼 때” 한다</b>는 점이 중요합니다. 열린 목록에 넣는 순간 검사해 버리면 아직 더 싼 길이 남아 있을 수 있어 최적성이 깨집니다.'
+    },
+    {
+      type: 'match',
+      q: '다음 평가 함수를 알맞은 알고리즘과 짝지으시오.',
+      left: [
+        'f(n) = h(n)',
+        'f(n) = g(n) + h(n)',
+        'f(n) = g(n)',
+        '평가 함수를 쓰지 않고 큐로 꺼낸다'
+      ],
+      right: ['최상 우선 탐색', 'A* 알고리즘', '균일 비용 탐색', '너비 우선 탐색'],
+      answer: [0, 1, 2, 3],
+      why: '평가 함수가 알고리즘의 이름을 정합니다. h만 쓰면 최상 우선, g만 쓰면 균일 비용, 둘을 더하면 A*, 아무것도 쓰지 않고 선입선출로 꺼내면 너비 우선 탐색입니다.'
+    },
+    {
+      type: 'ox',
+      q: '휴리스틱 h(n)을 실제 남은 비용보다 <b>크게</b> 잡으면, A*는 더 적은 칸을 확인하는 대신 최적 경로를 놓칠 수 있다.',
+      answer: true,
+      why: '맞습니다. h를 크게 잡으면 목표 쪽으로 더 과감하게 달려가므로 <b>확인하는 칸 수는 줄어듭니다</b>. 하지만 f가 실제 전체 비용을 넘어 버리면, 진짜 최적 경로 위의 상태가 다른 후보에 밀려 늦게 열리게 되어 <b>최적성이 깨집니다</b>. 속도와 최적성 사이의 맞바꿈입니다.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a1l4-note',
+  title: '정보 이용 탐색 실험 기록',
+  prompt: '시뮬레이터 1에서 <b>같은 미로</b>를 그대로 두고 알고리즘·휴리스틱만 바꿔 가며 <b>끝까지</b> 실행하고, 아래 값을 적어 보세요. 시뮬레이터 2의 누적 평균도 함께 활용합니다.',
+  fields: [
+    { key: 'bfsE', label: '너비 우선 탐색 — 확인한 칸 수 / 경로 비용', type: 'text', placeholder: '예: 152칸 / 26' },
+    { key: 'bestE', label: '최상 우선 탐색(맨해튼) — 확인한 칸 수 / 경로 비용', type: 'text', placeholder: '예: 34칸 / 32' },
+    { key: 'astarE', label: 'A*(맨해튼) — 확인한 칸 수 / 경로 비용', type: 'text', placeholder: '예: 71칸 / 26' },
+    { key: 'astarEu', label: 'A*(유클리드) — 확인한 칸 수 / 경로 비용', type: 'text', placeholder: '예: 96칸 / 26' },
+    { key: 'zero', label: 'A*(h = 0) — 확인한 칸 수 / 경로 비용', type: 'text', placeholder: '예: 151칸 / 26' },
+    {
+      key: 'find', label: '휴리스틱을 맨해튼 → 유클리드 → h=0 으로 바꿀 때 확인한 칸 수가 어떻게 변했나요? 그 까닭을 써 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 맨해튼일 때 가장 적게 확인했고 h=0일 때 가장 많이 확인했다. 그 까닭은 …'
+    },
+    {
+      key: 'trap', label: '최상 우선 탐색이 <b>크게 돌아가는</b> 미로를 직접 만들어 보고, 어떤 모양의 벽이 함정이 되는지 설명해 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 목표 바로 앞에 ㄷ자 모양으로 벽을 세우면 …'
+    },
+    {
+      key: 'apply', label: '우리 주변에서 정보 이용 탐색을 쓸 만한 문제를 하나 찾고, 그 문제에서 g(n)과 h(n)을 각각 무엇으로 정할지 써 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 학교 안 최단 이동 경로 찾기 — g(n)은 지금까지 걸은 거리, h(n)은 목표 교실까지의 직선거리 …'
+    }
+  ]
+});
+</script>
+</body>
+</html>

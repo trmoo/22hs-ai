@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2차시 모든 문제는 탐색이 된다 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+/* 상태 표기용 작은 배지 */
+.st-badge { display: inline-flex; align-items: center; font-family: var(--font-mono); font-size: .92em; font-weight: 800; color: var(--accent-ink); background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 6px; padding: 0 6px; }
+/* 조합 폭발 환산 표 */
+.exp-note { font-size: 13px; color: var(--ink-3); margin: 10px 0 0; }
+.svg-wrap { overflow-x: auto; padding: 4px 0 2px; }
+.svg-wrap svg { display: block; min-width: 540px; }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>눈금이 하나도 없는 <b>4리터 물통</b>과 <b>3리터 물통</b>이 있습니다. 수돗물은 얼마든지 쓸 수 있고, 물을 버리는 것도 자유입니다. 이 두 통만으로 <b>정확히 2리터</b>를 만들어야 합니다.</p>
+      <p>“대충 반쯤 채우면 2리터”는 안 됩니다. 눈금이 없으니 <b>정확히</b>가 조건입니다. 어떻게 하면 될까요? 그리고 <b>가장 적은 횟수</b>는 몇 번일까요?</p>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 무엇을 적어 두면 생각이 정리될까?</summary>
+        <div class="more-body">
+          <p>머릿속으로만 굴리면 금방 헷갈립니다. 대신 <b>두 통에 담긴 물의 양을 짝지어</b> 적어 보세요. 처음은 <span class="st-badge">(0, 0)</span>, 4리터 통을 가득 채우면 <span class="st-badge">(4, 0)</span>, 그것을 3리터 통에 부으면 <span class="st-badge">(1, 3)</span>입니다.</p>
+          <p>이렇게 적는 순간 문제가 완전히 달라집니다. “물 붓기”가 <b>“짝지은 숫자에서 짝지은 숫자로 옮겨 가기”</b>가 되니까요. 그리고 옮겨 갈 수 있는 곳은 정해져 있습니다. 이제 이 문제는 <b>미로에서 길 찾기</b>와 같은 종류가 됩니다.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 문제를 상태로 쪼개기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>문제를 상태로 쪼개기</h2></div>
+
+    <p>인공지능이 문제를 푸는 첫걸음은 문제를 <b>기계가 다룰 수 있는 형태로 다시 쓰는 것</b>입니다. 그 형태가 바로 상태와 연산자입니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 · 상태</div>
+      <p>문제를 해결하는 과정에서 거쳐 가는 하나하나의 상황을 <b class="blank" data-a="상태|state" data-hint="지금의 상황을 숫자나 기호로 적은 것">상태</b>라고 한다. 문제가 주어진 시작 상황을 <b class="blank" data-a="초기 상태|시작 상태" data-hint="문제가 처음 주어졌을 때의 상태">초기 상태</b>, 문제를 해결한 마지막 상황을 <b class="blank" data-a="목표 상태|목적 상태" data-hint="문제를 다 푼 상태">목표 상태</b>라고 한다.</p>
+    </div>
+
+    <p>상태를 적을 때 중요한 원칙이 하나 있습니다. <b>문제를 푸는 데 필요한 정보만 적는다</b>는 것입니다. 물통 문제에서는 “두 통에 담긴 물의 양”만 있으면 됩니다. 통의 색깔, 수돗물의 온도, 지금이 몇 시인지는 답과 아무 상관이 없습니다. 그래서 상태를 <span class="st-badge">(4리터 통의 물, 3리터 통의 물)</span> 두 숫자로 적습니다. 이렇게 불필요한 것을 걷어내는 일을 <span class="term">추상화</span>라고 합니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 · 연산자</div>
+      <p>한 상태를 다른 상태로 바꾸는 행동을 <b class="blank" data-a="연산자|연산|행동|조작" data-hint="상태를 바꾸는 행동 · 수학의 +, − 같은 것을 상태에 적용한 것">연산자</b>라고 한다. 연산자를 적용할 수 있는 조건과, 적용한 뒤에 어떤 상태가 되는지를 함께 정해야 한다.</p>
+    </div>
+
+    <p>물통 문제의 연산자는 여섯 개입니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>물통 문제의 연산자 — 상태 <span class="mono">(a, b)</span>에서 a는 4리터 통, b는 3리터 통에 담긴 물</caption>
+        <thead><tr><th>연산자</th><th>뜻</th><th>결과 상태</th><th>예</th></tr></thead>
+        <tbody>
+          <tr><td><b>4L 채우기</b></td><td>4리터 통을 수돗물로 가득 채운다</td><td><span class="mono">(4, b)</span></td><td>(0,3) → (4,3)</td></tr>
+          <tr><td><b>3L 채우기</b></td><td>3리터 통을 수돗물로 가득 채운다</td><td><span class="mono">(a, 3)</span></td><td>(1,0) → (1,3)</td></tr>
+          <tr><td><b>4L 비우기</b></td><td>4리터 통의 물을 모두 버린다</td><td><span class="mono">(0, b)</span></td><td>(4,2) → (0,2)</td></tr>
+          <tr><td><b>3L 비우기</b></td><td>3리터 통의 물을 모두 버린다</td><td><span class="mono">(a, 0)</span></td><td>(1,3) → (1,0)</td></tr>
+          <tr><td><b>4L → 3L</b></td><td>3리터 통이 차거나 4리터 통이 빌 때까지 붓는다</td><td><span class="mono">(a−t, b+t)</span>, t=min(a, 3−b)</td><td>(4,0) → (1,3)</td></tr>
+          <tr><td><b>3L → 4L</b></td><td>4리터 통이 차거나 3리터 통이 빌 때까지 붓는다</td><td><span class="mono">(a+t, b−t)</span>, t=min(b, 4−a)</td><td>(3,3) → (4,2)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub-head">탐색 문제를 정의하는 다섯 요소</h3>
+    <p>어떤 문제든 아래 다섯 가지를 정하면 탐색 문제가 됩니다. 이 다섯 줄을 채우는 것이 인공지능 개발자가 가장 먼저 하는 일입니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>탐색 문제의 정의 — 서로 전혀 달라 보이는 문제도 같은 다섯 칸으로 정리된다</caption>
+        <thead><tr><th>요소</th><th>물통 문제</th><th>미로 길찾기</th><th>8-퍼즐</th><th>틱택토</th></tr></thead>
+        <tbody>
+          <tr><td><b>상태</b></td><td>(4L 통의 물, 3L 통의 물)</td><td>지금 서 있는 칸의 좌표</td><td>타일 8개의 배치</td><td>판 9칸의 O·X 배치</td></tr>
+          <tr><td><b>초기 상태</b></td><td>(0, 0)</td><td>출발 칸</td><td>섞어 놓은 배치</td><td>빈 판</td></tr>
+          <tr><td><b>연산자</b></td><td>채우기·비우기·붓기 6가지</td><td>위·아래·왼·오른쪽 이동</td><td>빈칸과 이웃 타일 맞바꾸기</td><td>빈칸에 내 기호 놓기</td></tr>
+          <tr><td><b>목표 판정</b></td><td>4L 통의 물 = 2</td><td>도착 칸에 도달</td><td>1~8이 순서대로 놓임</td><td>같은 기호 3개가 한 줄</td></tr>
+          <tr><td><b>비용</b></td><td>연산 1회 = 1</td><td>한 칸 이동 = 1</td><td>타일 1회 이동 = 1</td><td>수 1회 = 1</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 목표는 ‘상태’가 아니라 ‘판정 조건’일 수 있다</div>
+      <p>물통 문제의 목표는 “4리터 통에 2리터”입니다. 그런데 이 조건을 만족하는 상태는 <span class="st-badge">(2, 0)</span>, <span class="st-badge">(2, 3)</span> 등 여러 개입니다. 즉 목표는 <b>딱 하나의 상태</b>가 아니라 <b>조건을 만족하는 상태들의 묶음</b>일 수 있습니다. 그래서 프로그램에서는 목표를 “이 상태와 같은가?”가 아니라 <b>“이 조건을 만족하는가?”</b>로 판정합니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. 상태 공간 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>상태 공간 — 문제 전체의 지도</h2></div>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 · 상태 공간</div>
+      <p>초기 상태와 목표 상태를 포함하여, 연산자를 적용해 나타날 수 있는 <b>모든 상태의 집합</b>을 <b class="blank" data-a="상태 공간|상태공간|state space" data-hint="상태들을 모아 놓은 공간">상태 공간</b>이라고 한다. 탐색은 상태 공간 안에서 초기 상태로부터 목표 상태에 이르는 <b>경로를 찾는 일</b>이다.</p>
+    </div>
+
+    <p>이 정의의 힘은 <b>“문제 풀기”가 “길 찾기”로 바뀐다</b>는 데 있습니다. 물통을 붓는 일, 타일을 미는 일, 다음 수를 두는 일이 모두 “점에서 점으로 옮겨 가기”가 됩니다. 문제의 겉모습은 사라지고 <b>점과 선</b>만 남습니다. 그래서 하나의 탐색 알고리즘을 만들어 두면 <b>수많은 문제에 그대로 쓸 수 있습니다.</b></p>
+
+    <p>물통 문제의 상태 공간을 세어 봅시다. 4리터 통에는 0, 1, 2, 3, 4리터가 담길 수 있으니 5가지, 3리터 통에는 0, 1, 2, 3리터이니 4가지입니다. 곱하면 <b>5 × 4 = 20가지</b>입니다. 그런데 이 20가지 모두에 실제로 도달할 수 있을까요? 시뮬레이터로 직접 확인해 보면 재미있는 사실을 알게 됩니다. <b>(0, 0)에서 출발해 여섯 연산자만 쓰면 14가지에만 도달할 수 있습니다.</b> 나머지 6가지는 아무리 해도 만들 수 없습니다.</p>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 도달할 수 없는 상태가 있다는 뜻</div>
+      <p>상태 공간을 정의할 때는 “있을 수 있는 모든 상태”를 넣지만, 실제 탐색이 다루는 것은 <b>초기 상태에서 연산자로 이어지는 부분</b>뿐입니다. 예를 들어 <span class="st-badge">(1, 1)</span>은 두 통 모두 눈금이 없으므로 만들 방법이 없습니다. 이것은 인공지능에서 중요한 의미를 가집니다. 상태 공간이 아무리 커도 <b>실제로 뒤져야 하는 부분은 그보다 작을 수 있다</b>는 것입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. 상태 공간 트리와 그래프 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>트리로 펼칠까, 그래프로 접을까</h2></div>
+
+    <p>상태 공간을 눈으로 보기 좋게 그리는 방법은 두 가지입니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 · 상태 공간 트리</div>
+      <p>초기 상태를 뿌리(루트)로 두고, 연산자를 적용해 만들어지는 상태를 자식으로 붙여 나무 모양으로 펼친 구조를 <b class="blank" data-a="상태 공간 트리|상태공간 트리|탐색 트리" data-hint="상태 공간을 나무 모양으로 구조화한 것">상태 공간 트리</b>라고 한다. 여기서 상태는 <b class="blank" data-a="노드|node|정점" data-hint="트리·그래프에서 점으로 그리는 것">노드</b>로, 상태 사이의 관계(연산자)는 <b class="blank" data-a="간선|edge|가지" data-hint="트리·그래프에서 점과 점을 잇는 선">간선</b>으로 나타낸다.</p>
+    </div>
+
+    <p>트리로 펼치면 “어떤 순서로 뒤졌는지”가 한눈에 보입니다. 뿌리에서 아래로 내려간 칸 수가 곧 <b>깊이</b>이고, 그것이 사용한 연산자의 개수입니다. 아래 그림은 물통 문제를 깊이 2까지 펼친 것입니다.</p>
+
+    <div class="svg-wrap">
+      <svg viewBox="0 0 720 260" role="img" aria-label="물통 문제의 상태 공간 트리를 깊이 2까지 펼친 그림">
+        <g font-family="inherit" text-anchor="middle">
+          <line x1="360" y1="52" x2="196" y2="112" stroke="var(--line-strong)" stroke-width="2"></line>
+          <line x1="360" y1="52" x2="524" y2="112" stroke="var(--line-strong)" stroke-width="2"></line>
+          <line x1="196" y1="130" x2="90" y2="196" stroke="var(--line-strong)" stroke-width="2"></line>
+          <line x1="196" y1="130" x2="252" y2="196" stroke="var(--line-strong)" stroke-width="2"></line>
+          <line x1="524" y1="130" x2="468" y2="196" stroke="var(--line-strong)" stroke-width="2"></line>
+          <line x1="524" y1="130" x2="630" y2="196" stroke="var(--line-strong)" stroke-width="2"></line>
+
+          <rect x="316" y="26" width="88" height="30" rx="9" fill="var(--accent)" stroke="var(--accent)"></rect>
+          <text x="360" y="46" font-size="15" font-weight="800" fill="var(--surface)">(0, 0)</text>
+          <text x="360" y="16" font-size="12" font-weight="700" fill="var(--ink-3)">초기 상태 · 깊이 0</text>
+
+          <rect x="152" y="100" width="88" height="30" rx="9" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="2"></rect>
+          <text x="196" y="120" font-size="15" font-weight="800" fill="var(--ink)">(4, 0)</text>
+          <rect x="480" y="100" width="88" height="30" rx="9" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="2"></rect>
+          <text x="524" y="120" font-size="15" font-weight="800" fill="var(--ink)">(0, 3)</text>
+          <text x="278" y="94" font-size="11.5" fill="var(--ink-3)">4L 채우기</text>
+          <text x="446" y="94" font-size="11.5" fill="var(--ink-3)">3L 채우기</text>
+          <text x="66" y="120" font-size="12" font-weight="700" fill="var(--ink-3)">깊이 1</text>
+
+          <rect x="46" y="184" width="88" height="30" rx="9" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="2"></rect>
+          <text x="90" y="204" font-size="15" font-weight="800" fill="var(--ink)">(4, 3)</text>
+          <rect x="208" y="184" width="88" height="30" rx="9" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="2"></rect>
+          <text x="252" y="204" font-size="15" font-weight="800" fill="var(--ink)">(1, 3)</text>
+          <rect x="424" y="184" width="88" height="30" rx="9" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="2"></rect>
+          <text x="468" y="204" font-size="15" font-weight="800" fill="var(--ink)">(4, 3)</text>
+          <rect x="586" y="184" width="88" height="30" rx="9" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="2"></rect>
+          <text x="630" y="204" font-size="15" font-weight="800" fill="var(--ink)">(3, 0)</text>
+          <text x="360" y="204" font-size="12" font-weight="700" fill="var(--ink-3)">깊이 2</text>
+
+          <text x="279" y="240" font-size="12.5" font-weight="700" fill="var(--warn)">↑ (4, 3)이 두 번 나타난다 — 같은 상태인데 노드는 둘</text>
+        </g>
+      </svg>
+    </div>
+
+    <p>그림에서 문제가 보입니다. <span class="st-badge">(4, 3)</span>이 <b>두 번</b> 나타났습니다. 같은 상태인데 트리에서는 서로 다른 노드가 된 것입니다. 트리로 펼치면 이런 중복이 계속 늘어납니다. 게다가 (4,0)에서 4L 비우기를 하면 (0,0)으로 되돌아가므로, 그대로 두면 <b>같은 곳을 무한히 맴돌게</b> 됩니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 · 그래프와 방문 표시</div>
+      <p>같은 상태를 하나의 노드로 합쳐 그리면 <b class="blank" data-a="그래프|graph" data-hint="같은 상태를 하나의 점으로 합쳐 그린 구조">그래프</b>가 된다. 프로그램에서는 이미 확인한 상태를 기록해 두고 다시 확장하지 않는데, 이 기록을 <b class="blank" data-a="방문 표시|방문표시|방문 기록" data-hint="‘이미 가 봤다’를 적어 두는 일">방문 표시</b>라고 한다.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">🌳</span>
+        <h4>트리로 볼 때</h4>
+        <p>탐색이 <b>진행된 순서와 경로</b>가 그대로 드러납니다. 깊이가 곧 연산 횟수이므로 “몇 단계 만에 풀었는가”를 읽기 쉽습니다. 다만 같은 상태가 여러 번 나타나 <b>노드 수가 부풀어 오릅니다.</b></p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🕸️</span>
+        <h4>그래프로 볼 때</h4>
+        <p>같은 상태가 하나로 합쳐져 <b>문제의 전체 구조</b>가 보입니다. 어떤 상태가 서로 이어져 있는지, 도달할 수 없는 곳이 있는지 알 수 있습니다. 대신 <b>방문 표시</b>를 관리해야 합니다.</p>
+      </div>
+    </div>
+
+    <div class="box box-ok">
+      <div class="box-label">✅ 방문 표시가 없으면 어떻게 되는가</div>
+      <p>물통 문제에서 “4L 채우기 → 4L 비우기 → 4L 채우기 → …”를 반복하면 <span class="st-badge">(0,0)</span>과 <span class="st-badge">(4,0)</span> 사이를 영원히 왕복합니다. 방문 표시를 하면 두 번째로 (0,0)을 만났을 때 <b>“이미 봤다”며 버립니다.</b> 그래서 방문 표시는 단순한 최적화가 아니라 <b>탐색이 끝나게 만드는 장치</b>입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4. 조합 폭발 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>왜 똑똑한 탐색이 필요한가 — 조합 폭발</h2></div>
+
+    <p>물통 문제의 상태 공간은 20가지뿐이었습니다. 컴퓨터에게는 우스운 크기죠. 그러면 “모든 상태를 다 확인하면 되지 않나?”라는 생각이 듭니다. 이 생각이 왜 무너지는지 계산해 봅시다.</p>
+
+    <p>어떤 상태에서 적용할 수 있는 연산자의 개수를 <b class="blank" data-a="분기 수|분기수|가지 수|분기 계수" data-hint="한 상태에서 갈라져 나가는 갈림길의 개수, 기호는 b">분기 수</b>(b)라 하고, 초기 상태에서 목표까지 필요한 연산 횟수를 <b class="blank" data-a="깊이|depth" data-hint="뿌리에서 아래로 내려간 칸 수, 기호는 d">깊이</b>(d)라고 합니다. 그러면 깊이 d까지 펼친 상태 공간 트리의 노드 수는 다음과 같습니다.</p>
+
+    <div class="box box-info" style="text-align:center">
+      <div class="box-label" style="justify-content:center">📐 노드 수의 합</div>
+      <p style="font-family:var(--font-mono);font-size:17px;font-weight:800;color:var(--accent-ink)">
+        1 + b + b<sup>2</sup> + b<sup>3</sup> + ⋯ + b<sup>d</sup>
+      </p>
+      <p style="font-size:14px;color:var(--ink-3);margin:0">마지막 층 <span class="mono">b<sup>d</sup></span> 하나가 그 위 모든 층의 합보다 크다는 점이 핵심이다.</p>
+    </div>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 · 조합 폭발</div>
+      <p>깊이가 하나 깊어질 때마다 확인해야 하는 상태의 수가 b배로 늘어나 걷잡을 수 없이 커지는 현상을 <b class="blank" data-a="조합 폭발|조합폭발|상태 폭발" data-hint="경우의 수가 걷잡을 수 없이 늘어나는 현상">조합 폭발</b>이라고 한다.</p>
+    </div>
+
+    <p>숫자로 느껴 봅시다. 분기 수가 10이라면 깊이 1에서 10개, 깊이 5에서 10만 개, 깊이 10에서 <b>100억 개</b>가 됩니다. 1초에 100만 개를 확인하는 컴퓨터라도 깊이 10을 다 훑으려면 세 시간 가까이 걸립니다. 그런데 실제 문제의 분기 수는 10보다 훨씬 큽니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>대표 문제의 대략적인 규모 — 자세한 환산은 아래 시뮬레이터에서 직접 확인한다</caption>
+        <thead><tr><th>문제</th><th>평균 분기 수 b</th><th>평균 깊이 d</th><th>규모</th></tr></thead>
+        <tbody>
+          <tr><td><b>틱택토</b> (3×3)</td><td class="num">약 4</td><td class="num">9</td><td>서로 다른 판 5,478가지 · 끝까지 두는 경기 255,168가지</td></tr>
+          <tr><td><b>체스</b></td><td class="num">약 35</td><td class="num">약 80</td><td>게임 트리 약 10<sup>120</sup>가지</td></tr>
+          <tr><td><b>바둑</b> (19×19)</td><td class="num">약 250</td><td class="num">약 150</td><td>규칙에 맞는 판 약 2.1×10<sup>170</sup>가지</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 우주에 있는 원자보다 많다</div>
+      <p>관측 가능한 우주의 원자 수는 대략 10<sup>80</sup>개로 추정됩니다. 체스의 게임 트리는 10<sup>120</sup>가지, 바둑의 판은 10<sup>170</sup>가지입니다. 즉 <b>모든 경우를 저장하는 것 자체가 물리적으로 불가능합니다.</b> 컴퓨터가 더 빨라지기를 기다리는 것으로는 절대 해결되지 않습니다. 필요한 것은 속도가 아니라 <b>“어디를 안 봐도 되는지 아는 능력”</b>입니다.</p>
+    </div>
+
+    <p>그래서 인공지능의 탐색은 두 갈래로 갈라집니다. 목표까지의 거리 정보를 쓰지 않고 정해진 순서대로 훑는 <span class="term">맹목적 탐색</span>(3차시)과, “목표는 아마 이쪽”이라는 추정을 이용해 유망한 쪽부터 보는 <span class="term">정보 이용 탐색</span>(4차시)입니다. 조합 폭발이야말로 정보 이용 탐색이 존재하는 이유입니다.</p>
+  </section>
+
+  <!-- ============ 5. 실생활 문제를 상태 공간으로 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>실생활 문제를 상태 공간으로 바꾸기</h2></div>
+
+    <p>연습이 필요합니다. 아래 네 문제를 상태와 연산자로 다시 써 보겠습니다. 각 칸을 읽고 <b>“나라면 상태에 무엇을 넣을까”</b>를 먼저 생각해 보세요.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>같은 틀, 다른 문제 — 상태에 무엇을 담을지가 문제 해결의 절반이다</caption>
+        <thead><tr><th>문제</th><th>상태에 담을 것</th><th>연산자</th><th>목표 판정</th><th>분기 수 짐작</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>등교 경로 찾기</b></td>
+            <td>지금 서 있는 정류장·역</td>
+            <td>이어진 다음 정류장으로 이동, 환승</td>
+            <td>학교 앞 정류장에 도달</td>
+            <td>2~5 (갈래 수)</td>
+          </tr>
+          <tr>
+            <td><b>8-퍼즐 맞추기</b></td>
+            <td>3×3 칸에 놓인 타일 배치</td>
+            <td>빈칸과 이웃한 타일을 맞바꾸기</td>
+            <td>1~8이 순서대로 놓임</td>
+            <td>2~4 (빈칸 위치에 따라)</td>
+          </tr>
+          <tr>
+            <td><b>시간표 짜기</b></td>
+            <td>지금까지 배정한 과목·교실·교시</td>
+            <td>아직 배정 안 된 수업 하나를 빈 교시에 넣기</td>
+            <td>모든 수업 배정 + 겹침 없음</td>
+            <td>수십~수백</td>
+          </tr>
+          <tr>
+            <td><b>틱택토 두기</b></td>
+            <td>판 9칸의 O·X 배치와 차례</td>
+            <td>빈칸 하나에 내 기호 놓기</td>
+            <td>같은 기호 3개가 한 줄</td>
+            <td>9에서 1까지 줄어듦</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 상태 설계가 성능을 결정한다</div>
+      <p>같은 문제라도 상태를 어떻게 정하느냐에 따라 상태 공간의 크기가 크게 달라집니다. 예를 들어 등교 경로에서 상태를 “<b>지금 서 있는 역</b>”으로 잡으면 역의 개수만큼 상태가 생깁니다. 그런데 “<b>지금까지 지나온 역들의 목록</b>”으로 잡으면 상태 수가 조합 폭발을 일으킵니다. 두 상태 모두 문제를 풀 수는 있지만, 앞의 것이 압도적으로 효율적입니다.</p>
+      <p>좋은 상태를 고르는 요령은 하나입니다. <b>“앞으로 어떻게 해야 할지 판단하는 데 꼭 필요한 정보만 남기기.”</b> 등교 경로에서는 어디를 거쳐 왔는지가 아니라 <b>지금 어디에 있는지</b>만 알면 다음 행동을 정할 수 있습니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 6. 시뮬레이터 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>직접 탐색해 보기</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim1"></div>
+    <div id="sim2"></div>
+  </section>
+
+  <!-- ============ 7. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 8. 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 9. 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">9</span><h2>활동 기록</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 왜 (1, 1)은 만들 수 없을까 — 최대공약수의 비밀</summary>
+      <div class="more-body">
+        <p>시뮬레이터를 아무리 눌러도 <span class="st-badge">(1, 1)</span>이나 <span class="st-badge">(2, 2)</span>에는 도달할 수 없습니다. 이유가 있습니다. 두 통 모두에 물이 조금씩 남으려면 <b>붓는 도중에 멈춰야</b> 하는데, 눈금이 없으니 붓기는 “한쪽이 비거나 다른 쪽이 찰 때까지”만 가능합니다. 그래서 붓기가 끝나면 <b>반드시 한쪽은 비어 있거나 한쪽은 가득</b>합니다. 채우기·비우기도 마찬가지죠. 결국 도달 가능한 상태는 <span class="mono">a=0</span>, <span class="mono">a=4</span>, <span class="mono">b=0</span>, <span class="mono">b=3</span> 중 하나를 만족하는 것들뿐입니다. 5×4=20 중 이 조건을 만족하는 것은 14가지이고, 정확히 시뮬레이터가 보여 주는 수입니다.</p>
+        <p>더 일반적인 결론도 있습니다. 용량이 <span class="mono">m</span>, <span class="mono">n</span>인 두 통으로 만들 수 있는 물의 양은 <b><span class="mono">m</span>과 <span class="mono">n</span>의 최대공약수의 배수</b>뿐입니다. 4와 3의 최대공약수는 1이니 1, 2, 3, 4리터를 모두 만들 수 있습니다. 만약 통이 4리터와 2리터라면 최대공약수가 2이므로 <b>1리터나 3리터는 절대 만들 수 없습니다.</b> 상태 공간을 그려 보면 이런 성질이 눈에 보입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">코드</span> 파이썬으로 쓴 물통 문제의 연산자와 최소 단계</summary>
+      <div class="more-body">
+        <p>상태를 튜플 <span class="mono">(a, b)</span>로 두면 연산자는 여섯 개의 함수가 됩니다. 너비 우선 탐색으로 최소 단계를 구하는 부분은 3차시에서 자세히 배웁니다.</p>
+        <pre style="margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;white-space:pre-wrap;overflow-x:auto">from collections import deque
+
+CAP = (4, 3)                 # 두 통의 용량
+
+def neighbors(s):            # 연산자 6개를 적용한 결과
+    a, b = s
+    out = []
+    out.append((CAP[0], b))                    # 4L 채우기
+    out.append((a, CAP[1]))                    # 3L 채우기
+    out.append((0, b))                         # 4L 비우기
+    out.append((a, 0))                         # 3L 비우기
+    t = min(a, CAP[1] - b); out.append((a - t, b + t))   # 4L -> 3L
+    t = min(b, CAP[0] - a); out.append((a + t, b - t))   # 3L -> 4L
+    return [x for x in out if x != s]          # 제자리 연산은 버림
+
+def solve(goal_a=2):
+    start = (0, 0)
+    came = {start: None}                       # 방문 표시 + 경로 기록
+    q = deque([start])
+    while q:
+        s = q.popleft()
+        if s[0] == goal_a:                     # 목표 판정
+            path = []
+            while s is not None:
+                path.append(s); s = came[s]
+            return path[::-1]
+        for n in neighbors(s):
+            if n not in came:                  # 이미 본 상태는 건너뜀
+                came[n] = s
+                q.append(n)
+    return None
+
+print(solve())   # [(0,0), (0,3), (3,0), (3,3), (4,2), (0,2), (2,0)] → 6단계</pre>
+        <p style="margin-top:12px"><span class="mono">came</span> 사전이 <b>방문 표시</b>와 <b>경로 기록</b>을 동시에 맡고 있습니다. 이 사전이 없으면 (0,0)과 (4,0) 사이를 영원히 왕복합니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> 조합 폭발과 마주친 실제 문제들</summary>
+      <div class="more-body">
+        <ul>
+          <li><b>순회 판매원 문제</b> — 도시 n개를 한 번씩 들르는 가장 짧은 경로를 찾는 문제입니다. 경우의 수가 n! 로 늘어나 도시가 20개만 되어도 모든 경로를 확인할 수 없습니다. 택배 배송 경로 계획이 바로 이 문제입니다.</li>
+          <li><b>단백질 접힘</b> — 아미노산 사슬이 접히는 모양의 가능한 수가 천문학적입니다. 그래서 모두 계산하지 않고 <b>학습한 모델로 유망한 모양을 예측</b>하는 방식이 쓰입니다.</li>
+          <li><b>시간표 편성</b> — 교실·교사·학급·교시의 조합이 폭발합니다. 실제 학교 시간표 프로그램은 모든 경우를 보지 않고 “겹치면 즉시 포기”하는 방식으로 가지를 잘라 냅니다.</li>
+        </ul>
+        <p>공통 해법이 보입니다. <b>가능성이 없는 가지는 일찍 잘라 내고, 유망한 가지부터 본다.</b> 이것이 다음 두 차시의 주제입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 다음 차시로 — 어떤 순서로 뒤질 것인가</summary>
+      <div class="more-body">
+        이 차시에서 우리는 문제를 <b>상태 공간</b>으로 바꾸는 법을 배웠습니다. 이제 지도는 손에 들었습니다. 남은 질문은 하나입니다. <b>“이 넓은 지도를 어떤 순서로 뒤질 것인가?”</b> 3차시에서는 목표의 방향을 전혀 모른 채 훑는 두 가지 방법 — 가까운 곳부터 넓게 퍼지는 <b>너비 우선 탐색</b>과 한 방향으로 끝까지 파고드는 <b>깊이 우선 탐색</b> — 을 나란히 돌려 보며 비교합니다.
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 1, lesson: 2,
+  title: '모든 문제는 탐색이 된다',
+  sub: '상태 공간과 탐색 과정 설계',
+  lead: '길찾기, 퍼즐, 일정 짜기, 게임처럼 서로 달라 보이는 문제들이 <b>상태와 연산자</b>로 다시 쓰이면 모두 “상태 공간에서 길 찾기”가 됩니다. 물통 문제를 직접 풀며 상태 공간이 그려지는 것을 보고, 왜 <b>조합 폭발</b> 때문에 똑똑한 탐색이 필요한지 계산으로 확인합니다.',
+  standards: ['12인기01-02'],
+  keywords: ['상태', '상태 공간', '연산자', '상태 공간 트리', '조합 폭발'],
+  goals: [
+    '문제를 상태·초기 상태·목표 상태·연산자로 나누어 탐색 문제로 정의할 수 있다.',
+    '상태 공간과 상태 공간 트리·그래프의 차이를 설명하고, 방문 표시가 필요한 까닭을 말할 수 있다.',
+    '조합 폭발을 계산으로 확인하고, 지능적 탐색이 필요한 까닭을 근거를 들어 설명할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 시뮬레이터 1: 물통 문제 상태 공간 탐색기 ===================== -->
+<script>
+(function () {
+  const CAP4 = 4, CAP3 = 3, GOAL_A = 2;      // 목표: 4L 통에 정확히 2L
+
+  const body = AI.sim.panel('#sim1', {
+    title: '물통 문제 상태 공간 탐색기 — 4L·3L 통으로 2L 만들기',
+    tag: '상태 공간',
+    desc: '아래 <b>연산자 버튼</b>을 눌러 물을 옮겨 보세요. 상태는 <b>(4L 통의 물, 3L 통의 물)</b>로 적습니다. 여러분이 지나온 상태들이 오른쪽에 <b>상태 공간 그래프</b>로 자동으로 그려집니다. 목표는 <b>4L 통에 정확히 2L</b>를 만드는 것입니다.'
+  });
+
+  const OPS = [
+    { key: 'f4', label: '4L 채우기', apply: s => [CAP4, s[1]] },
+    { key: 'f3', label: '3L 채우기', apply: s => [s[0], CAP3] },
+    { key: 'e4', label: '4L 비우기', apply: s => [0, s[1]] },
+    { key: 'e3', label: '3L 비우기', apply: s => [s[0], 0] },
+    { key: 'p43', label: '4L → 3L 옮기기', apply: s => { const t = Math.min(s[0], CAP3 - s[1]); return [s[0] - t, s[1] + t]; } },
+    { key: 'p34', label: '3L → 4L 옮기기', apply: s => { const t = Math.min(s[1], CAP4 - s[0]); return [s[0] + t, s[1] - t]; } }
+  ];
+
+  const kk = s => s[0] + ',' + s[1];
+
+  /* ---- 너비 우선 탐색으로 최소 단계 · 최적 경로 계산 ---- */
+  function bfsOptimal() {
+    const came = new Map(), seen = new Set(['0,0']);
+    const q = [[0, 0]];
+    while (q.length) {
+      const s = q.shift();
+      if (s[0] === GOAL_A) {
+        const path = [s], ops = [];
+        let k = kk(s);
+        while (came.has(k)) {
+          const c = came.get(k);
+          ops.unshift(c.op);
+          path.unshift(c.prev);
+          k = kk(c.prev);
+        }
+        return { path, ops };
+      }
+      for (const op of OPS) {
+        const n = op.apply(s), nk = kk(n);
+        if (seen.has(nk)) continue;
+        seen.add(nk);
+        came.set(nk, { prev: s, op });
+        q.push(n);
+      }
+    }
+    return null;
+  }
+  const OPT = bfsOptimal();
+
+  /* ---- 도달 가능한 상태 (그래프에서 흐리게 구분해 보여 준다) ---- */
+  const REACH = (function () {
+    const seen = new Set(['0,0']), q = [[0, 0]];
+    while (q.length) {
+      const s = q.shift();
+      for (const op of OPS) {
+        const n = op.apply(s), nk = kk(n);
+        if (!seen.has(nk)) { seen.add(nk); q.push(n); }
+      }
+    }
+    return seen;
+  })();
+
+  /* ---- 학습자 상태 ---- */
+  let cur = [0, 0];
+  let hist = [[0, 0]];
+  let visited = new Set(['0,0']);
+  let edges = new Set();
+  let showOpt = false;
+  let solved = false;
+
+  const FONT = () => getComputedStyle(document.body).fontFamily;
+
+  /* ---- 캔버스 ---- */
+  const bv = AI.sim.canvas(420, 212);
+  const gv = AI.sim.canvas(660, 352);
+
+  function drawJug(ctx, C, x, capL, amt, label) {
+    const U = 32, W = 92, base = 168;
+    const top = base - capL * U, wh = amt * U;
+    ctx.fillStyle = C.dark ? '#26325c' : '#dde5fc';
+    ctx.fillRect(x, base - wh, W, wh);
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+    for (let i = 1; i < capL; i++) {
+      const y = base - i * U + .5;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 13, y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + W - 13, y); ctx.lineTo(x + W, y); ctx.stroke();
+    }
+    if (amt > 0) {
+      ctx.strokeStyle = C.a; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(x, base - wh); ctx.lineTo(x + W, base - wh); ctx.stroke();
+    }
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(x, top); ctx.lineTo(x, base); ctx.lineTo(x + W, base); ctx.lineTo(x + W, top);
+    ctx.stroke();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = C.ink3; ctx.font = '700 13px ' + FONT();
+    ctx.textBaseline = 'top';
+    ctx.fillText(label, x + W / 2, base + 11);
+    ctx.fillStyle = C.a; ctx.font = '800 21px ' + FONT();
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(amt + 'L', x + W / 2, top - 7);
+  }
+
+  function drawBottles() {
+    const C = AI.sim.colors(), ctx = bv.ctx;
+    bv.clear(C.bg);
+    drawJug(ctx, C, 68, CAP4, cur[0], '4L 통');
+    drawJug(ctx, C, 240, CAP3, cur[1], '3L 통');
+    ctx.fillStyle = cur[0] === GOAL_A ? C.ok : C.ink;
+    ctx.font = '800 16px ' + FONT();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText('현재 상태 (' + cur[0] + ', ' + cur[1] + ')' + (cur[0] === GOAL_A ? '  ✓ 목표!' : ''), 210, 206);
+  }
+
+  /* ---- 상태 공간 그래프 ---- */
+  const GX = 108, GY = 74, DX = 122, DY = 78, R = 18;
+  const npos = s => ({ x: GX + s[0] * DX, y: GY + s[1] * DY });
+
+  function arrow(ctx, p, q, color, lw, dash) {
+    const dx = q.x - p.x, dy = q.y - p.y, L = Math.hypot(dx, dy) || 1;
+    const ux = dx / L, uy = dy / L, o = 4.5;
+    const ox = -uy * o, oy = ux * o;
+    const sx = p.x + ux * R + ox, sy = p.y + uy * R + oy;
+    const ex = q.x - ux * (R + 3) + ox, ey = q.y - uy * (R + 3) + oy;
+    ctx.save();
+    ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.lineCap = 'round';
+    if (dash) ctx.setLineDash(dash);
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.setLineDash([]);
+    const ah = 7.5;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(ex, ey);
+    ctx.lineTo(ex - ux * ah - uy * ah * .55, ey - uy * ah + ux * ah * .55);
+    ctx.lineTo(ex - ux * ah + uy * ah * .55, ey - uy * ah - ux * ah * .55);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawGraph() {
+    const C = AI.sim.colors(), ctx = gv.ctx;
+    gv.clear(C.bg);
+
+    /* 축 안내 */
+    ctx.fillStyle = C.ink3;
+    ctx.font = '700 12.5px ' + FONT();
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText('→ 4L 통에 담긴 물 (리터)', 20, 26);
+    ctx.save();
+    ctx.translate(20, 210); ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.fillText('↑ 3L 통에 담긴 물', 0, 0);
+    ctx.restore();
+
+    ctx.font = '700 12px ' + FONT();
+    ctx.textAlign = 'center';
+    for (let a = 0; a <= CAP4; a++) ctx.fillText(String(a), GX + a * DX, GY - 34);
+    ctx.textAlign = 'right';
+    for (let b = 0; b <= CAP3; b++) ctx.fillText(String(b), GX - 34, GY + b * DY + 4);
+
+    /* 간선 */
+    const pathEdge = new Set();
+    for (let i = 1; i < hist.length; i++) pathEdge.add(kk(hist[i - 1]) + '>' + kk(hist[i]));
+    edges.forEach(e => {
+      const [f, t] = e.split('>');
+      const p = npos(f.split(',').map(Number)), q = npos(t.split(',').map(Number));
+      if (pathEdge.has(e)) return;
+      arrow(ctx, p, q, C.dark ? '#4b5470' : '#c3cbdd', 1.6);
+    });
+    pathEdge.forEach(e => {
+      const [f, t] = e.split('>');
+      arrow(ctx, npos(f.split(',').map(Number)), npos(t.split(',').map(Number)), C.a, 3);
+    });
+    if (showOpt && OPT) {
+      for (let i = 1; i < OPT.path.length; i++) {
+        arrow(ctx, npos(OPT.path[i - 1]), npos(OPT.path[i]), C.ok, 3.4, [7, 5]);
+      }
+    }
+
+    /* 노드 */
+    for (let a = 0; a <= CAP4; a++) {
+      for (let b = 0; b <= CAP3; b++) {
+        const s = [a, b], k = kk(s), p = npos(s);
+        const seen = visited.has(k), isCur = (a === cur[0] && b === cur[1]);
+        const canReach = REACH.has(k);
+
+        if (a === GOAL_A) {          // 목표 조건 표시
+          ctx.beginPath(); ctx.arc(p.x, p.y, R + 5, 0, Math.PI * 2);
+          ctx.strokeStyle = C.ok; ctx.lineWidth = 2; ctx.setLineDash([4, 3]);
+          ctx.stroke(); ctx.setLineDash([]);
+        }
+        ctx.beginPath(); ctx.arc(p.x, p.y, R, 0, Math.PI * 2);
+        ctx.fillStyle = isCur ? C.a : (seen ? (C.dark ? '#2b3355' : '#e6ebfc') : C.bg);
+        ctx.fill();
+        ctx.lineWidth = isCur ? 3 : 1.6;
+        ctx.strokeStyle = isCur ? C.a : (seen ? C.a : (canReach ? C.grid : (C.dark ? '#3a3f4d' : '#eceff6')));
+        if (!seen && !isCur) { ctx.setLineDash([3, 3]); }
+        ctx.stroke(); ctx.setLineDash([]);
+
+        ctx.font = '800 11.5px ' + FONT();
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = isCur ? (C.dark ? '#12151c' : '#ffffff') : (seen ? C.ink : (canReach ? C.ink3 : (C.dark ? '#454b58' : '#cfd5e2')));
+        ctx.fillText(a + ',' + b, p.x, p.y + .5);
+      }
+    }
+
+    /* 안내 문구 */
+    ctx.fillStyle = C.ink3;
+    ctx.font = '600 12px ' + FONT();
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText('점선 원 = 목표 조건(4L 통에 2L) · 옅은 점선 노드 = (0,0)에서 도달할 수 없는 상태', 20, 344);
+  }
+
+  function drawAll() { drawBottles(); drawGraph(); }
+
+  /* ---- UI ---- */
+  const stats = AI.ui.stats([
+    { key: 's', label: '현재 상태' },
+    { key: 'n', label: '사용한 연산' },
+    { key: 'v', label: '방문한 상태' },
+    { key: 'm', label: '최소 단계' }
+  ]);
+  const log = AI.ui.log();
+  const verdict = AI.h('div', { class: 'box box-ok', style: { display: 'none', marginTop: '14px' } });
+
+  body.appendChild(AI.h('div', { class: 'sim-grid' },
+    AI.h('div', {}, AI.h('h4', { class: 'mini-head', style: { marginTop: 0 }, text: '두 물통의 지금 모습' }), bv.wrap),
+    AI.h('div', {}, AI.h('h4', { class: 'mini-head', style: { marginTop: 0 }, text: '지나온 상태들 — 상태 공간 그래프' }), gv.wrap)
+  ));
+
+  const opBtns = OPS.map(op => AI.ui.btn(op.label, () => applyOp(op)));
+  body.appendChild(AI.h('div', { class: 'sim-controls' }, opBtns));
+  const optBtn = AI.ui.btn('💡 최적 경로 보기', toggleOpt, 'ghost');
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('↩ 되돌리기', undo, 'ghost'),
+    AI.ui.btn('↺ 처음부터', reset, 'ghost'),
+    optBtn
+  ));
+  body.appendChild(stats.el);
+  body.appendChild(AI.ui.legend([
+    { color: 'var(--accent)', label: '현재 상태 · 내가 지나온 경로' },
+    { color: 'var(--accent-soft)', label: '방문한 상태' },
+    { color: 'var(--ok)', label: '목표 조건 · 최적 경로' },
+    { color: 'var(--surface)', label: '아직 안 가 본 상태' }
+  ]));
+  body.appendChild(log.el);
+  body.appendChild(verdict);
+
+  function refresh() {
+    stats.set('s', '(' + cur[0] + ', ' + cur[1] + ')');
+    stats.set('n', hist.length - 1);
+    stats.set('v', visited.size + ' / 20');
+    stats.set('m', OPT ? OPT.ops.length : '–');
+  }
+
+  function applyOp(op) {
+    const nx = op.apply(cur);
+    if (nx[0] === cur[0] && nx[1] === cur[1]) {
+      AI.toast('이 연산으로는 상태가 바뀌지 않아요 — 제자리 연산');
+      return;
+    }
+    edges.add(kk(cur) + '>' + kk(nx));
+    hist.push(nx);
+    cur = nx;
+    const isNew = !visited.has(kk(cur));
+    visited.add(kk(cur));
+    log.add('<b>' + op.label + '</b> → (' + cur[0] + ', ' + cur[1] + ')' + (isNew ? '' : ' <span style="color:var(--warn)">이미 지나온 상태</span>'), cur[0] === GOAL_A);
+    if (cur[0] === GOAL_A && !solved) { solved = true; showVerdict(); }
+    refresh(); drawAll();
+  }
+
+  function undo() {
+    if (hist.length < 2) { AI.toast('여기가 초기 상태예요'); return; }
+    hist.pop();
+    cur = hist[hist.length - 1];
+    log.add('되돌리기 → (' + cur[0] + ', ' + cur[1] + ')');
+    refresh(); drawAll();
+  }
+
+  function reset() {
+    cur = [0, 0]; hist = [[0, 0]];
+    visited = new Set(['0,0']); edges = new Set();
+    solved = false; showOpt = false;
+    optBtn.textContent = '💡 최적 경로 보기';
+    verdict.style.display = 'none';
+    log.clear();
+    refresh(); drawAll();
+  }
+
+  function toggleOpt() {
+    showOpt = !showOpt;
+    optBtn.textContent = showOpt ? '💡 최적 경로 숨기기' : '💡 최적 경로 보기';
+    if (showOpt && OPT) {
+      log.add('<b>최소 단계 ' + OPT.ops.length + '단계</b> — 너비 우선 탐색으로 계산한 최적 경로', true);
+      OPT.path.forEach((s, i) => {
+        log.add(i === 0 ? '　시작 (0, 0)' : '　' + i + ') ' + OPT.ops[i - 1].label + ' → (' + s[0] + ', ' + s[1] + ')');
+      });
+    }
+    drawAll();
+  }
+
+  function showVerdict() {
+    const used = hist.length - 1, min = OPT.ops.length;
+    verdict.style.display = '';
+    verdict.innerHTML = '<div class="box-label">🎉 목표 상태 도달</div>' +
+      '<p>4L 통에 정확히 2L를 만들었습니다. 여러분은 <b>' + used + '단계</b>를 썼고, 너비 우선 탐색으로 계산한 <b>최소 단계는 ' + min + '단계</b>입니다.' +
+      (used === min
+        ? ' <b>최적 경로를 바로 찾았습니다!</b> 그래프에서 여러분의 경로가 목표까지 곧게 이어진 것을 확인해 보세요.'
+        : ' <b>' + (used - min) + '단계</b>를 더 썼습니다. 「최적 경로 보기」를 눌러 어디서 돌아갔는지 비교해 보세요.') + '</p>' +
+      '<p style="font-size:14px;color:var(--ink-3);margin-bottom:0">💡 이제 그래프를 보세요. 여러분이 한 일은 <b>물을 부은 것</b>이 아니라 <b>점에서 점으로 옮겨 간 것</b>입니다. 옅은 점선으로 남은 노드 6개는 어떤 연산자로도 도달할 수 없는 상태입니다. 왜 그럴까요? 「더 알아보기」에서 확인해 보세요.</p>';
+  }
+
+  window.addEventListener('ai:redraw', drawAll);
+  refresh();
+  drawAll();
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 조합 폭발 계산기 ===================== -->
+<script>
+(function () {
+  const body = AI.sim.panel('#sim2', {
+    title: '조합 폭발 계산기',
+    tag: 'b와 d를 움직여 보기',
+    desc: '분기 수 <b>b</b>와 깊이 <b>d</b>를 움직이면 상태 공간 트리의 노드 수가 어떻게 늘어나는지 볼 수 있습니다. <b>1초에 100만 개</b>를 확인하는 컴퓨터로 몇 초·몇 년이 걸리는지도 함께 환산해 줍니다. 막대가 화면을 넘어가면 <b>로그 눈금</b>으로 바꿔 보세요.'
+  });
+
+  const SEC_PER_YEAR = 3.15576e7;
+  const FONT = () => getComputedStyle(document.body).fontFamily;
+
+  let b = 3, d = 8, useLog = false;
+
+  function levels() { const out = []; let p = 1; for (let i = 0; i <= d; i++) { out.push(p); p *= b; } return out; }
+  function total() { return levels().reduce((s, v) => s + v, 0); }
+
+  function timeText(sec) {
+    if (sec < 0.001) return '0.001초 미만';
+    if (sec < 1) return AI.sim.fmt(sec * 1000, 1) + ' 밀리초';
+    if (sec < 60) return AI.sim.fmt(sec, 2) + '초';
+    if (sec < 3600) return AI.sim.fmt(sec / 60, 1) + '분';
+    if (sec < 86400) return AI.sim.fmt(sec / 3600, 1) + '시간';
+    if (sec < SEC_PER_YEAR) return AI.sim.fmt(sec / 86400, 1) + '일';
+    return AI.sim.fmt(sec / SEC_PER_YEAR, 1) + '년';
+  }
+
+  /* 10의 거듭제곱 지수(L)를 사람이 읽을 문자열로 */
+  function sciHTML(L) {
+    if (L < 7) return Math.round(Math.pow(10, L)).toLocaleString('ko-KR');
+    const e = Math.floor(L), m = Math.pow(10, L - e);
+    return AI.sim.fmt(m, 1) + '×10<sup>' + e + '</sup>';
+  }
+  function timeHTMLFromLog(L) {          // L = log10(노드 수)
+    const secL = L - 6;                  // 1초에 100만(10^6) 개
+    if (secL < Math.log10(SEC_PER_YEAR)) return timeText(Math.pow(10, secL));
+    return '약 ' + sciHTML(secL - Math.log10(SEC_PER_YEAR)) + ' 년';
+  }
+
+  const cv = AI.sim.canvas(660, 280);
+  const stats = AI.ui.stats([
+    { key: 't', label: '전체 노드 수' },
+    { key: 'l', label: '마지막 층 노드 수' },
+    { key: 'r', label: '마지막 층의 비율' },
+    { key: 'x', label: '확인에 걸리는 시간' }
+  ]);
+
+  function draw() {
+    const C = AI.sim.colors(), ctx = cv.ctx;
+    cv.clear(C.bg);
+    const lv = levels(), n = lv.length;
+    const x0 = 62, x1 = 646, y0 = 30, y1 = 236;
+    const maxV = lv[n - 1];
+
+    /* 눈금선 */
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+    ctx.fillStyle = C.ink3; ctx.font = '600 11px ' + FONT();
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let g = 0; g <= 4; g++) {
+      const y = y1 - (y1 - y0) * g / 4;
+      ctx.beginPath(); ctx.moveTo(x0, y + .5); ctx.lineTo(x1, y + .5); ctx.stroke();
+      let labelV;
+      if (useLog) labelV = Math.pow(maxV + 1, g / 4) - 1;
+      else labelV = maxV * g / 4;
+      ctx.fillText(labelV >= 1e6 ? AI.sim.fmt(labelV / 1e6, 1) + 'M' : Math.round(labelV).toLocaleString('ko-KR'), x0 - 7, y);
+    }
+
+    /* 막대 */
+    const slot = (x1 - x0) / n, bw = Math.max(4, Math.min(46, slot - 8));
+    lv.forEach((v, i) => {
+      const t = useLog ? Math.log(v + 1) / Math.log(maxV + 1) : v / maxV;
+      const hh = Math.max(2, (y1 - y0) * t);
+      const cxx = x0 + slot * i + slot / 2;
+      ctx.fillStyle = i === n - 1 ? C.c : C.a;
+      ctx.fillRect(cxx - bw / 2, y1 - hh, bw, hh);
+      ctx.fillStyle = C.ink3;
+      ctx.font = '700 11px ' + FONT();
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(String(i), cxx, y1 + 7);
+      if (slot > 26) {
+        ctx.fillStyle = C.ink;
+        ctx.font = '700 10.5px ' + FONT();
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(v >= 1e6 ? AI.sim.fmt(v / 1e6, 1) + 'M' : v.toLocaleString('ko-KR'), cxx, y1 - hh - 4);
+      }
+    });
+
+    /* 축 */
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x0, y1); ctx.lineTo(x1, y1); ctx.stroke();
+    ctx.fillStyle = C.ink3; ctx.font = '700 12px ' + FONT();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText('깊이 (연산자를 적용한 횟수)', (x0 + x1) / 2, y1 + 27);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText('층별 노드 수' + (useLog ? ' · 로그 눈금' : ' · 보통 눈금') + '　b = ' + b + ',  d = ' + d, x0, y0 - 11);
+  }
+
+  function refresh() {
+    const lv = levels(), tot = total(), last = lv[lv.length - 1];
+    stats.set('t', tot.toLocaleString('ko-KR'));
+    stats.set('l', last.toLocaleString('ko-KR'));
+    stats.set('r', Math.round(last / tot * 100) + '%');
+    stats.set('x', timeText(tot / 1e6));
+    draw();
+  }
+
+  const sB = AI.ui.slider({ label: '분기 수 b', min: 1, max: 6, value: b, onInput: v => { b = v; refresh(); } });
+  const sD = AI.ui.slider({ label: '깊이 d', min: 1, max: 12, value: d, onInput: v => { d = v; refresh(); } });
+  const seg = AI.ui.seg({
+    label: '눈금', options: [{ value: 'lin', label: '보통 눈금' }, { value: 'log', label: '로그 눈금' }],
+    value: 'lin', onChange: v => { useLog = (v === 'log'); refresh(); }
+  });
+
+  body.appendChild(cv.wrap);
+  body.appendChild(AI.h('div', { class: 'sim-controls' }, sB.el, sD.el, seg.el));
+  body.appendChild(stats.el);
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('미로 갈림길 (b=3, d=10)', () => { sB.set(3); sD.set(10); }, 'small'),
+    AI.ui.btn('틱택토 근사 (b=4, d=9)', () => { sB.set(4); sD.set(9); }, 'small'),
+    AI.ui.btn('최악 (b=6, d=12)', () => { sB.set(6); sD.set(12); }, 'small')
+  ));
+
+  /* ---- 실제 문제로 환산하기 ---- */
+  const CASES = [
+    { name: '틱택토 (3×3)', b: '약 4', d: '9', L: Math.log10(255168), note: '끝까지 두는 경기의 수' },
+    { name: '체스', b: '약 35', d: '약 80', L: 120, note: '게임 트리의 크기(섀넌 수)' },
+    { name: '바둑 (19×19)', b: '약 250', d: '약 150', L: Math.log10(2.08) + 170, note: '규칙에 맞는 판의 수' }
+  ];
+  const UNIVERSE_YEARS_L = Math.log10(1.38e10);
+
+  const rows = CASES.map(c => {
+    const yearL = c.L - 6 - Math.log10(SEC_PER_YEAR);
+    const cmp = yearL > UNIVERSE_YEARS_L
+      ? '우주 나이의 <b>' + sciHTML(yearL - UNIVERSE_YEARS_L) + '배</b>'
+      : '사람이 기다릴 수 있는 시간';
+    return [
+      '<b>' + c.name + '</b>',
+      c.b, c.d,
+      '약 ' + sciHTML(c.L) + '<br><span style="font-size:12px;color:var(--ink-3)">' + c.note + '</span>',
+      timeHTMLFromLog(c.L),
+      cmp
+    ];
+  });
+  body.appendChild(AI.h('h4', { class: 'mini-head', text: '실제 문제로 환산하면 — 1초에 100만 개씩 확인할 때' }));
+  body.appendChild(AI.ui.table(['문제', 'b', 'd', '경우의 수', '걸리는 시간', '비교'], rows));
+  body.appendChild(AI.h('p', {
+    class: 'exp-note',
+    html: '관측 가능한 우주의 나이는 약 138억(1.38×10<sup>10</sup>)년, 원자 수는 약 10<sup>80</sup>개로 추정됩니다. ' +
+      '즉 체스와 바둑은 <b>컴퓨터가 아무리 빨라져도 모든 경우를 확인할 수 없습니다.</b> ' +
+      '필요한 것은 속도가 아니라 <b>보지 않아도 되는 곳을 알아내는 방법</b>입니다 — 3차시와 4차시의 주제입니다.'
+  }));
+
+  window.addEventListener('ai:redraw', draw);
+  refresh();
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a1l2-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['상태', '초기 상태', '목표 상태', '연산자', '상태 공간', '상태 공간 트리', '노드', '간선', '조합 폭발'],
+  sents: [
+    { text: '문제를 해결하는 과정에서 거쳐 가는 하나하나의 상황을 {0}(이)라고 한다.', answers: [['상태']] },
+    { text: '문제가 주어진 시작 상황은 {0}, 문제를 해결한 마지막 상황은 {1}이다.', answers: [['초기 상태'], ['목표 상태']] },
+    { text: '한 상태를 다른 상태로 바꾸는 행동을 {0}(이)라고 한다.', answers: [['연산자']] },
+    { text: '초기 상태와 목표 상태를 포함하여 나타날 수 있는 모든 상태의 집합을 {0}(이)라고 한다.', answers: [['상태 공간']] },
+    { text: '상태 공간을 나무 모양으로 구조화한 것을 {0}(이)라고 하며, 여기서 상태는 {1}, 상태 사이의 관계는 {2}(으)로 나타낸다.', answers: [['상태 공간 트리'], ['노드'], ['간선']] },
+    { text: '깊이가 하나 깊어질 때마다 확인할 상태 수가 분기 수만큼 곱해져 걷잡을 수 없이 커지는 현상을 {0}(이)라고 한다.', answers: [['조합 폭발']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '2차시 확인 문제',
+  items: [
+    {
+      type: 'mc',
+      q: '물통 문제에서 상태를 <b>(4L 통의 물, 3L 통의 물)</b> 두 숫자로만 적는 이유로 가장 알맞은 것은?',
+      choices: [
+        '컴퓨터는 숫자만 저장할 수 있기 때문이다',
+        '문제를 푸는 데 필요한 정보만 남기면 상태 공간이 작아지기 때문이다',
+        '물통의 개수가 두 개이기 때문에 반드시 두 숫자여야 한다',
+        '숫자가 많을수록 탐색이 정확해지기 때문이다'
+      ],
+      answer: 1,
+      why: '이렇게 필요한 정보만 남기는 일을 <b>추상화</b>라고 합니다. 통의 색깔이나 지금 시각을 상태에 넣으면 답과 상관없는 정보 때문에 상태 수가 몇 배로 늘어나 탐색이 느려집니다. ④는 반대로 <b>상태가 커질수록 조합 폭발이 심해진다</b>는 점에서 틀렸습니다.'
+    },
+    {
+      type: 'short',
+      q: '한 상태를 다른 상태로 바꾸는 행동을 무엇이라고 하는가?',
+      answer: ['연산자', '연산', '행동', '조작'],
+      placeholder: '예: ○○○',
+      why: '<b>연산자</b>입니다. 물통 문제라면 “4L 채우기”, 미로라면 “위로 한 칸 이동”이 연산자입니다. 연산자를 정하는 순간 상태 사이에 <b>간선</b>이 생기고, 그 결과가 상태 공간의 모양을 결정합니다.'
+    },
+    {
+      type: 'ox',
+      q: '상태 공간 트리에서는 같은 상태가 서로 다른 노드로 두 번 이상 나타날 수 있다.',
+      answer: true,
+      why: '나타날 수 있습니다. 물통 문제에서 (0,0)→(4,0)→(4,3)과 (0,0)→(0,3)→(4,3)은 <b>같은 상태 (4,3)</b>에 도달하지만 트리에서는 서로 다른 노드가 됩니다. 이 중복을 없애려면 같은 상태를 하나로 합친 <b>그래프</b>로 보고 <b>방문 표시</b>를 해야 합니다.'
+    },
+    {
+      type: 'order',
+      q: '4L·3L 물통으로 <b>4L 통에 2L</b>를 만드는 최소 단계(6단계) 경로를 <b>올바른 순서</b>로 배열하시오.',
+      items: [
+        '3L 통을 가득 채운다 → (0, 3)',
+        '3L 통의 물을 4L 통으로 모두 옮긴다 → (3, 0)',
+        '3L 통을 다시 가득 채운다 → (3, 3)',
+        '3L 통의 물을 4L 통이 찰 때까지 옮긴다 → (4, 2)',
+        '4L 통의 물을 모두 버린다 → (0, 2)',
+        '3L 통에 남은 2L를 4L 통으로 옮긴다 → (2, 0)'
+      ],
+      answer: [0, 1, 2, 3, 4, 5],
+      why: '핵심은 네 번째 단계입니다. (3,3)에서 4L 통에 남은 자리는 1L뿐이므로 1L만 옮겨지고 3L 통에 <b>정확히 2L가 남습니다</b>. 그 2L를 빈 4L 통으로 옮기면 목표에 도달합니다. 시뮬레이터에서 「최적 경로 보기」를 누르면 같은 경로를 확인할 수 있습니다.'
+    },
+    {
+      type: 'match',
+      q: '“등교 경로 찾기” 문제를 탐색 문제로 정의할 때, 다음 내용이 어떤 요소에 해당하는지 짝지으시오.',
+      left: [
+        '지금 서 있는 정류장',
+        '이어진 다음 정류장으로 이동하기',
+        '집 앞 정류장',
+        '학교 앞 정류장에 도달했는가'
+      ],
+      right: ['상태', '연산자', '초기 상태', '목표 판정'],
+      answer: [0, 1, 2, 3],
+      why: '탐색 문제는 <b>상태 · 초기 상태 · 연산자 · 목표 판정 · 비용</b>으로 정의합니다. 여기서 상태는 “지금 어디에 있는지”이면 충분합니다. “지나온 정류장 전체 목록”을 상태로 잡으면 같은 답을 얻더라도 상태 수가 폭발합니다.'
+    },
+    {
+      type: 'multi',
+      q: '조합 폭발에 대한 설명으로 <b>옳은 것을 모두</b> 고르시오.',
+      choices: [
+        '분기 수 b, 깊이 d일 때 노드 수는 대략 b<sup>d</sup> 규모로 늘어난다',
+        '컴퓨터의 속도를 두 배로 올리면 다룰 수 있는 깊이도 두 배가 된다',
+        '마지막 층의 노드 수가 그 위 모든 층의 합보다 클 수 있다',
+        '조합 폭발 때문에 목표 방향을 추정하는 정보 이용 탐색이 필요해진다'
+      ],
+      answer: [0, 2, 3],
+      why: '②가 틀렸습니다. 속도를 두 배로 올려도 노드 수가 b배씩 늘어나므로 <b>깊이는 겨우 한 단계 정도 더 볼 수 있을 뿐</b>입니다(b=2일 때). 이것이 “컴퓨터가 빨라지기를 기다리는 것으로는 해결되지 않는다”는 말의 뜻입니다.'
+    },
+    {
+      type: 'mc',
+      q: '분기 수 b = 3, 깊이 d = 5인 상태 공간 트리에서 <b>깊이 5에 있는 노드의 개수</b>는?',
+      choices: ['15개', '81개', '243개', '364개'],
+      answer: 2,
+      why: '깊이 d에 있는 노드 수는 b<sup>d</sup>이므로 3<sup>5</sup> = <b>243개</b>입니다. 81개는 3<sup>4</sup>(깊이 4), 364개는 깊이 0부터 5까지의 <b>전체 합</b>(1+3+9+27+81+243)입니다. 문제가 “한 층”을 묻는지 “전체”를 묻는지 잘 구별해야 합니다.'
+    },
+    {
+      type: 'ox',
+      q: '물통 문제에서 (0, 0)부터 시작해 여섯 연산자를 아무리 조합해도 (1, 1) 상태는 만들 수 없다.',
+      answer: true,
+      why: '만들 수 없습니다. 눈금이 없으므로 붓기는 “한쪽이 비거나 다른 쪽이 찰 때까지”만 가능합니다. 따라서 어떤 연산 뒤에도 <b>두 통 중 적어도 하나는 비어 있거나 가득 차 있습니다</b>. (1,1)은 둘 다 아니므로 도달할 수 없습니다. 상태 공간을 그려 보면 이런 성질이 눈에 보입니다.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a1l2-note',
+  title: '상태 공간 설계 실험 기록',
+  prompt: '두 시뮬레이터를 직접 돌려 보고 아래를 채워 보세요. 물통 문제는 <b>최적 경로를 보지 않고</b> 먼저 스스로 풀어 본 뒤 비교하는 것이 핵심입니다.',
+  fields: [
+    { key: 'mySteps', label: '내가 처음 목표에 도달한 단계 수', type: 'text', placeholder: '예: 9단계' },
+    { key: 'minSteps', label: '시뮬레이터가 알려 준 최소 단계 수', type: 'text', placeholder: '예: 6단계' },
+    { key: 'visited', label: '내가 방문한 상태 수 (예: 11 / 20)', type: 'text', placeholder: '예: 11 / 20' },
+    { key: 'explode', label: '조합 폭발 계산기에서 b=6, d=12일 때 전체 노드 수와 걸리는 시간', type: 'text', placeholder: '예: 2,612,138,803개 · 43.5분' },
+    {
+      key: 'detour', label: '내 경로와 최적 경로를 그래프에서 비교해 보세요. 어디서, 왜 돌아갔나요?',
+      type: 'textarea', rows: 4,
+      placeholder: '예) (4,0)에서 시작했는데 최적 경로는 (0,3)부터 출발했다. 4L 통을 먼저 채우면 …'
+    },
+    {
+      key: 'design', label: '내 주변 문제 하나를 골라 상태·초기 상태·연산자·목표 판정으로 정의해 보세요.',
+      type: 'textarea', rows: 5,
+      placeholder: '예) 문제: 사물함 정리하기 / 상태: 각 칸에 들어 있는 물건의 목록 / 초기 상태: 지금 상태 / 연산자: 물건 하나를 다른 칸으로 옮기기 / 목표 판정: 교과서가 한 칸에 모이고 …'
+    },
+    {
+      key: 'why', label: '조합 폭발 계산기를 보고, 왜 “똑똑한 탐색”이 필요한지 근거를 들어 써 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 바둑은 경우의 수가 10의 170제곱이라 1초에 100만 개를 확인해도 우주 나이보다 훨씬 오래 걸린다. 그래서 …'
+    }
+  ]
+});
+</script>
+</body>
+</html>

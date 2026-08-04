@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3차시 받아들이기 전에 따져보기 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+/* 이 페이지에서만 쓰는 보조 클래스 */
+.ai-bubble {
+  position: relative; padding: 14px 16px; margin: 0 0 12px;
+  border-radius: 4px 14px 14px 14px; border: 1px solid var(--line-strong);
+  background: var(--surface-2); font-size: 15.5px; line-height: 1.8;
+}
+.ai-bubble .who {
+  display: block; font-size: 12px; font-weight: 750; letter-spacing: .02em;
+  color: var(--ink-3); margin-bottom: 6px;
+}
+.hz-kind { display: inline-block; font-size: 11.5px; font-weight: 750; padding: 2px 8px; border-radius: 6px; background: var(--accent-soft); color: var(--accent-ink); margin-left: 6px; }
+.cx-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; margin: 0 0 8px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
+.cx-no { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: var(--surface-3); color: var(--ink-2); font-size: 12px; font-weight: 800; }
+.cx-name { flex: 1 1 180px; font-size: 14.6px; font-weight: 700; min-width: 0; }
+.cx-ax { flex: 0 0 auto; font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-3); }
+.cx-btns { flex: 0 0 auto; display: flex; gap: 5px; margin-left: auto; }
+.cx-fb { font-size: 13.9px; line-height: 1.75; color: var(--ink-2); padding: 10px 13px; margin: -3px 0 10px; background: var(--surface-2); border-left: 3px solid var(--accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.pick-a { --accent-soft: var(--warn-soft); }
+.wt-line { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-3); margin: 10px 0 0; }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>수업 시간에 조사 과제를 받은 세 학생이 같은 인공지능 챗봇에게 똑같은 질문을 했습니다.</p>
+      <ul>
+        <li><b>가온</b>은 답을 그대로 복사해 과제로 냈습니다. “인공지능이 나보다 훨씬 많이 아니까.”</li>
+        <li><b>나리</b>는 챗봇 창을 닫았습니다. “기계가 하는 말은 못 믿어. 처음부터 내가 찾겠어.”</li>
+        <li><b>다온</b>은 답변에서 <b>연도·숫자·출처</b>만 따로 적어 두고, 도서관 자료로 하나씩 확인했습니다. 세 군데가 맞았고 한 군데는 그런 자료가 아예 없었습니다.</li>
+      </ul>
+      <p>세 사람 중 누가 가장 좋은 과제를 냈을까요? 그리고 <b>왜</b> 그렇게 생각했나요?</p>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 세 태도에 이름을 붙여 보기</summary>
+        <div class="more-body">
+          가온은 <b>무조건 수용</b>, 나리는 <b>무조건 거부</b>, 다온은 <b>비판적 수용</b>입니다. 이 차시는 왜 세 번째 태도만이 실제로 도움이 되는지, 그리고 그 태도를 <b>어떻게 연습하는지</b>를 다룹니다.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 세 가지 태도 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>기술을 대하는 세 가지 태도</h2></div>
+
+    <p>새로운 기술이 등장하면 사람들의 반응은 대개 세 갈래로 나뉩니다. 그리고 그중 두 갈래는 <b>생각을 멈추는 방식</b>이라는 공통점이 있습니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">🙌</span>
+        <h4>무조건 수용</h4>
+        <p>“인공지능이 말했으니 맞을 것이다.” 확인하는 수고를 아끼는 대신, <b>틀린 정보를 그대로 옮기는 위험</b>을 떠안습니다. 결과가 잘못되어도 왜 잘못됐는지 알 수 없습니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🙅</span>
+        <h4>무조건 거부</h4>
+        <p>“기계는 못 믿는다.” 안전해 보이지만, 인공지능이 확실히 더 잘하는 일(대량 검색, 반복 계산, 초안 작성)까지 포기합니다. 게다가 <b>남들이 쓰는 도구의 위험도 알 수 없게</b> 됩니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🔍</span>
+        <h4>비판적 수용</h4>
+        <p>“쓰되, 따져 본다.” 어디까지 믿을 수 있는지 <b>확인할 방법을 함께 준비</b>하고 씁니다. 가장 품이 들지만, 결과의 책임을 스스로 질 수 있는 유일한 태도입니다.</p>
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념</div>
+      <p><b class="blank" data-a="비판적 수용|비판적 태도|비판적 수용 태도" data-hint="일방적 수용도 거부도 아닌 태도">비판적 수용</b>이란 인공지능의 사용 목적, 학습한 데이터, 내놓은 결과를 <b>확인 가능한 근거로 따져 본 뒤</b> 받아들이는 태도이다. 의심 자체가 목적이 아니라, <b>어디까지 믿을 수 있는지 범위를 정하는 것</b>이 목적이다.</p>
+    </div>
+
+    <p>여기서 흔한 오해 하나를 짚어야 합니다. 비판적 수용은 “되도록 쓰지 말자”가 아닙니다. 오히려 <b>더 잘 쓰기 위한 태도</b>입니다. 자동차를 잘 쓰는 사람은 자동차를 무서워하는 사람이 아니라, <b>제동 거리와 사각지대를 아는 사람</b>입니다. 인공지능도 마찬가지입니다. 무엇을 잘하고 무엇을 못하는지 알면, 안심하고 맡길 수 있는 범위가 오히려 넓어집니다.</p>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 오해 주의</div>
+      <p>“인공지능이 자꾸 틀리니까 더 발전하면 문제가 사라진다”는 말은 절반만 맞습니다. 성능이 좋아지면 <b>틀리는 빈도</b>는 줄지만, 다음 절에서 볼 한계들은 성능 문제가 아니라 <b>작동 방식에서 비롯되는 구조적 한계</b>입니다. 게다가 성능이 좋아질수록 답변이 더 그럴듯해져서, 오히려 <b>알아채기 어려워집니다</b>.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. 구조적 한계 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>인공지능이 구조적으로 약한 다섯 곳</h2></div>
+
+    <p>인공지능의 한계를 “아직 덜 똑똑해서”라고 뭉뚱그리면 대비할 수가 없습니다. 어디가 왜 약한지 알아야 확인할 지점을 정할 수 있습니다. 다섯 가지로 나누어 살펴봅니다.</p>
+
+    <h3 class="sub-head">① 환각 — 그럴듯한 거짓을 만들어 낸다</h3>
+    <p>거대 언어 모델은 “다음에 올 말로 자연스러운 것”을 고르도록 학습합니다. 그래서 사실을 모를 때도 <b>말이 되는 문장</b>을 만들어 냅니다. 이렇게 사실이 아닌 내용을 사실인 것처럼 그럴듯하게 제공하는 현상을 <b class="blank" data-a="환각|할루시네이션|환각 현상|hallucination" data-hint="영어로 hallucination, 없는 것을 지각하는 현상에서 온 말">환각</b>이라고 합니다.</p>
+    <p>환각이 무서운 이유는 <b>틀린 답이 자신 없어 보이지 않는다</b>는 점입니다. 존재하지 않는 논문의 제목과 저자, 있지도 않은 법 조항의 번호가 아주 매끄러운 문장으로 나옵니다. 인공지능은 “논문 인용은 이렇게 생겼다”는 <b>형식</b>을 완벽하게 배웠기 때문에, 내용이 없어도 형식만은 진짜와 구별되지 않습니다.</p>
+
+    <h3 class="sub-head">② 처음 보는 상황에 약하다</h3>
+    <p>기계학습 모델은 <b class="blank" data-a="학습 데이터|훈련 데이터|학습데이터" data-hint="모델을 학습시킬 때 쓴 데이터">학습 데이터</b>에 나타난 규칙성을 배웁니다. 그래서 학습할 때 본 적 없는 상황이 들어오면 근거 없이 답을 내놓습니다. 도로 공사로 차선이 이상하게 그려진 구간, 국내에 처음 유입된 병해충, 유행어가 섞인 문장처럼 <b>드물지만 중요한 사례</b>에서 특히 위험합니다.</p>
+    <p>더 어려운 점은, 모델이 “이건 제가 처음 보는 상황입니다”라고 스스로 알려 주지 않는다는 것입니다. 확률이 낮아도 그중 가장 높은 답을 고르기 때문에, <b>모른다는 사실 자체를 표현하지 못합니다</b>.</p>
+
+    <h3 class="sub-head">③ 판단 근거를 설명하기 어렵다</h3>
+    <p>깊은 신경망은 수백만 개의 가중치가 함께 작용해 결론을 냅니다. 입력과 출력은 보이지만 그 사이에서 무슨 일이 일어났는지 사람이 따라갈 수 없는 이런 성질을 <b class="blank" data-a="블랙박스|블랙 박스|black box" data-hint="속이 보이지 않는 검은 상자">블랙박스</b>라고 부릅니다.</p>
+    <p>이것은 프로그램의 버그가 아닙니다. 규칙을 사람이 직접 쓰지 않고 데이터에서 찾아내게 한 <b>방식 자체의 대가</b>입니다. 그래서 대출 거절, 채용 탈락, 질병 판정처럼 <b>이유를 들을 권리가 있는 판단</b>에 그대로 쓰기 어렵습니다.</p>
+
+    <h3 class="sub-head">④ 데이터에 담긴 편향을 그대로 배운다</h3>
+    <p>모델은 데이터에 담긴 규칙성을 배웁니다. 문제는 그 데이터가 과거 사회의 기록이라는 점입니다. 과거에 차별이 있었다면 그 기록도 규칙성이므로, 모델은 그것까지 <b class="blank" data-a="편향|편향성|bias" data-hint="한쪽으로 치우친 성질">편향</b>으로 함께 학습합니다. 인공지능이 나쁜 의도를 가진 것이 아니라, <b>주어진 기록에 충실했을 뿐</b>이라는 점이 오히려 문제를 어렵게 만듭니다. 이 주제는 다음 차시에서 직접 실험해 봅니다.</p>
+
+    <h3 class="sub-head">⑤ 맥락과 상식이 부족하다</h3>
+    <p>사람은 “냉장고에 코끼리를 넣어 두었다”는 문장을 읽으면 곧바로 이상함을 느낍니다. 세상이 어떻게 돌아가는지에 대한 <b class="blank" data-a="상식|상식적 지식|공통 상식" data-hint="세상이 어떻게 돌아가는지에 대한 누구나 아는 지식">상식</b>을 몸으로 갖고 있기 때문입니다. 반면 모델은 그 문장이 문법적으로 자연스러운지만 판단합니다. 그래서 계산은 잘하면서도 <b>왜 그 계산을 하는지</b>는 놓칠 수 있습니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>다섯 가지 한계와 그에 맞는 확인 방법</caption>
+        <thead><tr><th>한계</th><th>어떤 모습으로 나타나는가</th><th>사람이 할 확인</th></tr></thead>
+        <tbody>
+          <tr><td><b>환각</b></td><td>없는 출처·법조문·수치를 매끄럽게 제시</td><td>출처를 직접 검색, 숫자는 직접 계산</td></tr>
+          <tr><td><b>처음 보는 상황</b></td><td>드문 사례에서 자신 있게 틀림</td><td>이례적 입력은 사람에게 넘기는 규칙</td></tr>
+          <tr><td><b>블랙박스</b></td><td>“종합적으로 판단했습니다”만 반복</td><td>근거 제시를 요구, 설명 가능 기법 적용</td></tr>
+          <tr><td><b>편향</b></td><td>특정 집단에 반복적으로 불리한 결과</td><td>집단별 성능을 따로 측정해 비교</td></tr>
+          <tr><td><b>맥락·상식 부족</b></td><td>문장은 자연스러운데 상황에 안 맞음</td><td>결과를 실제 상황에 대어 보기</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 3. 사람이 잘하는 일 · 자동화와 증강 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>사람이 여전히 더 잘하는 일</h2></div>
+
+    <p>한계를 나열하면 인공지능이 못하는 것만 보입니다. 방향을 바꿔 봅시다. 인공지능이 잘하는 일이 늘어날수록 <b>사람의 몫이 무엇인지</b>가 더 또렷해집니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card"><span class="icon">🎯</span><h4>문제를 정의하기</h4><p>“무엇을 풀어야 하는가”는 데이터에 적혀 있지 않습니다. 학교 급식 잔반을 줄이는 문제인지, 선호를 파악하는 문제인지 정하는 것은 사람입니다.</p></div>
+      <div class="mini-card"><span class="icon">⚖️</span><h4>가치를 판단하기</h4><p>속도와 안전, 효율과 배려처럼 <b>서로 충돌하는 가치</b> 중 무엇을 앞세울지는 계산으로 정해지지 않습니다.</p></div>
+      <div class="mini-card"><span class="icon">🪪</span><h4>책임지기</h4><p>결과가 잘못되었을 때 사과하고 고치고 보상할 수 있는 주체는 사람과 조직뿐입니다. 모델은 <b class="blank" data-a="책임|책임성" data-hint="잘못된 결과에 대해 사과하고 보상하는 일">책임</b>을 질 수 없습니다.</p></div>
+      <div class="mini-card"><span class="icon">🤝</span><h4>공감하기</h4><p>나쁜 소식을 전할 때 필요한 것은 정확한 확률이 아니라, 그 사람의 처지를 헤아리는 말입니다.</p></div>
+      <div class="mini-card"><span class="icon">🚨</span><h4>예외를 알아채기</h4><p>“뭔가 이상하다”는 감각은 규칙으로 적히지 않습니다. 평소와 다름을 눈치채고 절차를 멈추는 일은 사람의 강점입니다.</p></div>
+    </div>
+
+    <h3 class="sub-head">공존의 두 모델 — 대신하기와 돕기</h3>
+    <p>인공지능을 도입하는 방식은 크게 둘로 나뉩니다. 사람의 일을 기계가 <b>대신</b> 하도록 만드는 <b class="blank" data-a="자동화|automation" data-hint="사람 없이 기계가 처리하도록 만드는 방식">자동화</b>와, 사람이 하던 판단을 더 잘하도록 <b>돕는</b> <b class="blank" data-a="증강|증강 모델|augmentation" data-hint="사람의 능력을 키워 주는 방식, 영어로 augmentation">증강</b>입니다. 둘은 좋고 나쁨의 문제가 아니라, <b>상황에 따라 골라야 하는 설계 선택</b>입니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>구분</th><th>자동화 (사람 대신)</th><th>증강 (사람을 돕기)</th></tr></thead>
+        <tbody>
+          <tr><td><b>사람의 위치</b></td><td>절차에서 빠진다</td><td>절차 안에 남아 최종 판단을 한다</td></tr>
+          <tr><td><b>강점</b></td><td class="good">속도·비용·일관성</td><td class="good">정확도·설명 가능성·책임 소재</td></tr>
+          <tr><td><b>약점</b></td><td class="bad">오류가 그대로 통과, 책임 불분명</td><td class="bad">느리고 비용이 크다</td></tr>
+          <tr><td><b>잘 맞는 상황</b></td><td>반복이 많고 오류의 피해가 작다</td><td>피해가 크거나 되돌리기 어렵다</td></tr>
+          <tr><td><b>예</b></td><td>맞춤법 검사, 일상 문서 번역, 영수증 분류</td><td>영상 판독 보조, 서류 1차 정리 후 사람 심사</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-ok">
+      <div class="box-label">✅ 함께가 더 나은 이유</div>
+      <p>인공지능과 사람이 <b>틀리는 방식이 다르다</b>는 점이 핵심입니다. 모델은 사람이 놓치는 미세한 패턴을 잡아내고, 사람은 모델이 근거 없이 확신하는 순간을 알아챕니다. 서로 다른 오류를 서로 잡아 주기 때문에, 잘 설계된 협력은 <b>둘 중 어느 한쪽만 쓰는 것보다 정확할 수 있습니다</b>. 반대로 사람이 모델의 답을 그냥 승인하기만 한다면, 협력의 이득은 사라지고 자동화와 다를 바가 없어집니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4. 공존의 장치와 경계 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>어디까지 맡길까 — 공존을 설계하는 방법</h2></div>
+
+    <p>“인공지능을 믿어도 되는가”는 답이 없는 질문입니다. 질문을 바꿔야 합니다. <b>어떤 판단을, 어떤 조건에서, 누가 최종 확정하는가.</b> 이렇게 물으면 설계가 가능해집니다.</p>
+
+    <h3 class="sub-head">공존을 위한 세 가지 장치</h3>
+    <div class="box box-concept">
+      <div class="box-label">📘 개념</div>
+      <ul style="margin:0">
+        <li><b class="blank" data-a="사람 개입|인간 개입|휴먼 인 더 루프|human-in-the-loop" data-hint="영어로 human-in-the-loop, 절차 안에 사람을 남겨 두는 방식">사람 개입</b>: 판단 절차 안에 사람을 반드시 남겨 두어, 인공지능의 결과를 <b>사람이 확인하고 최종 확정</b>하게 하는 방식이다.</li>
+        <li><b class="blank" data-a="설명 가능한 인공지능|설명가능한 인공지능|XAI|설명 가능 인공지능" data-hint="영어 약자 XAI">설명 가능한 인공지능</b>: 인공지능의 판단 이유를 사람이 이해할 수 있는 방식으로 제시하는 인공지능이다. 어떤 항목이 결과에 얼마나 영향을 주었는지 보여 준다.</li>
+        <li><b class="blank" data-a="인간 중심 인공지능|사람 중심 인공지능|인간중심 인공지능" data-hint="인간을 배제하지 않고 능력을 키워 주는 접근">인간 중심 인공지능</b>: 인간을 절차에서 배제하는 대신, 인간과 협력해 인간의 능력을 향상시키는 데 중점을 두는 접근이다.</li>
+      </ul>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 사람 개입이 형식이 되지 않으려면</div>
+      <p>절차에 사람이 있다는 것만으로는 부족합니다. 하루에 수백 건을 승인해야 하고, 인공지능의 추천을 거부하면 이유를 따로 써야 하는 구조라면, 사람은 결국 <b>추천을 그대로 누르게</b> 됩니다. 사람 개입이 실제로 작동하려면 ① 판단할 <b>시간</b>, ② 다르게 결정할 <b>권한</b>, ③ 판단에 필요한 <b>근거 정보</b>, 이 세 가지가 함께 주어져야 합니다.</p>
+    </div>
+
+    <h3 class="sub-head">두 축으로 경계를 정하기</h3>
+    <p>어떤 판단을 맡길지 정할 때 쓸 수 있는 실용적인 기준이 두 가지 있습니다.</p>
+    <ol>
+      <li><b>오류가 났을 때의 피해 크기</b> — 되돌릴 수 있는가? 사람의 생명·권리·기회에 닿는가?</li>
+      <li><b>판단의 반복성</b> — 같은 유형의 판단이 대량으로 되풀이되는가, 하나하나가 고유한 사건인가?</li>
+    </ol>
+    <p>두 축을 겹쳐 놓으면 방향이 보입니다. <b>반복이 많고 피해가 작으면</b> 자동화가 유리합니다. <b>반복이 적고 피해가 크면</b> 사람이 직접 판단해야 합니다. <b>반복도 많고 피해도 큰</b> 영역이 가장 어려운데, 여기가 바로 사람 개입과 설명 가능성을 함께 넣어야 하는 자리입니다.</p>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 두 축만으로 정할 수 없는 것</div>
+      <p>두 축은 출발점일 뿐입니다. 여기에 최소한 두 가지 질문을 더 붙여야 합니다. <b>피해를 입는 사람이 스스로 선택했는가</b>(동의), 그리고 <b>결과에 이의를 제기할 길이 있는가</b>(구제 절차). 피해가 작아 보여도 당사자가 거부할 수 없고 되돌릴 방법도 없다면, 자동화해서는 안 됩니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 5. 시뮬레이터 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>직접 해 보기 ① 환각을 알아채는 연습</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div class="box box-warn" style="margin-bottom:16px">
+      <div class="box-label">⚠️ 활동 안내</div>
+      <p>아래 답변 8개는 <b>이 학습 활동을 위해 만든 예시</b>입니다. ‘환각’으로 표시되는 답변에 나오는 학술지·논문·저자·법률 이름은 <b>실제로 존재하지 않는 가상의 것</b>이며, 그 내용도 사실이 아닙니다. 어떤 단서로 알아챌 수 있는지에 집중해 주세요.</p>
+    </div>
+    <div id="sim1"></div>
+
+    <div class="sec-head" style="margin-top:34px"><span class="sec-num">6</span><h2>직접 해 보기 ② 공존 설계 보드</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim2"></div>
+  </section>
+
+  <!-- ============ 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">9</span><h2>활동 기록</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 설명 가능한 인공지능은 무엇을 어떻게 설명하는가</summary>
+      <div class="more-body">
+        <p>설명 가능한 인공지능(XAI)은 모델의 내부를 전부 펼쳐 보이는 것이 아닙니다. 대신 사람이 쓸 수 있는 형태로 <b>근거를 재구성</b>합니다. 대표적인 방식이 셋 있습니다.</p>
+        <ul>
+          <li><b>속성 기여도</b> — “거절 결정에 가장 크게 영향을 준 항목은 연체 이력(−0.41), 다음은 소득 대비 부채(−0.22)”처럼 각 입력이 결과를 어느 쪽으로 얼마나 밀었는지 수치로 보여 줍니다.</li>
+          <li><b>중요 영역 표시</b> — 이미지 판정에서 모델이 실제로 본 부분을 색으로 덮어 보여 줍니다. 폐 사진을 판독한다고 하면서 사진 구석의 병원 표시를 보고 있었다는 사실이 이런 방법으로 발견되기도 합니다.</li>
+          <li><b>반사실 설명</b> — “소득이 300만 원 더 높았다면 결과가 바뀌었습니다”처럼 <b>무엇이 달라져야 결과가 뒤집히는지</b> 알려 줍니다. 당사자가 다음에 무엇을 할 수 있는지 알려 주므로 실용적입니다.</li>
+        </ul>
+        <p>주의할 점도 있습니다. 설명이 그럴듯해 보인다는 것과 그 설명이 모델의 실제 계산을 정확히 반영한다는 것은 다릅니다. <b>설명 역시 검증의 대상</b>입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> 사람 개입은 실제로 어떻게 배치되는가</summary>
+      <div class="more-body">
+        <ul>
+          <li><b>의료 영상 판독</b> — 모델이 의심 영역을 표시하고 위험 점수를 매기지만, 진단은 판독의가 확정합니다. 모델은 놓치기 쉬운 작은 병변을 잘 찾고, 사람은 모델이 잘못 짚은 그림자를 걸러 냅니다.</li>
+          <li><b>스팸 분류</b> — 대부분은 자동으로 처리하고, <b>확신도가 낮은 메일만</b> 사람에게 보여 줍니다. 사람의 ‘신고’는 다시 학습 데이터가 됩니다.</li>
+          <li><b>온라인 게시물 검토</b> — 명백한 위반은 자동 처리, 애매한 것은 검토자에게 넘기고, 사용자가 이의를 제기하면 반드시 사람이 다시 봅니다. <b>이의 제기 경로</b>가 사람 개입의 마지막 안전장치입니다.</li>
+        </ul>
+        <p>공통 원리는 하나입니다. <b>모든 건을 사람이 보지 않되, 사람이 봐야 할 건을 골라내는 기준을 미리 정해 둔다.</b> 그 기준은 대개 “모델의 확신도가 낮을 때”와 “피해가 클 수 있을 때”입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">실습</span> 환각을 줄이는 질문법 — 프롬프트를 바꿔 보기</summary>
+      <div class="more-body">
+        <p>같은 도구라도 어떻게 묻는지에 따라 확인 가능성이 달라집니다.</p>
+        <div class="table-wrap">
+          <table class="tb">
+            <thead><tr><th>덜 좋은 질문</th><th>더 좋은 질문</th><th>왜</th></tr></thead>
+            <tbody>
+              <tr><td>“이 주제에 대해 알려 줘.”</td><td>“이 주제에 대해 알려 주고, <b>확실하지 않은 부분은 표시</b>해 줘.”</td><td>모델이 불확실성을 드러낼 여지를 만든다</td></tr>
+              <tr><td>“관련 논문 알려 줘.”</td><td>“관련 <b>검색어</b>를 알려 줘. 논문은 내가 직접 찾을게.”</td><td>없는 출처를 만들 자리를 없앤다</td></tr>
+              <tr><td>“계산해 줘.”</td><td>“계산 <b>과정을 단계별로</b> 보여 줘.”</td><td>중간 단계를 보면 오류를 짚을 수 있다</td></tr>
+              <tr><td>“맞아?”</td><td>“이 주장이 <b>틀렸다면 어떤 근거로</b> 틀렸을지 말해 줘.”</td><td>동의하는 방향으로 끌려가는 것을 막는다</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>그래도 남는 원칙은 같습니다. <b>확인 가능한 것만 결과에 넣는다.</b> 확인하지 못한 내용은 지우거나 ‘미확인’이라고 적어 두어야 합니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 다음 차시로 — 편향은 어디서 들어오는가</summary>
+      <div class="more-body">
+        이 차시의 다섯 한계 중 <b>편향</b>만은 확인 방법이 유독 까다롭습니다. 답변 하나만 봐서는 편향을 알 수 없고, <b>집단별로 결과를 모아 비교해야</b> 비로소 드러나기 때문입니다. 다음 차시에서는 가상의 채용 심사 모델을 직접 학습시켜, 실력 분포가 똑같은 두 집단 사이에 어떻게 격차가 생기는지 눈으로 확인합니다. 그리고 “집단 정보를 입력에서 빼면 공정해지지 않을까?”라는 자연스러운 생각이 왜 통하지 않는지도 실험으로 알아봅니다.
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 3, lesson: 3,
+  title: '받아들이기 전에 따져보기',
+  sub: '인공지능과 인간의 공존',
+  lead: '인공지능을 무조건 믿는 것도, 무조건 밀어내는 것도 생각을 멈추는 방식입니다. 이 차시에서는 인공지능이 <b>구조적으로 약한 곳</b>을 짚고, <b>환각을 알아채는 연습</b>을 하고, 어떤 판단을 사람이 반드시 맡아야 하는지 <b>스스로 경계를 그려</b> 봅니다.',
+  standards: ['12인기03-03'],
+  keywords: ['비판적 수용', '환각', '설명 가능성', '인간 중심', '사람 개입'],
+  goals: [
+    '인공지능을 대하는 세 가지 태도를 구분하고, 비판적 수용이 필요한 까닭을 설명할 수 있다.',
+    '환각·블랙박스·편향 등 인공지능의 구조적 한계를 사례로 설명하고, 각 한계에 맞는 확인 방법을 제시할 수 있다.',
+    '오류의 피해 크기와 판단의 반복성을 기준으로 인공지능과 인간의 역할을 나누어 공존 방안을 도출할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 시뮬레이터 1: 환각 판별 훈련 ===================== -->
+<script>
+(function () {
+  const ITEMS = [
+    {
+      fake: true, kind: '존재하지 않는 출처',
+      q: '학교 급식 잔반량을 인공지능으로 예측한 연구가 있나요?',
+      a: '네, 있습니다. 『대한지능정보학회 논문집』 2019년 제7권 2호 118~131쪽에 실린 정하람·오세빈의 「순환신경망을 이용한 학교 급식 잔반량 예측 모델」이 대표적입니다. 이 논문의 3장에 요일별 예측 정확도가 표로 정리되어 있습니다.',
+      clue: '학회명 · 연도 · 권 · 호 · 쪽수 · 저자 · 장 번호까지 <b>지나치게 완벽하게</b> 갖춰져 있는데, 실제로 검색하면 그런 학술지도 논문도 나오지 않습니다. 인공지능은 “논문 인용 문장은 이렇게 생겼다”는 형식을 학습했기 때문에, <b>진짜 논문이 없어도 형식만 완벽한 인용을 만들어 냅니다</b>. 서지 정보가 구체적이라는 것은 신뢰의 근거가 아니라 <b>확인해야 할 신호</b>입니다.'
+    },
+    {
+      fake: true, kind: '틀린 계산',
+      q: '동아리 학생 24명에게 색연필을 한 사람당 3자루씩 나눠 주려면 몇 자루가 필요한가요?',
+      a: '학생 수 24명에 한 사람당 3자루를 곱하면 됩니다. 따라서 모두 82자루가 필요합니다. 여유분을 생각하면 90자루 정도 준비하시는 것을 권합니다.',
+      clue: '방법 설명은 정확합니다. 24 × 3을 하라고 제대로 말했습니다. 그런데 <b>결과가 72가 아니라 82</b>입니다. 언어 모델은 계산을 “실행”하는 것이 아니라 <b>계산 결과처럼 보이는 숫자를 생성</b>하기 때문에 이런 어긋남이 생깁니다. 뒤의 “여유분 90자루”가 자연스러워서 오히려 넘어가기 쉽습니다. <b>숫자는 가장 쉽게 검증할 수 있는 지점</b>이니 직접 계산해 보세요.'
+    },
+    {
+      fake: true, kind: '존재하지 않는 법조문',
+      q: '학교에서 인공지능을 쓸 때 지켜야 하는 법이 있나요?',
+      a: '「학교 인공지능 활용 촉진법」 제9조 제2항에 따라 모든 고등학교는 인공지능 윤리 담당 교사를 1명 이상 지정해야 합니다. 같은 조 제3항은 학기마다 2회 이상 인공지능 윤리 교육을 실시하도록 정하고 있습니다.',
+      clue: '법률 이름과 조·항 번호가 그럴듯하지만, <b>그런 이름의 법률은 존재하지 않습니다</b>. 법조문은 문장 구조가 매우 정형화되어 있어서 인공지능이 흉내내기 가장 쉬운 형식 중 하나입니다. 법·규정·약관을 인용한 답변은 반드시 <b>법령 정보를 제공하는 공식 사이트에서 원문을 직접 확인</b>해야 합니다. 실제로 없는 판례를 인용해 법원에 서류를 낸 변호사가 문제가 된 사례도 있었습니다.'
+    },
+    {
+      fake: true, kind: '연도 뒤섞기',
+      q: '훈민정음은 언제 만들어졌고 언제 반포되었나요?',
+      a: '훈민정음은 1392년에 창제되었으며, 창제된 직후 곧바로 전국에 반포되어 널리 쓰이기 시작했습니다.',
+      clue: '<b>1392년은 조선이 세워진 해</b>입니다. 훈민정음은 <b>1443년에 창제</b>되고 <b>1446년에 반포</b>되었으며, 창제와 반포 사이에 3년의 간격이 있었습니다. 환각은 이렇게 <b>같은 시대의 유명한 다른 연도를 끌어다 붙이는</b> 방식으로 자주 나타납니다. 게다가 “직후 곧바로”처럼 사실이 아닌 부분을 매끄러운 표현으로 덮습니다. 연도가 나오면 <b>다른 사건의 연도와 섞이지 않았는지</b> 확인해 보세요.'
+    },
+    {
+      fake: false, kind: '사실 — 구체적이지만 확인되는 정보',
+      q: '우리나라에 국가 차원의 인공지능 윤리 기준이 있나요?',
+      a: '있습니다. 우리나라는 2020년에 사람 중심 인공지능 구현을 위한 「국가 인공지능 윤리기준」을 마련했습니다. 인간 존엄성 원칙, 사회의 공공선 원칙, 기술의 합목적성 원칙이라는 3대 기본 원칙과, 인권 보장·프라이버시 보호·다양성 존중·침해 금지·공공성·연대성·데이터 관리·책임성·안전성·투명성의 10대 핵심 요건으로 구성됩니다.',
+      clue: '이 답변도 연도·개수·항목 이름이 아주 구체적입니다. 하지만 <b>확인해 보면 모두 맞습니다</b>. 여기서 얻어야 할 교훈은 <b>“구체적이면 가짜”가 아니라는 것</b>입니다. 판단 기준은 구체성이 아니라 <b>확인 가능성</b>입니다. 공식 문서로 확인되는 정보라면 구체적일수록 좋은 답변입니다. 다음 차시에서 이 10대 요건을 직접 다룹니다.'
+    },
+    {
+      fake: false, kind: '사실 — 배운 내용으로 검증 가능',
+      q: '너비 우선 탐색은 최단 경로를 찾아 주나요?',
+      a: '가중치가 없는 그래프에서는 너비 우선 탐색이 시작점에서 목표까지의 최단 경로를 보장합니다. 프런티어를 큐로 쓰기 때문에 시작점에서 1칸 거리인 상태를 모두 확인한 뒤 2칸 거리로 넘어가므로, 목표를 처음 꺼내는 순간이 곧 가장 가까운 거리입니다. 다만 간선마다 비용이 다른 그래프에서는 보장되지 않습니다.',
+      clue: '1단원에서 배운 내용과 정확히 일치합니다. <b>“다만 ~에서는 보장되지 않습니다”처럼 조건과 예외를 스스로 밝히는 답변</b>은 상대적으로 신뢰도가 높은 편입니다. 반대로 조건을 생략하고 “항상 최단 경로를 찾습니다”라고 단정했다면 그 자체가 의심 신호가 됩니다. <b>내가 이미 아는 영역의 답변을 먼저 확인해 보면</b> 그 도구가 얼마나 조심스럽게 답하는지 감을 잡을 수 있습니다.'
+    },
+    {
+      fake: false, kind: '사실 — 정의가 정확한 답변',
+      q: '재현율이 무엇인가요?',
+      a: '재현율은 실제로 양성인 사례 가운데 모델이 양성이라고 맞힌 비율입니다. 반면 정밀도는 모델이 양성이라고 예측한 것 가운데 실제로 양성인 비율입니다. 판정 기준을 낮추면 재현율은 올라가지만 정밀도는 떨어지는 경향이 있어, 두 값을 함께 보아야 합니다.',
+      clue: '정의가 정확하고, 두 지표의 관계까지 옳게 설명했습니다. 정밀도와 재현율을 <b>서로 바꿔 설명하는 것</b>이 흔한 오류인데 이 답변은 바르게 구분했습니다. 이렇게 <b>교과서로 대조할 수 있는 정의 문장</b>은 검증이 쉬운 편입니다. 확인 방법은 간단합니다. 답변의 정의를 교과서의 정의와 <b>한 낱말씩 맞춰 보는 것</b>입니다.'
+    },
+    {
+      fake: true, kind: '사실 뒤에 붙은 논리 비약',
+      q: '인공신경망을 사람 뇌만큼 크게 만들면 사람과 같은 지능이 되나요?',
+      a: '사람의 뇌에는 약 860억 개의 신경세포가 있습니다. 따라서 신경세포와 같은 수의 인공 뉴런을 가진 인공신경망을 만들면 사람과 동일한 지능이 자동으로 나타납니다. 규모가 지능을 결정하기 때문입니다.',
+      clue: '첫 문장은 대체로 맞습니다(뇌의 신경세포는 860억 개 수준으로 추정됩니다). 그런데 <b>두 번째 문장에서 근거 없는 비약</b>이 일어납니다. 인공 뉴런은 생물학적 신경세포와 구조도 작동 방식도 다르고, 지능은 개수뿐 아니라 연결 구조·학습 방식·환경과의 상호작용에 달려 있습니다. 환각은 <b>맞는 사실로 문장을 시작해 신뢰를 얻은 뒤 결론을 슬쩍 바꾸는</b> 형태로도 나타납니다. <b>“따라서”, “그러므로” 뒤를 특히 의심하세요.</b>'
+    }
+  ];
+
+  const STRATEGY = [
+    ['출처를 직접 확인한다', '학술지·법령·기관 이름이 나오면 그 이름 그대로 검색해 원문이 실제로 있는지 확인합니다. 형식이 완벽한 인용일수록 더 확인해야 합니다.'],
+    ['숫자는 스스로 계산한다', '곱셈·비율·합계는 직접 계산해 보면 몇 초 만에 검증됩니다. 언어 모델은 계산을 실행하지 않고 계산 결과처럼 보이는 숫자를 만들어 냅니다.'],
+    ['지나친 확신을 경계한다', '“항상”, “반드시”, “절대”가 조건 없이 붙은 문장은 의심합니다. 반대로 조건과 예외를 스스로 밝히는 답변은 상대적으로 신뢰할 만합니다.'],
+    ['구체적 고유명사를 짚어 본다', '사람 이름, 책 제목, 조항 번호, 연도처럼 <b>확인이 가능한 항목</b>에 표시를 하고 하나씩 대조합니다. 확인되지 않은 것은 결과에 넣지 않습니다.'],
+    ['연결 부분을 다시 읽는다', '“따라서”, “그러므로” 앞뒤가 정말 이어지는지 봅니다. 사실로 시작해 결론에서 비약하는 환각이 많습니다.']
+  ];
+
+  const body = AI.sim.panel('#sim1', {
+    title: '환각 판별 훈련 — 사실인가, 환각인가',
+    tag: '8문항',
+    desc: '인공지능이 내놓은 것처럼 보이는 답변 8개가 차례로 나옵니다. <b>사실</b>인지 <b>환각</b>인지 판정하고, 이어지는 해설에서 <b>어떤 단서로 알아챌 수 있었는지</b> 확인해 보세요. 절반은 사실, 절반은 환각입니다.'
+  });
+
+  const order = AI.sim.shuffle(ITEMS.map(function (_, i) { return i; }), AI.sim.rng(20260804));
+  let pos = 0, correct = 0, answered = false;
+
+  const stats = AI.ui.stats([
+    { key: 'n', label: '진행' }, { key: 'c', label: '맞힌 수' }, { key: 'r', label: '정확도' }
+  ]);
+  const card = AI.h('div', {});
+  const fb = AI.h('div', { class: 'q-feedback' });
+  const acts = AI.h('div', { class: 'sim-controls' });
+  const summary = AI.h('div', { style: { display: 'none' } });
+
+  body.appendChild(card);
+  body.appendChild(acts);
+  body.appendChild(fb);
+  body.appendChild(stats.el);
+  body.appendChild(summary);
+
+  const btnFact = AI.ui.btn('✅ 사실이다', function () { judge(false); }, 'primary');
+  const btnFake = AI.ui.btn('🚨 환각이다', function () { judge(true); }, 'primary');
+  const btnNext = AI.ui.btn('다음 답변 →', next, 'ghost');
+  acts.appendChild(btnFact);
+  acts.appendChild(btnFake);
+  acts.appendChild(btnNext);
+  btnNext.style.display = 'none';
+
+  function setStats() {
+    stats.set('n', pos + ' / ' + ITEMS.length);
+    stats.set('c', correct);
+    stats.set('r', pos ? Math.round(correct / pos * 100) + '%' : '–');
+  }
+
+  function render() {
+    const it = ITEMS[order[pos]];
+    card.innerHTML = '';
+    card.appendChild(AI.h('p', { style: { fontSize: '14.5px', fontWeight: '700', margin: '0 0 8px' } },
+      '👤 사용자: ' + it.q));
+    card.appendChild(AI.h('div', { class: 'ai-bubble' },
+      AI.h('span', { class: 'who', text: '🤖 인공지능의 답변 (' + (pos + 1) + ' / ' + ITEMS.length + ')' }),
+      AI.h('span', { html: it.a })
+    ));
+    fb.className = 'q-feedback';
+    fb.innerHTML = '';
+    answered = false;
+    btnFact.disabled = false; btnFake.disabled = false;
+    btnFact.style.display = ''; btnFake.style.display = '';
+    btnNext.style.display = 'none';
+    setStats();
+  }
+
+  function judge(saidFake) {
+    if (answered) return;
+    answered = true;
+    const it = ITEMS[order[pos]];
+    const ok = (saidFake === it.fake);
+    if (ok) correct++;
+    pos++;
+    btnFact.disabled = true; btnFake.disabled = true;
+    fb.className = 'q-feedback show ' + (ok ? 'ok' : 'no');
+    fb.innerHTML = '<b>' + (ok ? '✓ 맞혔습니다' : '✗ 아쉽습니다') + ' — 이 답변은 ' +
+      (it.fake ? '<span style="color:var(--no)">환각</span>' : '<span style="color:var(--ok)">사실</span>') + '입니다.</b>' +
+      '<span class="hz-kind">' + it.kind + '</span><br>' + it.clue;
+    btnNext.style.display = '';
+    btnNext.textContent = (pos >= ITEMS.length) ? '📋 판별 전략 보기' : '다음 답변 →';
+    setStats();
+  }
+
+  function next() {
+    if (pos >= ITEMS.length) { finish(); return; }
+    render();
+  }
+
+  function finish() {
+    card.innerHTML = '';
+    acts.style.display = 'none';
+    fb.className = 'q-feedback';
+    fb.innerHTML = '';
+    summary.style.display = '';
+    summary.innerHTML = '';
+
+    const pct = Math.round(correct / ITEMS.length * 100);
+    let msg;
+    if (correct >= 7) msg = '단서를 아주 잘 찾아냈습니다. 이제 이 감각을 <b>실제 과제</b>에 적용해 보세요.';
+    else if (correct >= 5) msg = '절반 이상 알아냈습니다. 놓친 문항이 어떤 <b>유형</b>이었는지 확인해 두면 다음에 훨씬 빨라집니다.';
+    else msg = '괜찮습니다. 환각은 원래 알아채기 어렵습니다. 그래서 <b>감으로 판단하지 않고 확인 절차를 만드는 것</b>이 답입니다.';
+
+    summary.appendChild(AI.h('div', { class: 'box box-ok' },
+      AI.h('div', { class: 'box-label', text: '🎯 결과' }),
+      AI.h('p', { html: '<b>' + correct + ' / ' + ITEMS.length + ' 정답 (' + pct + '%)</b> — ' + msg })
+    ));
+
+    const list = AI.h('div', { class: 'box box-concept' },
+      AI.h('div', { class: 'box-label', text: '📘 환각 판별 전략 5가지' }));
+    const ol = AI.h('ol', { style: { margin: '0' } });
+    STRATEGY.forEach(function (s) {
+      ol.appendChild(AI.h('li', { style: { marginBottom: '6px' } },
+        AI.h('b', { text: s[0] }), AI.h('span', { html: ' — ' + s[1] })));
+    });
+    list.appendChild(ol);
+    summary.appendChild(list);
+
+    summary.appendChild(AI.h('div', { class: 'box box-info' },
+      AI.h('div', { class: 'box-label', text: '💡 가장 중요한 한 가지' }),
+      AI.h('p', { html: '여덟 문항 중 <b>사실도 네 개</b>였다는 점을 기억해 주세요. 목표는 인공지능을 믿지 않는 것이 아니라, <b>어디까지 믿을 수 있는지 확인하는 절차를 갖추는 것</b>입니다. 확인하지 못한 내용은 결과에 넣지 않으면 됩니다.' })
+    ));
+
+    summary.appendChild(AI.h('div', { class: 'sim-controls' },
+      AI.ui.btn('↺ 처음부터 다시', function () {
+        pos = 0; correct = 0;
+        summary.style.display = 'none';
+        acts.style.display = '';
+        render();
+      }, 'ghost')
+    ));
+  }
+
+  render();
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 공존 설계 보드 ===================== -->
+<script>
+(function () {
+  const CHOICES = [
+    { key: 'auto', label: '🤖 인공지능에게 맡김', short: '맡김' },
+    { key: 'human', label: '🧑 사람이 함', short: '사람' },
+    { key: 'both', label: '🤝 함께 함(사람 최종)', short: '함께' }
+  ];
+
+  const S = [
+    {
+      emo: '🚑', name: '응급실 환자 분류(중증도 판정)', harm: 5, rep: 4,
+      auto: '대기 시간을 크게 줄일 수 있다는 장점은 분명합니다. 그러나 학습 데이터에 드문 질환은 낮게 평가되기 쉽고, <b>한 번의 오분류가 생명으로 이어집니다</b>. 많은 병원이 인공지능 점수를 <b>보조 정보</b>로만 쓰고 최종 판정은 의료진이 하도록 설계하는 이유입니다.',
+      human: '판단 근거가 분명하고 책임도 명확합니다. 다만 환자가 몰리는 시간대에는 판정 자체가 늦어져 <b>지연이 곧 위험</b>이 됩니다. 인공지능이 활력징후를 미리 훑어 우선순위 후보를 제시하면 속도를 얻을 수 있습니다.',
+      both: '많은 학생이 고르는 선택입니다. 다만 “함께”가 <b>형식적 승인</b>으로 변하지 않도록 주의해야 합니다. 의료진이 인공지능 점수를 그대로 누르기만 한다면 실제로는 자동화와 같습니다. 다르게 판단할 <b>시간과 권한</b>이 함께 보장되어야 합니다.'
+    },
+    {
+      emo: '🎓', name: '대학 입학 사정', harm: 5, rep: 3,
+      auto: '기준을 일관되게 적용한다는 장점이 있습니다. 그러나 합격 기준 자체가 <b>가치 판단</b>이며, 과거 합격자 기록으로 학습하면 과거의 편향을 미래로 옮깁니다. 무엇보다 탈락자에게 <b>이유를 설명할 수 없다</b>는 점이 치명적입니다.',
+      human: '지원자의 맥락을 읽고 이유를 설명할 수 있습니다. 반면 평가자에 따라 결과가 달라지는 <b>일관성 문제</b>가 생깁니다. 인공지능을 형식 요건 확인과 채점 편차 점검에 쓰면 오히려 공정성이 올라갈 수 있습니다.',
+      both: '서류 정리와 형식 확인은 인공지능이, 가치 판단은 사람이 맡는 분업입니다. 다만 인공지능이 매긴 점수가 사람 판단의 <b>기준점</b>이 되어 오히려 판단의 폭을 좁힌다는 지적도 있습니다. 점수를 나중에 보여 주는 순서 설계가 대안이 됩니다.'
+    },
+    {
+      emo: '🚗', name: '자동차 운전', harm: 5, rep: 5,
+      auto: '피로·음주·부주의가 없다는 점에서 사고를 크게 줄일 여지가 있습니다. 다만 <b>처음 보는 상황</b>(공사 구간, 이례적 표지)에서 취약하며, 운전자가 언제 개입해야 하는지 모호할 때 가장 위험합니다.',
+      human: '책임이 분명합니다. 그러나 사람의 반응 시간과 주의력에는 한계가 있습니다. 차선 유지나 긴급 제동처럼 <b>반복적이고 빠른 판단</b>은 기계가 확실히 더 잘합니다.',
+      both: '현재 대부분의 차량이 택한 방식입니다. 문제는 사람이 “언제든 개입할 준비”를 오래 유지하지 못한다는 점입니다. 자동화 수준이 높아질수록 사람의 주의력이 떨어지는 이 현상을 <b>자동화의 역설</b>이라고 합니다.'
+    },
+    {
+      emo: '✍️', name: '시 쓰기', harm: 1, rep: 2,
+      auto: '초안을 빠르게 얻을 수 있고 실패해도 피해가 작습니다. 다만 시의 가치는 정확함이 아니라 <b>누구의 경험에서 나왔는가</b>에 있다는 반론이 강합니다. 결과물을 누구의 작품으로 볼지도 문제가 됩니다.',
+      human: '표현의 주체가 분명하고, 쓰는 과정 자체가 목적이 됩니다. 한편 인공지능을 <b>연습 상대</b>로 삼아 표현의 폭을 넓힐 수 있다는 의견도 많습니다. 거부가 늘 최선은 아닙니다.',
+      both: '아이디어는 인공지능에게, 선택과 다듬기는 사람이 하는 방식입니다. 이때 <b>어디까지 도움을 받았는지 밝히는 것</b>이 새로운 예의가 됩니다. 밝히지 않으면 협력이 아니라 속임이 됩니다.'
+    },
+    {
+      emo: '📄', name: '채용 서류 심사', harm: 4, rep: 5,
+      auto: '수천 건을 빠르게 처리할 수 있습니다. 그러나 과거 합격 기록으로 학습하면 <b>과거의 차별을 재생산</b>합니다. 다음 차시의 편향 실험실에서 이 현상을 직접 확인하게 됩니다. 탈락 이유를 설명할 수 없다는 점도 문제입니다.',
+      human: '맥락을 읽고 예외를 알아챌 수 있습니다. 반면 지원자가 매우 많으면 뒤쪽 서류가 앞쪽보다 덜 꼼꼼히 읽히는 <b>순서 효과</b>가 나타납니다. 사람도 완전히 일관되지는 않습니다.',
+      both: '인공지능이 형식 요건으로 1차 정리를 하고 사람이 판단하는 방식입니다. 다만 <b>1차에서 걸러진 사람은 사람 눈에 아예 닿지 못한다</b>는 점을 잊으면 안 됩니다. 1차 탈락자에게도 이의 제기 경로가 필요합니다.'
+    },
+    {
+      emo: '🌐', name: '번역', harm: 2, rep: 5,
+      auto: '반복이 매우 많고 오류의 피해가 대체로 작아 자동화에 잘 맞는 대표적인 일입니다. 단, 계약서나 의약품 설명서처럼 <b>한 문장의 오역이 큰 피해로 이어지는 문서</b>는 예외로 두어야 합니다.',
+      human: '뉘앙스와 문화적 맥락을 살릴 수 있습니다. 그러나 일상적인 안내문까지 사람이 모두 번역하는 것은 비용과 속도 면에서 비현실적입니다. <b>사람의 시간을 어디에 쓸지</b>가 진짜 문제입니다.',
+      both: '기계 번역 뒤 사람이 다듬는 방식이 현재 번역 산업의 표준에 가깝습니다. 핵심은 <b>어떤 문서를 사람이 반드시 검토할지 기준을 미리 정해 두는 것</b>입니다.'
+    },
+    {
+      emo: '⚖️', name: '법원 판결', harm: 5, rep: 2,
+      auto: '판결의 일관성이 높아질 수 있다는 주장이 있습니다. 그러나 판결은 법을 사실에 <b>해석하여 적용</b>하는 일이고, 그 해석의 책임을 기계가 질 수 없습니다. 재판을 받을 권리와도 정면으로 충돌합니다.',
+      human: '가장 널리 지지되는 선택입니다. 다만 사람 판사도 편차가 있고 사건 순서나 피로에 영향을 받는다는 연구가 있어, <b>일관성 점검 도구</b>는 도움이 될 수 있습니다.',
+      both: '판례 검색과 유사 사건 정리에는 인공지능이 매우 유용합니다. 그러나 <b>형량 추천</b>까지 나아가면 판사의 판단이 기계 쪽으로 끌려갈 위험이 커집니다. 어디까지가 보조인지 선을 그어야 합니다.'
+    },
+    {
+      emo: '🌾', name: '농작물 병 진단', harm: 3, rep: 4,
+      auto: '잎 사진 한 장으로 즉시 판정할 수 있어 농가에 큰 도움이 됩니다. 오진의 피해는 회복 가능한 편입니다. 다만 국내에 처음 유입된 병해는 <b>학습 데이터에 없어</b> 놓칠 수 있습니다.',
+      human: '숙련된 농민과 전문가의 경험은 여전히 강력합니다. 그러나 전문가 수는 적고 농지는 넓어, 모든 밭을 사람이 살피기는 어렵습니다. <b>접근성</b>이 실질적 문제입니다.',
+      both: '인공지능이 1차 선별하고 의심 사례만 전문가가 확인하는 방식이 효율적입니다. <b>“처음 보는 증상은 사람에게 넘긴다”</b>는 규칙을 넣으면 앞의 약점까지 보완됩니다.'
+    },
+    {
+      emo: '📝', name: '학생 성적 매기기', harm: 4, rep: 3,
+      auto: '채점 편차가 줄고 속도가 빠릅니다. 그러나 서술형의 창의적 서술이 낮게 평가될 수 있고, 학생이 <b>점수를 얻는 문장</b>을 쓰는 쪽으로 학습이 왜곡될 수 있습니다.',
+      human: '학생의 성장 과정과 맥락을 반영할 수 있습니다. 반면 채점자에 따라 점수가 달라지는 문제가 있어, 인공지능을 <b>2차 채점자</b>로 두어 편차를 점검하는 방법이 쓰입니다.',
+      both: '형식 확인과 객관식 채점은 기계가, 서술형 평가와 최종 확정은 교사가 하는 분업입니다. 판단 기준은 하나입니다. <b>학생에게 어떤 부분이 어떻게 채점되었는지 설명할 수 있는가.</b>'
+    },
+    {
+      emo: '🎨', name: '미술 작품 만들기', harm: 1, rep: 2,
+      auto: '표현의 문턱이 낮아져 더 많은 사람이 창작에 참여할 수 있습니다. 다만 학습에 쓰인 그림의 <b>저작권과 화풍</b> 문제가 남고, 작품의 저자가 누구인지가 논쟁이 됩니다.',
+      human: '작품과 작가의 관계가 분명합니다. 한편 붓·사진기·컴퓨터도 처음에는 “진짜 예술이 아니다”라는 말을 들었다는 반론이 있습니다. <b>도구의 변화와 예술의 소멸은 다릅니다.</b>',
+      both: '인공지능을 도구로 쓰고 사람이 의도와 선택을 책임지는 방식입니다. <b>사용 사실을 밝히는 것</b>이 신뢰의 조건이 됩니다. 밝힌 뒤에도 좋은 작품은 여전히 좋은 작품입니다.'
+    }
+  ];
+
+  const body = AI.sim.panel('#sim2', {
+    title: '공존 설계 보드 — 어디까지 맡길까',
+    tag: '10가지 상황',
+    desc: '열 가지 상황을 <b>인공지능에게 맡김 / 사람이 함 / 함께 함(사람이 최종 결정)</b>으로 분류해 보세요. <b>정답은 정해져 있지 않습니다.</b> 선택할 때마다 그 선택의 위험과 <b>다른 관점의 근거</b>가 함께 제시되고, 아래 좌표에 여러분의 판단이 찍힙니다. ●는 그 상황의 <b>피해 크기</b>와 <b>반복성</b>을 나타냅니다.'
+  });
+
+  const picks = new Array(S.length).fill(null);
+
+  const stats = AI.ui.stats([
+    { key: 'a', label: '🤖 맡김' }, { key: 'h', label: '🧑 사람' },
+    { key: 'b', label: '🤝 함께' }, { key: 'n', label: '분류한 상황' }
+  ]);
+
+  const cv = AI.sim.canvas(520, 340, { maxFull: true });
+  const list = AI.h('div', {});
+
+  body.appendChild(list);
+  body.appendChild(cv.wrap);
+  body.appendChild(AI.ui.legend([
+    { color: 'var(--warn)', label: '🤖 인공지능에게 맡김' },
+    { color: 'var(--accent)', label: '🧑 사람이 함' },
+    { color: 'var(--ok)', label: '🤝 함께 함' },
+    { color: 'var(--surface-3)', label: '아직 분류 안 함' }
+  ]));
+  body.appendChild(stats.el);
+
+  const verdict = AI.h('div', { class: 'box box-info', style: { display: 'none', marginTop: '14px' } });
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('↺ 전부 다시', function () {
+      picks.fill(null);
+      buildList();
+      draw(); update();
+      verdict.style.display = 'none';
+    }, 'ghost')
+  ));
+  body.appendChild(verdict);
+
+  function dots(v) {
+    let s = '';
+    for (let i = 1; i <= 5; i++) s += (i <= v ? '●' : '○');
+    return s;
+  }
+
+  function buildList() {
+    list.innerHTML = '';
+    S.forEach(function (s, i) {
+      const row = AI.h('div', { class: 'cx-row' },
+        AI.h('span', { class: 'cx-no', text: i + 1 }),
+        AI.h('span', { class: 'cx-name', text: s.emo + ' ' + s.name }),
+        AI.h('span', { class: 'cx-ax', html: '피해 ' + dots(s.harm) + ' · 반복 ' + dots(s.rep) })
+      );
+      const btns = AI.h('span', { class: 'cx-btns' });
+      CHOICES.forEach(function (c) {
+        const b = AI.h('button', {
+          class: 'btn small' + (picks[i] === c.key ? '' : ' ghost'), type: 'button',
+          'aria-pressed': picks[i] === c.key ? 'true' : 'false',
+          onclick: function () { pick(i, c.key); }
+        }, c.short);
+        btns.appendChild(b);
+      });
+      row.appendChild(btns);
+      list.appendChild(row);
+      if (picks[i]) {
+        list.appendChild(AI.h('div', { class: 'cx-fb' },
+          AI.h('b', { text: '고른 선택: ' + CHOICES.find(function (c) { return c.key === picks[i]; }).label + ' → 다른 관점도 보세요' }),
+          AI.h('br'),
+          AI.h('span', { html: s[picks[i]] })
+        ));
+      }
+    });
+  }
+
+  function pick(i, key) {
+    picks[i] = key;
+    buildList();
+    draw();
+    update();
+  }
+
+  function update() {
+    const n = picks.filter(function (p) { return p; }).length;
+    stats.set('a', picks.filter(function (p) { return p === 'auto'; }).length);
+    stats.set('h', picks.filter(function (p) { return p === 'human'; }).length);
+    stats.set('b', picks.filter(function (p) { return p === 'both'; }).length);
+    stats.set('n', n + ' / ' + S.length);
+    if (n === S.length) showVerdict();
+  }
+
+  function showVerdict() {
+    // 두 축과 학습자의 선택이 얼마나 일관된지 스스로 점검하게 한다
+    let hiAuto = 0, loHuman = 0, hiRepAuto = 0;
+    S.forEach(function (s, i) {
+      if (picks[i] === 'auto' && s.harm >= 4) hiAuto++;
+      if (picks[i] === 'human' && s.harm <= 2 && s.rep >= 4) loHuman++;
+      if (picks[i] === 'auto' && s.rep >= 4 && s.harm <= 3) hiRepAuto++;
+    });
+    verdict.style.display = '';
+    verdict.innerHTML =
+      '<div class="box-label">🧭 내가 그린 경계 살펴보기</div>' +
+      '<p>열 가지를 모두 분류했습니다. 이제 <b>여러분이 실제로 쓴 기준</b>이 무엇이었는지 확인해 봅시다. 아래는 채점이 아니라 <b>스스로 따져 볼 질문</b>입니다.</p>' +
+      '<ul>' +
+      '<li>피해가 큰 상황(●●●● 이상)을 인공지능에게 맡긴 것이 <b>' + hiAuto + '개</b>입니다. ' +
+      (hiAuto ? '그 상황에서 <b>오류가 났을 때 되돌릴 방법</b>을 무엇으로 마련하겠습니까?' : '피해 크기를 기준으로 삼았다는 뜻입니다. 그렇다면 <b>피해가 작은 반복 업무</b>는 충분히 맡겼습니까?') + '</li>' +
+      '<li>피해가 작고 반복이 많은 상황을 사람이 하기로 한 것이 <b>' + loHuman + '개</b>입니다. ' +
+      (loHuman ? '사람의 시간을 여기에 쓰면, <b>정작 중요한 판단에 쓸 시간</b>은 남습니까?' : '반복 업무를 덜어 냈다는 뜻입니다. 덜어 낸 시간을 어디에 쓰겠습니까?') + '</li>' +
+      '<li>반복이 많고 피해가 중간 이하인 상황을 자동화한 것이 <b>' + hiRepAuto + '개</b>입니다. 이 자리가 자동화의 이득이 가장 큰 구간입니다.</li>' +
+      '</ul>' +
+      '<p style="color:var(--ink-3);font-size:14px">💡 좌표의 <b>오른쪽 아래</b>(반복 많고 피해 작음)는 자동화, <b>왼쪽 위</b>(반복 적고 피해 큼)는 사람, <b>오른쪽 위</b>(둘 다 큼)는 사람 개입과 설명 가능성을 함께 넣어야 하는 자리입니다. 여러분의 점 색깔이 이 방향과 얼마나 맞는지 살펴보고, 다르다면 <b>왜 다른지</b>를 활동 기록에 적어 보세요.</p>';
+  }
+
+  /* ---- 좌표 그리기 ---- */
+  const M = { l: 62, r: 16, t: 18, b: 46 };
+  const OFF = [[0, 0], [.16, -.13], [-.15, .12], [.14, .14], [-.16, -.12],
+  [.15, -.15], [-.13, -.14], [.13, .12], [-.15, .13], [.16, .12]];
+
+  function px(rep) { return M.l + (rep - 0.5) / 4.8 * (cv.w - M.l - M.r); }
+  function py(harm) { return cv.h - M.b - (harm - 0.5) / 4.8 * (cv.h - M.t - M.b); }
+
+  function colorOf(C, key) {
+    if (key === 'auto') return C.warn;
+    if (key === 'human') return C.a;
+    if (key === 'both') return C.ok;
+    return C.dark ? '#3a4050' : '#d5dae5';
+  }
+
+  function draw() {
+    const C = AI.sim.colors(), ctx = cv.ctx;
+    cv.clear(C.bg);
+    const font = getComputedStyle(document.body).fontFamily;
+
+    // 배경 구역 안내
+    ctx.font = '600 11px ' + font;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = C.dark ? '#39404f' : '#eef1f8';
+    ctx.fillRect(px(3.1), M.t, px(5.4) - px(3.1), py(3.1) - M.t);
+    ctx.fillStyle = C.dark ? '#2b3242' : '#f4f7fb';
+    ctx.fillRect(px(3.1), py(3.1), px(5.4) - px(3.1), cv.h - M.b - py(3.1));
+    ctx.fillRect(M.l, M.t, px(3.1) - M.l, py(3.1) - M.t);
+
+    ctx.fillStyle = C.ink3;
+    ctx.fillText('사람 개입 · 설명 필요', (px(3.1) + px(5.4)) / 2, M.t + 14);
+    ctx.fillText('사람이 판단', (M.l + px(3.1)) / 2, M.t + 14);
+    ctx.fillText('자동화 유리', (px(3.1) + px(5.4)) / 2, cv.h - M.b - 12);
+
+    // 격자
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+    for (let v = 1; v <= 5; v++) {
+      ctx.beginPath(); ctx.moveTo(px(v), M.t); ctx.lineTo(px(v), cv.h - M.b); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(M.l, py(v)); ctx.lineTo(cv.w - M.r, py(v)); ctx.stroke();
+    }
+    // 축
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(M.l, M.t); ctx.lineTo(M.l, cv.h - M.b); ctx.lineTo(cv.w - M.r, cv.h - M.b); ctx.stroke();
+
+    ctx.fillStyle = C.ink3;
+    ctx.font = '600 11px ' + font;
+    for (let v = 1; v <= 5; v++) {
+      ctx.textAlign = 'center'; ctx.fillText(String(v), px(v), cv.h - M.b + 14);
+      ctx.textAlign = 'right'; ctx.fillText(String(v), M.l - 8, py(v));
+    }
+    ctx.font = '700 12px ' + font;
+    ctx.fillStyle = C.ink;
+    ctx.textAlign = 'center';
+    ctx.fillText('판단의 반복성 (많을수록 오른쪽) →', (M.l + cv.w - M.r) / 2, cv.h - 10);
+    ctx.save();
+    ctx.translate(15, (M.t + cv.h - M.b) / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('오류 시 피해 크기 →', 0, 0);
+    ctx.restore();
+
+    // 점
+    S.forEach(function (s, i) {
+      const x = px(s.rep + OFF[i][0]), y = py(s.harm + OFF[i][1]);
+      ctx.beginPath();
+      ctx.arc(x, y, 12, 0, Math.PI * 2);
+      ctx.fillStyle = colorOf(C, picks[i]);
+      ctx.fill();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = C.bg;
+      ctx.stroke();
+      ctx.fillStyle = picks[i] ? (C.dark ? '#12151c' : '#ffffff') : C.ink3;
+      ctx.font = '800 11px ' + font;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(String(i + 1), x, y + 1);
+    });
+  }
+
+  window.addEventListener('ai:redraw', draw);
+
+  buildList();
+  draw();
+  update();
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a3l3-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['비판적 수용', '환각', '블랙박스', '설명 가능한', '자동화', '증강', '사람 개입', '인간 중심'],
+  sents: [
+    { text: '인공지능을 대할 때는 무조건 수용도 무조건 거부도 아닌 {0} 태도가 필요하다.', answers: [['비판적 수용']] },
+    { text: '인공지능이 사실이 아닌 내용을 사실처럼 그럴듯하게 만들어 내는 현상을 {0}(이)라고 한다.', answers: [['환각']] },
+    { text: '입력과 출력은 보이지만 그 사이의 판단 과정을 사람이 따라갈 수 없는 성질을 {0}(이)라고 부른다.', answers: [['블랙박스']] },
+    { text: '판단의 이유를 사람이 이해할 수 있는 방식으로 제시하는 인공지능을 {0} 인공지능이라고 한다.', answers: [['설명 가능한']] },
+    { text: '사람을 대신하는 {0}보다, 사람의 능력을 키워 주는 {1}이(가) 더 알맞은 상황이 많다.', answers: [['자동화'], ['증강']] },
+    { text: '판단 절차 안에 사람을 남겨 두어 결과를 사람이 최종 확정하게 하는 방식을 {0}(이)라고 한다.', answers: [['사람 개입']] },
+    { text: '인간을 배제하지 않고 인간을 도와 능력을 향상시키는 데 중점을 두는 접근을 {0} 인공지능이라고 한다.', answers: [['인간 중심']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '3차시 확인 문제',
+  items: [
+    {
+      type: 'mc',
+      q: '인공지능을 대하는 태도 중 <b>비판적 수용</b>에 해당하는 것은?',
+      choices: [
+        '인공지능의 답변을 그대로 옮겨 쓰되, 출처만 나중에 덧붙인다',
+        '인공지능이 틀릴 수 있으므로 아예 사용하지 않는다',
+        '인공지능을 쓰면서, 확인할 수 있는 항목을 정해 근거로 검증한 뒤 받아들인다',
+        '성능이 좋은 최신 모델의 답변만 신뢰하고 그대로 쓴다'
+      ],
+      answer: 2,
+      why: '비판적 수용은 <b>쓰되 따져 보는</b> 태도입니다. ①은 형식만 갖춘 무조건 수용, ②는 무조건 거부, ④는 “성능이 좋으면 믿어도 된다”는 또 다른 형태의 무조건 수용입니다. 성능이 좋아지면 오류가 <b>더 그럴듯해져서 알아채기 어려워진다</b>는 점을 기억해야 합니다.'
+    },
+    {
+      type: 'ox',
+      q: '비판적 수용은 인공지능을 되도록 사용하지 않으려는 태도이다.',
+      answer: false,
+      why: '반대입니다. 비판적 수용은 <b>더 잘 쓰기 위한 태도</b>입니다. 자동차를 잘 쓰는 사람은 자동차를 무서워하는 사람이 아니라 제동 거리와 사각지대를 아는 사람입니다. 무엇을 잘하고 무엇을 못하는지 알면 <b>안심하고 맡길 수 있는 범위가 오히려 넓어집니다</b>.'
+    },
+    {
+      type: 'short',
+      q: '인공지능이 사실이 아닌 내용을 마치 사실인 것처럼 그럴듯하게 만들어 내는 현상을 무엇이라고 하는가?',
+      answer: ['환각', '할루시네이션', '환각 현상', 'hallucination'],
+      placeholder: '예: ○○',
+      why: '<b>환각(할루시네이션)</b>입니다. 거대 언어 모델은 “다음에 올 말로 자연스러운 것”을 고르도록 학습했기 때문에, 사실을 모를 때도 <b>말이 되는 문장</b>을 만들어 냅니다. 형식이 완벽할수록 알아채기 어렵다는 점이 가장 위험합니다.'
+    },
+    {
+      type: 'ox',
+      q: '인공지능이 판단 근거를 설명하지 못하는 것은 프로그램의 오류이므로, 코드를 고치면 해결된다.',
+      answer: false,
+      why: '오류가 아니라 <b>구조적 특성</b>입니다. 깊은 신경망은 수백만 개의 가중치가 함께 작용해 결론을 내므로, 사람이 따라갈 수 있는 규칙의 형태로 근거가 <b>애초에 존재하지 않습니다</b>. 규칙을 사람이 쓰지 않고 데이터에서 찾아내게 한 방식의 대가입니다. 그래서 근거를 따로 재구성해 보여 주는 <b>설명 가능한 인공지능</b> 연구가 필요합니다.'
+    },
+    {
+      type: 'multi',
+      q: '어떤 판단을 <b>사람이 반드시 맡아야 한다</b>고 볼 근거로 알맞은 것을 모두 고르시오.',
+      choices: [
+        '오류가 났을 때 되돌리기 어렵다',
+        '같은 유형의 판단이 매우 자주 대량으로 반복된다',
+        '어떤 가치를 더 중요하게 볼지 정해야 한다',
+        '결과에 대해 누군가 책임을 지고 설명해야 한다'
+      ],
+      answer: [0, 2, 3],
+      why: '②는 오히려 <b>자동화에 유리한 조건</b>입니다. 반복이 많을수록 기계의 속도와 일관성이 이득이 됩니다. 사람이 맡아야 하는 근거는 ① 되돌릴 수 없는 피해, ③ 가치의 충돌을 정하는 일, ④ 책임과 설명의 주체가 필요한 일입니다. 이 셋은 성능이 좋아져도 기계가 대신할 수 없습니다.'
+    },
+    {
+      type: 'mc',
+      q: '다음 중 <b>자동화</b>보다 <b>증강</b>이 더 알맞은 상황은?',
+      choices: [
+        '수만 건의 영수증을 항목별로 분류하는 일',
+        '일상적인 안내문을 여러 언어로 번역하는 일',
+        '의료 영상에서 병변을 찾아 최종 진단을 내리는 일',
+        '문서의 맞춤법을 검사하는 일'
+      ],
+      answer: 2,
+      why: '③은 <b>오류의 피해가 크고 되돌리기 어렵고, 당사자에게 이유를 설명해야</b> 하는 판단입니다. 모델이 의심 영역을 표시하고 사람이 최종 확정하는 <b>증강</b>이 알맞습니다. ①②④는 반복이 많고 오류의 피해가 작아 자동화의 이득이 큰 일입니다.'
+    },
+    {
+      type: 'order',
+      q: '인공지능의 답변을 비판적으로 확인하는 절차를 <b>알맞은 순서</b>로 배열하시오.',
+      items: [
+        '답변에서 확인이 가능한 사실 주장(숫자·출처·고유명사)을 찾아 표시한다',
+        '표시한 주장을 직접 계산하거나 다른 자료로 하나씩 대조한다',
+        '확인되지 않은 주장은 지우거나 ‘미확인’으로 표시한다',
+        '남은 내용으로 결론을 정하고, 그 판단의 책임은 내가 진다'
+      ],
+      answer: [0, 1, 2, 3],
+      why: '무엇을 확인할지 <b>정하는 일</b>이 먼저입니다. 확인할 항목을 표시하지 않으면 “대체로 맞는 것 같다”는 느낌으로 넘어가게 됩니다. 마지막 단계가 가장 중요합니다. 도구를 썼더라도 <b>결과의 책임은 사용한 사람에게 남습니다</b>.'
+    },
+    {
+      type: 'match',
+      q: '인공지능의 한계와 그에 알맞은 대응 방법을 짝지으시오.',
+      left: [
+        '환각 — 없는 출처와 수치를 매끄럽게 제시한다',
+        '블랙박스 — 판단 근거를 알 수 없다',
+        '학습 데이터에 없던 상황에서 근거 없이 확신한다',
+        '과거 기록에 담긴 편향을 그대로 학습한다'
+      ],
+      right: [
+        '출처를 직접 검색하고 숫자를 직접 계산한다',
+        '설명 가능한 인공지능으로 기여도·근거를 요구한다',
+        '이례적 입력은 사람에게 넘기는 규칙을 절차에 넣는다',
+        '집단별로 성능을 따로 측정해 격차를 점검한다'
+      ],
+      answer: [0, 1, 2, 3],
+      why: '한계마다 확인 지점이 다릅니다. 특히 <b>편향</b>은 답변 하나만 봐서는 절대 드러나지 않고, <b>집단별로 결과를 모아 비교해야</b> 보입니다. 그래서 “나는 이상한 답을 못 봤다”는 경험은 편향이 없다는 증거가 되지 못합니다.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a3l3-note',
+  title: '공존 방안 설계 기록',
+  prompt: '두 시뮬레이터를 모두 해 본 뒤 아래를 채워 보세요. 마지막 세 칸은 <b>토론 준비</b>용입니다. 자기 입장을 쓰는 것보다 <b>반대 입장의 가장 강한 근거</b>를 쓰는 것이 훨씬 어렵고 훨씬 중요합니다.',
+  fields: [
+    { key: 'hz', label: '환각 판별 훈련 결과 (8문항 중 맞힌 수)', type: 'text', placeholder: '예: 6 / 8' },
+    { key: 'miss', label: '내가 놓친 문항의 유형은 무엇이었나요?', type: 'text', placeholder: '예: 틀린 계산, 연도 뒤섞기' },
+    { key: 'cnt', label: '공존 보드에서 각 칸에 넣은 상황 수 (맡김 / 사람 / 함께)', type: 'text', placeholder: '예: 2 / 3 / 5' },
+    {
+      key: 'rule', label: '두 시뮬레이터에서 관찰한 것 — 나는 어떤 기준으로 세 칸을 나누었나요?',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 되돌릴 수 없는 피해가 생기는 상황은 모두 사람 쪽으로 보냈다. 다만 반복이 아주 많은 상황은 …'
+    },
+    {
+      key: 'design', label: '상황 하나를 골라 공존을 설계해 보세요 — 인공지능이 하는 일, 사람이 하는 일, 사람이 개입하는 정확한 지점',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 채용 서류 심사: 인공지능은 형식 요건만 확인한다. 사람은 …. 인공지능의 확신도가 낮은 서류와 1차 탈락자의 이의 제기는 반드시 사람이 다시 본다.'
+    },
+    {
+      key: 'pos', label: '【토론】 나의 입장 — 인공지능에게 맡겨도 되는 판단의 경계는 어디까지인가?',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 나는 ○○를 기준으로 삼는다. 왜냐하면 …'
+    },
+    {
+      key: 'counter', label: '【토론】 반대 입장의 가장 강한 근거 (내 입장을 가장 아프게 하는 반론을 적을 것)',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 사람이 최종 결정을 하면 오히려 …. 사람도 편향되고 느리다는 점을 들어 …'
+    },
+    {
+      key: 'reply', label: '【토론】 그 반론에 대한 나의 대답 — 인정할 부분과 그래도 지킬 부분을 나누어 쓰기',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 그 지적은 ○○ 부분에서 맞다. 그래도 △△는 지켜야 하는데, 그 까닭은 …'
+    }
+  ]
+});
+</script>
+</body>
+</html>

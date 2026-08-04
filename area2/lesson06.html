@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6차시 얼마나 잘 맞혔나 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+  /* 이 페이지에서만 쓰는 보조 스타일 */
+  .fx { font-family: var(--font-mono); font-size: .95em; background: var(--surface-3); padding: 2px 7px; border-radius: 6px; }
+  .cm-wrap { overflow-x: auto; margin: 14px 0 0; }
+  table.cm { border-collapse: separate; border-spacing: 6px; width: 100%; min-width: 360px; }
+  table.cm th { font-size: 12.5px; color: var(--ink-3); font-weight: 750; padding: 3px 8px; text-align: center; white-space: nowrap; }
+  table.cm th.rh { text-align: right; }
+  table.cm td { border-radius: 10px; border: 1px solid var(--line); padding: 9px 10px; text-align: center; background: var(--surface-2); }
+  table.cm td .cml { display: block; font-size: 11.5px; font-weight: 750; color: var(--ink-3); }
+  table.cm td .cmv { display: block; font-size: 21px; font-weight: 800; font-family: var(--font-mono); letter-spacing: -.02em; }
+  table.cm td.cm-tp { background: var(--ok-soft); border-color: var(--ok-line); }
+  table.cm td.cm-tp .cmv { color: var(--ok); }
+  table.cm td.cm-fn { background: var(--no-soft); border-color: var(--no-line); }
+  table.cm td.cm-fn .cmv { color: var(--no); }
+  table.cm td.cm-fp { background: var(--warn-soft); border-color: var(--warn-line); }
+  table.cm td.cm-fp .cmv { color: var(--warn); }
+  table.cm td.cm-tn { background: var(--accent-soft); border-color: var(--accent-line); }
+  table.cm td.cm-tn .cmv { color: var(--accent-ink); }
+  .split-bar { display: flex; height: 34px; border-radius: 9px; overflow: hidden; border: 1px solid var(--line-strong); margin: 12px 0 6px; }
+  .split-bar div { display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 750; color: #fff; }
+  :root[data-theme="dark"] .split-bar div { color: #10131a; }
+  .sb-train { background: var(--accent); }
+  .sb-valid { background: var(--warn); }
+  .sb-test { background: var(--ok); }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>어떤 회사가 이런 광고를 냈습니다.</p>
+      <p style="text-align:center;font-size:19px;font-weight:750;color:var(--accent-ink);margin:14px 0">“우리 인공지능은 희귀 질병을 <b>99% 정확도</b>로 진단합니다!”</p>
+      <p>그런데 이 병에 걸린 사람은 1,000명 중 1명뿐입니다. 여기서 아무 검사도 하지 않고 <b>모두에게 “당신은 건강합니다”라고 말하는 프로그램</b>을 만들면, 이 프로그램의 정확도는 몇 %일까요?</p>
+      <ul>
+        <li>정확도 99.9%인 프로그램이 <b>정말 좋은 프로그램</b>일까요?</li>
+        <li>이 프로그램이 놓치고 있는 것은 무엇일까요?</li>
+      </ul>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 계산해 보고, 무엇이 이상한지 말해 보기</summary>
+        <div class="more-body">
+          1,000명 중 999명은 실제로 건강하니 “모두 건강”이라고 답하면 999명을 맞힙니다. 정확도는 <b>99.9%</b>입니다. 광고보다 높습니다! 하지만 이 프로그램은 <b>진짜 환자 1명을 단 한 번도 찾아내지 못합니다.</b> 정확도라는 하나의 숫자가 이렇게 사람을 속일 수 있습니다.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 데이터 나누기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>왜 데이터를 나누어야 하는가</h2></div>
+
+    <p>지난 차시까지 우리는 모델을 <b>만드는</b> 방법을 배웠습니다. 이제는 만든 모델이 <b>쓸 만한지 판단하는</b> 방법을 배웁니다. 여기서 가장 먼저 지켜야 할 규칙이 하나 있습니다. <b>시험 문제를 미리 보여 주고 시험을 치르면 안 된다</b>는 것입니다.</p>
+
+    <p>기계학습에서는 가진 데이터를 용도에 따라 나눕니다. 모델의 학습에 쓰는 데이터를 <b class="blank" data-a="훈련 데이터|학습 데이터|훈련용 데이터" data-hint="모델을 학습시킬 때 쓰는 데이터, 보통 전체의 60~80%">훈련 데이터</b>, 학습이 모두 끝난 뒤 성능을 재는 데이터를 <b class="blank" data-a="테스트 데이터|시험 데이터|테스트용 데이터" data-hint="마지막에 단 한 번만 쓰는 ‘실전 시험지’">테스트 데이터</b>라고 합니다.</p>
+
+    <div class="split-bar">
+      <div class="sb-train" style="flex:6">훈련 데이터 60%</div>
+      <div class="sb-valid" style="flex:2">검증 20%</div>
+      <div class="sb-test" style="flex:2">테스트 20%</div>
+    </div>
+    <p style="font-size:13.5px;color:var(--ink-3)">데이터를 나누는 흔한 비율. 데이터가 적으면 검증 데이터를 따로 떼지 않고 교차 검증을 쓰기도 합니다.</p>
+
+    <p>여기에 하나가 더 있습니다. 모델을 만들다 보면 “k-NN의 k를 3으로 할까 7로 할까”, “다항식 차수를 몇으로 할까” 같은 선택을 계속 하게 됩니다. 이런 선택을 비교하려고 성능을 재는 데이터가 <b class="blank" data-a="검증 데이터|검증용 데이터" data-hint="하이퍼파라미터를 고를 때 성능을 비교하려고 쓰는 데이터">검증 데이터</b>입니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 — 세 가지 데이터의 역할</div>
+      <ul style="margin:0">
+        <li><b>훈련 데이터</b> — 모델이 파라미터(가중치)를 배우는 데 쓴다. 교과서와 문제집에 해당한다.</li>
+        <li><b>검증 데이터</b> — 하이퍼파라미터를 고르고 모델을 비교하는 데 쓴다. 모의고사에 해당한다.</li>
+        <li><b>테스트 데이터</b> — 최종 성능을 <b>단 한 번</b> 재는 데 쓴다. 실제 수능에 해당한다.</li>
+      </ul>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 훈련 데이터로 평가하면 안 되는 까닭</div>
+      <p>훈련 데이터로 성능을 재면 <b>거의 언제나 성적이 좋게 나옵니다.</b> 극단적으로, 훈련 데이터를 전부 통째로 외워 버린 모델은 훈련 데이터에서 정확도 100%를 얻습니다. 하지만 이 모델은 <b>처음 보는 데이터</b>에서는 아무 쓸모가 없습니다.</p>
+      <p>우리가 진짜로 알고 싶은 것은 “외운 것을 다시 물었을 때”가 아니라 “<b>처음 보는 데이터에서 얼마나 잘하는가</b>”입니다. 이 능력을 <b>일반화 성능</b>이라고 부르며, 테스트 데이터를 따로 떼어 두는 이유가 바로 이것입니다.</p>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 나눌 때 지켜야 할 것</div>
+      <p>① 나누기 전에 <b>순서를 섞습니다.</b> 날짜순으로 정렬된 데이터를 그냥 앞뒤로 자르면 훈련·테스트의 성질이 달라집니다. ② 클래스 비율이 한쪽으로 치우친 데이터는 <b>비율을 유지하며</b> 나눕니다(층화 추출). ③ 테스트 데이터는 <b>모델을 고치는 데 절대 쓰지 않습니다.</b> 테스트 성능을 보고 모델을 계속 고치면, 테스트 데이터가 사실상 검증 데이터가 되어 버립니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. 과소적합과 과대적합 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>너무 단순해도, 너무 복잡해도 문제다</h2></div>
+
+    <p>모델의 성능이 나쁠 때 원인은 크게 두 가지입니다. 모델이 <b>너무 단순한</b> 경우와 <b>너무 복잡한</b> 경우입니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">📏</span>
+        <h4>과소적합 (underfitting)</h4>
+        <p>모델이 너무 단순해서 <b>훈련 데이터조차</b> 제대로 설명하지 못합니다. 훈련 오차와 테스트 오차가 <b>둘 다 큽니다.</b> 곡선 데이터에 직선 하나를 그은 경우가 그렇습니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🌀</span>
+        <h4>과대적합 (overfitting)</h4>
+        <p>모델이 너무 복잡해서 데이터의 <b>잡음까지 외워</b> 버립니다. 훈련 오차는 아주 작은데 테스트 오차는 큽니다. 시험 범위 문제집의 답만 외운 학생과 같습니다.</p>
+      </div>
+    </div>
+
+    <p>모델이 너무 단순해 훈련 데이터의 규칙조차 잡아내지 못하는 상태를 <b class="blank" data-a="과소적합|언더피팅" data-hint="훈련 오차와 테스트 오차가 둘 다 큰 상태">과소적합</b>이라고 하고, 반대로 훈련 데이터의 잡음까지 외워 새 데이터에서 성능이 뚝 떨어지는 상태를 <b class="blank" data-a="과대적합|과적합|오버피팅" data-hint="훈련 오차는 아주 작은데 테스트 오차는 큰 상태, ‘과적합’이라고도 한다">과대적합</b>이라고 합니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>훈련 오차와 테스트 오차로 진단하기</caption>
+        <thead><tr><th>훈련 오차</th><th>테스트 오차</th><th>진단</th><th>해결 방향</th></tr></thead>
+        <tbody>
+          <tr><td class="bad">큼</td><td class="bad">큼</td><td><b>과소적합</b></td><td>모델을 더 복잡하게, 속성을 더 추가</td></tr>
+          <tr><td class="good">작음</td><td class="bad">큼</td><td><b>과대적합</b></td><td>데이터를 더 모으고, 모델을 단순하게, 규제 추가</td></tr>
+          <tr><td class="good">작음</td><td class="good">작음</td><td><b>알맞음</b></td><td>그대로 사용</td></tr>
+          <tr><td class="bad">큼</td><td class="good">작음</td><td>거의 없는 경우</td><td>데이터 나누기가 잘못됐는지 확인</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-ok">
+      <div class="box-label">✅ 과대적합을 줄이는 세 가지 방법</div>
+      <p>① <b>데이터를 더 모은다</b> — 가장 확실한 방법입니다. 외울 수 있는 양보다 데이터가 많아지면 모델은 규칙을 배우는 수밖에 없습니다. ② <b>모델을 단순하게 한다</b> — 차수를 낮추고, 신경망의 층을 줄입니다. ③ <b>규제를 넣는다</b> — 가중치가 지나치게 커지지 못하게 벌점을 주는 방법입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. 혼동 행렬 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>혼동 행렬 — 맞힌 것과 틀린 것을 네 칸으로</h2></div>
+
+    <p>분류 모델의 성능을 제대로 보려면 “몇 개 맞혔나”만으로는 부족합니다. <b>어떤 식으로 틀렸는지</b>를 알아야 하기 때문입니다. 그래서 실젯값과 예측값을 짝지어 네 칸의 표로 정리합니다. 이 표를 <b class="blank" data-a="혼동 행렬|혼동행렬|confusion matrix" data-hint="모델이 무엇과 무엇을 헷갈렸는지 보여 주는 표, 영어로는 confusion matrix">혼동 행렬</b>이라고 합니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>혼동 행렬의 네 칸 — 질병 검사에서 ‘양성’은 ‘병이 있다고 예측’을 뜻합니다</caption>
+        <thead><tr><th>칸</th><th>이름</th><th>뜻</th><th>질병 검사의 예</th></tr></thead>
+        <tbody>
+          <tr><td><b>TP</b></td><td>참 양성 (True Positive)</td><td>실제로 양성인 것을 양성으로 <b>맞게</b> 예측</td><td class="good">환자를 환자로 찾아냄 ✔</td></tr>
+          <tr><td><b>FN</b></td><td>위 음성 (False Negative)</td><td>실제로 양성인 것을 음성으로 <b>틀리게</b> 예측</td><td class="bad">환자를 놓침 ✖ (치료 시기를 잃는다)</td></tr>
+          <tr><td><b>FP</b></td><td>위 양성 (False Positive)</td><td>실제로 음성인 것을 양성으로 <b>틀리게</b> 예측</td><td class="bad">건강한 사람에게 겁을 줌 ✖ (재검사 비용)</td></tr>
+          <tr><td><b>TN</b></td><td>참 음성 (True Negative)</td><td>실제로 음성인 것을 음성으로 <b>맞게</b> 예측</td><td class="good">건강한 사람을 건강하다고 함 ✔</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 이름을 외우는 요령</div>
+      <p>두 글자를 <b>뒤에서부터</b> 읽으면 됩니다. 뒷글자(Positive/Negative)는 <b>모델이 무엇이라고 예측했는지</b>, 앞글자(True/False)는 <b>그 예측이 맞았는지</b>를 뜻합니다. 그러니 <span class="mono">FN</span>은 “음성이라고 예측했는데(N) 그것이 틀렸다(F)” → <b>실제로는 양성인데 놓쳤다</b>가 됩니다.</p>
+    </div>
+
+    <p>네 칸 중에서 특히 조심해야 할 칸은 실제 양성을 놓쳐 버린 <b class="blank" data-a="위 음성|위음성|FN|거짓 음성" data-hint="영어 약자 FN, 환자를 건강하다고 판정해 버린 경우">위 음성</b>입니다. 질병 검사에서 이 칸이 커지면 사람의 목숨이 위험해지기 때문입니다.</p>
+  </section>
+
+  <!-- ============ 4. 지표 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>정확도만으로는 부족하다 — 정밀도와 재현율</h2></div>
+
+    <p>혼동 행렬의 네 숫자를 조합하면 서로 다른 관점의 지표를 만들 수 있습니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 — 네 가지 평가 지표</div>
+      <p><b>정확도</b> <span class="fx">= (TP + TN) / (TP + FN + FP + TN)</span><br>
+        전체 중에서 <b>맞게 예측한 비율</b>입니다. 가장 직관적이지만 클래스가 치우치면 쉽게 속습니다.</p>
+      <p><b>정밀도</b> <span class="fx">= TP / (TP + FP)</span><br>
+        모델이 <b>양성이라고 예측한 것들 중</b> 실제로 양성인 비율입니다. “네가 양성이라고 한 말을 얼마나 믿을 수 있나?”</p>
+      <p><b>재현율</b> <span class="fx">= TP / (TP + FN)</span><br>
+        <b>실제 양성인 것들 중</b> 모델이 찾아낸 비율입니다. “있는 것을 얼마나 빠짐없이 찾아냈나?”</p>
+      <p><b>F1 점수</b> <span class="fx">= 2 × 정밀도 × 재현율 / (정밀도 + 재현율)</span><br>
+        정밀도와 재현율을 하나로 합친 값입니다.</p>
+    </div>
+
+    <p>전체 중 맞게 예측한 비율은 <b class="blank" data-a="정확도|정확률|accuracy" data-hint="(TP+TN)을 전체로 나눈 값">정확도</b>, 양성이라고 예측한 것 중 실제로 양성인 비율은 <b class="blank" data-a="정밀도|precision" data-hint="TP / (TP+FP), 예측을 얼마나 믿을 수 있는지">정밀도</b>, 실제 양성 중 찾아낸 비율은 <b class="blank" data-a="재현율|재현도|recall" data-hint="TP / (TP+FN), 빠짐없이 찾아냈는지">재현율</b>입니다. F1 점수는 이 두 값의 <b class="blank" data-a="조화평균|조화 평균" data-hint="역수의 평균의 역수로 구하는 평균, 둘 중 하나만 높아서는 값이 커지지 않는다">조화평균</b>입니다.</p>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 왜 산술평균이 아니고 조화평균일까</div>
+      <p>정밀도 100%, 재현율 0%인 모델을 생각해 봅시다. 산술평균은 50%로 그럴듯해 보이지만, 조화평균은 <b>0%</b>입니다. 조화평균은 <b>둘 다 높지 않으면 절대 높아지지 않습니다.</b> 그래서 한쪽 지표만 극단적으로 올려 점수를 부풀리는 일을 막아 줍니다.</p>
+    </div>
+
+    <h3 class="sub-head">임계값을 움직이면 무엇이 바뀌는가</h3>
+    <p>대부분의 분류 모델은 “양성이다/음성이다”라고 딱 잘라 말하지 않습니다. 대신 <b>0에서 1 사이의 점수(확률)</b>를 내놓습니다. 이 점수가 얼마 이상일 때 양성으로 판정할지 정하는 기준값을 <b class="blank" data-hint="이 값을 넘으면 양성으로 판정하는 기준값, 영어로는 threshold">임계값</b>이라고 합니다.</p>
+
+    <p>임계값을 <b>낮추면</b> 조금만 의심스러워도 양성으로 판정하니 놓치는 환자가 줄어듭니다(재현율 ↑). 그러나 건강한 사람도 양성으로 몰리니 예측을 믿기 어려워집니다(정밀도 ↓). 임계값을 <b>높이면</b> 정반대가 됩니다. 이렇게 한쪽을 얻으면 다른 쪽을 잃는 관계를 <span class="term">트레이드오프</span>라고 합니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>상황에 따라 중요한 지표가 달라진다</caption>
+        <thead><tr><th>상황</th><th>더 무서운 실수</th><th>중요한 지표</th><th>임계값을</th></tr></thead>
+        <tbody>
+          <tr><td><b>암 검진</b></td><td>환자를 놓치는 것(FN)</td><td class="good">재현율</td><td>낮게</td></tr>
+          <tr><td><b>스팸 메일 분류</b></td><td>중요한 메일을 스팸함에 넣는 것(FP)</td><td class="good">정밀도</td><td>높게</td></tr>
+          <tr><td><b>불량품 검사</b></td><td>불량품을 통과시키는 것(FN)</td><td class="good">재현율</td><td>낮게</td></tr>
+          <tr><td><b>추천 시스템</b></td><td>관심 없는 것을 추천하는 것(FP)</td><td class="good">정밀도</td><td>높게</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 클래스 불균형과 정확도의 함정</div>
+      <p>한 클래스의 데이터가 다른 클래스보다 훨씬 많은 상태를 <b class="blank" data-a="클래스 불균형|불균형|데이터 불균형" data-hint="한쪽 클래스의 데이터가 다른 쪽보다 훨씬 많은 상태">클래스 불균형</b>이라고 합니다. 환자가 4%뿐인 데이터에서 “모두 건강”이라고만 답하는 모델의 정확도는 <b>96%</b>입니다. 그러나 재현율은 <b>0%</b>, 즉 환자를 한 명도 찾지 못합니다.</p>
+      <p>그러므로 클래스가 치우친 문제에서는 <b>정확도를 대표 지표로 삼으면 안 됩니다.</b> 재현율·정밀도·F1 점수를 함께 보고, 혼동 행렬의 네 칸을 직접 확인해야 합니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 5. 회귀의 평가 지표 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>회귀는 무엇으로 평가하는가</h2></div>
+
+    <p>여기까지는 분류 모델의 이야기였습니다. 값을 예측하는 회귀 모델은 “맞았다/틀렸다”로 나눌 수 없으니 <b>얼마나 빗나갔는지</b>를 잽니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>회귀 모델의 평가 지표 — 실젯값 y, 예측값 ŷ</caption>
+        <thead><tr><th>지표</th><th>계산</th><th>성질</th></tr></thead>
+        <tbody>
+          <tr><td><b>MAE</b><br>평균 절대 오차</td><td><span class="fx">|y − ŷ| 의 평균</span></td><td>단위가 원래 값과 같아 해석하기 쉽다. 큰 오차에 둔감하다.</td></tr>
+          <tr><td><b>MSE</b><br>평균 제곱 오차</td><td><span class="fx">(y − ŷ)<sup>2</sup> 의 평균</span></td><td>큰 오차에 큰 벌점을 준다. 단위가 제곱이라 해석이 어렵다.</td></tr>
+          <tr><td><b>RMSE</b><br>평균 제곱근 오차</td><td><span class="fx">√MSE</span></td><td>MSE의 장점을 두고 단위를 원래대로 돌려놓은 값이다.</td></tr>
+          <tr><td><b>R²</b><br>결정 계수</td><td><span class="fx">1 − (모델 오차 제곱합 / 평균으로만 예측한 오차 제곱합)</span></td><td>1에 가까울수록 좋다. 0이면 그냥 평균을 답한 것과 같고, 음수면 그보다 못하다.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>회귀에서도 규칙은 같습니다. 이 지표들을 <b>테스트 데이터에서</b> 계산해야 의미가 있습니다. 아래 두 번째 시뮬레이터에서는 RMSE를 훈련 데이터와 테스트 데이터에서 각각 재어, 차수가 커질 때 두 값이 어떻게 갈라지는지 확인합니다.</p>
+  </section>
+
+  <!-- ============ 6. 시뮬레이터 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>직접 돌려 보기</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim1"></div>
+    <div id="sim2"></div>
+  </section>
+
+  <!-- ============ 7. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 8. 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 9. 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">9</span><h2>활동 기록</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 교차 검증 — 데이터가 적을 때의 해법</summary>
+      <div class="more-body">
+        <p>데이터가 100개뿐이라면 20개를 테스트로 떼는 것도 아깝습니다. 게다가 어느 20개를 떼느냐에 따라 성능이 크게 흔들립니다. 이때 쓰는 방법이 <b>k-겹 교차 검증</b>입니다.</p>
+        <p>데이터를 <span class="mono">k</span>등분한 뒤, 그중 한 조각을 검증용으로 쓰고 나머지로 학습합니다. 이것을 <b>검증 조각을 바꿔 가며 k번</b> 되풀이하고, k개의 성능을 평균합니다. 5겹 교차 검증이라면 모든 데이터가 <b>네 번은 훈련에, 한 번은 검증에</b> 쓰이므로 데이터를 낭비하지 않고 성능도 안정적으로 추정할 수 있습니다.</p>
+        <p>단, 교차 검증은 하이퍼파라미터를 고르기 위한 <b>검증</b> 과정입니다. 최종 성능은 여전히 한 번도 쓰지 않은 테스트 데이터에서 재야 합니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> ROC 곡선과 AUC</summary>
+      <div class="more-body">
+        <p>시뮬레이터 1에서 임계값을 0부터 100까지 움직이면 재현율과 위 양성률이 계속 변합니다. 이 두 값을 각각 세로축·가로축으로 삼아 점을 찍으면 곡선 하나가 생깁니다. 이것이 <b>ROC 곡선</b>입니다.</p>
+        <p>곡선이 왼쪽 위 구석에 가까울수록 좋은 모델입니다. 이 곡선 아래의 면적을 <b>AUC</b>라고 하며, 1에 가까울수록 좋고 0.5면 동전 던지기와 같습니다. AUC의 좋은 점은 <b>임계값을 하나로 정하지 않고도</b> 모델의 성능을 비교할 수 있다는 것입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">코드</span> 파이썬으로 나누고 평가하기</summary>
+      <div class="more-body">
+        <pre style="margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;white-space:pre-wrap">from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, classification_report
+
+# stratify=y : 클래스 비율을 유지하며 나눈다 (불균형 데이터에서 특히 중요)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y)
+
+model.fit(X_train, y_train)          # 훈련 데이터로만 학습
+pred = model.predict(X_test)         # 테스트 데이터로 예측
+
+print(confusion_matrix(y_test, pred))       # [[TN, FP], [FN, TP]]
+print(classification_report(y_test, pred))  # 정밀도·재현율·F1 한 번에
+
+# 임계값을 직접 정하고 싶다면 확률을 받아 비교한다
+proba = model.predict_proba(X_test)[:, 1]
+pred_low = (proba >= 0.3)            # 임계값을 낮춰 재현율을 높인다</pre>
+        <p style="margin-top:12px">사이킷런의 <span class="mono">confusion_matrix</span>는 <b>행이 실젯값, 열이 예측값</b>이고 음성(0)이 먼저 옵니다. 교과서의 표와 칸 순서가 다를 수 있으니 항상 어느 칸이 무엇인지 확인해야 합니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 다음 차시로 — 층을 쌓으면 무엇이 달라질까</summary>
+      <div class="more-body">
+        시뮬레이터 2에서 차수를 올리면 모델은 <b>더 복잡한 모양</b>을 표현할 수 있었지만, 곧 과대적합에 빠졌습니다. 그렇다면 사람의 얼굴을 알아보는 것처럼 아주 복잡한 문제는 어떻게 풀까요? 다음 차시에서는 단순한 계산 단위를 <b>층으로 쌓아</b> 복잡한 함수를 만들어 내는 <b>인공신경망과 딥러닝</b>을 다룹니다. 그리고 그 강력한 모델에서도 과대적합은 여전히 가장 큰 적입니다.
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 2, lesson: 6,
+  title: '얼마나 잘 맞혔나',
+  sub: '훈련·테스트 데이터와 성능 평가',
+  lead: '“정확도 96%”라는 말에 속지 않는 법을 배웁니다. 임계값을 움직이며 <b>혼동 행렬</b>의 네 칸이 어떻게 변하는지 보고, 차수를 올려 가며 <b>과대적합</b>이 일어나는 순간을 두 눈으로 확인합니다.',
+  standards: ['12인기02-04'],
+  keywords: ['훈련 데이터', '테스트 데이터', '혼동 행렬', '정밀도', '재현율', '과대적합'],
+  goals: [
+    '데이터를 훈련·검증·테스트로 나누는 이유를 일반화 성능과 관련지어 설명할 수 있다.',
+    '혼동 행렬에서 정확도·정밀도·재현율·F1 점수를 계산하고, 상황에 알맞은 지표를 선택할 수 있다.',
+    '임계값 조정과 모델 복잡도 변화가 성능에 미치는 영향을 실험으로 확인하고 해석할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 시뮬레이터 1: 임계값과 혼동 행렬 ===================== -->
+<script>
+(function () {
+  /* ---------- 검사 점수 생성 (결정론적) ---------- */
+  function gen(nNeg, nPos) {
+    var r = AI.sim.rng(20260807), out = [];
+    function nz() {
+      var u1 = Math.max(1e-9, r()), u2 = r();
+      return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    }
+    for (var i = 0; i < nNeg; i++) out.push({ s: AI.sim.clamp(38 + nz() * 11, 2, 98), p: 0 });
+    for (var j = 0; j < nPos; j++) out.push({ s: AI.sim.clamp(62 + nz() * 12, 2, 98), p: 1 });
+    return out;
+  }
+
+  var SCEN = {
+    cancer: {
+      name: '암 검진',
+      pos: '암 의심(양성)', neg: '정상(음성)',
+      realPos: '실제 환자', realNeg: '실제 건강한 사람',
+      score: '검사 점수',
+      key: '재현율',
+      why: '환자를 놓치면(<b>FN</b>) 치료 시기를 잃어 목숨이 위험해집니다. 건강한 사람이 양성으로 나오면(<b>FP</b>) 불안하고 재검사 비용이 들지만 되돌릴 수 있습니다. 그래서 <b>재현율</b>을 우선하고, 임계값을 <b>낮게</b> 잡습니다.'
+    },
+    spam: {
+      name: '스팸 분류',
+      pos: '스팸으로 분류(양성)', neg: '받은 편지함으로(음성)',
+      realPos: '실제 스팸 메일', realNeg: '실제 정상 메일',
+      score: '스팸 점수',
+      key: '정밀도',
+      why: '스팸 하나가 받은 편지함에 들어오면(<b>FN</b>) 지우면 끝입니다. 그러나 합격 통보 메일이 스팸함으로 가면(<b>FP</b>) 아예 읽지 못합니다. 그래서 <b>정밀도</b>를 우선하고, 임계값을 <b>높게</b> 잡습니다.'
+    }
+  };
+
+  var scen = 'cancer', imb = false, TH = 50;
+  var data = gen(60, 40);
+
+  var body = AI.sim.panel('#sim1', {
+    title: '임계값과 혼동 행렬',
+    tag: '실시간 계산',
+    desc: '검사 점수가 <b>임계값 이상</b>이면 양성으로 판정합니다. 임계값 슬라이더를 움직이며 히스토그램의 색과 혼동 행렬 네 칸, 그리고 아래 네 지표가 어떻게 함께 움직이는지 관찰해 보세요. 히스토그램의 색은 혼동 행렬의 칸 색과 <b>똑같이</b> 맞춰 두었습니다.'
+  });
+
+  var W = 460, H = 290, L = 46, R = 14, T = 16, B = 44;
+  var PW = W - L - R, PH = H - T - B, BINS = 25, BW = PW / BINS;
+  var cv = AI.sim.canvas(W, H, { maxFull: true });
+  body.appendChild(cv.wrap);
+
+  body.appendChild(AI.ui.legend([
+    { color: 'var(--ok)', label: 'TP 참 양성 (제대로 찾아냄)' },
+    { color: 'var(--no)', label: 'FN 위 음성 (놓침)' },
+    { color: 'var(--warn)', label: 'FP 위 양성 (헛경보)' },
+    { color: 'var(--accent)', label: 'TN 참 음성 (제대로 통과)' }
+  ]));
+
+  /* ---------- 혼동 행렬 표 ---------- */
+  var cells = {};
+  function cell(cls, key, label) {
+    var v = AI.h('span', { class: 'cmv', text: '0' });
+    cells[key] = v;
+    return AI.h('td', { class: cls }, AI.h('span', { class: 'cml', text: label }), v);
+  }
+  var hdPos = AI.h('th', { text: '예측: 양성' }), hdNeg = AI.h('th', { text: '예측: 음성' });
+  var rhPos = AI.h('th', { class: 'rh', text: '실제 양성' }), rhNeg = AI.h('th', { class: 'rh', text: '실제 음성' });
+  var cmTable = AI.h('table', { class: 'cm' },
+    AI.h('thead', {}, AI.h('tr', {}, AI.h('th', {}), hdPos, hdNeg)),
+    AI.h('tbody', {},
+      AI.h('tr', {}, rhPos, cell('cm-tp', 'tp', 'TP 참 양성'), cell('cm-fn', 'fn', 'FN 위 음성')),
+      AI.h('tr', {}, rhNeg, cell('cm-fp', 'fp', 'FP 위 양성'), cell('cm-tn', 'tn', 'TN 참 음성'))
+    )
+  );
+  body.appendChild(AI.h('div', { class: 'cm-wrap' }, cmTable));
+
+  var stats = AI.ui.stats([
+    { key: 'acc', label: '정확도' },
+    { key: 'pre', label: '정밀도' },
+    { key: 'rec', label: '재현율' },
+    { key: 'f1', label: 'F1 점수' }
+  ]);
+  body.appendChild(stats.el);
+
+  var note = AI.h('div', { class: 'box box-info', style: { marginTop: '14px' } });
+
+  /* ---------- 지표 계산 ---------- */
+  function metrics(t) {
+    var TP = 0, FN = 0, FP = 0, TN = 0;
+    for (var i = 0; i < data.length; i++) {
+      var pos = data[i].s >= t;
+      if (data[i].p) { pos ? TP++ : FN++; } else { pos ? FP++ : TN++; }
+    }
+    var acc = (TP + TN) / data.length;
+    var pre = (TP + FP) ? TP / (TP + FP) : null;
+    var rec = (TP + FN) ? TP / (TP + FN) : null;
+    var f1 = (pre && rec && pre + rec > 0) ? 2 * pre * rec / (pre + rec) : 0;
+    return { TP: TP, FN: FN, FP: FP, TN: TN, acc: acc, pre: pre, rec: rec, f1: f1 };
+  }
+
+  function bestThreshold(kind) {
+    var best = null;
+    for (var t = 0; t <= 100; t++) {
+      var m = metrics(t);
+      var v, tie;
+      if (kind === 'rec') { v = m.rec === null ? -1 : m.rec; tie = m.pre === null ? -1 : m.pre; }
+      else if (kind === 'pre') { v = m.pre === null ? -1 : m.pre; tie = m.rec === null ? -1 : m.rec; }
+      else { v = m.f1; tie = m.acc; }
+      if (!best || v > best.v + 1e-12 || (Math.abs(v - best.v) < 1e-12 && tie > best.tie)) best = { t: t, v: v, tie: tie };
+    }
+    return best.t;
+  }
+
+  /* ---------- 히스토그램 ---------- */
+  function bin(list) {
+    var b = [];
+    for (var i = 0; i < BINS; i++) b.push(0);
+    for (var j = 0; j < list.length; j++) {
+      var k = Math.min(BINS - 1, Math.floor(list[j].s / 100 * BINS));
+      b[k]++;
+    }
+    return b;
+  }
+
+  function draw() {
+    var C = AI.sim.colors(), ctx = cv.ctx, S = SCEN[scen];
+    cv.clear(C.bg);
+    var neg = data.filter(function (o) { return !o.p; });
+    var pos = data.filter(function (o) { return o.p; });
+    var bn = bin(neg), bp = bin(pos);
+    var maxC = 1;
+    for (var i = 0; i < BINS; i++) maxC = Math.max(maxC, bn[i], bp[i]);
+    var X = function (s) { return L + s / 100 * PW; };
+    var Y = function (c) { return T + PH - c / maxC * PH; };
+
+    /* 격자·y축 */
+    ctx.font = '600 11px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    var stepC = maxC <= 8 ? 2 : (maxC <= 20 ? 5 : 10);
+    for (var c = 0; c <= maxC; c += stepC) {
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(L, Y(c)); ctx.lineTo(L + PW, Y(c)); ctx.stroke();
+      ctx.fillStyle = C.ink3; ctx.fillText(c + '명', L - 6, Y(c));
+    }
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(L, T); ctx.lineTo(L, T + PH); ctx.lineTo(L + PW, T + PH); ctx.stroke();
+
+    /* 막대: 먼저 음성 판정 색으로 전부 그린다 */
+    function bars(negCol, posCol) {
+      for (var i = 0; i < BINS; i++) {
+        var x0 = X(i / BINS * 100);
+        if (bn[i]) { ctx.fillStyle = negCol; ctx.fillRect(x0 + 1, Y(bn[i]), BW / 2 - 1.5, PH - (Y(bn[i]) - T)); }
+        if (bp[i]) { ctx.fillStyle = posCol; ctx.fillRect(x0 + BW / 2 + 0.5, Y(bp[i]), BW / 2 - 1.5, PH - (Y(bp[i]) - T)); }
+      }
+    }
+    bars(C.a, C.no);            /* 임계값 왼쪽: 건강=TN(파랑), 환자=FN(빨강) */
+    ctx.save();
+    ctx.beginPath(); ctx.rect(X(TH), T, Math.max(0, L + PW - X(TH)), PH); ctx.clip();
+    bars(C.warn, C.ok);         /* 임계값 오른쪽: 건강=FP(주황), 환자=TP(초록) */
+    ctx.restore();
+
+    /* 임계값 선 */
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 2.4;
+    ctx.beginPath(); ctx.moveTo(X(TH), T - 4); ctx.lineTo(X(TH), T + PH + 4); ctx.stroke();
+    ctx.fillStyle = C.ink;
+    ctx.font = '800 12px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText('임계값 ' + TH, AI.sim.clamp(X(TH), L + 30, L + PW - 30), T - 5);
+
+    /* x축 눈금과 판정 방향 */
+    ctx.font = '600 11px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillStyle = C.ink3;
+    for (var s = 0; s <= 100; s += 20) ctx.fillText(String(s), X(s), T + PH + 7);
+    ctx.fillText('← ' + S.neg, L + (X(TH) - L) / 2, T + PH + 24);
+    ctx.fillText(S.pos + ' →', X(TH) + (L + PW - X(TH)) / 2, T + PH + 24);
+    ctx.save();
+    ctx.translate(13, T + PH / 2); ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('사람 수', 0, 0);
+    ctx.restore();
+  }
+
+  /* ---------- 갱신 ---------- */
+  function pct(v) { return v === null ? '–' : (v * 100).toFixed(1) + '%'; }
+
+  function update() {
+    var m = metrics(TH), S = SCEN[scen];
+    cells.tp.textContent = m.TP; cells.fn.textContent = m.FN;
+    cells.fp.textContent = m.FP; cells.tn.textContent = m.TN;
+    hdPos.textContent = '예측: ' + S.pos; hdNeg.textContent = '예측: ' + S.neg;
+    rhPos.textContent = S.realPos + ' ' + (m.TP + m.FN) + '명';
+    rhNeg.textContent = S.realNeg + ' ' + (m.FP + m.TN) + '명';
+    stats.set('acc', pct(m.acc));
+    stats.set('pre', pct(m.pre));
+    stats.set('rec', pct(m.rec));
+    stats.set('f1', m.pre === null || m.rec === null ? '–' : m.f1.toFixed(3));
+
+    var html = '<div class="box-label">🧠 ' + S.name + ' 상황에서는 무엇을 봐야 할까</div>';
+    html += '<p>' + S.why + '</p>';
+    html += '<p>지금 임계값 <b>' + TH + '</b>에서는 ' + S.realPos + ' ' + (m.TP + m.FN) + '명 중 <b>' + m.TP + '명을 찾아내고 ' + m.FN + '명을 놓쳤으며</b>, ' +
+      S.realNeg + ' ' + (m.FP + m.TN) + '명 중 <b>' + m.FP + '명에게 헛경보</b>를 냈습니다. ' +
+      '(재현율 ' + pct(m.rec) + ' · 정밀도 ' + pct(m.pre) + ')</p>';
+
+    if (imb) {
+      var m55 = metrics(55);
+      html += '<p style="color:var(--no)"><b>⚠ 불균형의 함정</b> — 양성이 전체의 4%뿐입니다. 임계값을 <b>100</b>으로 올려 아무도 양성으로 판정하지 않으면 정확도는 <b>' +
+        pct(metrics(100).acc) + '</b>이지만 재현율은 <b>0%</b>, 즉 환자를 <b>한 명도</b> 찾지 못합니다. ' +
+        '반대로 임계값을 <b>55</b>로 두면 정확도는 <b>' + pct(m55.acc) + '</b>로 거의 같은데 재현율은 <b>' + pct(m55.rec) +
+        '</b>입니다. <b>정확도만 보면 두 모델이 똑같아 보인다</b>는 것이 이 함정의 무서운 점입니다.</p>';
+    } else if (m.pre !== null && m.rec !== null) {
+      if (m.rec > 0.95) html += '<p style="color:var(--ink-3);font-size:14px">💡 지금은 거의 아무도 놓치지 않지만, 양성이라고 판정한 사람 중 실제 양성은 ' + pct(m.pre) + '뿐입니다. <b>재현율을 끝까지 올리면 정밀도를 잃습니다.</b></p>';
+      else if (m.pre > 0.95) html += '<p style="color:var(--ink-3);font-size:14px">💡 지금은 양성 판정이 거의 다 맞지만, 실제 양성 중 ' + pct(m.rec) + '만 찾아냈습니다. <b>정밀도를 끝까지 올리면 재현율을 잃습니다.</b></p>';
+      else html += '<p style="color:var(--ink-3);font-size:14px">💡 세 개의 ‘최대’ 버튼을 차례로 눌러 보세요. 하나를 올리면 다른 하나가 반드시 내려가는 <b>트레이드오프</b>를 확인할 수 있습니다.</p>';
+    }
+    note.innerHTML = html;
+    draw();
+  }
+
+  /* ---------- 컨트롤 ---------- */
+  var thSlider = AI.ui.slider({
+    label: '임계값', min: 0, max: 100, step: 1, value: 50,
+    onInput: function (v) { TH = v; update(); }
+  });
+
+  var scenSeg = AI.ui.seg({
+    label: '상황', options: [{ value: 'cancer', label: '🏥 암 검진' }, { value: 'spam', label: '📧 스팸 분류' }],
+    value: 'cancer',
+    onChange: function (v) { scen = v; update(); }
+  });
+
+  var balSeg = AI.ui.seg({
+    label: '양성 비율', options: [{ value: 'bal', label: '균형 40%' }, { value: 'imb', label: '불균형 4%' }],
+    value: 'bal',
+    onChange: function (v) {
+      imb = (v === 'imb');
+      data = imb ? gen(96, 4) : gen(60, 40);
+      thSlider.set(imb ? 100 : 50);
+    }
+  });
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' }, thSlider.el,
+    AI.h('div', { class: 'ctl', style: { minWidth: '0' } }, AI.h('label', {}, AI.h('span', { text: '상황' })), scenSeg.el),
+    AI.h('div', { class: 'ctl', style: { minWidth: '0' } }, AI.h('label', {}, AI.h('span', { text: '양성 비율' })), balSeg.el)
+  ));
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('재현율 최대로', function () { thSlider.set(bestThreshold('rec')); }, 'small'),
+    AI.ui.btn('F1 점수 최대로', function () { thSlider.set(bestThreshold('f1')); }, 'small'),
+    AI.ui.btn('정밀도 최대로', function () { thSlider.set(bestThreshold('pre')); }, 'small'),
+    AI.ui.btn('↺ 임계값 50으로', function () { thSlider.set(50); }, 'small ghost')
+  ));
+
+  body.appendChild(note);
+
+  window.addEventListener('ai:redraw', draw);
+  update();
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 과대적합 관찰 ===================== -->
+<script>
+(function () {
+  /* ---------- 잡음이 있는 곡선 데이터 ---------- */
+  var N = 30, NOISE = 0.28, DMAX = 12;
+  function truth(x) { return Math.sin(3 * x) + 0.3 * x; }
+
+  var PTS = (function () {
+    var r = AI.sim.rng(20260811), out = [];
+    for (var i = 0; i < N; i++) {
+      var x = -1 + 2 * (i + 0.5) / N + (r() - 0.5) * 0.04;
+      var u1 = Math.max(1e-9, r()), u2 = r();
+      var g = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+      out.push({ x: x, y: truth(x) + g * NOISE });
+    }
+    return out;
+  })();
+  var ORDER = AI.sim.shuffle(PTS.map(function (_, i) { return i; }), AI.sim.rng(4242));
+
+  /* ---------- 최소 제곱 다항 회귀 (체비셰프 기저로 수치 안정화) ---------- */
+  function basis(x, d) {
+    var t = [1, x];
+    for (var i = 2; i <= d; i++) t.push(2 * x * t[i - 1] - t[i - 2]);
+    return t.slice(0, d + 1);
+  }
+
+  function fit(set, d) {
+    var m = d + 1, A = [], b = [];
+    for (var i = 0; i < m; i++) { A.push(new Array(m).fill(0)); b.push(0); }
+    for (var p = 0; p < set.length; p++) {
+      var ph = basis(set[p].x, d);
+      for (var i2 = 0; i2 < m; i2++) {
+        for (var j = 0; j < m; j++) A[i2][j] += ph[i2] * ph[j];
+        b[i2] += ph[i2] * set[p].y;
+      }
+    }
+    for (var k = 0; k < m; k++) A[k][k] += 1e-10;      /* 아주 작은 규제로 계산 안정화 */
+    /* 가우스 소거법 (부분 피벗) */
+    for (var c = 0; c < m; c++) {
+      var piv = c;
+      for (var r2 = c + 1; r2 < m; r2++) if (Math.abs(A[r2][c]) > Math.abs(A[piv][c])) piv = r2;
+      var tmp = A[c]; A[c] = A[piv]; A[piv] = tmp;
+      var tb = b[c]; b[c] = b[piv]; b[piv] = tb;
+      var pv = A[c][c];
+      if (Math.abs(pv) < 1e-14) continue;
+      for (var r3 = c + 1; r3 < m; r3++) {
+        var f = A[r3][c] / pv;
+        if (!f) continue;
+        for (var q = c; q < m; q++) A[r3][q] -= f * A[c][q];
+        b[r3] -= f * b[c];
+      }
+    }
+    var co = new Array(m).fill(0);
+    for (var i3 = m - 1; i3 >= 0; i3--) {
+      var s = b[i3];
+      for (var j2 = i3 + 1; j2 < m; j2++) s -= A[i3][j2] * co[j2];
+      co[i3] = Math.abs(A[i3][i3]) < 1e-14 ? 0 : s / A[i3][i3];
+    }
+    return co;
+  }
+
+  function evalPoly(co, x) {
+    var ph = basis(x, co.length - 1), s = 0;
+    for (var i = 0; i < co.length; i++) s += co[i] * ph[i];
+    return s;
+  }
+
+  function rmse(co, set) {
+    if (!set.length) return 0;
+    var s = 0;
+    for (var i = 0; i < set.length; i++) {
+      var e = evalPoly(co, set[i].x) - set[i].y;
+      s += e * e;
+    }
+    var v = Math.sqrt(s / set.length);
+    return isFinite(v) ? v : 999;
+  }
+
+  /* ---------- 상태 ---------- */
+  var deg = 3, ratio = 50, train = [], test = [], curve = null, errs = [];
+
+  function split() {
+    var nTr = AI.sim.clamp(Math.round(N * ratio / 100), 4, N - 4);
+    train = ORDER.slice(0, nTr).map(function (i) { return PTS[i]; });
+    test = ORDER.slice(nTr).map(function (i) { return PTS[i]; });
+  }
+
+  function recompute() {
+    split();
+    errs = [];
+    for (var d = 1; d <= DMAX; d++) {
+      var co = fit(train, d);
+      errs.push({ d: d, co: co, tr: rmse(co, train), te: rmse(co, test) });
+    }
+    curve = errs[deg - 1];
+  }
+
+  /* ---------- 패널 ---------- */
+  var body = AI.sim.panel('#sim2', {
+    title: '과대적합 관찰 — 다항식 차수를 올려 보기',
+    tag: '실제 최소 제곱 계산',
+    desc: '잡음이 섞인 곡선 데이터 ' + N + '개를 훈련용과 테스트용으로 나눕니다. 차수를 올리면 곡선이 <b>훈련 점을 지나가려고 몸을 비틉니다.</b> 왼쪽에서 곡선 모양을, 오른쪽에서 두 오차가 갈라지는 지점을 함께 보세요. 훈련 비율을 낮추면 어떻게 되는지도 확인해 보세요.'
+  });
+
+  var CW = 320, CH = 250;
+  var fitCv = AI.sim.canvas(CW, CH, { maxFull: true });
+  var errCv = AI.sim.canvas(CW, CH, { maxFull: true });
+  body.appendChild(AI.h('div', { class: 'sim-grid' },
+    AI.h('div', {}, AI.h('h4', { class: 'mini-head', style: { marginTop: 0 }, text: '① 데이터와 맞춘 곡선' }), fitCv.wrap),
+    AI.h('div', {}, AI.h('h4', { class: 'mini-head', style: { marginTop: 0 }, text: '② 차수에 따른 오차' }), errCv.wrap)
+  ));
+
+  body.appendChild(AI.ui.legend([
+    { color: 'var(--accent)', label: '훈련 점 · 훈련 오차' },
+    { color: 'var(--ok)', label: '테스트 점 · 테스트 오차' },
+    { color: 'var(--ink-4)', label: '점선 = 잡음이 없는 참 곡선' }
+  ]));
+
+  var stats = AI.ui.stats([
+    { key: 'tr', label: '훈련 RMSE' },
+    { key: 'te', label: '테스트 RMSE' },
+    { key: 'n', label: '훈련 / 테스트 점' },
+    { key: 'best', label: '테스트 오차 최소 차수' }
+  ]);
+  body.appendChild(stats.el);
+
+  var verdict = AI.h('div', { class: 'box box-info', style: { marginTop: '14px' } });
+
+  /* ---------- 왼쪽: 곡선 ---------- */
+  function drawFit() {
+    var C = AI.sim.colors(), ctx = fitCv.ctx;
+    fitCv.clear(C.bg);
+    var L = 34, R = 10, T = 12, B = 26, PW = CW - L - R, PH = CH - T - B;
+    var YMAX = 2.3;
+    var X = function (x) { return L + (x + 1) / 2 * PW; };
+    var Y = function (y) { return T + PH * (1 - (y + YMAX) / (2 * YMAX)); };
+
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+    for (var g = -2; g <= 2; g++) { ctx.beginPath(); ctx.moveTo(L, Y(g)); ctx.lineTo(L + PW, Y(g)); ctx.stroke(); }
+    for (var g2 = -1; g2 <= 1; g2 += 0.5) { ctx.beginPath(); ctx.moveTo(X(g2), T); ctx.lineTo(X(g2), T + PH); ctx.stroke(); }
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.moveTo(L, Y(0)); ctx.lineTo(L + PW, Y(0)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(L, T); ctx.lineTo(L, T + PH); ctx.stroke();
+    ctx.fillStyle = C.ink3;
+    ctx.font = '600 10.5px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (var t2 = -2; t2 <= 2; t2++) ctx.fillText(String(t2), L - 5, Y(t2));
+
+    ctx.save();
+    ctx.beginPath(); ctx.rect(L, T, PW, PH); ctx.clip();
+
+    /* 참 곡선 */
+    ctx.setLineDash([4, 4]); ctx.strokeStyle = C.ink3; ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    for (var i = 0; i <= 200; i++) {
+      var x = -1 + 2 * i / 200, yy = Y(truth(x));
+      i ? ctx.lineTo(X(x), yy) : ctx.moveTo(X(x), yy);
+    }
+    ctx.stroke(); ctx.setLineDash([]);
+
+    /* 맞춘 곡선 */
+    ctx.strokeStyle = C.c; ctx.lineWidth = 2.6;
+    ctx.beginPath();
+    var started = false;
+    for (var j = 0; j <= 400; j++) {
+      var xx = -1 + 2 * j / 400, vy = evalPoly(curve.co, xx);
+      if (!isFinite(vy)) { started = false; continue; }
+      vy = AI.sim.clamp(vy, -YMAX * 1.4, YMAX * 1.4);
+      var px = X(xx), py = Y(vy);
+      if (!started) { ctx.moveTo(px, py); started = true; } else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    /* 점 */
+    for (var k = 0; k < train.length; k++) {
+      ctx.beginPath(); ctx.arc(X(train[k].x), Y(train[k].y), 3.6, 0, Math.PI * 2);
+      ctx.fillStyle = C.a; ctx.fill();
+    }
+    for (var q = 0; q < test.length; q++) {
+      ctx.beginPath(); ctx.arc(X(test[q].x), Y(test[q].y), 3.6, 0, Math.PI * 2);
+      ctx.strokeStyle = C.ok; ctx.lineWidth = 2; ctx.stroke();
+    }
+    ctx.fillStyle = C.ink3;
+    ctx.font = '700 11px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+    ctx.fillText('차수 ' + deg, CW - 8, CH - 6);
+  }
+
+  /* ---------- 오른쪽: 오차 곡선 ---------- */
+  function drawErr() {
+    var C = AI.sim.colors(), ctx = errCv.ctx;
+    errCv.clear(C.bg);
+    var L = 40, R = 10, T = 14, B = 32, PW = CW - L - R, PH = CH - T - B;
+    var top = 0.8;
+    for (var i = 0; i < errs.length; i++) {
+      top = Math.max(top, errs[i].tr, Math.min(errs[i].te, 2.0));
+    }
+    var EMAX = Math.min(2.2, top * 1.12);
+    var X = function (d) { return L + (d - 1) / (DMAX - 1) * PW; };
+    var Y = function (e) { return T + PH * (1 - e / EMAX); };
+
+    ctx.font = '600 10.5px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (var g = 0; g <= 4; g++) {
+      var v = EMAX * g / 4;
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(L, Y(v)); ctx.lineTo(L + PW, Y(v)); ctx.stroke();
+      ctx.fillStyle = C.ink3; ctx.fillText(v.toFixed(1), L - 5, Y(v));
+    }
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.moveTo(L, T); ctx.lineTo(L, T + PH); ctx.lineTo(L + PW, T + PH); ctx.stroke();
+
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (var d2 = 1; d2 <= DMAX; d2 += (DMAX > 8 ? 2 : 1)) { ctx.fillStyle = C.ink3; ctx.fillText(String(d2), X(d2), T + PH + 6); }
+    ctx.fillStyle = C.ink3;
+    ctx.fillText('다항식 차수', L + PW / 2, T + PH + 19);
+
+    /* 현재 차수 세로선 */
+    ctx.setLineDash([4, 4]); ctx.strokeStyle = C.ink3; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X(deg), T); ctx.lineTo(X(deg), T + PH); ctx.stroke();
+    ctx.setLineDash([]);
+
+    function line(key, col) {
+      ctx.strokeStyle = col; ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      for (var i = 0; i < errs.length; i++) {
+        var e = Math.min(errs[i][key], EMAX);
+        var px = X(i + 1), py = Y(e);
+        i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+      }
+      ctx.stroke();
+      for (var j = 0; j < errs.length; j++) {
+        var over = errs[j][key] > EMAX;
+        var ee = Math.min(errs[j][key], EMAX);
+        ctx.beginPath(); ctx.arc(X(j + 1), Y(ee), (j + 1) === deg ? 5 : 3.2, 0, Math.PI * 2);
+        ctx.fillStyle = col; ctx.fill();
+        if (over) {
+          ctx.fillStyle = col;
+          ctx.font = '800 12px ' + getComputedStyle(document.body).fontFamily;
+          ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+          ctx.fillText('↑', X(j + 1), Y(ee) - 2);
+          ctx.font = '600 10.5px ' + getComputedStyle(document.body).fontFamily;
+        }
+      }
+    }
+    line('tr', C.a);
+    line('te', C.ok);
+
+    /* 최적 차수 표시 */
+    var bestD = 1, bestV = Infinity;
+    for (var m = 0; m < errs.length; m++) if (errs[m].te < bestV) { bestV = errs[m].te; bestD = m + 1; }
+    ctx.beginPath(); ctx.arc(X(bestD), Y(Math.min(bestV, EMAX)), 9, 0, Math.PI * 2);
+    ctx.strokeStyle = C.ok; ctx.lineWidth = 1.8; ctx.stroke();
+    ctx.fillStyle = C.ink3;
+    ctx.font = '700 10.5px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText('가장 좋은 차수', X(bestD), Y(Math.min(bestV, EMAX)) - 12);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = C.a; ctx.fillText('훈련 오차', L + 5, T + 12);
+    ctx.fillStyle = C.ok; ctx.fillText('테스트 오차', L + 5, T + 25);
+    return bestD;
+  }
+
+  /* ---------- 해설 ---------- */
+  function drawInfo(bestD) {
+    stats.set('tr', AI.sim.fmt(curve.tr, 3));
+    stats.set('te', curve.te > 90 ? '매우 큼' : AI.sim.fmt(curve.te, 3));
+    stats.set('n', train.length + ' / ' + test.length);
+    stats.set('best', bestD + '차');
+
+    var html = '<div class="box-label">🧠 지금 이 모델의 진단</div>';
+    var gap = curve.te - curve.tr;
+    if (curve.tr > 0.42 && curve.te > 0.42) {
+      html += '<p><b>과소적합</b>입니다. 훈련 오차(' + AI.sim.fmt(curve.tr, 3) + ')와 테스트 오차(' + AI.sim.fmt(curve.te, 3) +
+        ')가 <b>둘 다 큽니다.</b> 곡선이 데이터의 굽은 모양을 따라가지 못하고 있습니다. 차수를 올려 보세요.</p>';
+    } else if (gap > 0.18) {
+      html += '<p><b>과대적합</b>입니다. 훈련 오차는 ' + AI.sim.fmt(curve.tr, 3) + '으로 작은데 테스트 오차는 ' +
+        (curve.te > 90 ? '엄청나게 큽니다' : AI.sim.fmt(curve.te, 3) + '입니다') +
+        '. 곡선이 훈련 점(파란 점)만 통과하려고 심하게 출렁이면서, 테스트 점(초록 원)에서는 크게 빗나갑니다. <b>잡음까지 외운 것</b>입니다.</p>';
+    } else {
+      html += '<p><b>알맞은 상태</b>입니다. 훈련 오차 ' + AI.sim.fmt(curve.tr, 3) + ', 테스트 오차 ' + AI.sim.fmt(curve.te, 3) +
+        '로 둘이 비슷하고, 곡선이 점선(참 곡선)과 잘 겹칩니다.</p>';
+    }
+    if (deg >= train.length) {
+      html += '<p style="color:var(--no)"><b>⚠</b> 훈련 점이 ' + train.length + '개인데 차수 ' + deg + '의 다항식은 계수가 ' + (deg + 1) +
+        '개입니다. 계수가 점보다 많으면 모든 점을 <b>정확히 통과</b>할 수 있어 훈련 오차가 0에 가까워집니다. 완벽해 보이지만 아무것도 배우지 못한 상태입니다.</p>';
+    }
+    html += '<p style="color:var(--ink-3);font-size:14px">💡 훈련 데이터 비율을 <b>' + ratio + '%</b>에서 더 낮추고 차수를 다시 올려 보세요. ' +
+      '데이터가 적을수록 <b>더 낮은 차수에서 이미 과대적합이 시작됩니다.</b> 과대적합을 막는 가장 확실한 방법이 데이터를 더 모으는 것인 까닭입니다.</p>';
+    verdict.innerHTML = html;
+  }
+
+  function drawAll() {
+    drawFit();
+    var bestD = drawErr();
+    drawInfo(bestD);
+  }
+
+  /* ---------- 컨트롤 ---------- */
+  var degSlider = AI.ui.slider({
+    label: '다항식 차수', min: 1, max: DMAX, value: 3, unit: '차',
+    onInput: function (v) { deg = v; curve = errs[deg - 1]; drawAll(); }
+  });
+  var ratioSlider = AI.ui.slider({
+    label: '훈련 데이터 비율', min: 30, max: 80, step: 5, value: 50, unit: '%',
+    onInput: function (v) { ratio = v; recompute(); drawAll(); }
+  });
+  body.appendChild(AI.h('div', { class: 'sim-controls' }, degSlider.el, ratioSlider.el,
+    AI.ui.btn('↺ 처음 설정으로', function () { degSlider.set(3); ratioSlider.set(50); }, 'ghost')
+  ));
+  body.appendChild(verdict);
+
+  window.addEventListener('ai:redraw', drawAll);
+
+  recompute();
+  drawAll();
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a2l6-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['훈련', '테스트', '과대적합', '과소적합', '혼동 행렬', '정밀도', '재현율', '임계값'],
+  sents: [
+    { text: '모델을 학습시킬 때 쓰는 데이터를 {0} 데이터, 학습이 끝난 뒤 성능을 재는 데이터를 {1} 데이터라고 한다.', answers: [['훈련', '학습'], ['테스트']] },
+    { text: '훈련 데이터에는 잘 맞지만 처음 보는 데이터에서 성능이 크게 떨어지는 현상을 {0}(이)라고 한다.', answers: [['과대적합', '과적합']] },
+    { text: '모델이 너무 단순해서 훈련 데이터조차 제대로 설명하지 못하는 상태를 {0}(이)라고 한다.', answers: [['과소적합']] },
+    { text: '실젯값과 예측값을 네 칸으로 정리한 표를 {0}(이)라고 한다.', answers: [['혼동 행렬', '혼동행렬']] },
+    { text: '양성이라고 예측한 것 중 실제로 양성인 비율은 {0}이고, 실제 양성 중 찾아낸 비율은 {1}(이)다.', answers: [['정밀도'], ['재현율']] },
+    { text: '점수가 얼마 이상일 때 양성으로 판정할지 정하는 기준값을 {0}(이)라고 한다.', answers: [['임계값']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '6차시 확인 문제',
+  items: [
+    {
+      type: 'mc',
+      q: '훈련 데이터로 성능을 평가하면 안 되는 이유로 <b>가장 알맞은</b> 것은?',
+      choices: [
+        '훈련 데이터의 개수가 테스트 데이터보다 많기 때문이다',
+        '이미 학습한 데이터라 성능이 실제보다 좋게 나와 일반화 성능을 알 수 없기 때문이다',
+        '훈련 데이터에는 잡음이 없기 때문이다',
+        '훈련 데이터에는 정답 레이블이 없기 때문이다'
+      ],
+      answer: 1,
+      why: '훈련 데이터로 재는 것은 <b>본 문제를 다시 푸는 시험</b>과 같습니다. 데이터를 통째로 외운 모델도 100%를 받을 수 있으므로, 처음 보는 데이터에서 얼마나 잘하는지를 나타내는 <b>일반화 성능</b>을 전혀 알 수 없습니다.'
+    },
+    {
+      type: 'mc',
+      q: '어떤 검사 결과가 <span class="mono">TP=30, FP=10, FN=20, TN=40</span>일 때 <b>정밀도</b>는 얼마인가?',
+      choices: ['0.60', '0.70', '0.75', '0.80'],
+      answer: 2,
+      why: '정밀도 = TP / (TP + FP) = 30 / (30 + 10) = <b>0.75</b>입니다. 참고로 재현율은 30 / (30 + 20) = 0.60, 정확도는 (30 + 40) / 100 = 0.70입니다. 같은 표에서 지표마다 값이 다르게 나오는 것을 확인해 보세요.'
+    },
+    {
+      type: 'ox',
+      q: '환자가 전체의 1%인 데이터에서 “모두 건강”이라고만 답하는 모델은 정확도가 99%이므로 좋은 모델이다.',
+      answer: false,
+      why: '정확도는 99%지만 <b>재현율은 0%</b>입니다. 환자를 한 명도 찾아내지 못하므로 검사 도구로서 아무 쓸모가 없습니다. 이것이 <b>클래스 불균형에서 정확도의 함정</b>입니다.'
+    },
+    {
+      type: 'short',
+      q: '실제 양성인 것들 중에서 모델이 양성으로 찾아낸 비율을 나타내는 지표는 무엇인가?',
+      answer: ['재현율', '재현도', 'recall', '민감도'],
+      placeholder: '예: ○○○',
+      why: '<b>재현율</b>(recall)입니다. <span class="mono">TP / (TP + FN)</span>으로 계산하며, 놓친 것(FN)을 줄이는 것이 중요한 질병 검진·불량품 검사에서 특히 중요합니다.'
+    },
+    {
+      type: 'match',
+      q: '각 상황에서 <b>더 중요하게 봐야 할 지표</b>를 짝지으시오.',
+      left: [
+        '암 검진 — 환자를 놓치면 큰일이다',
+        '스팸 분류 — 중요한 메일이 스팸함에 가면 큰일이다',
+        '공장 불량품 검사 — 불량품이 출하되면 큰일이다',
+        '영상 추천 — 관심 없는 것을 자꾸 띄우면 안 된다'
+      ],
+      right: ['재현율', '정밀도'],
+      answer: [0, 1, 0, 1],
+      why: '<b>놓치는 것(FN)</b>이 더 무서운 상황에서는 재현율, <b>헛경보(FP)</b>가 더 무서운 상황에서는 정밀도를 우선합니다. 어느 실수가 더 큰 피해를 주는지 따져 보면 됩니다.'
+    },
+    {
+      type: 'order',
+      q: '모델을 만들고 평가하는 과정을 <b>올바른 순서</b>로 배열하시오.',
+      items: [
+        '데이터를 섞은 뒤 훈련·검증·테스트로 나눈다',
+        '훈련 데이터로 모델을 학습시킨다',
+        '검증 데이터로 하이퍼파라미터를 비교해 고른다',
+        '테스트 데이터로 최종 성능을 한 번 평가한다'
+      ],
+      answer: [0, 1, 2, 3],
+      why: '나누기 → 훈련 → 검증으로 모델 선택 → 테스트로 최종 평가입니다. 테스트 데이터를 먼저 보거나, 테스트 성능을 보고 모델을 고치면 <b>테스트 데이터가 사실상 검증 데이터가 되어</b> 최종 성능을 믿을 수 없게 됩니다.'
+    },
+    {
+      type: 'multi',
+      q: '과대적합이 일어났다는 신호와 그 해결 방법으로 옳은 것을 <b>모두</b> 고르시오.',
+      choices: [
+        '훈련 오차는 작은데 테스트 오차가 크다',
+        '훈련 오차와 테스트 오차가 둘 다 크다',
+        '데이터를 더 모으면 완화될 수 있다',
+        '모델을 더 단순하게 만들면 완화될 수 있다'
+      ],
+      answer: [0, 2, 3],
+      why: '②는 <b>과소적합</b>의 신호입니다. 과대적합은 훈련 데이터의 잡음까지 외운 상태이므로, 데이터를 늘리거나(외울 수 있는 양을 넘기기) 모델을 단순하게 하거나(규제) 하는 방향으로 해결합니다.'
+    },
+    {
+      type: 'ox',
+      q: '임계값을 낮추면 재현율과 정밀도가 함께 올라간다.',
+      answer: false,
+      why: '임계값을 낮추면 양성 판정이 늘어나 놓치는 것이 줄어드니 <b>재현율은 올라가지만</b>, 건강한 사람도 양성으로 몰려 <b>정밀도는 내려갑니다.</b> 두 지표는 서로 맞바꾸는 <b>트레이드오프</b> 관계입니다.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a2l6-note',
+  title: '성능 평가 실험 기록',
+  prompt: '두 시뮬레이터를 조작하며 아래를 채워 보세요. 시뮬레이터 1에서 <b>불균형 4%</b>로 바꾸어 보는 실험과, 시뮬레이터 2에서 <b>훈련 비율을 30%까지 낮추는</b> 실험은 반드시 해 보아야 합니다.',
+  fields: [
+    { key: 'f1t', label: 'F1 점수가 가장 컸던 임계값과 그때의 F1', type: 'text', placeholder: '예: 48 · 0.747' },
+    { key: 'rec1', label: '‘재현율 최대로’를 눌렀을 때의 임계값과 정밀도', type: 'text', placeholder: '예: 24 · 42.1%' },
+    { key: 'imb', label: '불균형 4%에서 임계값 100일 때의 정확도와 재현율', type: 'text', placeholder: '예: 96.0% / 0.0%' },
+    { key: 'bestd', label: '훈련 비율 50%에서 테스트 오차가 가장 작았던 차수', type: 'text', placeholder: '예: 3차' },
+    {
+      key: 'trade', label: '임계값을 움직이며 관찰한 정밀도와 재현율의 관계를 설명해 보세요.',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 임계값을 40으로 낮추자 재현율은 90%까지 올랐지만 정밀도는 55%로 떨어졌다. 그 까닭은 …'
+    },
+    {
+      key: 'choose', label: '내가 만들 인공지능 서비스를 하나 정하고, 정밀도와 재현율 중 무엇을 우선할지 근거를 들어 적어 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 교실 화재 감지 시스템이라면 불이 났는데 못 잡는 FN이 훨씬 무섭다. 그래서 재현율을 우선하고 임계값을 낮게 …'
+    },
+    {
+      key: 'over', label: '시뮬레이터 2에서 차수와 훈련 비율을 바꿔 보며 알게 된 것을 적어 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 훈련 비율 50%에서는 8차부터 테스트 오차가 커졌는데, 30%로 낮추자 5차부터 이미 커졌다. 이것으로 보아 …'
+    }
+  ]
+});
+</script>
+</body>
+</html>

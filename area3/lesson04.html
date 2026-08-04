@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4차시 공정한 인공지능은 가능한가 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+/* 이 페이지에서만 쓰는 보조 클래스 */
+.wt-line { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.9; color: var(--ink-2); margin: 11px 0 0; padding: 9px 12px; background: var(--surface-3); border-radius: var(--radius-sm); }
+.wt-line b { color: var(--accent-ink); }
+.dl-card { border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--surface); padding: 15px 16px; margin: 0 0 14px; }
+.dl-head { font-size: 15px; font-weight: 750; margin: 0 0 7px; display: flex; align-items: baseline; gap: 8px; }
+.dl-head .dn { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 23px; height: 23px; border-radius: 7px; background: var(--accent); color: #fff; font-size: 12.5px; font-weight: 800; }
+:root[data-theme="dark"] .dl-head .dn, :root:not([data-theme="light"]) .dl-head .dn { color: #10131a; }
+.dl-sit { font-size: 14.6px; color: var(--ink-2); margin: 0 0 12px; }
+.dl-ch { display: flex; flex-direction: column; gap: 6px; }
+.dl-why { margin-top: 11px; }
+.dl-why > label { display: block; font-size: 12.5px; font-weight: 700; color: var(--ink-3); margin-bottom: 4px; }
+.persp { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 12px; }
+.persp > div { padding: 11px 13px; border-radius: var(--radius-sm); background: var(--surface-2); border: 1px solid var(--line); font-size: 13.6px; line-height: 1.72; color: var(--ink-2); }
+.persp h5 { font-size: 13px; margin: 0 0 5px; color: var(--accent-ink); }
+.ep-card { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 11px 13px; margin: 0 0 8px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
+.ep-txt { flex: 1 1 220px; font-size: 14.4px; line-height: 1.7; }
+.ep-fb { font-size: 13.4px; color: var(--ink-2); padding: 8px 12px; margin: -4px 0 10px; background: var(--surface-2); border-left: 3px solid var(--accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>어떤 회사가 채용 서류를 자동으로 심사하는 인공지능을 만들었습니다. 개발자는 공정하게 만들려고 아주 신경을 썼습니다.</p>
+      <ul>
+        <li>지원서에서 <b>이름·성별·나이·출신 지역을 모두 지웠습니다.</b></li>
+        <li>차별하라는 규칙은 <b>한 줄도 넣지 않았습니다.</b></li>
+        <li>모델은 <b>지난 10년간의 합격·불합격 기록</b>으로 학습했습니다.</li>
+      </ul>
+      <p>1년 뒤 결과를 집계해 보니, 특정 지역 출신 지원자의 합격률이 다른 지역의 <b>절반도 되지 않았습니다.</b> 개발자는 억울해합니다. “저는 그런 규칙을 넣지 않았는데요.”</p>
+      <p><b>무엇이 잘못되었을까요?</b> 그리고 이 회사는 무엇을 고쳐야 할까요?</p>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 세 번째 항목을 다시 읽어 보기</summary>
+        <div class="more-body">
+          모델은 “합격시켜야 할 사람”을 배우지 않았습니다. <b>“과거에 합격했던 사람”</b>을 배웠습니다. 두 문장은 완전히 다릅니다. 이 차시의 첫 번째 시뮬레이터에서 이 차이가 만드는 격차를 <b>직접 계산해</b> 확인합니다.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 왜 윤리인가 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>왜 인공지능에 윤리가 필요한가</h2></div>
+
+    <p>망치에는 윤리가 필요하지 않습니다. 망치는 스스로 무엇도 결정하지 않기 때문입니다. 그런데 인공지능은 사람에 관한 <b>결정을 대신 내리거나 결정에 영향을 줍니다.</b> 누가 대출을 받고, 누가 면접에 오고, 어떤 게시물이 사람들에게 보이는지가 모델의 출력에 달려 있습니다. 결정에 관여하는 것은 <b>규모와 속도까지 갖춘 결정</b>입니다.</p>
+
+    <p><b class="blank" data-a="인공지능 윤리|AI 윤리" data-hint="인공지능을 연구·개발·활용하는 모든 과정에서 지켜야 할 기준">인공지능 윤리</b>는 개발자의 착한 마음가짐을 뜻하는 말이 아닙니다. 인공지능을 만들고 쓰고 운영하는 과정에서 <b>누가 무엇을 확인하고 무엇을 기록하고 누가 책임지는지</b>를 정하는 실무 규칙에 가깝습니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 우리나라의 기준</div>
+      <p>우리나라는 2020년에 사람 중심 인공지능 구현을 위한 <b class="blank" data-a="국가 인공지능 윤리기준|인공지능 윤리기준|국가 인공지능 윤리 기준" data-hint="2020년 우리나라가 마련한, 3대 원칙과 10대 요건으로 구성된 기준">국가 인공지능 윤리기준</b>을 마련했습니다.</p>
+      <ul style="margin:0">
+        <li><b>3대 기본 원칙</b> — 인간 존엄성 원칙, 사회의 공공선 원칙, 기술의 합목적성 원칙</li>
+        <li><b>10대 핵심 요건</b> — 인권 보장, 프라이버시 보호, 다양성 존중, 침해 금지, 공공성, 연대성, 데이터 관리, 책임성, 안전성, 투명성</li>
+      </ul>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 오해 주의</div>
+      <p>“나쁜 의도가 없으면 윤리 문제도 없다”는 생각이 가장 흔한 오해입니다. 이 차시에서 다룰 문제 대부분은 <b>아무도 나쁜 의도를 갖지 않은 상태에서</b> 발생합니다. 편향은 데이터에 성실했기 때문에 생기고, 설명 불가능성은 성능을 높이려 했기 때문에 생깁니다. 그래서 의도를 따지는 것만으로는 부족하고, <b>결과를 측정하는 절차</b>가 필요합니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. 편향의 세 경로 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>편향은 어디서 들어오는가 — 세 개의 문</h2></div>
+
+    <p>“인공지능이 편향되었다”는 말은 너무 뭉뚱그린 표현입니다. 편향은 서로 다른 <b>세 개의 문</b>을 통해 들어오고, 문마다 막는 방법이 다릅니다.</p>
+
+    <h3 class="sub-head">① 데이터 — 대표성 부족과 과거 차별의 기록</h3>
+    <p>모델을 만드는 데 쓰인 데이터에 들어 있는 편향을 <b class="blank" data-a="데이터 편향|데이터 편향성" data-hint="학습에 쓰인 데이터 자체에 들어 있는 치우침">데이터 편향</b>이라고 합니다. 데이터 편향은 다시 두 갈래로 나뉩니다.</p>
+    <ul>
+      <li><b class="blank" data-a="대표성|대표성 부족" data-hint="데이터가 실제 집단 구성을 고르게 반영하는 성질">대표성</b>이 부족한 경우 — 어떤 집단의 데이터가 지나치게 적으면 모델은 그 집단에서 잘 작동하지 않습니다. 사투리 음성이 적으면 사투리를 못 알아듣습니다. 모델이 차별하려 한 것이 아니라 <b>배울 기회가 없었을 뿐</b>입니다.</li>
+      <li><b>과거 차별이 기록으로 남은 경우</b> — 이쪽이 훨씬 까다롭습니다. 데이터의 양이 충분하고 잡음도 없는데, <b>정답 표시(레이블) 자체가 과거의 불공정한 결정</b>일 때가 있습니다. 과거 합격 기록으로 학습한 채용 모델이 바로 이 경우입니다. 모델은 데이터에 충실할수록 과거의 차별을 정확하게 재현합니다.</li>
+    </ul>
+
+    <h3 class="sub-head">② 알고리즘 — 무엇을 최적화하도록 설계했는가</h3>
+    <p>기계학습 알고리즘 자체의 설계나 구현에 내재된 편향을 <b class="blank" data-a="알고리즘 편향|알고리즘 편향성" data-hint="알고리즘의 설계·구현 자체에 내재된 치우침">알고리즘 편향</b>이라고 합니다. 핵심 질문은 하나입니다. <b>모델에게 무엇을 잘하라고 시켰는가?</b></p>
+    <p>추천 알고리즘에게 “머문 시간을 늘려라”라고 시키면, 알고리즘은 사람을 오래 붙잡는 방법을 찾아냅니다. 그것이 자극적인 내용이라면 그쪽으로 갑니다. 이것은 알고리즘의 실패가 아니라 <b>주어진 목표를 정확히 달성한 결과</b>입니다. 전체 정확도만 목표로 삼는 경우도 마찬가지입니다. 데이터의 90%를 차지하는 집단에서 잘 맞히면 정확도는 높아지므로, 모델은 <b>소수 집단을 포기하는 것이 이득</b>이라고 학습합니다.</p>
+
+    <h3 class="sub-head">③ 사람 — 개발자의 가정과 해석</h3>
+    <p>세 번째 문은 사람입니다. 어떤 속성을 입력에 넣을지, 무엇을 ‘좋은 성과’로 볼지, 결과를 어떻게 해석할지는 모두 사람이 정합니다. “근무 연수가 길면 우수한 직원”이라는 <b>가정</b> 하나가 육아휴직을 쓴 사람에게 불리하게 작동할 수 있습니다. 데이터에도 알고리즘에도 잘못이 없는데 결과가 치우치는 경우입니다.</p>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 편향은 돌고 돈다</div>
+      <p>세 경로는 한 방향이 아니라 <b>고리</b>를 이룹니다. 사회와 사람의 편향이 데이터에 기록되고, 데이터가 모델의 편향을 만들고, 모델이 내린 결정이 다시 새로운 데이터가 되어 편향을 강화합니다. 특정 지역 출신을 덜 뽑은 모델은 그 지역의 합격자 데이터를 더 줄여, 다음 모델이 같은 판단을 더 자신 있게 하도록 만듭니다. 이 고리를 끊으려면 <b>결과를 주기적으로 측정해 되먹임을 확인하는 일</b>이 필수입니다.</p>
+    </div>
+
+    <h3 class="sub-head">집단 정보만 빼면 되지 않을까 — 대리 변수</h3>
+    <p>가장 자연스러운 해결책은 “민감한 정보를 입력에서 빼자”입니다. 그런데 이 방법은 대개 실패합니다. 지운 정보와 강하게 상관된 다른 속성이 남아 있으면, 모델은 그 속성을 통해 <b>지운 정보를 되살려 냅니다.</b> 이렇게 민감한 속성 대신 쓰이게 되는 속성을 <b class="blank" data-a="대리 변수|프록시|프록시 변수|대리변수" data-hint="지운 민감 정보를 대신하는 상관된 속성, 영어로 proxy">대리 변수</b>라고 합니다.</p>
+    <p>거주지 우편번호는 지역을, 졸업 학교는 출신지와 소득 수준을, 지원 시각은 직업 상태를 어느 정도 알려 줍니다. 그래서 <b>집단 정보를 지웠다는 사실은 공정성의 증거가 되지 못합니다.</b> 공정성은 입력에서 무엇을 뺐는지로 판단할 수 없고, <b>결과를 집단별로 측정해야만</b> 확인할 수 있습니다. 첫 번째 시뮬레이터에서 이 현상을 직접 확인합니다.</p>
+  </section>
+
+  <!-- ============ 3. 공정성을 재는 서로 다른 기준 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>공정성을 재는 세 가지 자, 그리고 나쁜 소식</h2></div>
+
+    <p><b class="blank" data-a="공정성|공정" data-hint="개인의 차이를 존중하고 누구도 배제하지 않는 원칙">공정성</b>은 개인의 독특함을 나타내는 차이를 존중하고 누구도 배제하지 않는 원칙입니다. 문제는 이 원칙을 <b>숫자로 옮기는 방법이 여러 가지</b>라는 점입니다. 대표적인 세 가지를 봅시다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>공정성을 숫자로 옮기는 세 가지 방식</caption>
+        <thead><tr><th>기준</th><th>무엇이 같아야 하는가</th><th>이 기준을 지지하는 이유</th></tr></thead>
+        <tbody>
+          <tr><td><b>결과의 균등</b></td><td>집단별 <b>합격률</b>이 같아야 한다</td><td>결과의 격차 자체가 차별의 증거라고 본다</td></tr>
+          <tr><td><b>기회의 균등</b></td><td>집단별 <b>재현율</b>이 같아야 한다<br><span class="mono">실제 자격자 중 합격한 비율</span></td><td>자격이 있는 사람은 어느 집단이든 같은 확률로 뽑혀야 한다</td></tr>
+          <tr><td><b>예측의 균등</b></td><td>집단별 <b>정밀도</b>가 같아야 한다<br><span class="mono">합격 판정자 중 실제 자격자 비율</span></td><td>같은 점수를 받았다면 같은 의미여야 한다</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>세 기준은 모두 그럴듯합니다. 그런데 나쁜 소식이 있습니다. <b>두 집단에서 실제 자격자의 비율(기저율)이 다르면, 완벽한 예측이 아닌 한 이 기준들을 동시에 만족시킬 수 없습니다.</b> 이것은 의견 차이가 아니라 <b>수학적으로 증명된 사실</b>입니다.</p>
+
+    <div class="box box-info">
+      <div class="box-label">🔢 숫자로 확인해 보기</div>
+      <p>가람 집단 100명 중 자격자가 50명, 나루 집단 100명 중 자격자가 20명이라고 합시다(기저율이 다른 상황).</p>
+      <ul>
+        <li><b>합격률을 똑같이</b> 30%로 맞추면, 가람에서는 자격자 50명 중 30명 이하만 뽑히고, 나루에서는 자격자 20명을 다 뽑고도 자리가 남아 비자격자가 들어옵니다. → 재현율과 정밀도가 집단별로 어긋납니다.</li>
+        <li><b>재현율을 똑같이</b> 맞추면 합격률이 달라집니다. 자격자가 많은 집단에서 더 많이 뽑히기 때문입니다.</li>
+      </ul>
+      <p>즉 <b>어느 자를 쓸지 고르는 순간 다른 자는 포기하게</b> 됩니다. 그러므로 “이 모델은 공정한가?”라는 질문은 성립하지 않습니다. 물어야 할 것은 <b>“어떤 공정성을 택했고, 왜 그것을 택했는가?”</b>입니다. 이것은 계산이 아니라 <b>사회가 논의해 정할 가치 판단</b>입니다.</p>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 기저율 차이를 ‘자연스러운 것’으로 받아들이지 않기</div>
+      <p>기저율이 다르다는 사실 자체가 이미 <b>과거 구조의 결과</b>일 수 있습니다. 어떤 지역에 실습 기회나 교육 자원이 적었다면, 그 지역의 ‘자격자 비율’이 낮게 측정되는 것은 능력의 차이가 아니라 <b>기회의 차이</b>입니다. 기저율을 고정된 사실로 두고 계산만 하면, 과거의 불평등을 공정성의 전제로 삼는 셈이 됩니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4. 투명성 · 책임 · 프라이버시 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>투명성, 책임, 그리고 나의 데이터</h2></div>
+
+    <h3 class="sub-head">투명성과 설명 가능성</h3>
+    <p>인공지능이 사용하는 알고리즘과 수집한 데이터를 공개하여 판단 과정을 확인할 수 있게 하는 원칙을 <b class="blank" data-a="투명성" data-hint="알고리즘·데이터·판단 근거를 확인할 수 있게 하는 원칙">투명성</b>이라고 합니다. 그리고 인공지능의 판단 이유를 사람이 이해할 수 있는 방식으로 제시하는 인공지능을 <b class="blank" data-a="설명 가능한 인공지능|XAI|설명가능한 인공지능" data-hint="영어 약자 XAI">설명 가능한 인공지능</b>이라고 합니다.</p>
+    <p>둘은 같지 않습니다. 소스 코드를 전부 공개해도(투명성) 신경망의 판단 근거는 여전히 알 수 없고, 반대로 코드를 공개하지 않고도 “어떤 항목이 결과를 어느 쪽으로 얼마나 밀었는지”는 알려 줄 수 있습니다(설명 가능성). <b>당사자에게 필요한 것은 대개 후자입니다.</b> 탈락한 지원자에게 필요한 정보는 코드가 아니라 “무엇이 결정적이었고 무엇을 바꾸면 결과가 달라지는가”입니다.</p>
+
+    <h3 class="sub-head">누가 책임지는가</h3>
+    <p>인공지능의 개발 과정과 결과에 대한 책임을 분명히 하는 원칙을 <b class="blank" data-a="책임성|책임" data-hint="문제가 생겼을 때 책임의 주체를 분명히 하는 원칙">책임성</b>이라고 합니다. 인공지능이 관여한 사고에서 가장 흔한 실패는 “아무도 책임지지 않는 상태”입니다. 개발사는 “정해진 대로 만들었다”, 병원은 “인증된 제품을 썼다”, 의료진은 “시스템 권고를 따랐다”라고 말할 수 있기 때문입니다. 이런 상태를 <b>책임의 공백</b>이라고 부릅니다.</p>
+    <p>책임의 공백을 막는 방법은 사고가 난 뒤에 따지는 것이 아니라, <b>도입 전에 미리 분담을 문서로 정해 두는 것</b>입니다. 어떤 조건에서 사람이 반드시 확인하는지, 판단 기록을 얼마나 남기는지, 이의 제기는 누가 처리하는지를 정해 두어야 합니다.</p>
+
+    <h3 class="sub-head">프라이버시와 데이터 주권</h3>
+    <p>사생활을 보호하고 개인 정보의 오용을 최소화하는 원칙을 <b class="blank" data-a="프라이버시 보호|프라이버시|사생활 보호" data-hint="사생활 보호와 개인 정보 오용 최소화 원칙">프라이버시 보호</b>라고 합니다. 인공지능 시대에 이 원칙이 특히 어려워진 까닭은, 하나하나는 민감하지 않은 정보들을 <b>모으면 민감해진다</b>는 점입니다. 걸음 수, 위치, 검색어, 취침 시각은 따로 보면 대수롭지 않지만, 합치면 건강 상태와 생활 습관이 드러납니다.</p>
+    <p>그래서 최근에는 “정보를 지켜 준다”를 넘어, 내 데이터가 어디에 쓰이는지 알고 옮기고 삭제를 요구할 수 있어야 한다는 <b class="blank" data-a="데이터 주권|정보 주권" data-hint="내 데이터의 사용을 내가 결정할 권리">데이터 주권</b> 개념이 강조됩니다. 동의 버튼을 한 번 눌렀다는 사실이 <b>모든 용도에 대한 영구 허락</b>이 될 수는 없다는 문제 제기입니다.</p>
+
+    <h3 class="sub-head">세 관점에서 나누어 지는 책임</h3>
+    <div class="card-grid">
+      <div class="mini-card"><span class="icon">👩‍💻</span><h4>개발자</h4><p>출시 전에 사회적 영향을 예측하고, 집단별 성능을 측정해 기록합니다. 학습 데이터의 출처와 한계를 문서로 남기고, 무엇을 최적화했는지 밝힙니다.</p></div>
+      <div class="mini-card"><span class="icon">🏢</span><h4>운영·관리자</h4><p>사회적 책임과 공정성을 고려해 <b>어떻게 출시하고 운영할지</b> 결정합니다. 사람이 확인할 조건, 이의 제기 절차, 중단 기준을 정하고 정기적으로 결과를 점검합니다.</p></div>
+      <div class="mini-card"><span class="icon">🙋</span><h4>사용자</h4><p>도구의 한계를 알고 쓰며, 결과를 그대로 옮기지 않습니다. 이상한 결과를 발견하면 신고하고, 다른 사람에게 피해를 주는 용도로 쓰지 않습니다.</p></div>
+    </div>
+
+    <h3 class="sub-head">윤리적 딜레마의 구조</h3>
+    <p><b class="blank" data-a="윤리적 딜레마|딜레마" data-hint="여러 가치가 충돌해 쉽게 결정할 수 없는 난처한 상황">윤리적 딜레마</b>란 도덕적으로 어떤 결정을 해야 할 때 여러 가치가 서로 충돌하여 쉽게 결정할 수 없는 난처한 상황을 말합니다. 딜레마를 잘 다루려면 그 구조를 볼 수 있어야 합니다.</p>
+    <div class="box box-concept">
+      <div class="box-label">📘 딜레마를 분해하는 네 가지 질문</div>
+      <ol style="margin:0">
+        <li><b>충돌하는 가치가 무엇인가</b> — 안전과 자유? 효율과 배려? 개인의 권리와 공공의 이익?</li>
+        <li><b>누가 이득을 얻고 누가 부담을 지는가</b> — 이득과 부담을 지는 사람이 다르면 특히 신중해야 합니다.</li>
+        <li><b>되돌릴 수 있는가</b> — 되돌릴 수 없는 선택은 더 높은 확신을 요구합니다.</li>
+        <li><b>결정하지 않는 것도 결정이다</b> — 미루는 동안에도 현재 상태가 계속 작동합니다.</li>
+      </ol>
+    </div>
+    <div class="box box-ok">
+      <div class="box-label">✅ 딜레마에는 정답이 없다, 그러나</div>
+      <p>“정답이 없다”는 말은 “아무 답이나 괜찮다”는 뜻이 아닙니다. 딜레마에서 평가받는 것은 <b>결론이 아니라 근거의 질</b>입니다. 충돌하는 가치를 정확히 짚었는지, 내 선택이 누구에게 부담을 주는지 인정했는지, 반대 입장의 가장 강한 근거에 답했는지 — 이것이 좋은 근거의 조건입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 5. 시뮬레이터 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>직접 해 보기 ① 데이터 편향 실험실</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim1"></div>
+
+    <div class="sec-head" style="margin-top:34px"><span class="sec-num">6</span><h2>직접 해 보기 ② 윤리 딜레마와 세 관점</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim2"></div>
+
+    <div class="sec-head" style="margin-top:34px"><span class="sec-num">7</span><h2>직접 해 보기 ③ 윤리 원칙 짝짓기</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim3"></div>
+  </section>
+
+  <!-- ============ 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">9</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">10</span><h2>활동 기록</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 왜 여러 공정성 기준을 동시에 만족할 수 없는가</summary>
+      <div class="more-body">
+        <p>혼동 행렬을 떠올려 봅시다. 어떤 집단에서 실제 자격자 비율(기저율)을 <span class="mono">p</span>, 재현율을 <span class="mono">TPR</span>, 위양성률을 <span class="mono">FPR</span>이라고 하면, 정밀도는 다음과 같이 정해집니다.</p>
+        <p style="text-align:center"><span class="mono">정밀도 = p·TPR / ( p·TPR + (1−p)·FPR )</span></p>
+        <p>이 식에서 <span class="mono">p</span>가 집단마다 다르면, <span class="mono">TPR</span>과 <span class="mono">FPR</span>을 두 집단에서 똑같이 맞추더라도 <b>정밀도는 자동으로 달라집니다.</b> 반대로 정밀도를 맞추려면 <span class="mono">TPR</span>이나 <span class="mono">FPR</span>을 집단마다 다르게 두어야 합니다. 완전히 정확한 예측(<span class="mono">TPR</span>=1, <span class="mono">FPR</span>=0)일 때만 모든 기준이 함께 성립합니다.</p>
+        <p>이 결과의 의미는 “공정성은 불가능하다”가 아닙니다. <b>“공정성이라는 말을 정의하지 않고 쓰면 논쟁이 끝나지 않는다”</b>는 뜻입니다. 그래서 실무에서는 <b>어떤 기준을 택했는지 명시하고, 나머지 기준의 값도 함께 공개</b>하는 방식을 씁니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">실무</span> 편향을 실제로 줄이는 네 가지 지점</summary>
+      <div class="more-body">
+        <p>편향 완화는 한 방에 끝나는 일이 아니라, 파이프라인의 여러 지점에서 조금씩 하는 일입니다.</p>
+        <ul>
+          <li><b>데이터 단계</b> — 부족한 집단의 데이터를 더 모으거나, 표본에 가중치를 주어 균형을 맞춥니다. 레이블 자체가 의심스러우면 레이블 기준을 다시 정의합니다(“과거 합격” 대신 “입사 후 실제 성과”처럼).</li>
+          <li><b>학습 단계</b> — 손실 함수에 <b>집단 간 격차를 벌하는 항</b>을 더해, 정확도와 공정성을 함께 최적화합니다.</li>
+          <li><b>출력 단계</b> — 집단마다 판정 임계값을 다르게 두어 재현율을 맞추는 방법이 있습니다. 효과는 즉각적이지만, “집단에 따라 기준을 달리 적용해도 되는가”라는 새로운 논쟁을 부릅니다.</li>
+          <li><b>운영 단계</b> — 가장 중요합니다. <b>집단별 지표를 정기적으로 측정해 공개하고</b>, 격차가 기준을 넘으면 자동으로 재검토가 시작되도록 절차를 만듭니다. 측정하지 않으면 편향은 반드시 다시 자랍니다.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">코드</span> 집단별 지표를 계산하는 파이썬 코드</summary>
+      <div class="more-body">
+        <p>공정성 점검의 출발점은 언제나 “집단별로 나누어 세기”입니다. 아래 함수가 시뮬레이터가 실제로 하는 계산과 같습니다.</p>
+        <pre style="margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;white-space:pre-wrap">def group_report(y_true, y_pred, group):
+    """집단별 합격률·정확도·재현율·정밀도를 계산한다."""
+    for g in sorted(set(group)):
+        idx = [i for i in range(len(group)) if group[i] == g]
+        n   = len(idx)
+        tp  = sum(1 for i in idx if y_pred[i] == 1 and y_true[i] == 1)
+        fp  = sum(1 for i in idx if y_pred[i] == 1 and y_true[i] == 0)
+        pos = sum(1 for i in idx if y_true[i] == 1)      # 실제 자격자
+        acc = sum(1 for i in idx if y_pred[i] == y_true[i]) / n
+
+        print(g,
+              '합격률 %.3f' % ((tp + fp) / n),
+              '정확도 %.3f' % acc,
+              '재현율 %.3f' % (tp / pos if pos else 0),
+              '정밀도 %.3f' % (tp / (tp + fp) if tp + fp else 0))</pre>
+        <p style="margin-top:12px">전체 정확도 하나만 보고하는 보고서는 <b>공정성에 대해 아무것도 말해 주지 않습니다.</b> 소수 집단이 전체의 10%라면, 그 집단을 모두 틀려도 전체 정확도는 10%만 떨어집니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 다음 단원으로 — 내가 만들 인공지능에 적용하기</summary>
+      <div class="more-body">
+        이 단원에서 배운 것은 남이 만든 인공지능을 비판하는 기술이 아니라, <b>내가 만들 인공지능을 설계하는 기준</b>입니다. 다음 단원의 프로젝트에서는 주제를 정하는 단계부터 이 질문을 함께 들고 갑니다. 이 모델이 <b>누구에게</b> 영향을 주는가, 오류가 났을 때 <b>누가 피해</b>를 입는가, 집단별 성능을 <b>어떻게 측정</b>할 것인가, 사람은 <b>어느 지점에서</b> 개입하는가. 이 네 질문에 답을 적어 두는 것이 프로젝트 계획서의 필수 항목이 됩니다.
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 3, lesson: 4,
+  title: '공정한 인공지능은 가능한가',
+  sub: '인공지능 윤리와 딜레마',
+  lead: '차별하라는 규칙을 한 줄도 넣지 않았는데도 결과가 치우칠 수 있습니다. 이 차시에서는 <b>편향이 들어오는 세 경로</b>를 짚고, 가상의 채용 심사 모델을 <b>직접 학습시켜</b> 격차를 계산해 보고, 윤리적 딜레마에서 <b>근거를 갖춘 판단</b>을 연습합니다.',
+  standards: ['12인기03-04'],
+  keywords: ['인공지능 윤리', '편향', '공정성', '투명성', '책임', '딜레마'],
+  goals: [
+    '인공지능 편향이 데이터·알고리즘·사람의 세 경로로 들어오는 과정을 사례로 설명할 수 있다.',
+    '집단별 지표를 직접 측정하여 격차의 원인을 분석하고, 대리 변수 때문에 민감 정보 제거만으로는 공정성이 확보되지 않음을 설명할 수 있다.',
+    '윤리적 딜레마 상황을 개발자·사용자·운영관리자 관점에서 분석하고, 근거를 갖춘 판단을 제시할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 시뮬레이터 1: 데이터 편향 실험실 ===================== -->
+<script>
+(function () {
+  const SEED = 20260804;
+  const T = 0.4;              // 실력 기준 합격선
+  const N_TRAIN = 700, N_TEST = 400;
+  const GA = '가람', NA = '나루';
+
+  const body = AI.sim.panel('#sim1', {
+    title: '데이터 편향 실험실 — 가상 채용 서류 심사 모델',
+    tag: '실제로 학습시킵니다',
+    desc: '두 지역(<b>가람 · 나루</b>) 지원자의 <b>실력 분포는 완전히 똑같게</b> 만들었습니다. 딱 하나만 다릅니다. <b>과거 합격 기록</b>에 편향을 심었습니다. 이 데이터로 로지스틱 회귀 모델을 <b>실제로 학습</b>시켜, 실력 기준으로 평가한 집단별 지표를 비교합니다. ' +
+      '<b>가람 · 나루는 가상의 지역명</b>이며 실제 어떤 집단도 가리키지 않습니다.'
+  });
+
+  /* ---------- 데이터 생성 ---------- */
+  function normalGen(rand) {
+    let spare = null;
+    return function () {
+      if (spare !== null) { const s0 = spare; spare = null; return s0; }
+      let u, v, s;
+      do { u = rand() * 2 - 1; v = rand() * 2 - 1; s = u * u + v * v; } while (s === 0 || s >= 1);
+      const m = Math.sqrt(-2 * Math.log(s) / s);
+      spare = v * m;
+      return u * m;
+    };
+  }
+
+  // g = +1 가람, -1 나루.  a = 실제 실력(두 집단 동일 분포)
+  function mk(isNaru, nrm, proxy) {
+    const g = isNaru ? -1 : 1;
+    const a = nrm();
+    return {
+      g: g, naru: isNaru, a: a,
+      f1: a + 0.5 * nrm(),               // 필기 점수
+      f2: a + 0.6 * nrm(),               // 활동 점수
+      f3: 0.4 * a + proxy * g + 0.5 * nrm() // 추천 지수 ← 집단과 상관된 대리 변수
+    };
+  }
+
+  function feat(d, useGroup) {
+    return useGroup ? [d.f1, d.f2, d.f3, d.g] : [d.f1, d.f2, d.f3];
+  }
+
+  /* ---------- 로지스틱 회귀 (경사 하강법) ---------- */
+  function fit(data, labels, useGroup) {
+    const dim = useGroup ? 4 : 3;
+    const w = new Array(dim).fill(0);
+    let b0 = 0;
+    const lr = 0.8, epochs = 500, n = data.length;
+    const X = data.map(function (d) { return feat(d, useGroup); });
+    for (let e = 0; e < epochs; e++) {
+      const gw = new Array(dim).fill(0);
+      let gb = 0;
+      for (let i = 0; i < n; i++) {
+        const x = X[i];
+        let z = b0;
+        for (let k = 0; k < dim; k++) z += w[k] * x[k];
+        const p = 1 / (1 + Math.exp(-z));
+        const err = p - labels[i];
+        for (let k = 0; k < dim; k++) gw[k] += err * x[k];
+        gb += err;
+      }
+      for (let k = 0; k < dim; k++) w[k] -= lr * gw[k] / n;
+      b0 -= lr * gb / n;
+    }
+    return { w: w, b0: b0, dim: dim };
+  }
+
+  function predict(m, d, useGroup) {
+    const x = feat(d, useGroup);
+    let z = m.b0;
+    for (let k = 0; k < m.dim; k++) z += m.w[k] * x[k];
+    return z > 0 ? 1 : 0;
+  }
+
+  /* ---------- 컨트롤 ---------- */
+  let R = null; // 최근 결과
+
+  const sRatio = AI.ui.slider({
+    label: '훈련 데이터에서 나루 지역 비율', min: 5, max: 50, step: 5, value: 15, unit: '%',
+    onInput: run
+  });
+  const sBias = AI.ui.slider({
+    label: '과거 합격 기록의 편향 정도', min: 0, max: 2, step: 0.1, value: 1.2,
+    format: function (v) { return v.toFixed(1); }, onInput: run
+  });
+  const sProxy = AI.ui.slider({
+    label: '추천 지수와 지역의 상관(대리 변수)', min: 0, max: 1.4, step: 0.1, value: 0.9,
+    format: function (v) { return v.toFixed(1); }, onInput: run
+  });
+  const segG = AI.ui.seg({
+    label: '지역 정보 입력', value: 'in',
+    options: [{ value: 'in', label: '입력에 포함' }, { value: 'out', label: '입력에서 제외' }],
+    onChange: run
+  });
+  const segL = AI.ui.seg({
+    label: '학습 레이블', value: 'hist',
+    options: [{ value: 'hist', label: '과거 합격 기록' }, { value: 'fair', label: '실력 기준(편향 없음)' }],
+    onChange: run
+  });
+
+  const cv = AI.sim.canvas(540, 260, { maxFull: true });
+  const stats = AI.ui.stats([
+    { key: 'gp', label: '합격률 격차' }, { key: 'gr', label: '재현율 격차' },
+    { key: 'ac', label: '전체 정확도' }, { key: 'pw', label: '추천 지수 가중치' }
+  ]);
+  const wline = AI.h('div', { class: 'wt-line' });
+  const log = AI.ui.log();
+  const diag = AI.h('div', { class: 'box box-info', style: { marginTop: '14px' } });
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' }, sRatio.el, sBias.el, sProxy.el));
+  body.appendChild(AI.h('div', { class: 'sim-controls' }, segG.el, segL.el));
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('⚖️ 데이터 균형 맞추기', function () {
+      sRatio.set(50);
+      AI.toast('나루 비율을 50%로 맞췄습니다');
+    }, 'primary'),
+    AI.ui.btn('🧹 레이블 편향 제거', function () {
+      segL.set('fair'); sBias.set(0);
+      AI.toast('실력 기준 레이블로 학습합니다');
+    }, 'primary'),
+    AI.ui.btn('↺ 처음 설정으로', function () {
+      sRatio.set(15); sBias.set(1.2); sProxy.set(0.9);
+      segG.set('in'); segL.set('hist');
+      log.clear();
+    }, 'ghost')
+  ));
+  body.appendChild(cv.wrap);
+  body.appendChild(AI.ui.legend([
+    { color: 'var(--accent)', label: '가람 지역' },
+    { color: 'var(--warn)', label: '나루 지역' }
+  ]));
+  body.appendChild(stats.el);
+  body.appendChild(wline);
+  body.appendChild(log.el);
+  body.appendChild(diag);
+
+  /* ---------- 실행 ---------- */
+  function run() {
+    const pN = sRatio.value / 100;
+    const b = sBias.value;
+    const proxy = sProxy.value;
+    const useGroup = segG.value === 'in';
+    const fairLabel = segL.value === 'fair';
+
+    const rand = AI.sim.rng(SEED);
+    const nrm = normalGen(rand);
+
+    const train = [], test = [];
+    for (let i = 0; i < N_TRAIN; i++) train.push(mk(rand() < pN, nrm, proxy));
+    for (let i = 0; i < N_TEST; i++) test.push(mk(i % 2 === 1, nrm, proxy)); // 평가는 50:50
+
+    // 훈련 레이블: 과거 합격 기록(편향) 또는 실력 기준
+    const yTrain = train.map(function (d) {
+      const shift = fairLabel ? 0 : b * 0.5 * d.g;   // 가람에게 유리, 나루에게 불리
+      return (d.a + shift) > T ? 1 : 0;
+    });
+
+    const m = fit(train, yTrain, useGroup);
+
+    // 평가는 언제나 '실력 기준'으로
+    const G = {
+      ga: { n: 0, pass: 0, acc: 0, tp: 0, fn: 0, pos: 0 },
+      na: { n: 0, pass: 0, acc: 0, tp: 0, fn: 0, pos: 0 }
+    };
+    test.forEach(function (d) {
+      const y = d.a > T ? 1 : 0;
+      const p = predict(m, d, useGroup);
+      const k = d.naru ? G.na : G.ga;
+      k.n++;
+      if (p === 1) k.pass++;
+      if (p === y) k.acc++;
+      if (y === 1) { k.pos++; if (p === 1) k.tp++; else k.fn++; }
+    });
+
+    function rate(k) {
+      return {
+        pass: k.pass / k.n * 100,
+        acc: k.acc / k.n * 100,
+        rec: k.pos ? k.tp / k.pos * 100 : 0,
+        base: k.pos / k.n * 100
+      };
+    }
+    const A = rate(G.ga), B2 = rate(G.na);
+    const trainN = train.filter(function (d) { return d.naru; }).length;
+
+    R = { A: A, B: B2, m: m, useGroup: useGroup, fairLabel: fairLabel, b: b, proxy: proxy, pN: pN, trainN: trainN, accAll: (G.ga.acc + G.na.acc) / (G.ga.n + G.na.n) * 100 };
+
+    draw();
+
+    const gapP = A.pass - B2.pass, gapR = A.rec - B2.rec;
+    stats.set('gp', (gapP >= 0 ? '+' : '') + AI.sim.fmt(gapP, 1) + '%p');
+    stats.set('gr', (gapR >= 0 ? '+' : '') + AI.sim.fmt(gapR, 1) + '%p');
+    stats.set('ac', AI.sim.fmt(R.accAll, 1) + '%');
+    stats.set('pw', AI.sim.fmt(m.w[2], 2));
+
+    const names = ['필기 점수', '활동 점수', '추천 지수(대리 변수)', '지역 정보'];
+    let wtxt = '학습된 가중치 &nbsp;';
+    for (let k = 0; k < m.dim; k++) wtxt += names[k] + ' <b>' + AI.sim.fmt(m.w[k], 2) + '</b>&nbsp; ';
+    wtxt += '<br>실제 자격자 비율(실력 기준) — ' + GA + ' <b>' + AI.sim.fmt(A.base, 1) + '%</b> · ' + NA + ' <b>' + AI.sim.fmt(B2.base, 1) + '%</b>  ← 두 집단이 거의 같습니다';
+    wline.innerHTML = wtxt;
+
+    log.add('나루 비율 ' + Math.round(pN * 100) + '% (' + trainN + '명) · 편향 ' + AI.sim.fmt(b, 1) +
+      ' · 대리 변수 ' + AI.sim.fmt(proxy, 1) + ' · 지역 정보 ' + (useGroup ? '포함' : '제외') +
+      ' · 레이블 ' + (fairLabel ? '실력 기준' : '과거 기록') +
+      ' → 합격률 격차 ' + AI.sim.fmt(gapP, 1) + '%p', Math.abs(gapP) > 15);
+
+    diagnose(gapP, gapR);
+  }
+
+  function diagnose(gapP, gapR) {
+    const m = R.m;
+    let head, msg;
+    if (Math.abs(gapP) < 4) {
+      head = '✅ 격차가 거의 사라졌습니다';
+      msg = '두 집단의 합격률 차이가 ' + AI.sim.fmt(Math.abs(gapP), 1) + '%p까지 줄었습니다. 지금 무엇이 달라져 있는지 확인해 보세요. ' +
+        '<b>레이블</b>이 실력 기준인가요? 아니면 <b>대리 변수</b>의 상관을 0으로 내려 두었나요? 격차를 없앤 것이 무엇인지 정확히 지목할 수 있어야 합니다.';
+    } else if (!R.useGroup) {
+      head = '🔍 지역 정보를 뺐는데도 격차가 남았습니다';
+      msg = '입력에 지역이 아예 들어가지 않는데도 합격률 격차가 <b>' + AI.sim.fmt(Math.abs(gapP), 1) + '%p</b>입니다. ' +
+        '가중치를 보세요. <b>추천 지수의 가중치가 ' + AI.sim.fmt(m.w[2], 2) + '</b>입니다. 추천 지수는 지역과 상관이 있으므로, 모델은 이 속성을 통해 지역을 <b>간접적으로 되살려</b> 쓰고 있습니다. 이것이 <b>대리 변수</b>입니다. ' +
+        '위의 ‘추천 지수와 지역의 상관’ 슬라이더를 0으로 내려 보고 격차가 어떻게 되는지 확인해 보세요.';
+    } else {
+      head = '⚠️ 격차가 큽니다';
+      msg = '합격률 격차 <b>' + AI.sim.fmt(gapP, 1) + '%p</b>, 재현율 격차 <b>' + AI.sim.fmt(gapR, 1) + '%p</b>입니다. ' +
+        '재현율 격차는 <b>실력이 같은데도 뽑히지 못한 정도</b>를 뜻하므로 특히 중요합니다. ' +
+        '두 집단의 실력 분포는 똑같이 만들었고 실제 자격자 비율도 거의 같은데 결과가 이렇게 벌어졌습니다. 그렇다면 원인은 지원자에게 있지 않습니다.';
+    }
+    diag.innerHTML = '<div class="box-label">' + head + '</div><p>' + msg + '</p>' +
+      '<p style="margin-top:10px"><b>스스로 찾아보기 — 무엇이 격차를 만들었을까요?</b></p>' +
+      '<ol style="margin:0">' +
+      '<li><b>편향 정도</b>를 0으로 내려 보세요. 격차가 어떻게 되나요? 이때 데이터의 어떤 부분이 달라진 것인가요?</li>' +
+      '<li>편향을 다시 올린 뒤 <b>지역 정보를 제외</b>해 보세요. 격차가 완전히 사라지나요? 사라지지 않는다면 무엇이 지역을 대신하고 있나요?</li>' +
+      '<li>지역을 제외한 상태에서 <b>추천 지수의 상관</b>을 0으로 내려 보세요. 이제 격차는 어떻게 되나요?</li>' +
+      '<li><b>나루 비율</b>만 5%에서 50%로 올려 보세요. 비율만 맞추는 것으로 충분한가요?</li>' +
+      '<li>위 실험을 종합해, 격차의 <b>진짜 원인</b>을 한 문장으로 적어 활동 기록에 남겨 보세요.</li>' +
+      '</ol>';
+  }
+
+  /* ---------- 막대그래프 ---------- */
+  const M = { l: 44, r: 14, t: 26, b: 50 };
+  function draw() {
+    if (!R) return;
+    const C = AI.sim.colors(), ctx = cv.ctx;
+    cv.clear(C.bg);
+    const font = getComputedStyle(document.body).fontFamily;
+    const pw = cv.w - M.l - M.r, ph = cv.h - M.t - M.b;
+    const yOf = function (v) { return M.t + ph * (1 - v / 100); };
+
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+    ctx.fillStyle = C.ink3; ctx.font = '600 10.5px ' + font;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let v = 0; v <= 100; v += 20) {
+      ctx.beginPath(); ctx.moveTo(M.l, yOf(v)); ctx.lineTo(cv.w - M.r, yOf(v)); ctx.stroke();
+      ctx.fillText(v + '%', M.l - 6, yOf(v));
+    }
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(M.l, M.t); ctx.lineTo(M.l, M.t + ph); ctx.lineTo(cv.w - M.r, M.t + ph); ctx.stroke();
+
+    const METS = [
+      { key: 'pass', label: '합격률' },
+      { key: 'acc', label: '정확도' },
+      { key: 'rec', label: '재현율' }
+    ];
+    const bw = 40, gap = 8;
+    METS.forEach(function (mt, i) {
+      const cx = M.l + pw * (i + 0.5) / METS.length;
+      const vA = R.A[mt.key], vB = R.B[mt.key];
+      const xs = [cx - bw - gap / 2, cx + gap / 2];
+      [[vA, C.a, GA], [vB, C.warn, NA]].forEach(function (t, j) {
+        const hgt = Math.max(1, ph * t[0] / 100);
+        ctx.fillStyle = t[1];
+        ctx.fillRect(xs[j], M.t + ph - hgt, bw, hgt);
+        ctx.fillStyle = C.ink;
+        ctx.font = '800 11px ' + font;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        ctx.fillText(AI.sim.fmt(t[0], 0) + '%', xs[j] + bw / 2, M.t + ph - hgt - 3);
+      });
+      ctx.fillStyle = C.ink;
+      ctx.font = '700 12px ' + font;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(mt.label, cx, M.t + ph + 8);
+      const d = vA - vB;
+      ctx.fillStyle = Math.abs(d) > 8 ? C.no : C.ink3;
+      ctx.font = '700 11px ' + font;
+      ctx.fillText('격차 ' + (d >= 0 ? '+' : '') + AI.sim.fmt(d, 1) + '%p', cx, M.t + ph + 26);
+    });
+
+    ctx.fillStyle = C.ink3;
+    ctx.font = '600 11px ' + font;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillText('평가 데이터는 두 지역 50:50 · 평가 기준은 실력(과거 기록이 아님)', M.l, 6);
+  }
+
+  window.addEventListener('ai:redraw', draw);
+  run();
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 윤리 딜레마와 세 관점 ===================== -->
+<script>
+(function () {
+  const NOTE_ID = 'a3l4-dilemma';
+
+  const D = [
+    {
+      title: '자율주행차의 회피 선택',
+      sit: '자율주행차가 좁은 도로를 달리던 중 보행자가 갑자기 뛰어들었습니다. 그대로 가면 보행자가 크게 다치고, 급히 방향을 틀면 차에 탄 사람이 다칩니다. 제조사는 이런 순간의 규칙을 <b>사고가 나기 전에 미리</b> 프로그램으로 정해 두어야 합니다.',
+      choices: [
+        {
+          t: '탑승자의 안전을 우선하도록 정한다',
+          why: '차를 사는 사람은 자신을 지켜 줄 것을 기대하고 삽니다. 탑승자를 희생시키는 차를 아무도 사지 않으면 자율주행차의 안전 이득 자체가 사회에 도달하지 못한다는 현실적 근거가 있습니다. 다만 이 논리는 <b>도로 위의 다른 사람을 계산에서 빼는</b> 방식이라는 비판을 받습니다.'
+        },
+        {
+          t: '전체 피해가 더 작아지는 쪽을 계산해 정한다',
+          why: '한 사람보다 여러 사람의 피해가 작아야 한다는 계산은 직관적입니다. 그러나 “누구의 피해를 어떻게 세는가”를 정하는 순간, 사람의 가치를 <b>숫자로 매기는 일</b>이 시작됩니다. 나이나 인원수를 넣는 순간 어떤 사람의 생명이 덜 세어집니다.'
+        },
+        {
+          t: '규칙을 회사가 정하지 않고 차주가 설정하게 한다',
+          why: '선택의 책임을 당사자에게 돌린다는 점에서 자율성을 존중합니다. 그러나 도로는 <b>공동의 공간</b>입니다. 타인의 안전이 개인 설정값에 달려 있어도 되는지, 그리고 그 설정이 사고 후 책임 판단에 어떻게 쓰일지가 문제로 남습니다.'
+        }
+      ],
+      dev: '어떤 규칙을 넣든 그 규칙은 코드에 남습니다. 결정 과정을 기록하고, 규칙을 공개하고, 시험 결과를 남겨야 합니다. <b>규칙을 정하지 않는 것도 하나의 선택</b>이며, 그 결과 역시 개발자의 책임 범위에 들어옵니다.',
+      user: '내 차의 규칙이 무엇인지 <b>알고</b> 타야 합니다. 설명서 깊숙이 묻힌 조항이 아니라 구매 시점에 이해할 수 있는 형태로 안내되어야 하고, 사용자에게도 개입 조건을 익힐 책임이 있습니다.',
+      op: '이 규칙은 한 회사가 정할 문제가 아니라 <b>사회가 합의할 문제</b>입니다. 승인 기준, 사고 조사 절차, 주행 기록 보관 의무를 제도로 만들어야 합니다. 회사마다 규칙이 다르면 도로에서 예측 가능성이 사라집니다.'
+    },
+    {
+      title: '얼굴 인식 기반 공공 감시',
+      sit: '어느 시가 범죄 예방을 위해 도심 전체에 얼굴 인식 카메라를 설치하려 합니다. 실종자를 빨리 찾을 수 있고 범죄가 줄어들 수 있다는 기대가 있습니다. 동시에 그 거리를 지나는 <b>모든 시민의 얼굴</b>이 상시 수집됩니다.',
+      choices: [
+        {
+          t: '범죄 예방과 실종자 수색 효과가 크므로 설치한다',
+          why: '실종 아동이나 치매 환자를 빨리 찾는 일은 미룰 수 없는 이익입니다. “나는 잘못한 게 없으니 괜찮다”는 근거도 자주 등장합니다. 다만 이 논리는 <b>감시가 행동을 바꾼다</b>는 점을 놓칩니다. 집회에 나가는 것을 망설이게 만드는 효과는 범죄와 무관한 사람에게도 미칩니다.'
+        },
+        {
+          t: '기본권 침해가 크므로 설치하지 않는다',
+          why: '얼굴은 바꿀 수 없는 정보이고, 한번 유출되면 되돌릴 수 없습니다. 오인식 피해가 특정 집단에 몰린다는 문제도 반복해서 확인되었습니다. 반면 설치를 포기하면 <b>얻을 수 있었던 안전 이익도 함께 포기</b>하게 되며, 그 부담은 대개 취약한 지역에 더 크게 남습니다.'
+        },
+        {
+          t: '설치하되 목적·보관 기간·열람 권한·감사 절차를 법으로 강하게 제한한다',
+          why: '기술 자체보다 <b>운영 규칙</b>이 문제라는 관점입니다. 목적 외 사용 금지, 짧은 보관 기간, 접근 기록 의무, 외부 감사, 정기 공개를 조건으로 붙입니다. 다만 “한번 깔린 인프라는 나중에 규칙만 느슨해지기 쉽다”는 <b>기능 확장</b>의 위험을 어떻게 막을지 답해야 합니다.'
+        }
+      ],
+      dev: '오인식률을 <b>집단별로 나누어 측정</b>해 공개해야 합니다. 전체 정확도 하나만 보고하는 것은 이 문제에서 사실상 아무 정보도 주지 않습니다. 원본 영상 대신 특징값만 저장하기, 자동 삭제 같은 기술적 보호 장치도 설계 단계에서 들어가야 합니다.',
+      user: '시민은 <b>어디에 설치되어 있고 무엇을 수집하는지 알 권리</b>가 있습니다. 오인식 피해를 입었을 때 이의를 제기하고 기록을 확인할 수 있는 통로가 실제로 작동하는지가 관건입니다.',
+      op: '설치 목적을 문서로 좁게 정하고, 목적을 넘어선 사용은 기술적으로 불가능하게 만들어야 합니다. <b>중단 조건</b>을 미리 정해 두는 것도 중요합니다. 어떤 지표가 어느 수준을 넘으면 운영을 멈출지 정해 두지 않으면, 실제로는 멈추지 않습니다.'
+    },
+    {
+      title: '인공지능 창작물의 저작권',
+      sit: '한 참가자가 인공지능으로 만든 그림을 공모전에 냈고 상을 받았습니다. 그 인공지능은 수많은 화가의 작품을 학습했지만, 원작자들이 학습에 동의한 적은 없습니다. 결과물의 권리는 누구에게 있어야 할까요?',
+      choices: [
+        {
+          t: '도구를 사용한 사람에게 권리가 있다',
+          why: '사진기를 쓴 사람이 사진의 저작자인 것과 같다는 논리입니다. 어떤 지시를 주고 어떤 결과를 고르고 다듬었는지에 <b>창작적 선택</b>이 있다고 봅니다. 다만 지시문 한 줄로 나온 결과에도 같은 논리를 적용할 수 있는지, 그리고 학습에 쓰인 원작자의 몫은 어디로 갔는지가 문제로 남습니다.'
+        },
+        {
+          t: '학습에 쓰인 창작자들과 권리·수익을 나눈다',
+          why: '학습 데이터 없이는 그 결과가 존재할 수 없으므로, 기여에 대한 몫이 있어야 한다는 논리입니다. 음악 저작권료를 분배하는 제도가 이미 참고 사례가 됩니다. 실무적 어려움은 <b>기여도를 어떻게 계산하는가</b>입니다. 수십만 명의 작품이 조금씩 섞였다면 분배 기준을 정하기가 매우 어렵습니다.'
+        },
+        {
+          t: '누구의 것도 아닌 공유 자산으로 둔다',
+          why: '사람의 창작적 기여가 없다면 독점적 권리를 주지 말고 누구나 쓰게 하자는 논리입니다. 실제로 여러 나라가 <b>사람의 창작성</b>을 저작권의 조건으로 봅니다. 반론은 명확합니다. 권리가 없으면 아무도 그 결과에 <b>책임</b>도 지지 않게 되고, 원작자 보호에도 도움이 되지 않습니다.'
+        }
+      ],
+      dev: '학습 데이터의 <b>출처와 사용 허락 범위를 기록</b>해야 합니다. 원작자가 학습 제외를 요청할 수 있는 통로(옵트아웃)와, 특정 작가의 화풍을 그대로 재현하지 않도록 하는 안전장치를 설계에 넣을 수 있습니다.',
+      user: '<b>인공지능을 사용했다는 사실을 밝히는 것</b>이 출발점입니다. 밝히지 않으면 협력이 아니라 속임이 됩니다. 특정 작가의 이름을 넣어 화풍을 그대로 복제하는 사용은 도구의 문제가 아니라 사용자의 선택입니다.',
+      op: '공모전이라면 <b>규정을 미리 정해</b> 공지해야 합니다. 인공지능 사용을 금지할지, 허용하되 표기하게 할지, 별도 부문을 둘지를 정해 두지 않으면 심사가 끝난 뒤 논란이 반복됩니다. 규정이 없는 상태 자체가 운영자의 책임입니다.'
+    },
+    {
+      title: '의료 인공지능의 오진 책임',
+      sit: '병원이 도입한 인공지능 판독 시스템이 초기 종양을 놓쳤습니다. 의료진도 그 결과를 신뢰해 추가 검사를 하지 않았고, 환자의 치료가 6개월 늦어졌습니다. 이 피해의 책임은 누구에게 있을까요?',
+      choices: [
+        {
+          t: '최종 판단을 한 의료진의 책임이다',
+          why: '최종 결정 권한이 있는 사람이 책임을 진다는 원칙은 분명합니다. 그러나 하루에 수백 건을 판독하면서 시스템 결과를 매번 처음부터 다시 검토하기는 현실적으로 어렵습니다. <b>불가능한 확인을 전제로 한 책임 배분</b>이라는 반론이 나옵니다.'
+        },
+        {
+          t: '모델을 만든 개발사의 책임이다',
+          why: '성능을 근거로 제품을 판매했으므로 그 성능에 책임을 져야 한다는 논리입니다. 다만 개발사가 밝힌 한계 범위를 넘어 쓰였다면 이야기가 달라집니다. 그래서 <b>어떤 환자군에서 성능이 검증되었는지</b>를 명확히 밝혔는가가 핵심 쟁점이 됩니다.'
+        },
+        {
+          t: '도입과 운영을 결정한 병원의 책임이다',
+          why: '어떤 시스템을 어떤 절차로 쓸지 정한 주체가 병원이라는 점을 강조합니다. 확인 절차 없이 도입했다면 그 설계의 책임은 병원에 있습니다. 반면 개별 판독의 오류까지 병원 조직에 돌리면 <b>현장의 판단 책임이 흐려진다</b>는 지적도 있습니다.'
+        },
+        {
+          t: '미리 정해 둔 분담 규칙에 따라 함께 진다',
+          why: '가장 현실적인 방향으로 논의되는 선택입니다. 도입 계약서에 성능 검증 범위, 사람이 반드시 재확인할 조건, 기록 보관 의무, 사고 조사 절차를 미리 적어 둡니다. 다만 <b>사후에 서로 책임을 미루지 못하도록</b> 그 문서가 충분히 구체적이어야 합니다.'
+        }
+      ],
+      dev: '검증에 쓰인 환자군, 성능 지표, <b>모델이 잘 작동하지 않는 조건</b>을 문서로 제공해야 합니다. 확신도가 낮은 사례를 표시해 사람의 재확인을 유도하는 기능도 개발자가 넣을 수 있는 안전장치입니다.',
+      user: '의료진은 시스템의 결과를 <b>증거의 하나</b>로 다루어야 합니다. 판독 결과와 다르게 판단한 이유를 기록하는 문화가 있어야 시스템의 오류도 발견됩니다. 환자에게는 인공지능이 사용되었다는 사실을 알 권리가 있습니다.',
+      op: '병원은 <b>사람이 반드시 재확인하는 조건</b>을 문서로 정하고, 그 확인이 형식적 승인이 되지 않도록 시간을 확보해야 합니다. 도입 후 성능을 정기적으로 재측정하고, 기준을 못 넘으면 사용을 중단하는 절차도 필요합니다.'
+    }
+  ];
+
+  const body = AI.sim.panel('#sim2', {
+    title: '윤리 딜레마 선택과 세 관점',
+    tag: '4가지 상황',
+    desc: '네 가지 딜레마에서 선택을 하고 <b>근거를 직접 써</b> 보세요. 입력한 내용은 자동 저장됩니다. ' +
+      '<b>정답은 없습니다. 평가받는 것은 결론이 아니라 근거의 질입니다.</b> 선택하면 <b>그렇게 생각한 사람들의 근거</b>와 <b>개발자 · 사용자 · 운영관리자</b> 세 관점의 고려 사항이 나타납니다.'
+  });
+
+  let state = {};
+  try { state = JSON.parse(AI.progress.note(NOTE_ID) || '{}'); } catch (e) { state = {}; }
+  if (!state.pick) state.pick = {};
+  if (!state.why) state.why = {};
+
+  function persist() { AI.progress.note(NOTE_ID, JSON.stringify(state)); }
+
+  D.forEach(function (d, di) {
+    const card = AI.h('div', { class: 'dl-card' });
+    card.appendChild(AI.h('div', { class: 'dl-head' },
+      AI.h('span', { class: 'dn', text: di + 1 }),
+      AI.h('span', { text: d.title })));
+    card.appendChild(AI.h('p', { class: 'dl-sit', html: d.sit }));
+
+    const chBox = AI.h('div', { class: 'dl-ch' });
+    const out = AI.h('div', {});
+    const btns = d.choices.map(function (c, ci) {
+      const b = AI.h('button', {
+        class: 'q-choice', type: 'button', 'aria-pressed': 'false',
+        onclick: function () { choose(di, ci); }
+      }, AI.h('span', { class: 'mk', text: '①②③④⑤'[ci] }), AI.h('span', { text: c.t }));
+      chBox.appendChild(b);
+      return b;
+    });
+    card.appendChild(chBox);
+
+    const ta = AI.h('textarea', { rows: 3, placeholder: '왜 그렇게 선택했나요? 어떤 가치를 앞세웠고, 그 선택으로 누가 부담을 지는지도 함께 적어 보세요.' });
+    ta.value = state.why[di] || '';
+    ta.addEventListener('input', function () { state.why[di] = ta.value; persist(); });
+    card.appendChild(AI.h('div', { class: 'dl-why' },
+      AI.h('label', { text: '나의 근거' }), ta));
+
+    card.appendChild(out);
+    body.appendChild(card);
+
+    function choose(i, ci) {
+      state.pick[i] = ci;
+      persist();
+      btns.forEach(function (b, k) {
+        b.className = 'q-choice';
+        b.setAttribute('aria-pressed', k === ci ? 'true' : 'false');
+        if (k === ci) b.classList.add('ok');
+      });
+      out.innerHTML = '';
+      out.appendChild(AI.h('div', { class: 'box box-info', style: { marginTop: '12px', marginBottom: '0' } },
+        AI.h('div', { class: 'box-label', text: '💬 이렇게 생각한 사람들의 근거 (정답이 아니라 하나의 논거입니다)' }),
+        AI.h('p', { html: d.choices[ci].why })
+      ));
+      out.appendChild(AI.h('div', { class: 'persp' },
+        AI.h('div', {}, AI.h('h5', { text: '👩‍💻 개발자 관점' }), AI.h('span', { html: d.dev })),
+        AI.h('div', {}, AI.h('h5', { text: '🙋 사용자 관점' }), AI.h('span', { html: d.user })),
+        AI.h('div', {}, AI.h('h5', { text: '🏢 운영·관리자 관점' }), AI.h('span', { html: d.op }))
+      ));
+      out.appendChild(AI.h('p', {
+        style: { fontSize: '13.5px', color: 'var(--ink-3)', margin: '10px 0 0' },
+        html: '👉 세 관점을 읽은 뒤, 위에 쓴 <b>나의 근거</b>를 고쳐 써 보세요. 처음에 빠뜨린 관점이 무엇이었는지가 이 활동의 핵심입니다.'
+      }));
+    }
+
+    if (state.pick[di] !== undefined && state.pick[di] !== null) choose(di, state.pick[di]);
+  });
+
+  body.appendChild(AI.h('div', { class: 'box box-ok' },
+    AI.h('div', { class: 'box-label', text: '✅ 좋은 근거의 조건' }),
+    AI.h('ul', { style: { margin: '0' } },
+      AI.h('li', { html: '충돌하는 <b>가치를 이름 붙여</b> 말했는가 (안전과 자유, 효율과 배려처럼)' }),
+      AI.h('li', { html: '내 선택으로 <b>누가 부담을 지는지</b> 인정했는가' }),
+      AI.h('li', { html: '되돌릴 수 있는 선택인지 <b>구제 절차</b>를 함께 말했는가' }),
+      AI.h('li', { html: '반대 입장의 <b>가장 강한 근거</b>에 답했는가' })
+    )
+  ));
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 3: 윤리 원칙 짝짓기 ===================== -->
+<script>
+(function () {
+  const P = ['인간 존엄성', '공공선', '투명성', '책임성', '프라이버시 보호', '공정성', '안전성'];
+
+  const CASES = [
+    {
+      p: '인간 존엄성',
+      t: '요양원에 설치된 인공지능이 입소자의 모든 행동을 24시간 점수화해 순위를 매기고, 점수가 낮은 사람의 외출을 자동으로 제한한다.',
+      why: '사람을 <b>관리와 통제의 대상</b>으로만 다루고 있습니다. 인간 존엄성 원칙은 인공지능이 인간을 수단으로 취급하지 않고, 인간의 권리와 자유를 보장하는 방향으로 쓰여야 함을 요구합니다.'
+    },
+    {
+      p: '공공선',
+      t: '지역 재난 경보 인공지능이 유료 회원에게만 경보를 즉시 보내고, 나머지 주민에게는 30분 뒤에 알린다.',
+      why: '안전에 관한 정보를 <b>지불 능력에 따라 차등 제공</b>하고 있습니다. 공공선(공공성) 원칙은 인공지능의 순기능을 인류 공동의 이익을 위해 쓰고, 이익이 특정 집단에만 돌아가지 않게 할 것을 요구합니다.'
+    },
+    {
+      p: '투명성',
+      t: '대출 심사 인공지능이 거절 사유를 “종합적으로 판단했습니다”라고만 알려 주고, 어떤 항목이 영향을 주었는지 전혀 공개하지 않는다.',
+      why: '판단 근거를 <b>확인할 수 없게</b> 만들었습니다. 투명성 원칙은 알고리즘과 데이터, 판단 근거를 확인할 수 있게 하고 활용 내용과 유의 사항을 미리 알릴 것을 요구합니다. 설명 가능한 인공지능이 이 원칙을 지키는 방법이 됩니다.'
+    },
+    {
+      p: '책임성',
+      t: '배송 로봇이 보행자를 다치게 했는데, 제조사·운영사·이용자가 모두 “우리 잘못이 아니다”라고만 하고 사고 처리 절차가 어디에도 정해져 있지 않다.',
+      why: '<b>책임의 공백</b>이 발생했습니다. 책임성 원칙은 인공지능의 개발과 활용 과정에서 책임 주체를 명확히 하고, 주체별 책임을 미리 정해 둘 것을 요구합니다. 사고 뒤에 따지는 것으로는 늦습니다.'
+    },
+    {
+      p: '프라이버시 보호',
+      t: '학습 도우미 앱이 숙제 도움 기능을 쓰려면 통화 기록과 사진첩 전체에 접근하도록 허용해야 한다고 요구한다.',
+      why: '서비스에 <b>필요하지 않은 개인 정보</b>까지 수집하고 있습니다. 프라이버시 보호 원칙은 사생활을 보호하고 개인 정보의 오용을 최소화할 것을 요구합니다. 목적에 필요한 최소한만 모으는 것이 기본입니다.'
+    },
+    {
+      p: '공정성',
+      t: '면접 평가 인공지능이 특정 지역 출신 지원자에게 반복적으로 낮은 점수를 준다. 확인해 보니 과거 합격자 기록만으로 학습한 모델이었다.',
+      why: '과거의 차별이 데이터에 남아 <b>편향으로 학습</b>되었습니다. 공정성(다양성 존중) 원칙은 개인의 차이를 존중하고 누구도 배제하지 않으며, 데이터와 알고리즘의 편향·차별을 최소화할 것을 요구합니다.'
+    },
+    {
+      p: '안전성',
+      t: '자율주행 소프트웨어를 충분한 시험 없이 업데이트해 배포했고, 빗길에서 차선을 잘못 인식하는 오류가 반복되고 있다.',
+      why: '잠재적 위험을 <b>미리 확인하지 않고</b> 배포했습니다. 안전성 원칙은 인공지능의 잠재적 위험을 방지하고 이용자의 안전을 보장할 것을 요구합니다. 성능 개선보다 안전 확인이 먼저입니다.'
+    }
+  ];
+
+  const body = AI.sim.panel('#sim3', {
+    title: '윤리 원칙 짝짓기 — 어떤 원칙을 어겼는가',
+    tag: '7문항',
+    desc: '위의 <b>원칙</b>을 하나 눌러 고른 뒤, 아래 <b>사례 카드의 빈칸</b>을 누르면 채워집니다. 원칙은 한 번씩만 씁니다. 다 채운 뒤 채점하면 해설이 나타납니다.'
+  });
+
+  const order = AI.sim.shuffle(CASES.map(function (_, i) { return i; }), AI.sim.rng(777));
+
+  let armed = null;
+  const bank = AI.h('div', { class: 'cloze-bank' }, AI.h('span', { class: 'bank-label', text: '인공지능 윤리 원칙 (국가 인공지능 윤리기준 기반)' }));
+  const pills = AI.sim.shuffle(P, AI.sim.rng(31)).map(function (name) {
+    const p = AI.h('button', { class: 'word-pill', type: 'button', 'aria-pressed': 'false' }, name);
+    p.addEventListener('click', function () {
+      if (p.classList.contains('used')) return;
+      if (armed === p) { armed = null; p.setAttribute('aria-pressed', 'false'); unarm(); return; }
+      pills.forEach(function (q) { q.setAttribute('aria-pressed', 'false'); });
+      armed = p; p.setAttribute('aria-pressed', 'true');
+      slots.forEach(function (s) { if (!s.word) s.node.classList.add('armed'); });
+    });
+    bank.appendChild(p);
+    return p;
+  });
+  body.appendChild(bank);
+
+  function unarm() { slots.forEach(function (s) { s.node.classList.remove('armed'); }); }
+
+  const slots = [];
+  const list = AI.h('div', {});
+  order.forEach(function (ci) {
+    const c = CASES[ci];
+    const node = AI.h('span', { class: 'slot', role: 'button', tabindex: '0', text: '　　　' });
+    const fbEl = AI.h('div', { class: 'ep-fb', style: { display: 'none' } });
+    const s = { node: node, word: null, pill: null, ans: c.p, fb: fbEl, why: c.why };
+    function place() {
+      if (s.word) {
+        s.pill.classList.remove('used');
+        s.word = null; s.pill = null;
+        node.textContent = '　　　';
+        node.classList.remove('filled', 'ok', 'no');
+        return;
+      }
+      if (!armed) { AI.toast('먼저 위에서 원칙을 하나 골라 주세요'); return; }
+      s.word = armed.textContent;
+      s.pill = armed;
+      armed.classList.add('used');
+      armed.setAttribute('aria-pressed', 'false');
+      armed = null;
+      node.textContent = s.word;
+      node.classList.add('filled');
+      node.classList.remove('ok', 'no');
+      unarm();
+    }
+    node.addEventListener('click', place);
+    node.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); place(); }
+    });
+    slots.push(s);
+    list.appendChild(AI.h('div', { class: 'ep-card' },
+      AI.h('span', { class: 'ep-txt', text: c.t }), node));
+    list.appendChild(fbEl);
+  });
+  body.appendChild(list);
+
+  const fb = AI.h('div', { class: 'q-feedback' });
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('채점하기', function () {
+      let c = 0;
+      slots.forEach(function (s) {
+        const ok = s.word && AI.norm(s.word) === AI.norm(s.ans);
+        s.node.classList.toggle('ok', !!ok);
+        s.node.classList.toggle('no', !ok);
+        if (ok) c++;
+        s.fb.style.display = '';
+        s.fb.innerHTML = '<b>' + (ok ? '✓ ' : '✗ 정답: ') + s.ans + '</b> — ' + s.why;
+      });
+      fb.className = 'q-feedback show ' + (c === slots.length ? 'ok' : 'no');
+      fb.innerHTML = '<b>' + c + ' / ' + slots.length + ' 정답</b>' +
+        (c === slots.length
+          ? ' — 완벽합니다! 한 사례가 여러 원칙과 관련될 때도 많습니다. 해설을 읽고 <b>왜 그 원칙이 가장 핵심인지</b> 확인해 보세요.'
+          : ' — 빨간 칸의 해설을 읽어 보세요. 원칙의 이름보다 <b>무엇을 요구하는 원칙인지</b>를 기억하는 것이 중요합니다.');
+    }, 'primary'),
+    AI.ui.btn('다시 풀기', function () {
+      slots.forEach(function (s) {
+        if (s.pill) s.pill.classList.remove('used');
+        s.word = null; s.pill = null;
+        s.node.textContent = '　　　';
+        s.node.className = 'slot';
+        s.fb.style.display = 'none';
+      });
+      pills.forEach(function (p) { p.setAttribute('aria-pressed', 'false'); });
+      armed = null;
+      fb.className = 'q-feedback';
+    }, 'ghost'),
+    AI.ui.btn('정답 보기', function () {
+      pills.forEach(function (p) { p.classList.remove('used'); });
+      slots.forEach(function (s) {
+        s.word = s.ans;
+        s.pill = pills.filter(function (p) { return AI.norm(p.textContent) === AI.norm(s.ans); })[0] || null;
+        if (s.pill) s.pill.classList.add('used');
+        s.node.textContent = s.ans;
+        s.node.className = 'slot filled ok';
+        s.fb.style.display = '';
+        s.fb.innerHTML = '<b>' + s.ans + '</b> — ' + s.why;
+      });
+      armed = null;
+      fb.className = 'q-feedback show ok';
+      fb.innerHTML = '<b>정답과 해설을 모두 표시했습니다.</b>';
+    }, 'ghost')
+  ));
+  body.appendChild(fb);
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a3l4-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['공정성', '데이터 편향', '알고리즘 편향', '대리 변수', '투명성', '책임성', '윤리적 딜레마', '국가 인공지능 윤리기준'],
+  sents: [
+    { text: '개인의 독특함을 나타내는 차이를 존중하고 누구도 배제하지 않는 원칙을 {0}(이)라고 한다.', answers: [['공정성']] },
+    { text: '모델을 만드는 데 쓰인 데이터에 들어 있는 편향을 {0}, 알고리즘 자체의 설계나 구현에 내재된 편향을 {1}(이)라고 한다.', answers: [['데이터 편향'], ['알고리즘 편향']] },
+    { text: '집단 정보를 입력에서 빼도, 집단과 강하게 상관된 다른 속성이 {0} 구실을 하여 격차가 남는다.', answers: [['대리 변수']] },
+    { text: '판단 근거를 확인할 수 있게 하는 원칙은 {0}, 문제가 생겼을 때 누가 책임지는지 분명히 하는 원칙은 {1}이다.', answers: [['투명성'], ['책임성']] },
+    { text: '여러 가치가 서로 충돌하여 쉽게 결정할 수 없는 난처한 상황을 {0}(이)라고 한다.', answers: [['윤리적 딜레마']] },
+    { text: '우리나라는 2020년에 사람 중심 인공지능 구현을 위한 {0}을(를) 마련하였다.', answers: [['국가 인공지능 윤리기준']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '4차시 확인 문제',
+  items: [
+    {
+      type: 'ox',
+      q: '지원서에서 지역·성별·나이 같은 민감한 정보를 모두 지우면 인공지능의 편향 문제는 해결된다.',
+      answer: false,
+      why: '해결되지 않습니다. 지운 정보와 강하게 상관된 다른 속성(우편번호, 졸업 학교, 추천 지수 등)이 남아 있으면 모델은 그것을 통해 지운 정보를 <b>되살려 냅니다</b>. 이런 속성을 <b>대리 변수</b>라고 합니다. 시뮬레이터에서 지역 정보를 제외해도 격차가 남는 것을 직접 확인했습니다. 공정성은 <b>입력에서 무엇을 뺐는지가 아니라 결과를 집단별로 측정해</b> 판단해야 합니다.'
+    },
+    {
+      type: 'short',
+      q: '민감한 속성을 입력에서 제거했음에도, 그 속성과 상관관계가 높아 사실상 그 속성을 대신하게 되는 다른 속성을 무엇이라고 하는가?',
+      answer: ['대리 변수', '프록시', '프록시 변수', '대리변수', 'proxy'],
+      placeholder: '예: ○○ ○○',
+      why: '<b>대리 변수(프록시)</b>입니다. 우편번호가 거주 지역을, 졸업 학교가 출신지와 소득 수준을 알려 주는 것처럼, 데이터 안의 속성들은 서로 얽혀 있습니다. 그래서 “지웠으니 괜찮다”는 주장은 검증 없이는 성립하지 않습니다.'
+    },
+    {
+      type: 'mc',
+      q: '추천 알고리즘에게 “사용자가 머문 시간을 최대로 늘려라”라고 목표를 주었더니 자극적인 내용이 더 많이 추천되었다. 이는 편향의 세 경로 중 무엇에 가장 가까운가?',
+      choices: [
+        '데이터 편향 — 학습 데이터의 대표성이 부족했다',
+        '알고리즘 편향 — 무엇을 최적화하도록 설계했는가의 문제다',
+        '사람의 편향 — 개발자가 자극적인 내용을 좋아했다',
+        '편향이 아니다 — 알고리즘은 시킨 일을 했을 뿐이다'
+      ],
+      answer: 1,
+      why: '<b>알고리즘 편향</b>입니다. 핵심은 “무엇을 잘하라고 시켰는가”입니다. 알고리즘은 실패한 것이 아니라 <b>주어진 목표를 정확히 달성</b>했습니다. ④가 헷갈릴 수 있지만, 목표를 그렇게 정한 것 자체가 설계이므로 책임을 면제하지 않습니다. 전체 정확도만 목표로 삼아 소수 집단을 포기하는 경우도 같은 유형입니다.'
+    },
+    {
+      type: 'multi',
+      q: '<b>데이터 편향</b>이 생기는 원인으로 알맞은 것을 모두 고르시오.',
+      choices: [
+        '특정 집단의 데이터가 지나치게 적어 대표성이 부족하다',
+        '정답 표시(레이블)가 과거의 불공정한 결정 기록이다',
+        '모델의 층수가 너무 많아 과대적합이 일어났다',
+        '수집 경로가 한쪽에 치우쳐 특정 집단이 잘 잡히지 않았다'
+      ],
+      answer: [0, 1, 3],
+      why: '③은 <b>모델의 복잡도 문제</b>이지 데이터 편향이 아닙니다. 데이터 편향은 ① 대표성 부족, ② 레이블 자체의 편향, ④ 수집 경로의 치우침에서 옵니다. 특히 ②가 가장 다루기 어렵습니다. 데이터의 양이 충분하고 잡음도 없는데 <b>정답이라고 표시된 것 자체가 과거의 차별</b>이기 때문입니다.'
+    },
+    {
+      type: 'mc',
+      q: '두 집단에서 실제 자격자의 비율(기저율)이 서로 다를 때, 공정성 기준에 대해 옳은 설명은?',
+      choices: [
+        '충분히 성능이 좋은 모델을 쓰면 모든 공정성 기준을 동시에 만족시킬 수 있다',
+        '합격률·재현율·정밀도를 집단별로 모두 같게 맞추는 것은 완벽한 예측이 아닌 한 불가능하다',
+        '공정성 기준은 하나뿐이므로 이런 충돌은 생기지 않는다',
+        '기저율이 다르면 애초에 공정성을 논할 수 없다'
+      ],
+      answer: 1,
+      why: '기저율이 다르면 여러 공정성 기준을 동시에 만족시킬 수 없다는 것은 <b>수학적으로 증명된 사실</b>입니다. 그래서 물어야 할 질문은 “이 모델은 공정한가?”가 아니라 <b>“어떤 공정성을 택했고, 왜 그것을 택했는가?”</b>입니다. 이것은 계산이 아니라 사회가 논의해 정할 가치 판단입니다. 덧붙여 기저율의 차이 자체가 과거 기회 불평등의 결과일 수 있다는 점도 함께 따져야 합니다.'
+    },
+    {
+      type: 'match',
+      q: '다음 사례를 알맞은 편향의 경로와 짝지으시오.',
+      left: [
+        '사투리 음성 데이터가 적어 사투리를 잘 알아듣지 못한다',
+        '과거 합격자 기록으로 학습해 과거의 차별을 재현한다',
+        '전체 정확도만 목표로 삼아 소수 집단을 사실상 포기한다',
+        '“근무 연수가 길면 우수한 직원”이라는 가정을 넣었다'
+      ],
+      right: ['데이터 편향 — 대표성 부족', '데이터 편향 — 레이블의 편향', '알고리즘 편향', '사람의 편향'],
+      answer: [0, 1, 2, 3],
+      why: '경로마다 대응이 다릅니다. 대표성 부족은 <b>데이터를 더 모아</b> 해결하고, 레이블 편향은 <b>무엇을 정답으로 볼지 다시 정의</b>해야 하며, 알고리즘 편향은 <b>목표 함수를 바꾸고</b>, 사람의 편향은 <b>가정을 문서로 드러내 검토</b>해야 합니다. 원인을 구분하지 않으면 엉뚱한 처방을 하게 됩니다.'
+    },
+    {
+      type: 'order',
+      q: '인공지능 모델의 공정성을 점검하고 개선하는 절차를 <b>알맞은 순서</b>로 배열하시오.',
+      items: [
+        '어떤 집단을 기준으로 공정성을 볼지, 어떤 기준(합격률·재현율 등)을 쓸지 정한다',
+        '집단별로 지표를 나누어 측정하고 격차를 확인한다',
+        '격차의 원인이 데이터·알고리즘·사람 중 어디에 있는지 찾는다',
+        '원인에 맞는 완화 조치를 적용한 뒤 다시 측정해 비교한다',
+        '측정 결과와 택한 공정성 기준을 함께 공개하고 정기적으로 재점검한다'
+      ],
+      answer: [0, 1, 2, 3, 4],
+      why: '가장 먼저 할 일은 <b>기준을 정하는 것</b>입니다. 기준 없이 측정하면 유리한 숫자만 골라 쓰게 됩니다. 마지막 단계가 실무에서 가장 자주 빠집니다. 한 번 고치고 끝내면 편향은 <b>되먹임 고리를 통해 다시 자랍니다</b>. 그래서 정기적 재측정이 필수입니다.'
+    },
+    {
+      type: 'ox',
+      q: '윤리적 딜레마에는 정답이 없으므로, 어느 쪽을 선택하든 똑같이 좋은 답변이다.',
+      answer: false,
+      why: '“정답이 없다”와 “아무 답이나 괜찮다”는 다릅니다. 딜레마에서 평가되는 것은 <b>결론이 아니라 근거의 질</b>입니다. 충돌하는 가치를 정확히 짚었는지, 내 선택으로 <b>누가 부담을 지는지</b> 인정했는지, 되돌릴 수 있는지와 구제 절차를 말했는지, 반대 입장의 가장 강한 근거에 답했는지가 답변의 수준을 가릅니다.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a3l4-note',
+  title: '편향 실험과 윤리 판단 기록',
+  prompt: '앞의 <b>세 시뮬레이터</b>에서 관찰한 값을 그대로 옮겨 적은 뒤, 아래 서술 항목을 채워 보세요. 편향 실험실에서는 슬라이더를 <b>하나씩만</b> 바꿔야 원인을 알 수 있습니다.',
+  fields: [
+    { key: 'g0', label: '처음 설정(나루 15% · 편향 1.2 · 지역 정보 포함)의 합격률 격차', type: 'text', placeholder: '예: +38.5 %p' },
+    { key: 'g1', label: '지역 정보를 “제외”했을 때의 합격률 격차', type: 'text', placeholder: '예: +26.0 %p' },
+    { key: 'g2', label: '편향 정도를 0으로 내렸을 때의 합격률 격차', type: 'text', placeholder: '예: +6.5 %p' },
+    { key: 'g3', label: '추천 지수의 가중치는 얼마였나요? (지역 정보 제외 상태)', type: 'text', placeholder: '예: 0.91' },
+    {
+      key: 'cause', label: '실험 결과 — 격차를 만든 진짜 원인은 무엇이었나요? 슬라이더별 관찰을 근거로 쓰세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 지역 정보를 제외해도 격차가 남았다. 추천 지수의 상관을 0으로 내리자 격차가 크게 줄었으므로, 남은 격차의 원인은 …'
+    },
+    {
+      key: 'dilemma', label: '네 딜레마 중 가장 결정하기 어려웠던 것과, 내가 앞세운 가치',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 얼굴 인식 감시가 가장 어려웠다. 나는 안전보다 …을 앞세웠는데, 그 대신 …라는 부담을 인정한다.'
+    },
+    {
+      key: 'persp', label: '세 관점 중 내가 처음에 가장 빠뜨렸던 관점은?',
+      type: 'select', options: ['개발자 관점', '사용자 관점', '운영·관리자 관점']
+    },
+    {
+      key: 'rule', label: '내가 인공지능을 만든다면 반드시 지킬 규칙 세 가지 (측정 가능한 형태로 쓰기)',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 1) 출시 전 집단별 재현율을 측정해 격차가 5%p를 넘으면 출시하지 않는다.  2) 판단 근거로 상위 3개 항목을 항상 함께 제시한다.  3) …'
+    }
+  ]
+});
+</script>
+</body>
+</html>

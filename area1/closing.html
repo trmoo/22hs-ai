@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>단원 마무리 · 인공지능의 이해 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+  /* 개념 지도 (인라인 SVG) */
+  .cmap-wrap { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); padding: 14px 16px 10px; margin: 0 0 16px; overflow-x: auto; }
+  .cmap { width: 100%; min-width: 640px; height: auto; display: block; color: var(--line-strong); }
+  .cmap .ed { fill: none; stroke: currentColor; stroke-width: 1.8; marker-end: url(#a1arw); }
+  .cmap .ed2 { fill: none; stroke: currentColor; stroke-width: 1.8; }
+  .cmap .nb { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1.6; }
+  .cmap .nb.acc { fill: var(--accent-soft); stroke: var(--accent-line); }
+  .cmap .nb.fin { fill: var(--ok-soft); stroke: var(--ok-line); }
+  .cmap .nt { fill: var(--ink); font-weight: 750; font-size: 14px; text-anchor: middle; }
+  .cmap .nl { fill: var(--ink); font-weight: 700; font-size: 12.5px; text-anchor: middle; }
+  .cmap .ns { fill: var(--ink-3); font-weight: 600; font-size: 11.5px; text-anchor: middle; }
+  .cmap .bd { fill: var(--accent-soft); stroke: var(--accent-line); stroke-width: 1; }
+  .cmap .bt { fill: var(--accent-ink); font-weight: 800; font-size: 9.5px; text-anchor: middle; }
+  .cmap .el { fill: var(--accent-ink); font-weight: 700; font-size: 11px; text-anchor: middle; }
+  /* 되돌아가기 카드에서 제목·설명을 줄로 나누기 */
+  .lesson-card .lc-title, .lesson-card .lc-sub { display: block; }
+  .essay-q { padding: 14px 16px; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--radius); background: var(--surface); margin: 0 0 12px; }
+  .essay-q .eq-no { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; color: var(--accent-ink); margin-bottom: 6px; }
+  .essay-q p:last-child { margin-bottom: 0; }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 돌아보며 열기</div>
+      <p>1단원에서 우리는 다섯 차시 동안 서로 달라 보이는 것들을 배웠습니다. 튜링 테스트, 물병 퍼즐, 미로, 별표가 붙은 이상한 이름의 알고리즘, 그리고 규칙과 사실.</p>
+      <p>그런데 이 다섯 가지는 사실 <b>하나의 질문</b>에 대한 답입니다. 그 질문은 이것입니다.</p>
+      <p style="font-size:18px;font-weight:750;color:var(--accent-ink);text-align:center;margin:14px 0">“기계는 <u>어떻게</u> 답을 찾아내는가?”</p>
+      <p>지금 책을 덮고, 이 질문에 여러분의 말로 3문장 안에 답해 보세요. 잘 안 된다면 이 마무리 페이지가 꼭 필요한 사람입니다.</p>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 답의 뼈대는 두 갈래입니다</summary>
+        <div class="more-body">
+          기계가 답을 찾는 길은 크게 두 갈래입니다. 하나는 가능한 상황을 늘어놓고 <b>길을 찾아가는 것(탐색)</b>이고, 다른 하나는 이미 아는 것에서 <b>새로운 사실을 끌어내는 것(추론)</b>입니다. 2·3·4차시가 앞의 길, 5차시가 뒤의 길이었습니다.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 개념 지도 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>한 장으로 보는 1단원 개념 지도</h2><span class="sec-tag">1~5차시</span></div>
+
+    <p>아래 지도에서 <b>상자</b>는 개념, <b>화살표</b>는 “이것이 저것으로 이어진다”는 관계입니다. 상자 왼쪽 위의 작은 표시는 그 개념을 배운 차시입니다.</p>
+
+    <div class="cmap-wrap">
+      <svg class="cmap" viewBox="0 0 920 590" role="img" aria-label="1단원 인공지능의 이해 개념 지도. 지능적 판단에서 탐색과 추론의 두 갈래로 나뉘고, 탐색은 맹목적 탐색과 정보 이용 탐색으로, 추론은 지식 베이스와 전방 추론으로 이어진다.">
+        <defs>
+          <marker id="a1arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="currentColor"></path>
+          </marker>
+        </defs>
+
+        <!-- 간선 -->
+        <path class="ed" d="M460,88 V112 H245 V140"></path>
+        <path class="ed" d="M460,88 V112 H685 V140"></path>
+        <text class="el" x="348" y="106">문제를 상태 공간으로</text>
+        <text class="el" x="580" y="106">지식을 기호로</text>
+
+        <path class="ed" d="M245,214 V240 H130 V266"></path>
+        <path class="ed" d="M245,214 V240 H370 V266"></path>
+        <text class="el" x="172" y="234">정보를 쓰지 않고</text>
+        <text class="el" x="318" y="234">정보를 이용해</text>
+
+        <path class="ed" d="M130,340 V364 H72 V386"></path>
+        <path class="ed" d="M130,340 V364 H188 V386"></path>
+        <path class="ed" d="M370,340 V364 H312 V386"></path>
+        <path class="ed" d="M370,340 V364 H428 V386"></path>
+
+        <path class="ed" d="M685,214 V266"></path>
+        <text class="el" x="757" y="243">규칙과 사실로 표현</text>
+        <path class="ed" d="M685,340 V386"></path>
+        <text class="el" x="750" y="368">규칙을 반복 적용</text>
+
+        <path class="ed2" d="M188,440 V470 H685 V440"></path>
+        <path class="ed2" d="M312,440 V470"></path>
+        <path class="ed2" d="M428,440 V470"></path>
+        <path class="ed" d="M460,470 V500"></path>
+
+        <!-- 노드 -->
+        <g>
+          <rect class="nb acc" x="330" y="14" width="260" height="74" rx="12"></rect>
+          <rect class="bd" x="340" y="23" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="361" y="35.5">1차시</text>
+          <text class="nt" x="460" y="58">인공지능의 지능적 판단</text>
+          <text class="ns" x="460" y="76">튜링 테스트 · 문제 해결 사례</text>
+        </g>
+        <g>
+          <rect class="nb" x="120" y="140" width="250" height="74" rx="12"></rect>
+          <rect class="bd" x="130" y="149" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="151" y="161.5">2차시</text>
+          <text class="nt" x="245" y="184">상태 공간과 탐색 트리</text>
+          <text class="ns" x="245" y="202">초기 상태 · 연산자 · 목표 상태</text>
+        </g>
+        <g>
+          <rect class="nb" x="560" y="140" width="250" height="74" rx="12"></rect>
+          <rect class="bd" x="570" y="149" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="591" y="161.5">5차시</text>
+          <text class="nt" x="685" y="184">지식의 표현</text>
+          <text class="ns" x="685" y="202">명제 · 규칙 · 사실</text>
+        </g>
+        <g>
+          <rect class="nb" x="20" y="266" width="220" height="74" rx="12"></rect>
+          <rect class="bd" x="30" y="275" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="51" y="287.5">3차시</text>
+          <text class="nt" x="130" y="310">맹목적 탐색</text>
+          <text class="ns" x="130" y="328">목표 방향 정보를 안 쓴다</text>
+        </g>
+        <g>
+          <rect class="nb" x="260" y="266" width="220" height="74" rx="12"></rect>
+          <rect class="bd" x="270" y="275" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="291" y="287.5">4차시</text>
+          <text class="nt" x="370" y="310">정보 이용 탐색</text>
+          <text class="ns" x="370" y="328">휴리스틱으로 방향을 잡는다</text>
+        </g>
+        <g>
+          <rect class="nb" x="560" y="266" width="250" height="74" rx="12"></rect>
+          <rect class="bd" x="570" y="275" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="591" y="287.5">5차시</text>
+          <text class="nt" x="685" y="310">지식 베이스</text>
+          <text class="ns" x="685" y="328">규칙과 사실을 모아 둔 곳</text>
+        </g>
+        <g>
+          <rect class="nb" x="20" y="386" width="105" height="54" rx="10"></rect>
+          <text class="nl" x="72.5" y="411">너비 우선</text>
+          <text class="ns" x="72.5" y="428">큐 · 선입선출</text>
+        </g>
+        <g>
+          <rect class="nb" x="135" y="386" width="105" height="54" rx="10"></rect>
+          <text class="nl" x="187.5" y="411">깊이 우선</text>
+          <text class="ns" x="187.5" y="428">스택 · 후입선출</text>
+        </g>
+        <g>
+          <rect class="nb" x="260" y="386" width="105" height="54" rx="10"></rect>
+          <text class="nl" x="312.5" y="411">최상 우선</text>
+          <text class="ns" x="312.5" y="428">h 만 본다</text>
+        </g>
+        <g>
+          <rect class="nb" x="375" y="386" width="105" height="54" rx="10"></rect>
+          <text class="nl" x="427.5" y="411">A* 탐색</text>
+          <text class="ns" x="427.5" y="428">f = g + h</text>
+        </g>
+        <g>
+          <rect class="nb" x="560" y="386" width="250" height="54" rx="10"></rect>
+          <text class="nl" x="685" y="411">전방 추론 · 후방 추론</text>
+          <text class="ns" x="685" y="428">새로운 지식을 생성한다</text>
+        </g>
+        <g>
+          <rect class="nb fin" x="230" y="500" width="460" height="64" rx="12"></rect>
+          <text class="nt" x="460" y="528">실생활과 여러 학문 분야의 문제 해결</text>
+          <text class="ns" x="460" y="547">탐색과 추론이 만나 지능적 판단이 된다</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">🧭 지도를 읽는 세 가지 방법</div>
+      <ul style="margin:0">
+        <li><b>위에서 아래로</b> — 막연한 문제가 상태 공간이 되고, 상태 공간이 알고리즘이 되고, 알고리즘이 답이 됩니다.</li>
+        <li><b>왼쪽과 오른쪽을 비교</b> — 왼쪽(탐색)은 <b>가능한 경우를 훑어</b> 답을 찾고, 오른쪽(추론)은 <b>이미 아는 것을 조합해</b> 답을 만듭니다. 같은 문제도 어느 길로 갈지 선택할 수 있습니다.</li>
+        <li><b>맨 아래 줄에서 위로</b> — 맹목적 탐색 → 최상 우선 → A* 로 오면서 “쓰는 정보의 양”이 늘어나고, 그만큼 확인해야 하는 상태 수가 줄어듭니다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 2. 차시별 핵심 정리 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>차시별 핵심 정리</h2></div>
+
+    <p>표의 마지막 열은 시험과 수행평가에서 <b>가장 많이 틀리는 지점</b>입니다. 이 열만 따로 읽어도 좋습니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>1단원 인공지능의 이해 — 차시별 정리</caption>
+        <thead><tr><th>차시</th><th>꼭 알아야 할 개념</th><th>한 줄 요약</th><th>자주 나오는 오해</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>1차시</b><br>기계도 생각할 수 있을까</td>
+            <td>지능적 판단, 튜링 테스트, 인공지능 활용 사례</td>
+            <td>인공지능은 사람의 지능적인 행동을 모방하여 상황에 맞는 판단을 내리는 기술이다.</td>
+            <td class="bad">“튜링 테스트를 통과하면 기계가 사람처럼 <b>생각한다</b>” → 튜링 테스트는 <b>겉으로 드러난 대화만</b> 판정합니다. 속으로 이해했는지는 묻지 않습니다.</td>
+          </tr>
+          <tr>
+            <td><b>2차시</b><br>모든 문제는 탐색이 된다</td>
+            <td>상태, 상태 공간, 초기 상태, 목표 상태, 연산자, 탐색 트리</td>
+            <td>문제를 상태 공간으로 바꾸면 “답 찾기”가 “초기 상태에서 목표 상태까지 길 찾기”가 된다.</td>
+            <td class="bad">“상태 공간은 그림으로 다 그릴 수 있다” → 상태 수는 보통 <b>기하급수적으로</b> 늘어납니다. 그림은 일부만 그린 것이고, 그래서 탐색 순서가 중요해집니다.</td>
+          </tr>
+          <tr>
+            <td><b>3차시</b><br>무작정 뒤지기</td>
+            <td>맹목적 탐색, 프런티어, 너비 우선 탐색(큐), 깊이 우선 탐색(스택)</td>
+            <td>두 알고리즘의 뼈대는 같고, 프런티어에서 <b>무엇을 먼저 꺼내는지</b>만 다르다.</td>
+            <td class="bad">“깊이 우선 탐색이 빠르니까 더 좋다” → 확인한 칸이 적은 것과 <b>짧은 길을 찾은 것</b>은 다릅니다. 최단 경로를 보장하는 쪽은 너비 우선 탐색입니다.</td>
+          </tr>
+          <tr>
+            <td><b>4차시</b><br>눈치껏 찾아가기</td>
+            <td>정보 이용 탐색, 휴리스틱, 최상 우선 탐색, A* 탐색, f = g + h</td>
+            <td>남은 거리 추정값 h 를 쓰면 목표 쪽으로 먼저 뻗어 나가고, 지금까지 온 비용 g 까지 더하면 최단 경로까지 지킬 수 있다.</td>
+            <td class="bad">“A* 는 항상 최단 경로를 찾는다” → 휴리스틱이 실제 남은 비용을 <b>넘겨 어림잡지 않을 때만</b> 최적을 보장합니다. 또 최상 우선 탐색은 h 만 보므로 최적이 아닙니다.</td>
+          </tr>
+          <tr>
+            <td><b>5차시</b><br>아는 것에서 새것을</td>
+            <td>지식 표현, 명제, 규칙(IF-THEN), 사실, 지식 베이스, 전방 추론</td>
+            <td>사실에 적용할 수 있는 규칙을 반복해서 적용하면, 아무도 직접 넣어 주지 않은 <b>새로운 지식</b>이 생긴다.</td>
+            <td class="bad">“추론은 데이터를 학습하는 것이다” → 이 차시의 추론은 <b>사람이 넣은 규칙</b>을 적용하는 것입니다. 데이터로 규칙을 스스로 찾아내는 것은 2단원의 기계학습입니다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">🎯</span>
+        <h4>탐색 3종을 한 줄로</h4>
+        <p><b>너비 우선</b>은 “가까운 데부터 전부”, <b>깊이 우선</b>은 “한 방향으로 끝까지”, <b>A*</b>는 “여기까지 온 값 + 남은 어림값이 가장 작은 것부터”입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">⚖️</span>
+        <h4>g 와 h 의 역할</h4>
+        <p><b>g</b>는 <b>과거</b>(출발점부터 지금까지 실제로 쓴 비용), <b>h</b>는 <b>미래</b>(목표까지 남았을 것으로 어림잡은 비용)입니다. 과거만 보면 너비 우선, 미래만 보면 최상 우선, 둘을 더하면 A* 입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🧱</span>
+        <h4>탐색과 추론의 공통점</h4>
+        <p>둘 다 <b>기호로 표현된 지식</b>을 다룹니다. 상태와 연산자, 사실과 규칙 모두 사람이 정해서 넣어 준 형식입니다. 그래서 1단원을 <b>기호주의 인공지능</b>이라고 부릅니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. 핵심 용어 빈칸 점검 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>핵심 용어 빈칸 점검</h2><span class="sec-tag">본문 빈칸 13개</span></div>
+
+    <p>아래 네 문단은 1단원 전체를 압축한 요약입니다. 위쪽의 <b>빈칸 채우기 모드</b>를 켜고 직접 채워 보세요. 힌트 버튼(?)을 눌러도 좋지만, 먼저 문장 흐름으로 유추해 보는 편이 훨씬 오래 남습니다.</p>
+
+    <h3 class="sub-head">① 지능적 판단이란 무엇인가</h3>
+    <p>인공지능은 사람의 지능적인 행동을 모방해 상황에 맞는 판단을 내립니다. 기계가 지능을 가졌는지 겉으로 판정해 보려는 고전적인 실험이 앨런 튜링이 제안한 <b class="blank" data-a="튜링 테스트|튜링테스트|모방 게임" data-hint="심판이 대화만으로 사람과 기계를 구별하지 못하면 통과">튜링 테스트</b>입니다. 이 실험은 기계의 속마음을 들여다보지 않고, 사람과 구별되지 않는 <b>행동</b>을 보이는지만 따집니다.</p>
+
+    <h3 class="sub-head">② 문제를 탐색으로 바꾸기</h3>
+    <p>인공지능이 문제를 풀려면 먼저 문제를 다룰 수 있는 형태로 바꿔야 합니다. 문제에서 나타날 수 있는 모든 상황을 상태로 보고, 그 상태들과 상태 사이의 연결을 모두 모은 것을 <b class="blank" data-hint="상태들의 전체 집합과 그 연결">상태 공간</b>이라고 합니다. 이렇게 바꾸면 문제 풀이는 <b class="blank" data-a="초기 상태|시작 상태" data-hint="문제가 시작되는 상태">초기 상태</b>에서 출발해 <b class="blank" data-a="목표 상태|목표상태" data-hint="문제가 해결된 상태">목표 상태</b>에 이르는 길을 찾는 일이 됩니다. 이때 한 상태를 다른 상태로 바꾸는 규칙을 <b class="blank" data-a="연산자|오퍼레이터|상태 전이 규칙" data-hint="물병 문제에서 채우기·비우기·옮기기 같은 것">연산자</b>라고 부릅니다.</p>
+
+    <h3 class="sub-head">③ 어떤 순서로 뒤질 것인가</h3>
+    <p>목표가 어느 쪽에 있는지에 대한 정보를 전혀 쓰지 않고 상태 공간을 기계적으로 훑는 방식을 <b class="blank" data-a="맹목적 탐색|무정보 탐색" data-hint="무정보 탐색이라고도 한다">맹목적 탐색</b>이라고 합니다. 아직 확인하지 않은 후보 상태들의 목록인 프런티어를 <b class="blank" data-a="큐|queue" data-hint="선입선출 자료구조">큐</b>로 쓰면 시작점에서 가까운 순서대로 퍼져 나가는 너비 우선 탐색이 되고, <b class="blank" data-a="스택|stack" data-hint="후입선출 자료구조">스택</b>으로 쓰면 한 방향으로 끝까지 파고드는 깊이 우선 탐색이 됩니다. 가중치가 없는 그래프에서 <b class="blank" data-a="너비 우선 탐색|BFS|너비우선탐색" data-hint="영어 약자 BFS">너비 우선 탐색</b>은 최단 경로를 보장하지만, 같은 깊이의 상태를 모두 담아야 해서 기억 공간을 많이 씁니다.</p>
+
+    <p>목표까지 남은 비용을 어림잡은 값을 <b class="blank" data-a="휴리스틱|heuristic|추정 함수" data-hint="어림짐작 · 경험적 지식이라는 뜻">휴리스틱</b>이라고 합니다. 이 추정값 h 만 보고 가장 그럴듯한 상태를 먼저 꺼내는 알고리즘이 <b class="blank" data-a="최상 우선 탐색|최상우선 탐색|최선 우선 탐색" data-hint="가장 좋아 보이는 것부터 꺼낸다">최상 우선 탐색</b>이고, 여기에 지금까지 실제로 쓴 비용 g 를 더해 f = g + h 로 판단하는 알고리즘이 <b class="blank" data-a="A*|A스타|에이스타|A* 탐색" data-hint="별표가 붙은 이름의 대표적 정보 이용 탐색">A*</b> 탐색입니다.</p>
+
+    <h3 class="sub-head">④ 아는 것에서 새로운 것을 끌어내기</h3>
+    <p>탐색이 아닌 다른 길도 있습니다. 사람이 아는 것을 IF-THEN 형태의 규칙과 참으로 인정된 사실로 적어 두면, 그 둘을 모아 둔 <b class="blank" data-a="지식 베이스|지식베이스|knowledge base" data-hint="규칙과 사실의 저장소">지식 베이스</b>가 만들어집니다. 여기서 사실에 적용할 수 있는 규칙을 찾아 결론을 새 사실로 추가하고 이 과정을 반복하는 방식을 <b class="blank" data-a="전방 추론|순방향 추론|전향 추론" data-hint="사실에서 출발해 앞으로 나아간다">전방 추론</b>이라고 합니다. 반대로 알고 싶은 결론에서 거꾸로 필요한 조건을 찾아 내려가는 방식은 후방 추론입니다.</p>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 여기서 헷갈리면 반드시 다시 보기</div>
+      <p><b>연산자</b>와 <b>규칙</b>은 다른 개념입니다. 연산자는 <b>상태를 다른 상태로 바꾸는 행동</b>(2차시)이고, 규칙은 <b>사실에서 새 사실을 만드는 논리 문장</b>(5차시)입니다. 둘 다 “IF … THEN …” 처럼 보일 수 있지만, 하나는 이동, 하나는 결론입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4. 복습 인터랙션 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>탐색 알고리즘 3종 최종 비교</h2><span class="sec-tag">복습 인터랙션</span></div>
+    <p>3차시와 4차시에서 따로 돌려 본 알고리즘을 <b>같은 미로에서 동시에</b> 실행합니다. 세 판을 나란히 보면 “정보를 쓴다”는 말의 뜻이 눈에 보입니다.</p>
+    <div id="sim1"></div>
+  </section>
+
+  <!-- ============ 5. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>단원 용어 낱말 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 6. 단원 평가 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>단원 평가</h2><span class="sec-tag">11문항 · 기본 4 · 적용 4 · 통합 3</span></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 7. 서·논술형 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>서·논술형 문항</h2></div>
+
+    <p>정답이 하나가 아닌 문항입니다. 각 문항 아래의 <b>평가 기준</b>을 먼저 펼쳐 보고, 그 요소들이 내 글에 들어 있는지 확인하며 쓰세요.</p>
+
+    <div class="essay-q">
+      <div class="eq-no">문항 1 · 서술형</div>
+      <p>같은 미로에서 <b>너비 우선 탐색, 최상 우선 탐색, A* 탐색</b>을 실행하면 확인한 칸 수와 찾아낸 경로 길이가 서로 달라집니다. 세 알고리즘이 <b>프런티어에서 다음 상태를 고르는 기준</b>을 각각 밝히고, 그 기준 때문에 결과가 어떻게 달라지는지 설명하시오.</p>
+      <details class="more-box" style="margin:10px 0 0">
+        <summary><span class="plus-tag">평가 기준</span> 좋은 답에 반드시 들어가야 할 요소</summary>
+        <div class="more-body">
+          <ul style="margin:0">
+            <li>세 알고리즘의 선택 기준을 각각 정확히 언급했는가 — 너비 우선은 <b>가장 먼저 넣은 것(g 순서에 해당)</b>, 최상 우선은 <b>h 가 가장 작은 것</b>, A* 는 <b>f = g + h 가 가장 작은 것</b>.</li>
+            <li>g 와 h 가 각각 <b>지금까지의 비용</b>과 <b>남은 비용의 추정</b>임을 구분해 썼는가.</li>
+            <li>결과의 차이를 <b>확인한 칸 수(효율)</b>와 <b>경로 길이(최적성)</b> 두 축으로 나누어 설명했는가.</li>
+            <li>최상 우선 탐색이 빠를 수 있지만 <b>최단 경로를 보장하지 않는</b> 이유를 g 를 무시한다는 점과 연결했는가.</li>
+            <li>시뮬레이터에서 관찰한 <b>구체적인 숫자</b>를 근거로 제시했는가.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="essay-q">
+      <div class="eq-no">문항 2 · 논술형</div>
+      <p>주변에서 문제 상황 두 가지를 고르시오. 하나는 <b>탐색으로 푸는 것이 적절한 문제</b>, 다른 하나는 <b>규칙 기반 추론으로 푸는 것이 적절한 문제</b>여야 합니다. 각각을 고른 이유를 이 단원에서 배운 개념으로 설명하시오.</p>
+      <details class="more-box" style="margin:10px 0 0">
+        <summary><span class="plus-tag">평가 기준</span> 좋은 답에 반드시 들어가야 할 요소</summary>
+        <div class="more-body">
+          <ul style="margin:0">
+            <li>두 문제 상황이 <b>구체적</b>인가(“교통”이 아니라 “학교 앞 등교 시간 최단 경로” 수준).</li>
+            <li>탐색 쪽 문제에서 <b>상태·연산자·목표 상태</b>가 무엇인지 밝혔는가.</li>
+            <li>추론 쪽 문제에서 <b>사실과 규칙</b>의 예를 한 개 이상 IF-THEN 형태로 썼는가.</li>
+            <li>왜 반대로 하면 어려운지를 설명했는가(예: 상태 수가 너무 많아 탐색이 비효율적, 또는 규칙으로 적기 어려운 예외가 너무 많음).</li>
+            <li>두 방법 모두 <b>사람이 지식을 기호로 넣어 준다</b>는 공통 한계를 언급하면 더 좋습니다.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="essay-q">
+      <div class="eq-no">문항 3 · 설계형</div>
+      <p>우리 학교나 우리 지역의 문제 하나를 골라 <b>상태 공간으로 정의</b>하고, 그 문제에 쓸 수 있는 <b>휴리스틱을 직접 제안</b>하시오. 제안한 휴리스틱이 왜 타당한지도 함께 밝히시오.</p>
+      <details class="more-box" style="margin:10px 0 0">
+        <summary><span class="plus-tag">평가 기준</span> 좋은 답에 반드시 들어가야 할 요소</summary>
+        <div class="more-body">
+          <ul style="margin:0">
+            <li>상태를 <b>무엇으로 표현할지</b> 정했는가(예: 방문한 교실의 집합과 현재 위치).</li>
+            <li>초기 상태 · 목표 상태 · 연산자를 빠짐없이 적었는가.</li>
+            <li>제안한 휴리스틱이 <b>계산하기 쉬운가</b>, 그리고 <b>실제 남은 비용을 넘겨 어림잡지 않는가</b>를 따졌는가.</li>
+            <li>이 휴리스틱을 쓰면 맹목적 탐색보다 어떤 점이 나아지는지 예상했는가.</li>
+            <li>휴리스틱이 잘못될 수 있는 상황(반례)을 하나라도 떠올렸다면 매우 우수한 답입니다.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 8. 자가평가 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>성취기준 자가평가</h2></div>
+    <p>성취기준마다 지금 내 상태를 솔직하게 고릅니다. <b>D 나 E 를 고른 성취기준</b>은 아래 “돌아가기”에서 해당 차시로 이동해 다시 확인하세요.</p>
+    <div id="self1"></div>
+  </section>
+
+  <!-- ============ 9. 돌아가기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">9</span><h2>부족한 곳으로 돌아가기</h2></div>
+
+    <div class="lesson-list">
+      <a class="lesson-card" href="lesson01.html">
+        <span class="lc-no"><b>1</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">기계도 생각할 수 있을까</span>
+          <span class="lc-sub">인공지능이 무엇인지, 어디까지가 인공지능인지 헷갈린다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기01-01</span><span class="lc-sim">🎯 단원 평가 1·9번이 어려웠다면</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card" href="lesson02.html">
+        <span class="lc-no"><b>2</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">모든 문제는 탐색이 된다</span>
+          <span class="lc-sub">상태·연산자·목표 상태를 스스로 정하기 어렵다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기01-02</span><span class="lc-sim">🎯 단원 평가 2·6번, 서·논술형 3번이 막혔다면</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card" href="lesson03.html">
+        <span class="lc-no"><b>3</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">무작정 뒤지기</span>
+          <span class="lc-sub">큐와 스택이 왜 탐색의 성격을 바꾸는지 설명이 안 된다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기01-03</span><span class="lc-sim">🎯 단원 평가 3·4·7번이 어려웠다면</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card" href="lesson04.html">
+        <span class="lc-no"><b>4</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">눈치껏 찾아가기</span>
+          <span class="lc-sub">f = g + h 를 손으로 계산하지 못하거나 최적성 조건이 흐릿하다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기01-03</span><span class="lc-std">12인기01-04</span><span class="lc-sim">🎯 단원 평가 5·10·11번이 어려웠다면</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card" href="lesson05.html">
+        <span class="lc-no"><b>5</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">아는 것에서 새것을</span>
+          <span class="lc-sub">규칙과 사실로 새 지식을 만드는 과정을 손으로 못 따라간다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기01-05</span><span class="lc-sim">🎯 단원 평가 8번, 서·논술형 2번이 막혔다면</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card closing" href="index.html">
+        <span class="lc-no"><b>★</b></span>
+        <span class="lc-body">
+          <span class="lc-title">1단원 목차로</span>
+          <span class="lc-sub">내용 요소와 성취기준 전체를 다시 훑어보기</span>
+          <span class="lc-meta"><span class="lc-sim">📋 무엇을 배웠는지 한눈에 확인</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ 10. 다음 단원 예고 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>다음 단원 예고</h2></div>
+
+    <div class="box box-concept">
+      <div class="box-label">🚪 2단원으로 가는 문</div>
+      <p>1단원에서 인공지능이 잘한 일은 모두 <b>사람이 넣어 준 지식</b> 덕분이었습니다. 상태와 연산자를 정한 것도 사람, 휴리스틱을 만든 것도 사람, 규칙을 적은 것도 사람입니다.</p>
+      <p>그런데 “고양이 사진을 알아보는 규칙”을 IF-THEN 으로 적어 볼 수 있을까요? 귀 모양, 털 색, 자세… 예외가 끝없이 나옵니다. <b>규칙으로 적기 불가능한 문제</b>가 바로 1단원 방식의 한계입니다.</p>
+      <p>2단원 <b>인공지능과 학습</b>에서는 규칙을 사람이 짜지 않고 <b>데이터에서 스스로 찾아내게</b> 하는 방법을 배웁니다. 규칙 대신 데이터, 프로그래밍 대신 학습입니다.</p>
+    </div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 왜 A* 는 이름에 별표가 붙었을까</summary>
+      <div class="more-body">
+        <p>1968년 닐슨, 하트, 라파엘이 제안한 이 알고리즘의 이름은 원래 “알고리즘 A”였습니다. 뒤에 휴리스틱이 실제 남은 비용을 넘겨 어림잡지 않는다는 조건을 만족할 때 <b>최적 경로를 반드시 찾는다</b>는 것이 증명되었고, 그 최적성을 갖춘 판을 구별하려고 별표를 붙여 A* 라고 불렀습니다.</p>
+        <p>여기서 중요한 것은 이름이 아니라 조건입니다. <b>휴리스틱을 잘못 만들면 A* 라도 최단 경로를 놓칩니다.</b> 예를 들어 격자 미로에서 상하좌우로만 움직일 수 있는데 직선거리를 두 배로 부풀려 h 를 쓰면, 실제보다 크게 어림잡은 셈이라 최적성이 깨집니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">코드</span> 세 알고리즘을 한 함수로 쓰기</summary>
+      <div class="more-body">
+        <p>시뮬레이터가 실제로 하는 일을 파이썬으로 옮기면 이렇게 됩니다. <b>꺼내는 기준(key)</b>만 바꾸면 세 알고리즘이 모두 나옵니다.</p>
+        <pre style="margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.75;white-space:pre-wrap">def search(start, goal, neighbors, h, mode):
+    frontier = [(start, 0)]          # (상태, 지금까지 비용 g)
+    visited = set()
+    while frontier:
+        if mode == 'bfs':
+            node, g = frontier.pop(0)                        # 가장 먼저 넣은 것
+        elif mode == 'dfs':
+            node, g = frontier.pop()                         # 가장 나중에 넣은 것
+        elif mode == 'best':
+            i = min(range(len(frontier)), key=lambda k: h(frontier[k][0]))
+            node, g = frontier.pop(i)                        # h 가 가장 작은 것
+        else:  # 'astar'
+            i = min(range(len(frontier)), key=lambda k: frontier[k][1] + h(frontier[k][0]))
+            node, g = frontier.pop(i)                        # f = g + h 가 가장 작은 것
+        if node in visited:
+            continue
+        visited.add(node)
+        if node == goal:
+            return len(visited), g
+        for nb in neighbors(node):
+            frontier.append((nb, g + 1))</pre>
+        <p style="margin-top:12px">실제 A* 는 이 <span class="mono">min</span> 대신 <b>우선순위 큐</b>(파이썬의 <span class="mono">heapq</span>)를 써서 훨씬 빠르게 꺼냅니다. 알고리즘의 뜻은 같고 자료구조만 다릅니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> 이 단원의 개념이 실제로 쓰이는 곳</summary>
+      <div class="more-body">
+        <ul style="margin:0">
+          <li><b>내비게이션 길찾기</b> — 도로망을 상태 공간으로 보고 A* 계열 알고리즘을 씁니다. 휴리스틱은 목적지까지의 직선거리를 제한 속도로 나눈 최소 예상 시간입니다.</li>
+          <li><b>게임 속 캐릭터 이동</b> — 격자 지도에서 A* 로 경로를 찾고, 장애물이 바뀌면 다시 계산합니다.</li>
+          <li><b>물류 창고 로봇</b> — 여러 로봇이 부딪히지 않도록 상태에 “시간”까지 넣어 탐색합니다. 상태 공간이 훨씬 커지므로 휴리스틱이 더 중요해집니다.</li>
+          <li><b>의료 진단 지원 규칙 시스템</b> — 증상을 사실로, 진단 지침을 규칙으로 넣어 전방 추론으로 후보를 좁힙니다. 근거를 사람이 확인할 수 있다는 점이 강점입니다.</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 1, lesson: 'closing',
+  title: '단원 마무리',
+  sub: '인공지능의 이해 — 핵심 정리와 단원 평가',
+  lead: '다섯 차시를 한 장의 개념 지도로 잇고, 탐색 3종을 같은 미로에서 나란히 돌려 봅니다. 그다음 단원 평가와 서·논술형으로 <b>내가 어디까지 왔는지</b>를 스스로 확인합니다.',
+  standards: ['12인기01-01', '12인기01-02', '12인기01-03', '12인기01-04', '12인기01-05'],
+  keywords: ['지능적 판단', '상태 공간', '맹목적 탐색', '정보 이용 탐색', '휴리스틱', 'A*', '지식 표현', '추론'],
+  goals: [
+    '1단원의 개념들을 <b>관계</b>로 연결하여 하나의 지도로 설명할 수 있다.',
+    '너비 우선 · 최상 우선 · A* 탐색을 같은 문제에서 비교하고, 효율과 최적성의 차이를 근거를 들어 설명할 수 있다.',
+    '탐색으로 풀 문제와 규칙 기반 추론으로 풀 문제를 구분하고, 그 이유를 서술할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 복습 인터랙션: 탐색 3종 비교 ===================== -->
+<script>
+(function () {
+  const COLS = 13, ROWS = 9, CELL = 20;
+  const W = COLS * CELL, H = ROWS * CELL;
+  const START = 0, GOAL = COLS * ROWS - 1;
+
+  let walls = new Set();
+  let seed = 20260415;
+  let showNum = false;
+
+  const body = AI.sim.panel('#sim1', {
+    title: '같은 미로, 세 알고리즘',
+    tag: '3종 비교',
+    desc: '왼쪽부터 <b>너비 우선(BFS)</b>, <b>깊이 우선(DFS)</b>, 그리고 오른쪽은 아래 버튼으로 고르는 <b>정보 이용 탐색</b>입니다. <b>한 단계</b>를 눌러 한 번의 상태 확인이 어떻게 다른지 보고, 끝까지 돌려 <b>확인한 칸 수</b>와 <b>경로 길이</b>를 비교해 보세요. 미로 칸을 클릭하면 벽을 넣거나 뺄 수 있습니다.'
+  });
+
+  const idx = (x, y) => y * COLS + x;
+  const xy = i => ({ x: i % COLS, y: Math.floor(i / COLS) });
+
+  /* 이웃: 위 → 오른쪽 → 아래 → 왼쪽 (순서 고정) */
+  function neighbors(i) {
+    const p = xy(i), out = [];
+    const cand = [[p.x, p.y - 1], [p.x + 1, p.y], [p.x, p.y + 1], [p.x - 1, p.y]];
+    for (let k = 0; k < cand.length; k++) {
+      const nx = cand[k][0], ny = cand[k][1];
+      if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) continue;
+      const j = idx(nx, ny);
+      if (walls.has(j)) continue;
+      out.push(j);
+    }
+    return out;
+  }
+
+  function reachable() {
+    const seen = new Set([START]), q = [START];
+    while (q.length) {
+      const n = q.shift();
+      if (n === GOAL) return true;
+      const nb = neighbors(n);
+      for (let k = 0; k < nb.length; k++) if (!seen.has(nb[k])) { seen.add(nb[k]); q.push(nb[k]); }
+    }
+    return false;
+  }
+
+  function genMaze(s) {
+    const r = AI.rng(s);
+    for (let attempt = 0; attempt < 300; attempt++) {
+      walls = new Set();
+      for (let i = 0; i < COLS * ROWS; i++) {
+        if (i === START || i === GOAL) continue;
+        if (r() < 0.26) walls.add(i);
+      }
+      if (reachable()) return;
+    }
+    walls = new Set();
+  }
+
+  /* 맨해튼 거리 휴리스틱 — 상하좌우로만 움직이므로 실제 남은 비용을 넘기지 않는다 */
+  function hOf(i) {
+    const a = xy(i), b = xy(GOAL);
+    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+  }
+
+  function newSearch(kind) {
+    return {
+      kind: kind, open: [{ n: START, g: 0 }], came: new Map(), gs: new Map([[START, 0]]),
+      visited: new Set(), order: [], cur: null, done: false, found: false, path: [], lastF: null
+    };
+  }
+
+  /* 프런티어에서 무엇을 꺼내는가 — 이것이 세 알고리즘의 유일한 차이 */
+  function pick(s) {
+    if (s.kind === 'bfs') return s.open.shift();
+    if (s.kind === 'dfs') return s.open.pop();
+    let bi = 0, bf = Infinity;
+    for (let k = 0; k < s.open.length; k++) {
+      const e = s.open[k];
+      const f = (s.kind === 'astar') ? e.g + hOf(e.n) : hOf(e.n);
+      if (f < bf) { bf = f; bi = k; }
+    }
+    return s.open.splice(bi, 1)[0];
+  }
+
+  function stepSearch(s) {
+    if (s.done) return false;
+    if (!s.open.length) { s.done = true; s.cur = null; return false; }
+    const e = pick(s), node = e.n;
+    s.lastF = (s.kind === 'astar') ? e.g + hOf(node) : (s.kind === 'best' ? hOf(node) : e.g);
+    if (s.visited.has(node)) return true;
+    s.visited.add(node);
+    s.order.push(node);
+    s.cur = node;
+    if (node === GOAL) {
+      s.done = true; s.found = true;
+      let n = node; const p = [n];
+      while (s.came.has(n)) { n = s.came.get(n); p.push(n); }
+      s.path = p.reverse();
+      return false;
+    }
+    const nb = neighbors(node);
+    for (let k = 0; k < nb.length; k++) {
+      const v = nb[k];
+      if (s.visited.has(v)) continue;
+      const ng = e.g + 1;
+      if (s.kind === 'bfs' || s.kind === 'dfs') {
+        if (!s.came.has(v)) { s.came.set(v, node); s.gs.set(v, ng); }
+      } else {
+        if (!s.gs.has(v) || ng < s.gs.get(v)) { s.gs.set(v, ng); s.came.set(v, node); }
+      }
+      s.open.push({ n: v, g: ng });
+    }
+    return true;
+  }
+
+  /* ---- 판 만들기 ---- */
+  function makeBoard(kind, label, sub) {
+    const cv = AI.sim.canvas(W, H);
+    const titleEl = AI.h('h4', { class: 'mini-head', style: { marginTop: 0 }, text: label });
+    const subEl = AI.h('p', { style: { fontSize: '12.5px', color: 'var(--ink-3)', margin: '0 0 8px' }, text: sub });
+    const stats = AI.ui.stats([
+      { key: 'v', label: '확인한 칸' }, { key: 'p', label: '경로 길이' }, { key: 'f', label: '프런티어' }
+    ]);
+    const wrap = AI.h('div', {}, titleEl, subEl, cv.wrap, stats.el);
+    return { kind: kind, cv: cv, stats: stats, wrap: wrap, titleEl: titleEl, subEl: subEl, s: newSearch(kind) };
+  }
+
+  const b1 = makeBoard('bfs', '① 너비 우선 탐색', '큐 · 가장 먼저 넣은 칸을 꺼낸다');
+  const b2 = makeBoard('dfs', '② 깊이 우선 탐색', '스택 · 가장 나중에 넣은 칸을 꺼낸다');
+  const b3 = makeBoard('astar', '③ A* 탐색', 'f = g + h 가 가장 작은 칸을 꺼낸다');
+  const boards = [b1, b2, b3];
+
+  body.appendChild(AI.h('div', { class: 'sim-grid' }, b1.wrap, b2.wrap, b3.wrap));
+
+  body.appendChild(AI.ui.legend([
+    { color: 'var(--surface-2)', label: '아직 안 봄' },
+    { color: '#8b93a5', label: '벽' },
+    { color: 'var(--accent-soft)', label: '확인한 칸' },
+    { color: 'var(--accent-line)', label: '프런티어' },
+    { color: 'var(--ok)', label: '찾은 경로' },
+    { color: 'var(--warn)', label: '지금 확인 중' }
+  ]));
+
+  /* ---- 그리기 ---- */
+  function draw(b) {
+    const C = AI.sim.colors(), ctx = b.cv.ctx, s = b.s;
+    b.cv.clear(C.bg);
+    const frontSet = new Set(s.open.map(e => e.n));
+    const pathSet = new Set(s.path);
+    const fontName = getComputedStyle(document.body).fontFamily;
+
+    for (let i = 0; i < COLS * ROWS; i++) {
+      const p = xy(i), px = p.x * CELL, py = p.y * CELL;
+      let fill = C.bg;
+      if (walls.has(i)) fill = C.dark ? '#4a5162' : '#8b93a5';
+      else if (pathSet.has(i)) fill = C.dark ? '#1f4a3a' : '#cdeee0';
+      else if (s.cur === i) fill = C.dark ? '#5d4823' : '#fbe6bd';
+      else if (s.visited.has(i)) fill = C.dark ? '#232a44' : '#e4e9fb';
+      else if (frontSet.has(i)) fill = C.dark ? '#33406e' : '#c3cdf7';
+      ctx.fillStyle = fill;
+      ctx.fillRect(px, py, CELL, CELL);
+      ctx.strokeStyle = C.grid;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(px + .5, py + .5, CELL - 1, CELL - 1);
+
+      if (showNum && !walls.has(i)) {
+        const oi = s.order.indexOf(i);
+        if (oi >= 0) {
+          ctx.fillStyle = pathSet.has(i) ? (C.dark ? '#9ae8c6' : '#0a6b45') : C.ink3;
+          ctx.font = '700 8.5px ' + fontName;
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(String(oi + 1), px + CELL / 2, py + CELL / 2 + 1);
+        }
+      }
+    }
+
+    function tag(i, txt, col) {
+      const p = xy(i);
+      ctx.fillStyle = col;
+      ctx.fillRect(p.x * CELL + 2, p.y * CELL + 2, CELL - 4, CELL - 4);
+      ctx.fillStyle = C.dark ? '#12151c' : '#ffffff';
+      ctx.font = '800 8.5px ' + fontName;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(txt, p.x * CELL + CELL / 2, p.y * CELL + CELL / 2 + 1);
+    }
+    tag(START, '출발', C.a);
+    tag(GOAL, '목표', C.dark ? '#e0885f' : '#b3541e');
+
+    b.stats.set('v', s.order.length);
+    b.stats.set('p', s.found ? s.path.length : '–');
+    b.stats.set('f', s.open.length);
+  }
+
+  function drawAll() { boards.forEach(draw); }
+
+  /* ---- 결과 비교표 ---- */
+  const resultBox = AI.h('div', { style: { display: 'none', marginTop: '14px' } });
+
+  const KIND_NAME = { bfs: '너비 우선 탐색 (BFS)', dfs: '깊이 우선 탐색 (DFS)', astar: 'A* 탐색 (f = g + h)', best: '최상 우선 탐색 (h 만)' };
+  const KIND_OPT = { bfs: '보장 ○', dfs: '보장 ×', astar: '보장 ○', best: '보장 ×' };
+
+  function finish() {
+    if (!boards.every(b => b.s.done)) return;
+    const rows = boards.map(b => {
+      const s = b.s;
+      return [
+        '<b>' + KIND_NAME[s.kind] + '</b>',
+        { cls: 'num', html: String(s.order.length) },
+        { cls: 'num', html: s.found ? String(s.path.length) : '실패' },
+        { cls: KIND_OPT[s.kind] === '보장 ○' ? 'good' : 'bad', html: KIND_OPT[s.kind] }
+      ];
+    });
+    const best = boards.reduce((a, b) => (b.s.order.length < a.s.order.length ? b : a));
+    const bfsLen = b1.s.found ? b1.s.path.length : null;
+    const thirdLen = b3.s.found ? b3.s.path.length : null;
+
+    let msg = '<p><b>확인한 칸이 가장 적은 알고리즘</b>은 ' + KIND_NAME[best.s.kind] + '(' + best.s.order.length + '칸)입니다. ';
+    msg += '같은 미로인데도 확인한 칸 수가 다른 이유는 <b>프런티어에서 꺼내는 기준</b>이 다르기 때문입니다.</p>';
+    if (bfsLen && thirdLen) {
+      if (thirdLen === bfsLen) {
+        msg += '<p>③번이 찾은 경로 길이는 <b>' + thirdLen + '칸</b>으로 너비 우선 탐색과 <b>같습니다</b>. ' +
+          (b3.s.kind === 'astar'
+            ? 'A* 는 g 를 함께 보기 때문에 최단 경로를 지키면서도 확인한 칸을 줄였습니다.'
+            : '이번에는 최상 우선 탐색이 운 좋게 최단 경로를 찾았습니다. 하지만 g 를 보지 않으므로 <b>보장은 없습니다</b>. 벽을 바꿔 더 긴 경로가 나오는 미로를 찾아보세요.') + '</p>';
+      } else {
+        msg += '<p>③번의 경로는 <b>' + thirdLen + '칸</b>, 너비 우선 탐색은 <b>' + bfsLen + '칸</b>입니다. ' +
+          (thirdLen > bfsLen
+            ? '③번이 <b>' + (thirdLen - bfsLen) + '칸 더 돌아갔습니다.</b> g 를 무시하고 h 만 보면 이런 일이 생깁니다.'
+            : '') + '</p>';
+      }
+    }
+    msg += '<p style="color:var(--ink-3);font-size:14px">💡 오른쪽 알고리즘을 <b>최상 우선</b>으로 바꾸고 다시 돌려 보세요. 확인한 칸은 더 줄어드는데 경로가 길어지는 미로를 찾으면, “빠른 것”과 “좋은 것”이 다르다는 것을 직접 확인한 셈입니다.</p>';
+
+    resultBox.innerHTML = '';
+    resultBox.style.display = '';
+    resultBox.appendChild(AI.ui.table(
+      ['알고리즘', '확인한 칸', '경로 길이', '최단 경로'], rows,
+      { caption: '같은 미로에서의 세 알고리즘 비교 — 확인한 칸이 적을수록 효율적, 경로가 짧을수록 좋은 답' }
+    ));
+    resultBox.appendChild(AI.h('div', { class: 'box box-info', html: '<div class="box-label">📊 결과 해석</div>' + msg }));
+  }
+
+  /* ---- 컨트롤 ---- */
+  const loop = AI.sim.loop({
+    fps: 8,
+    step() {
+      let alive = false;
+      boards.forEach(b => { if (stepSearch(b.s)) alive = true; });
+      drawAll();
+      if (!alive && boards.every(b => b.s.done)) { finish(); return false; }
+      return true;
+    },
+    onState(playing) { playBtn.textContent = playing ? '⏸ 멈춤' : '▶ 자동 실행'; }
+  });
+
+  function resetSearch() {
+    loop.pause();
+    boards.forEach(b => { b.s = newSearch(b.kind); });
+    resultBox.style.display = 'none';
+    drawAll();
+  }
+
+  const playBtn = AI.ui.btn('▶ 자동 실행', () => loop.toggle(), 'primary');
+  const numBtn = AI.ui.btn('🔢 방문 순서 숨김', () => {
+    showNum = !showNum;
+    numBtn.textContent = showNum ? '🔢 방문 순서 표시' : '🔢 방문 순서 숨김';
+    drawAll();
+  }, 'ghost');
+
+  const kindSeg = AI.ui.seg({
+    label: '세 번째 알고리즘',
+    options: [{ value: 'astar', label: 'A* (f=g+h)' }, { value: 'best', label: '최상 우선 (h만)' }],
+    value: 'astar',
+    onChange(v) {
+      b3.kind = v;
+      b3.titleEl.textContent = (v === 'astar') ? '③ A* 탐색' : '③ 최상 우선 탐색';
+      b3.subEl.textContent = (v === 'astar') ? 'f = g + h 가 가장 작은 칸을 꺼낸다' : 'h 가 가장 작은 칸을 꺼낸다 (g 무시)';
+      resetSearch();
+    }
+  });
+
+  const speed = AI.ui.slider({
+    label: '속도', min: 1, max: 30, value: 8, unit: ' 단계/초',
+    onInput: v => loop.setFps(v)
+  });
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    playBtn,
+    AI.ui.btn('⏭ 한 단계', () => { loop.step(); if (boards.every(b => b.s.done)) finish(); }),
+    AI.ui.btn('↺ 처음부터', resetSearch, 'ghost'),
+    AI.ui.btn('🎲 새 미로', () => { seed = (seed * 31 + 17) % 999983; genMaze(seed); resetSearch(); }, 'ghost'),
+    numBtn,
+    kindSeg.el,
+    speed.el
+  ));
+  body.appendChild(resultBox);
+
+  /* ---- 벽 편집 ---- */
+  boards.forEach(b => {
+    b.cv.canvas.style.cursor = 'pointer';
+    b.cv.canvas.addEventListener('click', ev => {
+      const p = b.cv.pos(ev);
+      const x = Math.floor(p.x / CELL), y = Math.floor(p.y / CELL);
+      if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return;
+      const i = idx(x, y);
+      if (i === START || i === GOAL) return;
+      if (walls.has(i)) walls.delete(i); else walls.add(i);
+      if (!reachable()) {
+        if (walls.has(i)) walls.delete(i); else walls.add(i);
+        AI.toast('그 벽을 세우면 목표에 갈 수 없어요');
+        return;
+      }
+      resetSearch();
+    });
+  });
+
+  window.addEventListener('ai:redraw', drawAll);
+
+  genMaze(seed);
+  drawAll();
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 단원 평가 · 서논술형 · 자가평가 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a1c-cloze',
+  title: '1단원 핵심 용어 8개',
+  sub: '낱말을 누른 뒤 빈칸을 눌러 채웁니다. 낱말은 한 번씩만 쓰입니다.',
+  bank: ['상태 공간', '맹목적 탐색', '너비 우선 탐색', '휴리스틱', '최상 우선 탐색', 'A*', '지식 베이스', '전방 추론'],
+  sents: [
+    { text: '문제에서 나타날 수 있는 모든 상태와 그 연결을 모아 놓은 것을 {0}(이)라고 한다.', answers: [['상태 공간']] },
+    { text: '목표까지 남은 거리를 추정하지 않고 정해진 순서로 상태를 훑는 탐색을 {0}(이)라고 한다.', answers: [['맹목적 탐색']] },
+    { text: '가중치가 없는 그래프에서 최단 경로를 보장하는 맹목적 탐색은 {0}이다.', answers: [['너비 우선 탐색']] },
+    { text: '목표까지 남은 비용을 어림잡은 값을 {0}(이)라고 한다.', answers: [['휴리스틱']] },
+    { text: '추정값 h 만 보고 가장 그럴듯한 상태를 먼저 꺼내는 탐색이 {0}이고, 여기에 지금까지 쓴 비용 g 를 더해 f = g + h 로 판단하는 탐색이 {1} 탐색이다.', answers: [['최상 우선 탐색'], ['A*']] },
+    { text: '규칙과 사실을 모아 둔 저장소를 {0}(이)라고 한다.', answers: [['지식 베이스']] },
+    { text: '사실에서 출발해 적용할 수 있는 규칙을 반복 적용하며 새 사실을 늘려 가는 방식을 {0}(이)라고 한다.', answers: [['전방 추론']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '1단원 단원 평가',
+  sub: '11문항입니다. 해설에 관련 차시를 함께 적어 두었으니, 틀린 문항의 차시로 돌아가 확인해 보세요.',
+  items: [
+    {
+      type: 'mc',
+      q: '튜링 테스트에 대한 설명으로 <b>가장 알맞은</b> 것은?',
+      choices: [
+        '기계의 내부 구조를 분석해 사람의 뇌와 얼마나 비슷한지 측정한다',
+        '심판이 대화만으로 사람과 기계를 구별하지 못하면 지능이 있다고 본다',
+        '기계가 계산 문제를 사람보다 빨리 풀면 통과한 것으로 본다',
+        '기계가 스스로 규칙을 학습했는지를 검사한다'
+      ],
+      answer: 1,
+      why: '튜링 테스트는 <b>겉으로 드러난 행동(대화)</b>만으로 지능을 판정합니다. 내부 구조나 계산 속도, 학습 여부는 판정 기준이 아닙니다. <b>1차시</b>의 지능적 판단 부분을 다시 확인해 보세요.'
+    },
+    {
+      type: 'ox',
+      q: '문제를 상태 공간으로 표현하면, 문제 풀이는 초기 상태에서 목표 상태까지 가는 <b>경로를 찾는 문제</b>가 된다.',
+      answer: true,
+      why: '맞습니다. 상태 공간 표현의 핵심 효과가 바로 이것입니다. “답 찾기”가 “길 찾기”로 바뀌기 때문에 탐색 알고리즘을 쓸 수 있게 됩니다. <b>2차시</b>에서 다룬 상태 공간을 다시 확인해 보세요.'
+    },
+    {
+      type: 'short',
+      q: '너비 우선 탐색과 깊이 우선 탐색에서 “아직 확인하지 않았지만 곧 확인할 후보 상태들의 목록”을 무엇이라고 하는가?',
+      answer: ['프런티어', '프론티어', 'frontier', '경계', '개방 목록'],
+      placeholder: '예: ○○○○',
+      why: '<b>프런티어</b>입니다. 이 프런티어를 큐로 쓰면 너비 우선, 스택으로 쓰면 깊이 우선이 됩니다. <b>3차시</b>의 탐색 뼈대 부분을 확인해 보세요.'
+    },
+    {
+      type: 'match',
+      q: '다음 특징을 알맞은 알고리즘과 짝지으시오.',
+      left: [
+        '프런티어를 큐로 쓴다',
+        '막힌 길에서 되돌아오는 백트래킹을 한다',
+        'h 만 보고 가장 그럴듯한 상태를 먼저 꺼낸다',
+        'f = g + h 가 가장 작은 상태를 먼저 꺼낸다'
+      ],
+      right: ['너비 우선 탐색', '깊이 우선 탐색', '최상 우선 탐색', 'A* 탐색'],
+      answer: [0, 1, 2, 3],
+      why: '큐 = 너비 우선, 스택과 백트래킹 = 깊이 우선, h 만 = 최상 우선, g + h = A* 입니다. 네 알고리즘은 모두 <b>같은 뼈대</b>를 쓰고 꺼내는 기준만 다릅니다. <b>3·4차시</b>를 함께 확인해 보세요.'
+    },
+    {
+      type: 'mc',
+      q: '격자 지도에서 상하좌우로만 이동할 수 있다. 어떤 칸까지 실제로 5칸을 이동해 왔고(g = 5), 그 칸에서 목표까지의 맨해튼 거리가 6이다(h = 6). 이 칸의 <b>f 값</b>은?',
+      choices: ['5', '6', '11', '30'],
+      answer: 2,
+      why: 'f = g + h = 5 + 6 = <b>11</b> 입니다. g 는 <b>이미 쓴 비용</b>, h 는 <b>남은 비용의 추정</b>이므로 f 는 “이 칸을 지나가는 전체 비용의 추정값”이 됩니다. <b>4차시</b>의 f = g + h 계산을 다시 연습해 보세요.'
+    },
+    {
+      type: 'order',
+      q: '어떤 문제를 탐색으로 해결하려 할 때의 <b>설계 순서</b>를 올바르게 배열하시오.',
+      items: [
+        '문제에서 무엇을 하나의 상태로 볼지 정한다',
+        '초기 상태와 목표 상태를 정의한다',
+        '상태를 다른 상태로 바꾸는 연산자를 정한다',
+        '상태 공간의 크기를 어림잡아 탐색 알고리즘을 고른다',
+        '알고리즘을 실행하고 찾은 경로를 확인한다'
+      ],
+      answer: [0, 1, 2, 3, 4],
+      why: '상태 정의 → 초기·목표 상태 → 연산자 → 알고리즘 선택 → 실행 순서입니다. 특히 <b>상태 공간의 크기를 먼저 어림잡는 일</b>이 알고리즘 선택의 근거가 됩니다. <b>2차시</b>의 탐색 과정 설계를 확인해 보세요.'
+    },
+    {
+      type: 'multi',
+      q: '정보 이용 탐색에 대한 설명으로 <b>옳은 것을 모두</b> 고르시오.',
+      choices: [
+        '목표까지 남은 비용을 어림잡은 휴리스틱을 사용한다',
+        '휴리스틱을 쓰면 확인해야 하는 상태 수를 줄일 수 있다',
+        '최상 우선 탐색은 항상 최단 경로를 찾아 준다',
+        'A* 는 휴리스틱이 실제 남은 비용을 넘겨 어림잡지 않으면 최적 경로를 보장한다'
+      ],
+      answer: [0, 1, 3],
+      why: '③이 틀렸습니다. 최상 우선 탐색은 <b>h 만</b> 보고 g 를 무시하므로, 목표 쪽으로 빠르게 가더라도 <b>최단 경로를 보장하지 않습니다</b>. 최적성을 지키는 것은 g 를 함께 보는 A* 입니다. <b>4차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'short',
+      q: '지식 베이스에서 사실에 적용할 수 있는 규칙을 찾아 결론을 새 사실로 추가하고, 더 이상 새 사실이 생기지 않을 때까지 이를 반복하는 추론 방식을 무엇이라고 하는가?',
+      answer: ['전방 추론', '순방향 추론', '전향 추론', 'forward chaining'],
+      placeholder: '예: ○○ 추론',
+      why: '<b>전방 추론</b>입니다. 사실에서 출발해 앞으로 나아가며 새 지식을 쌓습니다. 반대로 알고 싶은 결론에서 거꾸로 조건을 찾아가는 것은 후방 추론입니다. <b>5차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'mc',
+      q: '다음 중 <b>1단원에서 배운 방식(탐색·규칙 기반 추론)으로는 해결하기 어려운</b> 문제는?',
+      choices: [
+        '지하철 노선도에서 환승을 최소로 하는 경로 찾기',
+        '체스에서 다음에 둘 수를 고르기',
+        '수만 장의 손글씨 사진에서 숫자를 알아보기',
+        '증상 목록과 진단 지침으로 가능한 병을 좁히기'
+      ],
+      answer: 2,
+      why: '손글씨 인식은 “어떤 모양이면 3인가”를 IF-THEN 규칙으로 적기가 사실상 불가능합니다. 예외가 끝없이 나오기 때문입니다. 이런 문제는 <b>데이터로 규칙을 스스로 찾는 기계학습</b>(2단원)의 영역입니다. 나머지는 상태 공간 탐색이나 규칙 기반 추론으로 다룰 수 있습니다. <b>1차시와 5차시</b>를 함께 확인해 보세요.'
+    },
+    {
+      type: 'ox',
+      q: '휴리스틱이 실제 남은 비용보다 <b>크게</b> 어림잡아도 A* 는 항상 최단 경로를 찾는다.',
+      answer: false,
+      why: '그렇지 않습니다. A* 의 최적성은 휴리스틱이 실제 남은 비용을 <b>넘겨 어림잡지 않을 때</b>에만 보장됩니다. 크게 어림잡으면 실제로 더 짧은 길이 있는 방향을 “비싸 보인다”고 판단해 버려 최단 경로를 놓칠 수 있습니다. 대신 탐색은 더 빨라질 수 있어, 실무에서는 속도와 최적성을 맞바꾸기도 합니다. <b>4차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'mc',
+      q: '상태 공간이 매우 크고 기억 공간이 <b>매우 부족한</b> 장치에서, 반드시 최단 경로가 아니어도 되니 “어떤 답이라도 하나” 빨리 찾아야 한다. 가장 적절한 선택과 그 이유는?',
+      choices: [
+        '너비 우선 탐색 — 최단 경로를 보장하기 때문',
+        '깊이 우선 탐색 — 한 갈래만 저장하므로 기억 공간을 적게 쓰기 때문',
+        '최상 우선 탐색 — 항상 최적해를 보장하기 때문',
+        'A* 탐색 — 기억 공간을 가장 적게 쓰기 때문'
+      ],
+      answer: 1,
+      why: '조건이 “기억 공간 부족 + 최단 경로 불필요”이므로 <b>깊이 우선 탐색</b>이 맞습니다. 깊이 우선은 파고든 한 갈래만 스택에 쌓으므로 메모리가 깊이에 비례합니다. 너비 우선과 A* 는 넓은 층이나 프런티어 전체를 담아야 해서 메모리를 많이 씁니다. <b>3·4차시</b>의 비교표를 다시 보세요.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a1c-note',
+  title: '1단원 서·논술형 답안',
+  prompt: '위의 세 문항에 대한 답을 씁니다. 자동 저장되며, <b>복사</b> 버튼으로 한 번에 옮길 수 있습니다.',
+  fields: [
+    { key: 'obs', label: '시뮬레이터 관찰값 — BFS / DFS / 세 번째 알고리즘의 (확인한 칸, 경로 길이)', type: 'text', placeholder: '예: BFS (74, 21) · DFS (49, 33) · A* (38, 21)' },
+    { key: 'third', label: '세 번째 알고리즘으로 무엇을 골랐나요?', type: 'select', options: ['A* (f = g + h)', '최상 우선 탐색 (h 만)', '둘 다 실행해 비교했다'] },
+    { key: 'q1', label: '문항 1 — 세 알고리즘의 선택 기준과 결과 차이', type: 'textarea', rows: 6, placeholder: '너비 우선은 프런티어에서 …, 최상 우선은 …, A* 는 … 그래서 확인한 칸 수는 …이고 경로 길이는 …' },
+    { key: 'q2', label: '문항 2 — 탐색으로 풀 문제와 규칙 기반 추론으로 풀 문제', type: 'textarea', rows: 6, placeholder: '탐색: (문제) — 상태는 …, 연산자는 …, 목표 상태는 … / 추론: (문제) — 사실은 …, 규칙은 IF … THEN …' },
+    { key: 'q3', label: '문항 3 — 우리 학교·지역 문제의 상태 공간과 휴리스틱 설계', type: 'textarea', rows: 6, placeholder: '문제: … / 상태: … / 초기 상태: … / 목표 상태: … / 연산자: … / 휴리스틱: … / 타당한 이유: …' },
+    { key: 'weak', label: '단원 평가에서 틀린 문항 번호와, 다시 볼 차시', type: 'text', placeholder: '예: 5번·10번 → 4차시' }
+  ]
+});
+
+AI.rubric('#self1', {
+  id: 'a1c-rubric',
+  items: [
+    { std: '12인기01-01', text: '나는 인공지능이 지능적으로 판단한다는 것이 무슨 뜻인지 설명하고, 실생활과 여러 학문 분야의 인공지능 활용 사례를 비교해 말할 수 있다.' },
+    { std: '12인기01-02', text: '나는 어떤 문제를 상태·초기 상태·목표 상태·연산자로 나누어 상태 공간으로 바꾸고, 그 문제를 풀 탐색 과정을 스스로 설계할 수 있다.' },
+    { std: '12인기01-03', text: '나는 맹목적 탐색과 정보 이용 탐색의 차이를 프런티어에서 꺼내는 기준으로 설명하고, 각 알고리즘의 장단점을 비교할 수 있다.' },
+    { std: '12인기01-04', text: '나는 지능적 탐색이 필요한 문제를 찾아 휴리스틱을 정하고, 최상 우선 탐색이나 A* 를 적용해 해결 과정을 보여 줄 수 있다.' },
+    { std: '12인기01-05', text: '나는 규칙과 사실로 지식을 표현하고, 전방 추론으로 새로운 지식이 만들어지는 과정을 순서대로 설명할 수 있다.' }
+  ]
+});
+</script>
+</body>
+</html>

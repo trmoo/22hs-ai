@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5차시 정답 없이 묶기 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+  /* 이 페이지에서만 쓰는 보조 스타일 */
+  .cl-chips { display: flex; flex-wrap: wrap; gap: 7px; margin: 11px 0 0; }
+  .cl-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 999px;
+             border: 1px solid var(--line); background: var(--surface-2); font-size: 12.5px; font-weight: 650; color: var(--ink-2); }
+  .cl-chip i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+  .step-list { counter-reset: kstep; list-style: none; padding: 0; margin: 0 0 18px; display: grid; gap: 10px; }
+  .step-list li { counter-increment: kstep; position: relative; padding: 13px 16px 13px 52px;
+                  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); font-size: 15.2px; }
+  .step-list li::before { content: counter(kstep); position: absolute; left: 14px; top: 12px;
+                  width: 26px; height: 26px; border-radius: 8px; background: var(--accent); color: #fff;
+                  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; }
+  :root[data-theme="dark"] .step-list li::before { color: #10131a; }
+  .fx { font-family: var(--font-mono); font-size: .95em; background: var(--surface-3); padding: 2px 7px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>선생님이 우리 반 학생 30명에게 두 가지만 물었습니다. <b>하루 스마트폰 사용 시간</b>과 <b>하루 수면 시간</b>입니다. 표에는 숫자 두 개씩만 적혀 있고, <b>‘이 학생은 어떤 유형’이라는 정답은 어디에도 없습니다.</b></p>
+      <p>그런데 점으로 찍어 보니 신기하게도 학생들이 <b>세 덩어리</b>로 모여 있었습니다. 정답표가 없는데도 우리는 “아, 이런 생활 패턴이 세 종류 있구나”라고 말할 수 있습니다.</p>
+      <ul>
+        <li>정답이 하나도 없는데 어떻게 <b>그룹을 찾아낼</b> 수 있을까요?</li>
+        <li>‘세 덩어리’라는 것은 누가 정한 걸까요? 컴퓨터에게 <b>몇 개로 묶으라</b>고 알려 줘야 할까요?</li>
+      </ul>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 정답 없이도 쓸 수 있는 단 하나의 정보</summary>
+        <div class="more-body">
+          정답표가 없어도 우리는 <b>두 점이 얼마나 가까운지</b>는 계산할 수 있습니다. 이 차시에서는 ‘가까운 것끼리 묶는다’는 아주 단순한 생각만으로 그룹을 찾아내는 <b>k-평균</b> 알고리즘을 직접 돌려 봅니다.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 정답표가 없는 학습 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>정답표가 없어도 배울 수 있다</h2></div>
+
+    <p>지난 세 차시에서 배운 k-NN과 선형 회귀는 모두 <span class="term">지도학습</span>이었습니다. 지도학습은 입력값과 함께 <b class="blank" data-a="레이블|정답 레이블|라벨" data-hint="정답표에 적혀 있는 정답값, 영어로는 label">레이블</b>을 짝지어 주고, 모델이 그 정답을 맞히도록 훈련시킵니다. 사진마다 ‘고양이/강아지’를 적어 주고, 아파트마다 실제 가격을 적어 주는 방식이지요.</p>
+
+    <p>그런데 현실의 데이터는 대부분 정답이 붙어 있지 않습니다. 쇼핑몰의 구매 기록 수십만 건에 ‘이 사람은 알뜰 소비형’이라고 누가 일일이 적어 줄 수는 없습니다. 이렇게 정답이 없는 데이터에서 <b>데이터 자체의 구조와 패턴</b>을 찾아내는 방식을 <b class="blank" data-a="비지도학습|비지도 학습" data-hint="지도학습의 반대말, ‘가르쳐 주는 사람이 없는’ 학습">비지도학습</b>이라고 합니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 — 비지도학습</div>
+      <p><b>비지도학습</b>은 정답 레이블이 없는 데이터에서 숨어 있는 구조·규칙·집단을 찾아내는 기계학습 유형이다. 모델에게 “무엇을 맞혀라”가 아니라 “<b>스스로 정리해 보라</b>”고 시키는 학습이다.</p>
+    </div>
+
+    <p>비지도학습에서 가장 많이 쓰이는 작업이 바로 <b class="blank" data-a="군집|군집화|클러스터링" data-hint="비슷한 것끼리 묶는 작업, 영어로는 clustering">군집</b>입니다. 비슷한 데이터끼리 같은 묶음에 넣고, 다른 데이터는 다른 묶음으로 떼어 놓는 일입니다. 이 밖에도 속성 수를 줄여 데이터를 간단하게 만드는 <span class="mono">차원 축소</span>, ‘A를 산 사람은 B도 산다’ 같은 규칙을 찾는 <span class="mono">연관 규칙 분석</span>이 비지도학습에 속합니다.</p>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 왜 비지도학습이 필요할까</div>
+      <p>레이블을 붙이는 일에는 <b>사람의 시간과 비용</b>이 듭니다. 의료 영상 10만 장에 의사가 직접 진단을 적어 주려면 엄청난 비용이 들지요. 반대로 레이블이 없는 데이터는 세상에 넘칩니다. 비지도학습은 이 값싸고 풍부한 데이터에서 먼저 <b>지도를 그려 주는</b> 역할을 합니다. 군집 결과를 보고 “이 집단에는 이런 이름을 붙이자”라고 정하면, 그다음부터는 지도학습을 쓸 수도 있습니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. 군집과 분류 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>군집과 분류는 무엇이 다른가</h2></div>
+
+    <p>군집과 <b class="blank" data-a="분류|분류하기" data-hint="k-NN이 하던 일, 미리 정해진 범주에 넣는 지도학습 작업">분류</b>는 결과만 보면 비슷해 보입니다. 둘 다 데이터를 여러 묶음으로 나누니까요. 하지만 <b>출발점이 완전히 다릅니다.</b> 분류는 “이미 있는 상자에 넣기”이고, 군집은 “상자를 새로 만들기”입니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>분류(지도학습)와 군집(비지도학습)의 비교</caption>
+        <thead><tr><th>구분</th><th>분류 (classification)</th><th>군집 (clustering)</th></tr></thead>
+        <tbody>
+          <tr><td><b>학습 유형</b></td><td>지도학습</td><td>비지도학습</td></tr>
+          <tr><td><b>정답 레이블</b></td><td class="good">필요함 ○</td><td class="bad">필요 없음 ×</td></tr>
+          <tr><td><b>묶음의 이름</b></td><td>사람이 미리 정해 둠(고양이, 강아지…)</td><td>없음. 군집 1·2·3처럼 번호만 붙음</td></tr>
+          <tr><td><b>하는 일</b></td><td>새 데이터를 정해진 범주에 넣는다</td><td>데이터를 비슷한 것끼리 묶는다</td></tr>
+          <tr><td><b>평가 방법</b></td><td>정답과 비교해 정확도를 잰다</td><td>정답이 없어 SSE·실루엣 계수 등으로 간접 평가</td></tr>
+          <tr><td><b>대표 알고리즘</b></td><td>k-NN, 결정트리, 로지스틱 회귀</td><td>k-평균, 계층적 군집, 밀도 기반 군집</td></tr>
+          <tr><td><b>예시</b></td><td>메일을 스팸/정상으로 나눈다</td><td>고객을 성향이 비슷한 5개 집단으로 묶는다</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 오해 주의 — 군집 번호는 이름이 아니다</div>
+      <p>군집 결과로 나오는 ‘1번 군집, 2번 군집’은 <b>아무 의미가 없는 번호</b>입니다. 알고리즘은 “이 묶음은 알뜰 소비형”이라고 말해 주지 않습니다. 각 군집의 특징을 살펴보고 <b>이름을 붙이는 일은 사람의 몫</b>입니다. 게다가 같은 데이터를 다시 돌리면 1번과 2번의 번호가 서로 바뀔 수도 있습니다. 군집에서 중요한 것은 번호가 아니라 <b>어떤 점들이 함께 묶였는가</b>입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. k-평균 알고리즘 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>k-평균 알고리즘 — 배정과 이동의 반복</h2></div>
+
+    <p>가장 널리 쓰이는 군집 알고리즘은 <b class="blank" data-a="k-평균|k평균|k-means|케이 평균" data-hint="이름에 ‘평균’이 들어간 대표 군집 알고리즘, 영어로는 k-means">k-평균</b>입니다. 이름의 <span class="mono">k</span>는 <b>만들 군집의 개수</b>이고, ‘평균’은 <b>중심을 평균으로 계산한다</b>는 뜻입니다. 알고리즘의 핵심은 단 두 동작을 번갈아 반복하는 것입니다.</p>
+
+    <p>각 군집을 대표하는 점을 <b class="blank" data-a="중심점|중심|센트로이드|centroid" data-hint="영어로 centroid, 군집을 대표하는 가운데 점">중심점</b>이라고 합니다. k-평균은 이 중심점을 조금씩 옮겨 가며 군집을 다듬습니다.</p>
+
+    <ol class="step-list">
+      <li><b>중심점 초기화</b> — 데이터 안에서 <span class="mono">k</span>개의 점을 골라 첫 중심점으로 삼습니다. 보통 무작위로 뽑습니다.</li>
+      <li><b>배정</b> — 모든 점을 가장 가까운 중심점에 <b class="blank" data-a="배정|할당" data-hint="각 점의 소속을 정해 주는 일, ‘할당’이라고도 한다">배정</b>합니다. 거리는 보통 유클리드 거리를 씁니다.</li>
+      <li><b>이동</b> — 각 군집에 배정된 점들의 <b class="blank" data-hint="k-평균이라는 이름에 들어 있는 그 계산, 값들을 모두 더해 개수로 나눈 값">평균</b> 위치로 중심점을 옮깁니다.</li>
+      <li><b>반복</b> — 배정이 더 이상 바뀌지 않을 때까지 ②와 ③을 되풀이합니다.</li>
+    </ol>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">🎯</span>
+        <h4>② 배정 단계</h4>
+        <p>중심점은 <b>가만히</b> 있고, 점들의 <b>소속만</b> 바뀝니다. 각 점은 자기와 가장 가까운 중심점의 군집으로 들어갑니다. 화면에서는 점의 <b>색</b>이 바뀌는 단계입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🧲</span>
+        <h4>③ 이동 단계</h4>
+        <p>소속은 <b>그대로</b> 두고, 중심점만 <b>자기 식구들의 평균 위치</b>로 옮겨 갑니다. 화면에서는 별 모양 중심점이 스르륵 움직이는 단계입니다.</p>
+      </div>
+    </div>
+
+    <h3 class="sub-head">군집이 잘 됐는지는 어떻게 재는가 — SSE</h3>
+    <p>정답이 없으니 정확도를 잴 수는 없습니다. 대신 “각 점이 자기 중심점에서 얼마나 멀리 떨어져 있는가”를 모두 더해 봅니다. 이 값을 <b class="blank" data-a="군집 내 제곱합|SSE|이너셔|관성|오차 제곱합" data-hint="영어 약자로는 SSE, 사이킷런에서는 이너셔(inertia)라고 부른다">군집 내 제곱합</b>이라고 하고, 보통 <span class="mono">SSE</span>로 줄여 씁니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 — 군집 내 제곱합(SSE)</div>
+      <p><span class="fx">SSE = Σ (각 점과 그 점이 속한 군집 중심점 사이의 거리)<sup>2</sup></span></p>
+      <p>SSE가 <b>작을수록</b> 각 군집이 촘촘하게 뭉쳐 있다는 뜻이다. 사이킷런에서는 이 값을 <b>이너셔(inertia)</b>라고 부른다.</p>
+    </div>
+
+    <p>여기서 놀라운 사실이 있습니다. <b>배정 단계와 이동 단계는 둘 다 SSE를 줄이거나 그대로 둡니다.</b> 배정 단계는 각 점을 더 가까운 중심으로 보내니 거리가 줄고, 이동 단계는 평균이 ‘제곱 거리 합을 가장 작게 하는 점’이라는 성질 덕분에 또 줄어듭니다. 그래서 k-평균은 SSE가 계단처럼 내려가다가 반드시 어딘가에서 멈춥니다. 이렇게 더 이상 변화가 없는 상태에 도달하는 것을 <b class="blank" data-a="수렴|수렴함" data-hint="값이 한 곳으로 모여 더 이상 변하지 않게 되는 것">수렴</b>이라고 합니다.</p>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 그런데 ‘가장 좋은 답’은 아니다</div>
+      <p>k-평균이 멈춘 자리는 <b>더 이상 나아지지 않는 자리</b>일 뿐, 언제나 <b>가장 좋은 자리</b>는 아닙니다. 처음 뽑은 중심점이 나쁘면 엉뚱한 모양으로 굳어 버리는데, 이것을 <b class="blank" data-a="지역 최적해|국소 최적해|지역 최적|국소 최적" data-hint="주변보다는 좋지만 전체에서 가장 좋은 답은 아닌 해">지역 최적해</b>에 갇혔다고 말합니다.</p>
+      <p>그래서 실제로는 <b>초기 중심을 바꿔 여러 번 실행하고, SSE가 가장 작은 결과를 고릅니다.</b> 초기 중심을 서로 멀리 떨어지게 똑똑하게 뽑는 <span class="mono">k-평균++</span> 방법도 널리 쓰입니다. 시뮬레이터에서 중심점을 한쪽 구석에 몰아 놓고 실행해 보면, 이 문제를 직접 겪어 볼 수 있습니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4. k 고르기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>k는 몇 개가 좋을까 — 엘보 방법</h2></div>
+
+    <p>k-평균에게는 치명적인 약점이 하나 있습니다. <b>군집을 몇 개로 나눌지(k)를 사람이 미리 알려 줘야</b> 한다는 점입니다. 이렇게 학습이 시작되기 전에 사람이 정해 주는 값을 <b class="blank" data-hint="모델이 학습으로 알아내는 값이 아니라, 사람이 미리 정해 주는 설정값">하이퍼파라미터</b>라고 합니다. k-NN의 k도 같은 성격의 값이었지요.</p>
+
+    <p>그렇다면 SSE가 가장 작은 k를 고르면 될까요? 그렇게 하면 <b>큰일 납니다.</b> k를 키우면 SSE는 <b>언제나</b> 줄어들기 때문입니다. 점이 100개일 때 k를 100으로 하면 모든 점이 자기 자신의 중심이 되어 SSE는 정확히 0이 됩니다. 완벽해 보이지만 아무것도 알려 주지 않는 결과입니다.</p>
+
+    <p>그래서 SSE의 <b>절댓값</b>이 아니라 <b>줄어드는 모양</b>을 봅니다. k를 1, 2, 3… 늘려 가며 SSE를 그려 보면 처음에는 뚝뚝 떨어지다가, 데이터에 실제로 들어 있는 덩어리 수를 지나는 순간부터 <b>완만해집니다.</b> 이 꺾이는 지점이 팔꿈치처럼 보이기 때문에 이 방법을 <b class="blank" data-a="엘보 방법|엘보|팔꿈치 방법|팔꿈치 분석|엘보우 방법" data-hint="팔꿈치처럼 꺾인 지점을 찾는다는 뜻, 팔꿈치 분석이라고도 한다">엘보 방법</b>이라고 부릅니다.</p>
+
+    <div class="box box-ok">
+      <div class="box-label">✅ 엘보 방법을 읽는 법</div>
+      <p>“k를 하나 더 늘렸을 때 SSE가 <b>많이</b> 줄어드는가?”를 묻습니다. 많이 줄어든다면 아직 한 군집 안에 서로 다른 덩어리가 섞여 있다는 뜻이고, 조금밖에 줄지 않는다면 이미 덩어리를 다 찾아낸 뒤 <b>같은 덩어리를 쪼개고 있을 뿐</b>이라는 뜻입니다. 그 경계가 팔꿈치입니다.</p>
+    </div>
+
+    <p>엘보 방법은 만능이 아닙니다. 팔꿈치가 흐릿해서 사람마다 다르게 읽는 경우도 많습니다. 그래서 각 점이 자기 군집에 얼마나 잘 어울리는지를 −1~1 사이 값으로 재는 <span class="mono">실루엣 계수</span>를 함께 보거나, 업무 상황(“마케팅 팀이 관리할 수 있는 고객 집단은 최대 5개”)을 함께 고려해 k를 정합니다.</p>
+  </section>
+
+  <!-- ============ 5. 시뮬레이터 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>직접 돌려 보기</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim1"></div>
+    <div id="sim2"></div>
+  </section>
+
+  <!-- ============ 6. 활용 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>군집은 어디에 쓰이는가</h2></div>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">🛒</span>
+        <h4>고객 분류</h4>
+        <p>구매 금액·방문 주기·장바구니 크기로 고객을 묶습니다. ‘큰돈을 한 번에 쓰는 집단’과 ‘조금씩 자주 오는 집단’에는 서로 다른 쿠폰을 보내야 하지요. 이런 작업을 <b>고객 세분화</b>라고 합니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🎨</span>
+        <h4>이미지 색 줄이기</h4>
+        <p>사진의 모든 픽셀을 (R, G, B) 세 숫자로 보고 k=16으로 군집하면, 수만 가지 색이 대표색 16개로 줄어듭니다. 파일 크기가 크게 줄어드는 <b>색 양자화</b> 기법입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🚨</span>
+        <h4>이상 탐지</h4>
+        <p>어느 군집의 중심에서도 <b>유난히 멀리</b> 떨어진 점은 이상한 데이터일 가능성이 높습니다. 카드 부정 사용 탐지, 공장 설비 고장 예측에 쓰입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">📰</span>
+        <h4>문서 주제 묶기</h4>
+        <p>기사에 등장하는 단어의 빈도를 좌표로 삼아 군집하면, 사람이 읽지 않아도 기사들이 정치·스포츠·연예처럼 <b>주제별로 모입니다.</b></p>
+      </div>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 k-평균이 못하는 것</div>
+      <p>k-평균은 군집이 <b>동그란 덩어리</b>라고 가정합니다. 그래서 초승달 모양이나 서로 감싼 고리 모양의 군집은 잘 찾지 못합니다. 이런 데이터에는 밀도가 높은 곳을 이어 붙이는 <span class="mono">DBSCAN</span> 같은 밀도 기반 군집이 더 알맞습니다. 또 k-평균은 <b>거리</b>로 판단하므로, 값의 범위가 크게 다른 속성이 섞여 있으면 반드시 정규화를 먼저 해야 합니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 7. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 8. 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 9. 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">9</span><h2>활동 기록</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> k-평균++와 실루엣 계수</summary>
+      <div class="more-body">
+        <p><b>k-평균++</b>는 초기 중심을 무작정 뽑지 않습니다. 첫 중심은 무작위로 뽑되, 그다음 중심은 <b>이미 뽑힌 중심에서 멀리 떨어진 점이 뽑힐 확률을 높여</b> 고릅니다. 중심들이 처음부터 골고루 퍼지므로 지역 최적해에 갇힐 확률이 크게 줄어듭니다. 사이킷런의 <span class="mono">KMeans</span>는 기본값이 이미 <span class="mono">init=&#39;k-means++&#39;</span>이고, 서로 다른 초기값으로 여러 번 실행하는 <span class="mono">n_init</span> 옵션도 함께 씁니다.</p>
+        <p><b>실루엣 계수</b>는 점 하나마다 이렇게 계산합니다. <span class="fx">s = (b − a) / max(a, b)</span> 여기서 <span class="mono">a</span>는 같은 군집 안 다른 점들과의 평균 거리, <span class="mono">b</span>는 가장 가까운 다른 군집 점들과의 평균 거리입니다. 1에 가까우면 자기 군집에 잘 어울리고, 0에 가까우면 경계에 걸쳐 있고, 음수면 <b>다른 군집에 들어가는 편이 나았다</b>는 뜻입니다. 전체 평균이 가장 높은 k를 고르는 방법을 실루엣 분석이라고 합니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">코드</span> 파이썬으로 k-평균 돌려 보기</summary>
+      <div class="more-body">
+        <p>사이킷런을 쓰면 이 차시의 시뮬레이터가 한 일을 몇 줄로 실행할 수 있습니다.</p>
+        <pre style="margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;white-space:pre-wrap">from sklearn.cluster import KMeans
+
+sse = []
+for k in range(1, 9):                      # k를 1부터 8까지
+    model = KMeans(n_clusters=k, n_init=10, random_state=0)
+    model.fit(X)                           # X: 정답 없는 데이터
+    sse.append(model.inertia_)             # inertia_ = 군집 내 제곱합(SSE)
+
+# 엘보 방법: sse 를 꺾은선으로 그려 팔꿈치를 찾는다
+best = KMeans(n_clusters=4, n_init=10, random_state=0).fit(X)
+print(best.labels_)                        # 각 점의 군집 번호
+print(best.cluster_centers_)               # 군집별 중심점 좌표</pre>
+        <p style="margin-top:12px"><span class="mono">n_init=10</span>이 바로 “초기 중심을 10번 다시 뽑아 가장 좋은 결과를 쓰겠다”는 뜻입니다. 시뮬레이터 2의 <b>재시도 횟수</b> 슬라이더와 똑같은 역할입니다. <span class="mono">fit_predict(X)</span>를 쓰면 학습과 군집 번호 얻기를 한 번에 할 수 있습니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> 사진 한 장의 색을 16가지로 줄이면</summary>
+      <div class="more-body">
+        <p>스마트폰 사진 한 장에는 보통 수십만 개의 픽셀이 있고, 색은 1,600만 가지까지 표현됩니다. 각 픽셀을 (R, G, B) 좌표의 점으로 보고 k=16으로 군집하면, 픽셀들은 16개 대표색으로 모입니다. 그다음 각 픽셀을 자기 군집의 중심색으로 바꿔 칠하면 <b>색은 16가지뿐인 사진</b>이 됩니다.</p>
+        <p>놀라운 점은 이렇게 색을 극단적으로 줄여도 사진의 내용을 알아보는 데는 큰 문제가 없다는 것입니다. 데이터의 양은 크게 줄지만 <b>중요한 정보는 남는</b> 이 성질이 압축 기술의 핵심 아이디어입니다. 오래된 GIF 이미지가 256색만 쓰던 것도 같은 원리입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 다음 차시로 — 잘 묶었는지, 잘 맞혔는지 재려면</summary>
+      <div class="more-body">
+        군집에는 정답이 없어서 SSE나 실루엣 계수로 <b>간접적으로만</b> 평가할 수 있었습니다. 그렇다면 정답이 있는 지도학습은 어떻게 평가할까요? “정확도 95%”라는 말만 믿으면 될까요? 다음 차시에서는 데이터를 <b>훈련용과 테스트용으로 나누는 이유</b>, 그리고 정확도 하나만 보면 크게 속을 수 있는 <b>혼동 행렬·정밀도·재현율</b>을 다룹니다.
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 2, lesson: 5,
+  title: '정답 없이 묶기',
+  sub: '비지도학습과 k-평균 군집',
+  lead: '정답표가 <b>한 줄도 없는</b> 데이터에서 그룹을 찾아냅니다. 배정과 이동, 단 두 동작을 번갈아 반복하는 <b>k-평균</b>을 단계별로 직접 실행하고, 군집을 몇 개로 나눌지 <b>엘보 방법</b>으로 결정해 봅니다.',
+  standards: ['12인기02-03'],
+  keywords: ['비지도학습', '군집', 'k-평균', '중심점', 'SSE', '엘보 방법'],
+  goals: [
+    '비지도학습의 개념을 설명하고, 군집과 분류의 차이를 예를 들어 구분할 수 있다.',
+    'k-평균 알고리즘의 배정 단계와 이동 단계를 직접 실행하며 수렴 과정을 설명할 수 있다.',
+    '초기 중심점이 결과에 미치는 영향을 확인하고, 엘보 방법으로 적절한 k를 선정할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 시뮬레이터 1: k-평균 단계별 관찰 ===================== -->
+<script>
+(function () {
+  /* ---------- 공통 데이터 (시뮬레이터 2와 같은 코드·같은 씨앗 → 같은 데이터) ---------- */
+  var CENTERS = [[2.2, 1.55], [7.6, 1.30], [1.9, 5.50], [7.1, 5.25]];
+  var SD = 0.45, PER = 22, TRUE_K = CENTERS.length;
+
+  function makeData() {
+    var r = AI.sim.rng(20260805), pts = [];
+    for (var b = 0; b < CENTERS.length; b++) {
+      for (var i = 0; i < PER; i++) {
+        var u1 = Math.max(1e-9, r()), u2 = r();
+        var rad = Math.sqrt(-2 * Math.log(u1));
+        pts.push({
+          x: AI.sim.clamp(CENTERS[b][0] + rad * Math.cos(2 * Math.PI * u2) * SD, 0.35, 9.65),
+          y: AI.sim.clamp(CENTERS[b][1] + rad * Math.sin(2 * Math.PI * u2) * SD, 0.35, 6.75),
+          b: b
+        });
+      }
+    }
+    return pts;
+  }
+
+  var PTS = makeData();
+
+  /* ---------- 패널 ---------- */
+  var body = AI.sim.panel('#sim1', {
+    title: 'k-평균 단계별 관찰',
+    tag: '배정 ↔ 이동',
+    desc: '점 ' + PTS.length + '개가 흩어져 있습니다. <b>① 배정</b>과 <b>② 이동</b> 버튼을 번갈아 눌러 두 단계가 각각 무엇을 바꾸는지 확인해 보세요. 별 모양 중심점은 <b>마우스로 직접 끌어 옮길 수 있습니다.</b> 중심을 한쪽 구석에 몰아 놓고 자동 실행하면 어떤 일이 벌어질까요?'
+  });
+
+  var W = 460, H = 340, PAD = 24, SC = 41.2;
+  var sx = function (x) { return PAD + x * SC; };
+  var sy = function (y) { return PAD + y * SC; };
+  var ux = function (px) { return (px - PAD) / SC; };
+  var uy = function (py) { return (py - PAD) / SC; };
+
+  var cv = AI.sim.canvas(W, H, { maxFull: true });
+  body.appendChild(cv.wrap);
+
+  var stats = AI.ui.stats([
+    { key: 'it', label: '반복 횟수' },
+    { key: 'sse', label: 'SSE (군집 내 제곱합)' },
+    { key: 'nx', label: '다음 단계' }
+  ]);
+  body.appendChild(stats.el);
+
+  var chips = AI.h('div', { class: 'cl-chips' });
+  body.appendChild(chips);
+
+  var log = AI.ui.log();
+
+  /* ---------- 상태 ---------- */
+  var K = 3, seed = 4021;
+  var cents = [], prev = null, assign = [], phase = 'assign';
+  var iters = 0, converged = false, lastChanged = true, dragIdx = -1;
+
+  function palette() {
+    var C = AI.sim.colors();
+    return [C.a, C.b, C.c, C.d, C.no, C.warn];
+  }
+
+  function initCents(newSeed) {
+    if (newSeed !== undefined) seed = newSeed;
+    var order = AI.sim.shuffle(PTS.map(function (_, i) { return i; }), AI.sim.rng(seed));
+    cents = order.slice(0, K).map(function (i) { return { x: PTS[i].x, y: PTS[i].y }; });
+    assign = PTS.map(function () { return -1; });
+    prev = null; phase = 'assign'; iters = 0; converged = false; lastChanged = true;
+    verdict.style.display = 'none';
+    log.clear();
+    log.add('k = ' + K + ' · 중심점 ' + K + '개를 무작위로 뽑았습니다. ① 배정부터 시작하세요.');
+  }
+
+  function sse() {
+    var s = 0;
+    for (var i = 0; i < PTS.length; i++) {
+      if (assign[i] < 0) continue;
+      var c = cents[assign[i]];
+      s += (PTS[i].x - c.x) * (PTS[i].x - c.x) + (PTS[i].y - c.y) * (PTS[i].y - c.y);
+    }
+    return s;
+  }
+
+  function counts() {
+    var n = [];
+    for (var c = 0; c < K; c++) n.push(0);
+    for (var i = 0; i < PTS.length; i++) if (assign[i] >= 0) n[assign[i]]++;
+    return n;
+  }
+
+  /* ---------- ② 배정 ---------- */
+  function doAssign() {
+    var changed = 0;
+    for (var i = 0; i < PTS.length; i++) {
+      var best = -1, bd = Infinity;
+      for (var c = 0; c < K; c++) {
+        var dx = PTS[i].x - cents[c].x, dy = PTS[i].y - cents[c].y;
+        var d = dx * dx + dy * dy;
+        if (d < bd) { bd = d; best = c; }
+      }
+      if (assign[i] !== best) { assign[i] = best; changed++; }
+    }
+    lastChanged = changed > 0;
+    phase = 'move';
+    prev = null;
+    log.add('① <b>배정</b> — 소속이 바뀐 점 ' + changed + '개 · SSE ' + AI.sim.fmt(sse(), 1), changed === 0);
+    return changed;
+  }
+
+  /* ---------- ③ 이동 ---------- */
+  function doMove() {
+    prev = cents.map(function (c) { return { x: c.x, y: c.y }; });
+    var sxs = [], sys = [], n = [];
+    for (var c = 0; c < K; c++) { sxs.push(0); sys.push(0); n.push(0); }
+    for (var i = 0; i < PTS.length; i++) {
+      var a = assign[i];
+      if (a < 0) continue;
+      sxs[a] += PTS[i].x; sys[a] += PTS[i].y; n[a]++;
+    }
+    var shift = 0;
+    for (var c2 = 0; c2 < K; c2++) {
+      if (!n[c2]) continue;
+      var nx = sxs[c2] / n[c2], ny = sys[c2] / n[c2];
+      shift = Math.max(shift, Math.hypot(nx - cents[c2].x, ny - cents[c2].y));
+      cents[c2] = { x: nx, y: ny };
+    }
+    iters++;
+    phase = 'assign';
+    log.add('② <b>이동</b> — 중심을 평균 위치로 (최대 ' + AI.sim.fmt(shift, 2) + ' 이동) · SSE ' + AI.sim.fmt(sse(), 1));
+    if (!lastChanged && shift < 0.004) {
+      converged = true;
+      log.add('✔ <b>수렴!</b> ' + iters + '번 반복 후 더 이상 변화가 없습니다. 최종 SSE ' + AI.sim.fmt(sse(), 1), true);
+      showVerdict();
+    }
+    return shift;
+  }
+
+  /* ---------- 그리기 ---------- */
+  function draw() {
+    var C = AI.sim.colors(), ctx = cv.ctx, P = palette();
+    cv.clear(C.bg);
+
+    /* 격자 */
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+    for (var g = 0; g <= 10; g++) {
+      ctx.beginPath(); ctx.moveTo(sx(g), sy(0)); ctx.lineTo(sx(g), sy(7.05)); ctx.stroke();
+    }
+    for (var g2 = 0; g2 <= 7; g2++) {
+      ctx.beginPath(); ctx.moveTo(sx(0), sy(g2)); ctx.lineTo(sx(10), sy(g2)); ctx.stroke();
+    }
+
+    /* 점 → 중심 연결선 */
+    for (var i = 0; i < PTS.length; i++) {
+      if (assign[i] < 0) continue;
+      var c = cents[assign[i]];
+      ctx.strokeStyle = P[assign[i] % P.length];
+      ctx.globalAlpha = 0.28; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sx(PTS[i].x), sy(PTS[i].y)); ctx.lineTo(sx(c.x), sy(c.y)); ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    /* 점 */
+    for (var j = 0; j < PTS.length; j++) {
+      ctx.beginPath();
+      ctx.arc(sx(PTS[j].x), sy(PTS[j].y), 3.6, 0, Math.PI * 2);
+      ctx.fillStyle = assign[j] < 0 ? (C.dark ? '#7b8496' : '#aab2c2') : P[assign[j] % P.length];
+      ctx.fill();
+    }
+
+    /* 이전 중심 흔적 */
+    if (prev) {
+      ctx.setLineDash([4, 3]);
+      for (var p = 0; p < prev.length && p < cents.length; p++) {
+        ctx.strokeStyle = C.ink3; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(sx(prev[p].x), sy(prev[p].y)); ctx.lineTo(sx(cents[p].x), sy(cents[p].y)); ctx.stroke();
+        ctx.beginPath(); ctx.arc(sx(prev[p].x), sy(prev[p].y), 5, 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.setLineDash([]);
+    }
+
+    /* 중심점 (별) */
+    for (var k = 0; k < cents.length; k++) star(ctx, sx(cents[k].x), sy(cents[k].y), P[k % P.length], C, k + 1);
+
+    /* 상태 표시 */
+    stats.set('it', iters);
+    stats.set('sse', AI.sim.fmt(sse(), 1));
+    stats.set('nx', converged ? '수렴' : (phase === 'assign' ? '① 배정' : '② 이동'));
+
+    var n = counts();
+    chips.innerHTML = '';
+    for (var q = 0; q < K; q++) {
+      var chip = AI.h('span', { class: 'cl-chip' },
+        AI.h('i', { style: { background: P[q % P.length] } }),
+        '군집 ' + (q + 1) + ' · ' + n[q] + '개');
+      chips.appendChild(chip);
+    }
+    if (assign[0] < 0) chips.appendChild(AI.h('span', { class: 'cl-chip', text: '아직 배정 전 (회색 점)' }));
+  }
+
+  function star(ctx, x, y, col, C, label) {
+    ctx.save();
+    ctx.beginPath();
+    for (var i = 0; i < 10; i++) {
+      var ang = -Math.PI / 2 + i * Math.PI / 5;
+      var r = i % 2 ? 4.6 : 10.5;
+      var px = x + Math.cos(ang) * r, py = y + Math.sin(ang) * r;
+      i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = col; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = C.bg; ctx.stroke();
+    ctx.fillStyle = C.ink;
+    ctx.font = '800 10px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(label), x, y - 16);
+    ctx.restore();
+  }
+
+  /* ---------- 결과 해설 ---------- */
+  var verdict = AI.h('div', { class: 'box box-ok', style: { display: 'none', marginTop: '14px' } });
+
+  function showVerdict() {
+    var n = counts(), empty = 0, s = sse();
+    for (var i = 0; i < n.length; i++) if (n[i] === 0) empty++;
+    var html = '<div class="box-label">📊 수렴 결과</div>' +
+      '<p><b>' + iters + '번 반복</b> 후 수렴했습니다. 최종 SSE는 <b>' + AI.sim.fmt(s, 1) + '</b>, 군집별 점 개수는 ' +
+      n.map(function (v, i) { return '군집 ' + (i + 1) + ' ' + v + '개'; }).join(' · ') + ' 입니다.</p>';
+    if (K === TRUE_K && s < 45) {
+      html += '<p>이 데이터에는 원래 <b>' + TRUE_K + '개의 덩어리</b>가 들어 있었습니다. k = ' + TRUE_K + '로 두고 좋은 초기 중심에서 출발하면 이렇게 SSE가 크게 떨어집니다.</p>';
+    } else if (K === TRUE_K) {
+      html += '<p>k는 ' + TRUE_K + '로 맞는데 SSE가 <b>' + AI.sim.fmt(s, 1) + '</b>이나 됩니다. 초기 중심이 나빠 <b>지역 최적해</b>에 갇혔을 가능성이 큽니다. ‘🎲 중심 다시 뽑기’를 눌러 다시 실행해 SSE를 비교해 보세요.</p>';
+    } else if (K < TRUE_K) {
+      html += '<p>k가 실제 덩어리 수보다 작으면 <b>서로 다른 덩어리가 한 군집에 섞입니다.</b> 연결선이 아주 길게 뻗은 군집을 찾아보세요.</p>';
+    } else {
+      html += '<p>k가 실제 덩어리 수보다 크면 <b>같은 덩어리를 억지로 쪼갭니다.</b> SSE는 조금 더 줄지만 새로 알게 되는 것은 없습니다.</p>';
+    }
+    if (empty) html += '<p style="color:var(--ink-3);font-size:14px">⚠ 점이 하나도 배정되지 않은 <b>빈 군집이 ' + empty + '개</b> 생겼습니다. 중심을 데이터에서 너무 멀리 놓으면 이런 일이 벌어집니다.</p>';
+    html += '<p style="color:var(--ink-3);font-size:14px">💡 별 모양 중심점을 한쪽 구석으로 몰아 놓고 다시 자동 실행해 보세요. 같은 k인데도 훨씬 나쁜 SSE로 굳어 버리는 것을 확인할 수 있습니다.</p>';
+    verdict.innerHTML = html;
+    verdict.style.display = '';
+  }
+
+  /* ---------- 컨트롤 ---------- */
+  var loop = AI.sim.loop({
+    fps: 2,
+    step: function () {
+      if (converged) return false;
+      if (phase === 'assign') doAssign(); else doMove();
+      draw();
+      return !converged;
+    },
+    onState: function (playing) { playBtn.textContent = playing ? '⏸ 멈춤' : '▶ 자동 실행'; }
+  });
+
+  var playBtn = AI.ui.btn('▶ 자동 실행', function () { loop.toggle(); }, 'primary');
+
+  var kSlider = AI.ui.slider({
+    label: '군집 개수 k', min: 2, max: 6, value: 3, unit: '개',
+    onInput: function (v) { loop.pause(); K = v; initCents(); draw(); }
+  });
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('① 배정', function () {
+      loop.pause();
+      if (converged) { AI.toast('이미 수렴했어요. 중심을 옮기거나 다시 뽑아 보세요'); return; }
+      doAssign(); draw();
+    }),
+    AI.ui.btn('② 이동', function () {
+      loop.pause();
+      if (assign[0] < 0) { AI.toast('먼저 ① 배정을 실행해 주세요'); return; }
+      if (converged) { AI.toast('이미 수렴했어요'); return; }
+      doMove(); draw();
+    }),
+    playBtn,
+    AI.ui.btn('🎲 중심 다시 뽑기', function () {
+      loop.pause();
+      initCents((seed * 37 + 11) % 99991);
+      draw();
+    }, 'ghost'),
+    kSlider.el
+  ));
+  body.appendChild(verdict);
+  body.appendChild(log.el);
+
+  body.appendChild(AI.ui.legend([
+    { color: 'var(--ink-4)', label: '아직 배정 전' },
+    { color: 'var(--accent)', label: '군집별 점과 중심점(별)' },
+    { color: 'var(--ink-3)', label: '점선 원 = 중심의 이전 위치' }
+  ]));
+
+  /* ---------- 중심점 끌어 옮기기 ---------- */
+  function pick(p) {
+    var best = -1, bd = 15;
+    for (var i = 0; i < cents.length; i++) {
+      var d = Math.hypot(sx(cents[i].x) - p.x, sy(cents[i].y) - p.y);
+      if (d < bd) { bd = d; best = i; }
+    }
+    return best;
+  }
+  cv.canvas.style.cursor = 'grab';
+  cv.canvas.addEventListener('pointerdown', function (ev) {
+    var i = pick(cv.pos(ev));
+    if (i < 0) return;
+    dragIdx = i;
+    cv.canvas.style.cursor = 'grabbing';
+    if (cv.canvas.setPointerCapture) cv.canvas.setPointerCapture(ev.pointerId);
+    ev.preventDefault();
+  });
+  cv.canvas.addEventListener('pointermove', function (ev) {
+    if (dragIdx < 0) return;
+    var p = cv.pos(ev);
+    cents[dragIdx] = { x: AI.sim.clamp(ux(p.x), 0, 10), y: AI.sim.clamp(uy(p.y), 0, 7.05) };
+    converged = false; phase = 'assign'; lastChanged = true; prev = null;
+    verdict.style.display = 'none';
+    draw();
+  });
+  function endDrag() {
+    if (dragIdx < 0) return;
+    log.add('✋ 중심 ' + (dragIdx + 1) + '번을 직접 옮겼습니다 — ① 배정을 다시 실행해 보세요.', true);
+    dragIdx = -1;
+    cv.canvas.style.cursor = 'grab';
+  }
+  cv.canvas.addEventListener('pointerup', endDrag);
+  cv.canvas.addEventListener('pointercancel', endDrag);
+
+  window.addEventListener('ai:redraw', draw);
+
+  initCents();
+  draw();
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 엘보 방법으로 k 고르기 ===================== -->
+<script>
+(function () {
+  /* ---------- 시뮬레이터 1과 똑같은 데이터 ---------- */
+  var CENTERS = [[2.2, 1.55], [7.6, 1.30], [1.9, 5.50], [7.1, 5.25]];
+  var SD = 0.45, PER = 22, TRUE_K = CENTERS.length, KMAX = 8;
+
+  function makeData() {
+    var r = AI.sim.rng(20260805), pts = [];
+    for (var b = 0; b < CENTERS.length; b++) {
+      for (var i = 0; i < PER; i++) {
+        var u1 = Math.max(1e-9, r()), u2 = r();
+        var rad = Math.sqrt(-2 * Math.log(u1));
+        pts.push({
+          x: AI.sim.clamp(CENTERS[b][0] + rad * Math.cos(2 * Math.PI * u2) * SD, 0.35, 9.65),
+          y: AI.sim.clamp(CENTERS[b][1] + rad * Math.sin(2 * Math.PI * u2) * SD, 0.35, 6.75),
+          b: b
+        });
+      }
+    }
+    return pts;
+  }
+  var PTS = makeData();
+
+  /* ---------- k-평균 한 번 완전히 돌리기 ---------- */
+  function kmeans(k, seed) {
+    var r = AI.sim.rng(seed);
+    var order = AI.sim.shuffle(PTS.map(function (_, i) { return i; }), r);
+    var cents = order.slice(0, k).map(function (i) { return { x: PTS[i].x, y: PTS[i].y }; });
+    var assign = PTS.map(function () { return -1; });
+    var iters = 0;
+    for (var t = 0; t < 100; t++) {
+      var changed = false;
+      for (var i = 0; i < PTS.length; i++) {
+        var best = -1, bd = Infinity;
+        for (var c = 0; c < k; c++) {
+          var dx = PTS[i].x - cents[c].x, dy = PTS[i].y - cents[c].y, d = dx * dx + dy * dy;
+          if (d < bd) { bd = d; best = c; }
+        }
+        if (assign[i] !== best) { assign[i] = best; changed = true; }
+      }
+      var sxs = [], sys = [], n = [];
+      for (var c2 = 0; c2 < k; c2++) { sxs.push(0); sys.push(0); n.push(0); }
+      for (var j = 0; j < PTS.length; j++) { sxs[assign[j]] += PTS[j].x; sys[assign[j]] += PTS[j].y; n[assign[j]]++; }
+      for (var c3 = 0; c3 < k; c3++) if (n[c3]) cents[c3] = { x: sxs[c3] / n[c3], y: sys[c3] / n[c3] };
+      iters = t + 1;
+      if (!changed) break;
+    }
+    var sse = 0;
+    for (var m = 0; m < PTS.length; m++) {
+      var cc = cents[assign[m]];
+      sse += (PTS[m].x - cc.x) * (PTS[m].x - cc.x) + (PTS[m].y - cc.y) * (PTS[m].y - cc.y);
+    }
+    return { cents: cents, assign: assign, sse: sse, iters: iters, k: k };
+  }
+
+  /* ---------- k=1..KMAX 각각 여러 번 돌려 최적 결과 ---------- */
+  var results = [], elbowK = TRUE_K, restarts = 10, curK = TRUE_K;
+
+  function computeAll() {
+    results = [];
+    for (var k = 1; k <= KMAX; k++) {
+      var best = null;
+      for (var s = 0; s < restarts; s++) {
+        var r = kmeans(k, 1000 + s * 7919 + k * 104729);
+        if (!best || r.sse < best.sse) best = r;
+      }
+      results.push(best);
+    }
+    elbowK = findElbow();
+  }
+
+  /* 팔꿈치 찾기: 양 끝을 이은 직선에서 가장 멀리 떨어진 점 (양축을 0~1로 정규화) */
+  function findElbow() {
+    var n = results.length;
+    var mx = results[0].sse, mn = results[n - 1].sse;
+    var nx = function (i) { return i / (n - 1); };
+    var ny = function (v) { return (v - mn) / (mx - mn || 1); };
+    var x0 = nx(0), y0 = ny(results[0].sse), x1 = nx(n - 1), y1 = ny(results[n - 1].sse);
+    var den = Math.hypot(y1 - y0, x1 - x0), bk = 1, bd = -1;
+    for (var i = 0; i < n; i++) {
+      var d = Math.abs((y1 - y0) * (nx(i) - x0) - (x1 - x0) * (ny(results[i].sse) - y0)) / den;
+      if (d > bd) { bd = d; bk = i + 1; }
+    }
+    return bk;
+  }
+
+  /* ---------- 패널 ---------- */
+  var body = AI.sim.panel('#sim2', {
+    title: '엘보 방법으로 k 고르기',
+    tag: 'k = 1 ~ 8 실제 계산',
+    desc: '위 시뮬레이터와 <b>완전히 같은 데이터</b>로 k를 1부터 8까지 바꿔 가며 k-평균을 실제로 돌립니다. 각 k마다 초기 중심을 여러 번 다시 뽑아 <b>가장 좋은(SSE가 가장 작은) 결과</b>를 골랐습니다. 꺾은선의 <b>팔꿈치</b>가 어디인지 눈으로 찾아보고, 점을 눌러 그 k의 군집 결과를 확인해 보세요.'
+  });
+
+  var CW = 460, CH = 300;
+  var chart = AI.sim.canvas(CW, CH, { maxFull: true });
+  body.appendChild(chart.wrap);
+
+  var stats = AI.ui.stats([
+    { key: 'e', label: '팔꿈치가 가리키는 k' },
+    { key: 't', label: '데이터에 심어 둔 덩어리' },
+    { key: 's', label: '선택한 k의 SSE' },
+    { key: 'd', label: '직전 k보다 줄어든 양' }
+  ]);
+  body.appendChild(stats.el);
+
+  var kSeg = AI.ui.seg({
+    label: '군집 결과를 볼 k',
+    options: [1, 2, 3, 4, 5, 6, 7, 8].map(function (v) { return { value: v, label: 'k=' + v }; }),
+    value: TRUE_K,
+    onChange: function (v) { curK = v; drawAll(); }
+  });
+
+  var rSlider = AI.ui.slider({
+    label: '초기 중심 재시도 횟수', min: 1, max: 15, value: 10, unit: '번',
+    onInput: function (v) { restarts = v; computeAll(); drawAll(); }
+  });
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.h('div', { class: 'ctl', style: { minWidth: '0' } },
+      AI.h('label', {}, AI.h('span', { text: '군집 결과를 볼 k' })), kSeg.el),
+    rSlider.el));
+
+  /* 아래: 군집 결과 미니 캔버스 + 해설 */
+  var mini = AI.sim.canvas(300, 215, { maxFull: true });
+  var info = AI.h('div', { class: 'box box-info', style: { margin: 0 } });
+  body.appendChild(AI.h('div', { class: 'sim-grid', style: { marginTop: '14px' } },
+    AI.h('div', {}, AI.h('h4', { class: 'mini-head', style: { marginTop: 0 }, text: '선택한 k의 군집 결과' }), mini.wrap),
+    info
+  ));
+
+  var tableHolder = AI.h('div', { style: { marginTop: '14px' } });
+  body.appendChild(tableHolder);
+
+  /* ---------- 꺾은선 그래프 ---------- */
+  function drawChart() {
+    var C = AI.sim.colors(), ctx = chart.ctx;
+    chart.clear(C.bg);
+    var L = 56, R = 16, T = 20, B = 42;
+    var pw = CW - L - R, ph = CH - T - B;
+    var maxS = results[0].sse * 1.06;
+    var X = function (k) { return L + (k - 1) / (KMAX - 1) * pw; };
+    var Y = function (v) { return T + ph - (v / maxS) * ph; };
+
+    /* 격자와 y축 눈금 */
+    ctx.font = '600 11px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textBaseline = 'middle'; ctx.textAlign = 'right';
+    for (var g = 0; g <= 4; g++) {
+      var v = maxS * g / 4, yy = Y(v);
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(L, yy); ctx.lineTo(L + pw, yy); ctx.stroke();
+      ctx.fillStyle = C.ink3;
+      ctx.fillText(Math.round(v), L - 7, yy);
+    }
+    /* 축 */
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(L, T); ctx.lineTo(L, T + ph); ctx.lineTo(L + pw, T + ph); ctx.stroke();
+
+    /* x축 눈금 */
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (var k = 1; k <= KMAX; k++) {
+      ctx.fillStyle = (k === curK) ? C.ink : C.ink3;
+      ctx.font = (k === curK ? '800 12px ' : '600 11px ') + getComputedStyle(document.body).fontFamily;
+      ctx.fillText('k=' + k, X(k), T + ph + 8);
+    }
+    ctx.fillStyle = C.ink3;
+    ctx.font = '600 11px ' + getComputedStyle(document.body).fontFamily;
+    ctx.fillText('군집 개수 k', L + pw / 2, T + ph + 26);
+    ctx.save();
+    ctx.translate(14, T + ph / 2); ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('SSE (군집 내 제곱합)', 0, 0);
+    ctx.restore();
+
+    /* 선택한 k 세로선 */
+    ctx.setLineDash([4, 4]); ctx.strokeStyle = C.ink3; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X(curK), T); ctx.lineTo(X(curK), T + ph); ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* 양 끝을 이은 보조선 (팔꿈치 기준선) */
+    ctx.setLineDash([3, 5]); ctx.strokeStyle = C.ink3; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X(1), Y(results[0].sse)); ctx.lineTo(X(KMAX), Y(results[KMAX - 1].sse)); ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* SSE 꺾은선 */
+    ctx.strokeStyle = C.a; ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    for (var i = 0; i < results.length; i++) {
+      var px = X(i + 1), py = Y(results[i].sse);
+      i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+    }
+    ctx.stroke();
+
+    /* 점과 값 */
+    for (var j = 0; j < results.length; j++) {
+      var qx = X(j + 1), qy = Y(results[j].sse);
+      var isElbow = (j + 1) === elbowK;
+      if (isElbow) {
+        ctx.beginPath(); ctx.arc(qx, qy, 11, 0, Math.PI * 2);
+        ctx.strokeStyle = C.c; ctx.lineWidth = 2.2; ctx.stroke();
+      }
+      ctx.beginPath(); ctx.arc(qx, qy, (j + 1) === curK ? 6 : 4.2, 0, Math.PI * 2);
+      ctx.fillStyle = isElbow ? C.c : C.a; ctx.fill();
+      ctx.lineWidth = 1.6; ctx.strokeStyle = C.bg; ctx.stroke();
+      ctx.fillStyle = C.ink3;
+      ctx.font = '700 10.5px ' + getComputedStyle(document.body).fontFamily;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText(AI.sim.fmt(results[j].sse, 0), qx, qy - (isElbow ? 15 : 9));
+    }
+    /* 팔꿈치 표시 */
+    var ex = X(elbowK), ey = Y(results[elbowK - 1].sse);
+    ctx.fillStyle = C.c;
+    ctx.font = '800 12px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText('◀ 팔꿈치', ex + 15, ey + 2);
+  }
+
+  /* ---------- 미니 산점도 ---------- */
+  function drawMini() {
+    var C = AI.sim.colors(), ctx = mini.ctx, P = [C.a, C.b, C.c, C.d, C.no, C.warn, C.ok, C.ink3];
+    mini.clear(C.bg);
+    var pad = 10, sc = Math.min((300 - pad * 2) / 10, (215 - pad * 2) / 7.05);
+    var sx = function (x) { return pad + x * sc; }, sy = function (y) { return pad + y * sc; };
+    var res = results[curK - 1];
+    for (var i = 0; i < PTS.length; i++) {
+      var c = res.cents[res.assign[i]];
+      ctx.strokeStyle = P[res.assign[i] % P.length]; ctx.globalAlpha = 0.25; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(sx(PTS[i].x), sy(PTS[i].y)); ctx.lineTo(sx(c.x), sy(c.y)); ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.arc(sx(PTS[i].x), sy(PTS[i].y), 2.7, 0, Math.PI * 2);
+      ctx.fillStyle = P[res.assign[i] % P.length]; ctx.fill();
+    }
+    for (var k = 0; k < res.cents.length; k++) {
+      ctx.beginPath(); ctx.arc(sx(res.cents[k].x), sy(res.cents[k].y), 6, 0, Math.PI * 2);
+      ctx.fillStyle = P[k % P.length]; ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = C.bg; ctx.stroke();
+    }
+    ctx.fillStyle = C.ink3;
+    ctx.font = '700 11px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+    ctx.fillText('k=' + curK + ' · SSE ' + AI.sim.fmt(res.sse, 1), 300 - 8, 215 - 6);
+  }
+
+  /* ---------- 해설 · 표 ---------- */
+  function drawInfo() {
+    var res = results[curK - 1];
+    var drop = curK > 1 ? results[curK - 2].sse - res.sse : null;
+    stats.set('e', 'k = ' + elbowK);
+    stats.set('t', TRUE_K + '개');
+    stats.set('s', AI.sim.fmt(res.sse, 1));
+    stats.set('d', drop === null ? '–' : AI.sim.fmt(drop, 1));
+
+    var html = '<div class="box-label">🧠 이 결과 읽기</div>';
+    if (elbowK === TRUE_K) {
+      html += '<p>팔꿈치는 <b>k = ' + elbowK + '</b>을 가리키고, 이 데이터를 만들 때 실제로 심어 둔 덩어리도 <b>' + TRUE_K + '개</b>였습니다. 정답을 한 번도 알려 주지 않았는데도 SSE의 <b>꺾이는 모양</b>만으로 덩어리 수를 알아낸 것입니다.</p>';
+    } else {
+      html += '<p>지금 팔꿈치는 <b>k = ' + elbowK + '</b>을 가리키지만, 실제로 심어 둔 덩어리는 <b>' + TRUE_K + '개</b>입니다. <b>재시도 횟수가 너무 적어</b> 어떤 k에서 나쁜 초기 중심에 걸렸고, 그 때문에 SSE 곡선이 일그러진 것입니다. 재시도 횟수를 올려 보세요.</p>';
+    }
+    if (curK < TRUE_K) {
+      html += '<p>지금 고른 <b>k = ' + curK + '</b>은 덩어리 수보다 작습니다. 오른쪽 그림에서 <b>연결선이 길게 뻗은</b> 군집을 찾아보세요. 서로 다른 덩어리가 한 군집에 묶여 있다는 신호입니다.</p>';
+    } else if (curK === TRUE_K) {
+      html += '<p>지금 고른 <b>k = ' + curK + '</b>에서는 각 군집이 덩어리 하나씩을 정확히 담고 있습니다. 연결선이 모두 짧습니다.</p>';
+    } else {
+      html += '<p>지금 고른 <b>k = ' + curK + '</b>은 덩어리 수보다 큽니다. SSE는 ' + (drop !== null ? AI.sim.fmt(drop, 1) + '만큼' : '조금') + ' 더 줄었지만, 실제로는 <b>한 덩어리를 둘로 쪼갠 것</b>일 뿐입니다. 이렇게 얻는 이득이 팔꿈치 이후로 급격히 작아집니다.</p>';
+    }
+    info.innerHTML = html;
+
+    var rows = results.map(function (r, i) {
+      var d = i ? results[i - 1].sse - r.sse : null;
+      return [
+        (i + 1 === elbowK ? '<b>k=' + (i + 1) + ' 🦾</b>' : 'k=' + (i + 1)),
+        AI.sim.fmt(r.sse, 1),
+        d === null ? '–' : AI.sim.fmt(d, 1),
+        d === null ? '–' : AI.sim.fmt(d / results[i - 1].sse * 100, 1) + '%',
+        r.iters + '번'
+      ];
+    });
+    tableHolder.innerHTML = '';
+    tableHolder.appendChild(AI.ui.table(
+      ['군집 개수', 'SSE', '직전보다 줄어든 양', '줄어든 비율', '수렴까지 반복'], rows));
+  }
+
+  function drawAll() { drawChart(); drawMini(); drawInfo(); }
+
+  /* 그래프 클릭 → 가까운 k 선택 */
+  chart.canvas.style.cursor = 'pointer';
+  chart.canvas.addEventListener('click', function (ev) {
+    var p = chart.pos(ev);
+    var L = 56, pw = CW - L - 16;
+    var k = Math.round((p.x - L) / pw * (KMAX - 1)) + 1;
+    k = AI.sim.clamp(k, 1, KMAX);
+    kSeg.set(k);
+  });
+
+  window.addEventListener('ai:redraw', drawAll);
+
+  computeAll();
+  drawAll();
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a2l5-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['비지도학습', '군집', '분류', '중심점', '평균', 'SSE', '하이퍼파라미터', '엘보'],
+  sents: [
+    { text: '정답 레이블 없이 데이터에 숨어 있는 구조를 찾아내는 학습 방식을 {0}(이)라고 한다.', answers: [['비지도학습', '비지도 학습']] },
+    { text: '비슷한 데이터끼리 묶는 작업은 {0}이고, 미리 정해진 범주에 넣는 작업은 {1}(이)다.', answers: [['군집', '군집화'], ['분류']] },
+    { text: 'k-평균은 각 점을 가장 가까운 {0}에 배정한 뒤, 그 군집의 {1} 위치로 중심을 옮긴다.', answers: [['중심점', '중심'], ['평균']] },
+    { text: '각 점과 자기 군집 중심 사이의 거리를 제곱해 모두 더한 값을 {0}(이)라고 한다.', answers: [['SSE', '군집 내 제곱합', '이너셔']] },
+    { text: 'k는 학습 전에 사람이 정해 주는 값이므로 {0}에 해당한다.', answers: [['하이퍼파라미터']] },
+    { text: 'SSE가 꺾이는 지점을 찾아 알맞은 k를 고르는 방법을 {0} 방법이라고 한다.', answers: [['엘보', '팔꿈치']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '5차시 확인 문제',
+  items: [
+    {
+      type: 'mc',
+      q: '비지도학습에 대한 설명으로 <b>가장 알맞은</b> 것은?',
+      choices: [
+        '입력과 정답 레이블을 함께 주고 정답을 맞히도록 훈련한다',
+        '정답 레이블 없이 데이터 자체의 구조와 패턴을 찾아낸다',
+        '보상을 최대화하는 행동을 시행착오로 배운다',
+        '사람이 규칙을 모두 적어 주면 그 규칙대로 판단한다'
+      ],
+      answer: 1,
+      why: '①은 <b>지도학습</b>, ③은 <b>강화학습</b>, ④는 <b>규칙 기반 시스템</b>의 설명입니다. 비지도학습은 정답이 없는 데이터에서 스스로 구조를 찾습니다.'
+    },
+    {
+      type: 'order',
+      q: 'k-평균 알고리즘의 실행 순서를 <b>올바르게</b> 배열하시오.',
+      items: [
+        'k개의 중심점을 무작위로 초기화한다',
+        '각 점을 가장 가까운 중심점에 배정한다',
+        '각 군집에 속한 점들의 평균 위치로 중심점을 옮긴다',
+        '배정이 더 이상 바뀌지 않을 때까지 배정과 이동을 반복한다'
+      ],
+      answer: [0, 1, 2, 3],
+      why: '초기화 → <b>배정</b> → <b>이동</b> → 반복입니다. 배정 단계에서는 중심이 가만히 있고 점의 소속만 바뀌며, 이동 단계에서는 소속이 그대로인 채 중심만 평균 위치로 움직입니다.'
+    },
+    {
+      type: 'ox',
+      q: 'k를 크게 할수록 SSE가 작아지므로, SSE가 가장 작은 k를 고르면 가장 좋은 군집을 얻을 수 있다.',
+      answer: false,
+      why: 'k를 늘리면 SSE는 <b>언제나</b> 줄어듭니다. 점이 100개일 때 k=100이면 SSE는 0이 되지만 아무 정보도 얻지 못합니다. 그래서 SSE의 절댓값이 아니라 <b>줄어드는 모양이 완만해지는 지점(팔꿈치)</b>을 봐야 합니다.'
+    },
+    {
+      type: 'short',
+      q: 'k-평균에서 각 군집을 대표하는 가운데 점을 무엇이라고 하는가? (영어로는 centroid)',
+      answer: ['중심점', '중심', '센트로이드', 'centroid'],
+      placeholder: '예: ○○○',
+      why: '<b>중심점</b>입니다. 이동 단계에서 중심점은 그 군집에 속한 모든 점의 <b>평균 위치</b>로 계산됩니다. 그래서 알고리즘 이름에 ‘평균’이 들어갑니다.'
+    },
+    {
+      type: 'match',
+      q: '다음 특징을 알맞은 작업과 짝지으시오.',
+      left: [
+        '정답 레이블이 반드시 필요하다',
+        '묶음마다 어떤 뜻인지 사람이 해석해 이름을 붙여야 한다',
+        '정확도로 성능을 평가할 수 있다',
+        '결과가 초기 중심점에 따라 달라질 수 있다'
+      ],
+      right: ['분류 (지도학습)', '군집 (비지도학습)'],
+      answer: [0, 1, 0, 1],
+      why: '분류는 정답이 있어 정확도로 평가할 수 있습니다. 군집은 정답이 없어 SSE·실루엣 계수로 간접 평가하며, 군집 번호의 의미는 사람이 해석해야 하고 초기 중심에 따라 결과가 달라질 수 있습니다.'
+    },
+    {
+      type: 'multi',
+      q: 'k-평균이 <b>지역 최적해에 갇히는 문제</b>를 줄이는 방법으로 옳은 것을 <b>모두</b> 고르시오.',
+      choices: [
+        '초기 중심을 바꿔 여러 번 실행한 뒤 SSE가 가장 작은 결과를 고른다',
+        '초기 중심들이 서로 멀리 떨어지도록 뽑는 k-평균++를 사용한다',
+        'k를 데이터 개수와 같게 설정한다',
+        '반복 횟수를 1회로 제한해 일찍 멈춘다'
+      ],
+      answer: [0, 1],
+      why: '③은 SSE를 0으로 만들지만 군집의 의미가 사라집니다. ④는 오히려 나쁜 상태에서 멈추게 만듭니다. 실제 사이킷런에서는 ①이 <span class="mono">n_init</span>, ②가 <span class="mono">init=k-means++</span> 옵션에 해당합니다.'
+    },
+    {
+      type: 'mc',
+      q: '시뮬레이터 1에서 <b>이동 단계</b>를 실행했을 때 나타나는 변화로 알맞은 것은?',
+      choices: [
+        '점의 색이 바뀌고 중심점은 제자리에 있다',
+        '중심점이 자기 군집 점들의 평균 위치로 움직이고, 점의 소속은 그대로다',
+        '점의 개수가 줄어든다',
+        'k의 값이 자동으로 하나 늘어난다'
+      ],
+      answer: 1,
+      why: '①은 <b>배정 단계</b>의 모습입니다. 이동 단계는 소속을 고정한 채 중심만 평균 위치로 옮기며, 이때도 SSE는 줄어들거나 그대로입니다. 두 단계가 모두 SSE를 줄이므로 k-평균은 반드시 수렴합니다.'
+    },
+    {
+      type: 'ox',
+      q: 'k-평균은 초승달처럼 길게 휘어진 모양의 군집도 잘 찾아낸다.',
+      answer: false,
+      why: 'k-평균은 각 군집이 중심 주변에 모인 <b>동그란 덩어리</b>라고 가정합니다. 휘어진 모양이나 서로 감싼 고리 모양에는 잘 맞지 않고, 이런 데이터에는 밀도 기반 군집(DBSCAN)이 더 적합합니다.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a2l5-note',
+  title: 'k-평균 관찰 기록',
+  prompt: '두 시뮬레이터를 직접 조작하며 아래를 채워 보세요. <b>중심점을 한쪽 구석으로 몰아 놓고 자동 실행하는 실험</b>은 반드시 해 보아야 합니다.',
+  fields: [
+    { key: 'k4it', label: 'k=4로 자동 실행했을 때 수렴까지 걸린 반복 횟수', type: 'text', placeholder: '예: 6번' },
+    { key: 'k4sse', label: '그때의 최종 SSE', type: 'text', placeholder: '예: 34.9' },
+    { key: 'badsse', label: '중심을 한쪽에 몰아 놓고 실행했을 때의 최종 SSE', type: 'text', placeholder: '예: 187.7' },
+    { key: 'elbow', label: '시뮬레이터 2에서 팔꿈치가 가리킨 k', type: 'text', placeholder: '예: k=4' },
+    {
+      key: 'twostep', label: '배정 단계와 이동 단계는 화면에서 각각 무엇을 바꾸었나요?',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 배정 단계에서는 점의 색만 바뀌고 별은 가만히 있었다. 이동 단계에서는 …'
+    },
+    {
+      key: 'init', label: '초기 중심을 나쁘게 놓았을 때 결과가 어떻게 달라졌는지, 그 이유와 함께 적어 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 오른쪽 두 덩어리를 하나의 군집이 다 가져가고, 왼쪽 덩어리는 둘로 쪼개졌다. SSE가 187까지 올라갔다. 그 까닭은 …'
+    },
+    {
+      key: 'apply', label: '우리 주변에서 군집으로 풀어 볼 만한 문제를 하나 정해, 좌표로 쓸 속성과 k를 정한 근거까지 적어 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 우리 학교 급식 메뉴를 군집한다. 속성은 (열량, 단백질량, 잔반량)이고 k=3으로 정했다. 급식실에서 실제로 관리할 수 있는 메뉴 묶음이 세 종류이기 때문이다 …'
+    }
+  ]
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+# 이 저장소에는 웹교과서 파일만 포함합니다.
+# 상위 폴더의 출판사 교과서·지도서 PDF 는 절대 포함하지 않습니다.
+
+# 문서 파일 (저작권 자료가 실수로 들어오는 것을 막는 안전장치)
+*.pdf
+*.hwp
+*.hwpx
+*.pptx
+*.ppt
+*.docx
+*.doc
+*.xlsx
+*.zip
+
+# 운영체제 · 편집기
+Thumbs.db
+ehthumbs.db
+desktop.ini
+.DS_Store
+*.swp
+*~
+.vscode/
+.idea/
+
+# OneDrive 동기화 부산물
+*.tmp
+~$*

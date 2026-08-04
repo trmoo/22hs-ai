@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1차시 세상을 바꾸는 속도 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+/* 이 쪽에서만 쓰는 최소한의 추가 클래스 */
+.tl-detail { margin: 14px 0 0; padding: 15px 17px; border-radius: var(--radius); border: 1px solid var(--accent-line); background: var(--accent-soft); }
+.tl-detail .tl-year { font-family: var(--font-mono); font-size: 13px; font-weight: 800; color: var(--accent-ink); }
+.tl-detail h5 { font-size: 16.5px; margin: 4px 0 7px; }
+.tl-detail p { font-size: 14.5px; color: var(--ink-2); margin: 0 0 8px; }
+.tl-detail p:last-child { margin-bottom: 0; }
+.tl-cat { display: inline-flex; margin-left: 7px; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 750; background: var(--surface); border: 1px solid var(--line); color: var(--ink-2); }
+
+.pm-row { display: grid; grid-template-columns: 1fr auto; gap: 9px 12px; align-items: center; padding: 11px 13px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); margin-bottom: 8px; }
+.pm-row.ok { border-color: var(--ok); background: var(--ok-soft); }
+.pm-row.no { border-color: var(--no); background: var(--no-soft); }
+.pm-name { font-size: 15px; font-weight: 700; }
+.pm-row select { width: auto; min-width: 178px; font-size: 13.5px; }
+.pm-detail { grid-column: 1 / -1; display: none; border-top: 1px dashed var(--line-strong); padding-top: 9px; font-size: 13.8px; color: var(--ink-2); line-height: 1.72; }
+.pm-row.graded .pm-detail { display: block; }
+.pm-flags { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 0; }
+.pm-flag { font-size: 11.5px; font-weight: 750; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); }
+.pm-flag.y { background: var(--ok-soft); border-color: var(--ok-line); color: var(--ok); }
+.pm-flag.m { background: var(--warn-soft); border-color: var(--warn-line); color: var(--warn); }
+.pm-flag.n { background: var(--no-soft); border-color: var(--no-line); color: var(--no); }
+.pm-data { display: block; margin-top: 5px; }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>1997년, 체스 세계 챔피언이 컴퓨터에게 졌습니다. 그때 사람들은 “체스는 규칙이 정해진 놀이니까 그럴 수 있다”고 말했습니다. 2016년, 바둑 세계 최고수가 컴퓨터에게 졌습니다. 그때 사람들은 “바둑은 특별한 경우”라고 말했습니다.</p>
+      <p>그리고 2022년 겨울, 컴퓨터가 사람처럼 글을 쓰기 시작했습니다. 이번에는 “특별한 경우”라고 말하기가 어려워졌습니다.</p>
+      <ul>
+        <li>1997년부터 2022년까지, 인공지능은 <b>왜 갑자기 빨라졌을까요?</b></li>
+        <li>그 사이에 인공지능이 두 번이나 <b>멈춰 섰던 시기</b>가 있었다는 사실은 어떻게 설명할 수 있을까요?</li>
+      </ul>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 기술이 빨라지려면 무엇이 함께 자라야 할까?</summary>
+        <div class="more-body">
+          좋은 요리에는 <b>재료</b>, <b>불</b>, <b>조리법</b>이 모두 필요합니다. 인공지능도 마찬가지입니다. 이 차시에서는 그 세 가지가 무엇인지, 그리고 그것이 사회를 어떻게 바꾸고 있는지 살펴봅니다.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 인공지능 발전의 주요 흐름 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>75년의 흐름 — 두 번의 겨울과 세 번의 봄</h2></div>
+
+    <p>인공지능의 역사는 한 방향으로 곧게 뻗은 직선이 아닙니다. 크게 기대했다가 크게 실망하고, 다시 새로운 방법을 찾아 도약하는 과정을 반복했습니다. 그 출발점은 한 편의 논문입니다.</p>
+
+    <p>1950년 앨런 튜링은 “기계가 생각할 수 있는가”라는 물음을 던지고, 사람과 기계를 구별할 수 있는지 시험해 보자고 제안했습니다. 이 시험은 뒤에 <b class="blank" data-a="튜링 테스트|튜링테스트" data-hint="심사자가 대화 상대가 사람인지 기계인지 구별하지 못하면 통과하는 시험">튜링 테스트</b>라고 불립니다. 그리고 1956년 미국의 한 대학에서 열린 <b class="blank" data-a="다트머스 회의|다트머스 학회|다트머스" data-hint="1956년 여름, 미국 대학 이름을 딴 회의 — 여기서 학문 분야의 이름이 정해졌다">다트머스 회의</b>에서 존 매카시를 비롯한 연구자들이 이 분야에 ‘인공지능(artificial intelligence)’이라는 이름을 붙였습니다. 인공지능이 학문으로 출발한 해입니다.</p>
+
+    <p>1950~60년대는 낙관의 시기였습니다. 1958년에는 신경 세포를 흉내 낸 <span class="term">퍼셉트론</span>이 만들어지고, 연구자들은 “20년 안에 사람만큼 똑똑한 기계가 나온다”고 말했습니다. 그러나 컴퓨터의 성능과 데이터가 턱없이 부족했습니다. 약속한 성과가 나오지 않자 1970년대에 연구비가 끊깁니다. 이 시기를 <b class="blank" data-a="인공지능의 겨울|AI 겨울|겨울" data-hint="기대가 꺾이고 연구비가 끊긴 침체기를 계절에 비유한 말">인공지능의 겨울</b>이라고 부릅니다.</p>
+
+    <p>1980년대에 두 번째 봄이 옵니다. 특정 분야 전문가의 지식을 <span class="mono">IF ~ THEN ~</span> 형태의 규칙으로 옮겨 담은 <b class="blank" data-hint="전문가의 지식을 규칙으로 옮겨 담아 판단하게 만든 1980년대 인공지능">전문가 시스템</b>이 병원과 은행에서 실제로 쓰였기 때문입니다. 그러나 규칙을 사람이 하나하나 손으로 넣어야 하고, 규칙에 없는 예외 상황에는 속수무책이었습니다. 1980년대 후반, 두 번째 겨울이 시작됩니다.</p>
+
+    <p>세 번째 봄의 신호탄은 1997년입니다. IBM의 <b class="blank" data-a="딥 블루|딥블루|Deep Blue" data-hint="1997년 체스 세계 챔피언 카스파로프를 이긴 IBM의 체스 프로그램">딥 블루</b>가 체스 세계 챔피언을 이겼습니다. 이것은 아직 사람이 만든 평가 기준과 빠른 탐색의 승리였습니다. 진짜 전환점은 2012년에 왔습니다. 대규모 이미지 인식 대회에서 층을 깊게 쌓은 인공신경망, 곧 <b class="blank" data-hint="은닉층을 여러 층 쌓은 인공신경망으로 학습하는 방식">딥러닝</b>이 다른 방법들을 크게 앞질렀습니다. 2016년에는 <b class="blank" data-hint="2016년 이세돌 9단과 대국하여 4승 1패를 기록한 바둑 프로그램">알파고</b>가 이세돌 9단을 이기며 한국 사회 전체가 인공지능을 현실로 받아들였고, 2017년에 발표된 <b class="blank" data-hint="2017년 발표된 구조로, 문장 속 단어들의 관계에 주의를 기울인다 — 오늘날 대규모 언어 모델의 뼈대">트랜스포머</b> 구조는 오늘날 대규모 언어 모델의 뼈대가 되었습니다. 2022년 이후 글·그림·소리를 만들어 내는 <b class="blank" data-a="생성형 인공지능|생성형 AI|생성형" data-hint="새로운 글·그림·음악·코드를 만들어 내는 인공지능">생성형 인공지능</b>이 누구나 쓰는 도구가 되면서, 인공지능은 연구실을 떠나 교실과 사무실로 들어왔습니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 — 인공지능의 겨울</div>
+      <p><b>인공지능의 겨울</b>은 기술이 약속한 성과를 내지 못해 투자와 연구가 크게 줄어든 침체기를 뜻한다. 겨울은 기술이 “틀렸기” 때문에 온 것이 아니라, <b>기대가 성능보다 앞서 나갔기</b> 때문에 왔다. 두 번의 겨울 모두 데이터·연산 능력·알고리즘 중 무엇인가가 준비되지 않은 상태였다.</p>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 오해 주의</div>
+      <p>“인공지능은 2022년에 갑자기 등장했다”는 말은 사실이 아닙니다. 트랜스포머는 2017년, 딥러닝의 도약은 2012년, 인공신경망의 아이디어는 1958년에 나왔습니다. 우리가 갑작스럽다고 느끼는 것은 <b>기술의 등장</b>이 아니라 <b>대중화의 속도</b>입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. 무엇이 도약을 가능하게 했는가 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>도약을 만든 세 축 — 데이터 · 연산 능력 · 알고리즘</h2></div>
+
+    <p>1958년의 퍼셉트론과 2012년의 딥러닝은 아이디어가 크게 다르지 않습니다. 그렇다면 무엇이 달라졌을까요? 답은 <b>아이디어를 실제로 돌릴 수 있는 환경</b>입니다. 최근의 도약은 다음 세 축이 동시에 자란 결과입니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">🗄️</span>
+        <h4>① 데이터</h4>
+        <p>스마트폰·인터넷·센서가 퍼지면서 사진·문서·음성이 <b>수십억 건 규모</b>로 쌓였습니다. 기계학습은 데이터에서 규칙을 뽑아내므로, 데이터가 없으면 아무리 좋은 알고리즘도 배울 것이 없습니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">⚙️</span>
+        <h4>② 연산 능력</h4>
+        <p>같은 계산을 수천 개씩 동시에 처리하는 <b class="blank" data-a="GPU|그래픽 처리 장치|지피유" data-hint="본래 화면을 그리기 위해 만들어진 장치의 영어 약자 — 병렬 계산에 강해 딥러닝 학습에 쓰인다">GPU</b> 덕분에, 예전에 몇 달 걸렸던 학습을 며칠 안에 끝낼 수 있게 되었습니다. 실험을 빨리 반복할 수 있다는 것은 곧 발전이 빨라진다는 뜻입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🧠</span>
+        <h4>③ 알고리즘</h4>
+        <p>깊은 신경망을 안정적으로 학습시키는 방법, 합성곱 신경망, 트랜스포머 같은 <b>구조의 발명</b>이 이어졌습니다. 데이터와 연산 능력을 낭비 없이 쓰는 설계가 성능을 끌어올렸습니다.</p>
+      </div>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 세 축은 곱셈처럼 작동한다</div>
+      <p>세 축 중 하나가 0에 가까우면 전체 성능도 0에 가까워집니다. 1980년대 전문가 시스템은 알고리즘(규칙 추론)은 있었지만 <b>데이터를 스스로 모으는 방법</b>이 없었고, 1960년대 퍼셉트론은 아이디어는 있었지만 <b>연산 능력</b>이 없었습니다. 지금 인공지능이 빠른 이유는 세 축이 처음으로 함께 커졌기 때문입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. 분야별 사회 변화 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>어디가 어떻게 달라졌나 — 분야별 사회 변화</h2></div>
+
+    <p>인공지능이 만드는 변화는 “로봇이 사람을 대신한다”는 식의 단순한 그림이 아닙니다. 대부분은 <b>사람이 하던 판단의 일부를 인공지능이 미리 걸러 주고, 최종 결정은 사람이 하는</b> 형태로 나타납니다. 아래 표에서 각 분야의 실제 변화와 남는 과제를 함께 살펴봅시다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>인공지능이 바꾸고 있는 분야 — 변화와 남은 과제</caption>
+        <thead><tr><th>분야</th><th>인공지능이 하는 일</th><th>남은 과제</th></tr></thead>
+        <tbody>
+          <tr><td><b>🩺 의료</b></td><td>엑스레이·내시경 영상에서 이상 소견을 표시해 판독을 돕고, 신약 후보 물질을 탐색한다</td><td>최종 진단 책임은 의사에게 있다. 학습 데이터에 없던 환자군에서는 성능이 떨어진다</td></tr>
+          <tr><td><b>📚 교육</b></td><td>학생이 틀린 문제의 유형을 분석해 다음 문제를 추천하고, 채점과 피드백을 자동화한다</td><td>맞춤 학습이 곧 학습 격차 해소는 아니다. 기기와 인터넷이 없는 학생은 오히려 뒤처질 수 있다</td></tr>
+          <tr><td><b>🚦 교통</b></td><td>실시간 교통량으로 신호 주기를 조절하고, 최적 경로를 안내하며 자율주행을 시험한다</td><td>사고가 났을 때의 책임 문제, 그리고 도로 밖 상황(공사·보행자)에 대한 대응</td></tr>
+          <tr><td><b>🏭 제조</b></td><td>제품 사진으로 불량을 검사하고, 설비 진동·소음으로 고장을 미리 예측한다</td><td>단순 검사 일자리의 감소, 그리고 설비를 이해하는 숙련 인력의 세대 교체</td></tr>
+          <tr><td><b>🌾 농업</b></td><td>드론 영상으로 병해충을 찾고, 기상 데이터로 수확 시기와 급수량을 정한다</td><td>고령 농업인의 기술 접근성, 초기 설비 비용</td></tr>
+          <tr><td><b>🏛️ 행정</b></td><td>민원을 유형별로 분류해 담당 부서로 보내고, 복지 사각지대를 데이터로 찾아낸다</td><td>행정 결정에 쓰이는 알고리즘은 <b>설명할 수 있어야</b> 한다. 편향된 데이터는 차별을 굳힌다</td></tr>
+          <tr><td><b>🎨 예술</b></td><td>그림·음악·영상의 초안을 만들어 창작 속도를 높이고, 새로운 표현 방식을 만든다</td><td>학습에 쓰인 원작자의 권리, 창작물의 저작권과 표시 의무</td></tr>
+          <tr><td><b>🚨 재난 대응</b></td><td>산불 연기를 카메라로 조기에 찾고, 지진·홍수 피해 범위를 위성 영상으로 즉시 추정한다</td><td>오탐(잘못된 경보)이 잦으면 신뢰를 잃는다. 통신이 끊긴 상황에서의 작동 방식</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-ok">
+      <div class="box-label">✅ 공통 구조를 찾아보자</div>
+      <p>표를 다시 읽어 보면 모든 칸이 같은 문장 구조를 갖고 있습니다. <b>“많은 데이터에서 사람이 놓치기 쉬운 패턴을 빠르게 찾아 준다.”</b> 인공지능이 잘하는 일의 정체는 결국 이 한 문장입니다. 여기에 해당하지 않는 문제라면, 인공지능은 좋은 도구가 아닐 수 있습니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4. 인공지능으로 풀 수 있는 문제와 그 조건 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>인공지능으로 풀 수 있는 문제, 그리고 그 조건</h2></div>
+
+    <p>사회적 문제를 앞에 두고 “인공지능으로 해결해 보자”고 말하기는 쉽습니다. 그러나 모든 문제가 인공지능에 적합한 것은 아닙니다. 다음 세 가지를 먼저 따져야 합니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>인공지능 적합성 판단의 세 기준</caption>
+        <thead><tr><th>기준</th><th>스스로에게 던질 질문</th><th>답이 ‘아니오’라면</th></tr></thead>
+        <tbody>
+          <tr><td><b>① 데이터 확보</b></td><td>판단의 근거가 될 데이터가 충분히, 그리고 정당하게 모을 수 있는가?</td><td>먼저 데이터를 만들 방법을 설계해야 한다. 데이터 없이 학습은 불가능하다</td></tr>
+          <tr><td><b>② 판단의 반복성</b></td><td>같은 종류의 판단을 아주 여러 번 되풀이해야 하는 일인가?</td><td>한 번뿐인 판단이라면 사람이 직접 하는 것이 더 정확하고 저렴하다</td></tr>
+          <tr><td><b>③ 오류의 위험</b></td><td>인공지능이 틀렸을 때 누가 어떤 피해를 입는가? 사람이 되돌릴 수 있는가?</td><td>사람이 반드시 최종 확인을 하거나, 자동화를 아예 포기해야 한다</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>세 기준을 모두 통과하는 대표적인 문제가 <b>산불 조기 발견</b>입니다. 감시 카메라가 이미 영상을 쌓고 있고(①), 연기인지 아닌지를 하루 수만 번 판단해야 하며(②), 사람이 최종 확인하는 절차를 둘 수 있습니다(③). 반대로 <b>“어떤 학생이 문제를 일으킬지 미리 예측하기”</b>는 세 기준 모두에서 위험합니다. 근거 데이터가 편향되어 있고, 판단 대상이 한 사람의 미래이며, 틀렸을 때 낙인이라는 되돌릴 수 없는 피해가 생깁니다.</p>
+
+    <h3 class="sub-head">인공지능이 오히려 문제를 키우는 경우</h3>
+    <p>인공지능은 문제를 푸는 도구이면서, 동시에 새로운 문제를 만드는 원인이기도 합니다. 아래 네 가지는 지금 실제로 논의되고 있는 부작용입니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">🔌</span>
+        <h4>에너지와 물 소비</h4>
+        <p>대규모 모델을 학습시키고 운영하는 데이터 센터는 많은 전기와 냉각용 물을 씁니다. 환경 문제를 풀려는 인공지능이 환경에 부담을 주는 역설이 생깁니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">💼</span>
+        <h4>일자리의 재편</h4>
+        <p>단순 반복 업무는 빠르게 줄어드는데, 새로 생기는 일자리는 다른 능력을 요구합니다. 변화의 속도가 재교육의 속도보다 빠르면 사람이 뒤에 남습니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">📶</span>
+        <h4>정보 격차</h4>
+        <p>좋은 인공지능 도구를 쓸 수 있는 사람과 그렇지 못한 사람 사이의 <b class="blank" data-a="정보 격차|디지털 격차|디지털 정보 격차" data-hint="기술을 쓸 수 있는 사람과 그렇지 못한 사람 사이에 벌어지는 차이">정보 격차</b>가 벌어집니다. 기술은 격차를 줄이기도 하지만, 그냥 두면 대개 벌립니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🎭</span>
+        <h4>딥페이크와 신뢰 붕괴</h4>
+        <p>인공지능으로 만든 정교한 가짜 영상·음성을 <b class="blank" data-hint="인공지능으로 만든, 진짜와 구별하기 어려운 가짜 영상·음성">딥페이크</b>라고 합니다. 진짜와 가짜를 구별할 수 없게 되면, 진짜 증거조차 믿지 못하는 사회가 됩니다.</p>
+      </div>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 기술 결정론을 경계하자</div>
+      <p>“기술이 발전하면 사회는 저절로 좋아진다” 또는 “기술이 발전하면 사회는 망한다”는 두 주장은 모두 <b>기술 결정론</b>입니다. 두 번의 겨울과 세 번의 봄이 보여 주듯, 기술의 방향은 사람들이 무엇에 돈과 시간을 쓰기로 결정하는지에 따라 달라집니다. 인공지능이 사회를 바꾸는 만큼, 사회도 인공지능을 바꿉니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 5. 시뮬레이터 1 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>인공지능 발전 타임라인</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim1"></div>
+  </section>
+
+  <!-- ============ 6. 시뮬레이터 2 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>사회 문제와 인공지능 해법 짝짓기</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim2"></div>
+  </section>
+
+  <!-- ============ 7. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 8. 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 9. 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">9</span><h2>활동 기록</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 세 번째 겨울은 올까 — 규모를 키우는 방식의 한계</summary>
+      <div class="more-body">
+        <p>최근 몇 년의 발전은 상당 부분 <b>모델과 데이터를 더 크게 키우는</b> 방식으로 이루어졌습니다. 그런데 이 방식에는 두 가지 벽이 있습니다.</p>
+        <ul>
+          <li><b>데이터의 벽</b> — 사람이 인터넷에 써 놓은 좋은 품질의 글은 무한하지 않습니다. 인공지능이 만든 글로 다시 인공지능을 학습시키면 품질이 떨어질 수 있습니다.</li>
+          <li><b>에너지와 비용의 벽</b> — 성능을 두 배로 올리려면 계산량은 그보다 훨씬 많이 필요합니다. 어느 지점부터는 얻는 것보다 드는 비용이 커집니다.</li>
+        </ul>
+        <p>그래서 지금 연구는 “더 크게”에서 “더 <b>효율적으로</b>”로 방향을 넓히고 있습니다. 적은 데이터로 배우는 방법, 계산을 아끼는 구조, 필요한 순간에만 깊이 생각하는 모델이 그 예입니다. 역사가 알려 주는 교훈은 분명합니다. <b>기대를 성능보다 앞세우면 겨울이 온다.</b></p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> 사회 문제를 실제로 푼 인공지능 — 세 가지 이야기</summary>
+      <div class="more-body">
+        <ul>
+          <li><b>산불 감시</b> — 산림 감시 카메라 영상을 학습한 모델이 연기 기둥을 사람보다 먼저 찾아냅니다. 중요한 것은 “경보를 울린다”가 아니라 “사람이 확인할 후보를 좁혀 준다”입니다.</li>
+          <li><b>실종자 수색</b> — 드론이 넓은 산악 지역을 촬영하고, 인공지능이 사람의 형태로 보이는 지점을 표시합니다. 수색 대원이 확인할 지점이 수천 곳에서 수십 곳으로 줄어듭니다.</li>
+          <li><b>해양 쓰레기</b> — 위성·항공 영상에서 쓰레기가 몰린 띠를 찾아, 수거선의 항로를 정하는 데 씁니다. 여기에는 이미지 인식과 최적 경로 탐색이 함께 쓰입니다.</li>
+        </ul>
+        <p>세 사례의 공통점은 <b>사람의 판단을 대신하지 않고, 사람이 볼 곳을 좁혀 준다</b>는 점입니다. 좋은 인공지능 활용은 대개 이런 모습입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">비판</span> 숫자로 보는 부작용 — 그래서 어떻게 해야 하나</summary>
+      <div class="more-body">
+        <p>인공지능의 부작용을 이야기할 때는 “나쁘다”로 끝내지 말고 <b>무엇을 어떻게 바꿀 수 있는가</b>까지 가야 합니다.</p>
+        <div class="table-wrap">
+          <table class="tb">
+            <thead><tr><th>부작용</th><th>가능한 대응</th></tr></thead>
+            <tbody>
+              <tr><td>데이터 센터의 전력·물 소비</td><td>재생 에너지 전환, 작고 효율적인 모델 사용, 꼭 필요한 곳에만 대형 모델 사용</td></tr>
+              <tr><td>일자리 재편</td><td>직무 재설계와 재교육 지원, 새로 생기는 역할로의 이동 경로 마련</td></tr>
+              <tr><td>정보 격차</td><td>공공 도서관·학교의 도구 제공, 쉬운 사용 설명, 도움이 필요한 계층 우선 지원</td></tr>
+              <tr><td>딥페이크</td><td>생성물 표시 의무, 탐지 기술, 그리고 <b>출처를 확인하는 습관</b>이라는 시민의 역량</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 다음 차시로 — 그러면 나의 일은 어떻게 될까?</summary>
+      <div class="more-body">
+        이 차시에서 인공지능이 사회를 바꾸는 속도와 방향을 살펴보았습니다. 그 변화가 가장 가깝게 느껴지는 곳이 바로 <b>직업</b>입니다. 다음 차시에서는 어떤 일이 자동화되기 쉬운지, 어떤 역량이 더 중요해지는지, 그리고 인공지능과 함께 일하는 새로운 직업들이 무엇인지 살펴봅니다.
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 3, lesson: 1,
+  title: '세상을 바꾸는 속도',
+  sub: '인공지능의 발전과 사회 변화',
+  lead: '인공지능은 75년 동안 <b>두 번의 겨울과 세 번의 봄</b>을 지나 왔습니다. 무엇이 최근의 도약을 만들었는지, 그 변화가 의료·교육·교통·재난 대응을 어떻게 바꾸고 있는지 살펴봅니다. 그리고 <b>어떤 사회적 문제에 인공지능이 적합한지</b>를 스스로 판단하는 기준을 세웁니다.',
+  standards: ['12인기03-01'],
+  keywords: ['인공지능의 역사', '사회 변화', '사회적 문제', '생성형 인공지능'],
+  goals: [
+    '인공지능 발전의 주요 흐름을 두 번의 겨울과 세 번의 도약으로 설명할 수 있다.',
+    '최근의 도약을 <b>데이터·연산 능력·알고리즘</b> 세 축으로 설명할 수 있다.',
+    '분야별 사회 변화를 사례와 함께 제시하고, 남은 과제를 함께 말할 수 있다.',
+    '인공지능으로 해결할 수 있는 사회적 문제를 세 기준(데이터 확보·판단의 반복성·오류의 위험)으로 분석할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 시뮬레이터 1: 인공지능 발전 타임라인 ===================== -->
+<script>
+(function () {
+  const W = 860, H = 348;
+  const PADL = 44, PADR = 22;
+  const AXIS_Y = 268;
+  const LANES = [26, 90, 154];       // 라벨 상자의 위쪽 y
+  const BOXH = 46;
+
+  /* ---- 사건 데이터 (연도 · 제목 · 분류 · 설명) ---- */
+  const EVENTS = [
+    { y: 1950, t: '튜링의 물음', cat: '기술',
+      d: '앨런 튜링이 논문에서 “기계가 생각할 수 있는가”를 묻고, 심사자가 사람과 기계를 구별하지 못하면 지능이 있다고 보자는 시험을 제안했다. 뒤에 <b>튜링 테스트</b>라고 불린다.' },
+    { y: 1956, t: '다트머스 회의', cat: '기술',
+      d: '미국 다트머스 대학에 모인 연구자들이 이 분야에 <b>인공지능(artificial intelligence)</b>이라는 이름을 처음 붙였다. 인공지능이 학문으로 출발한 해로 꼽힌다.' },
+    { y: 1958, t: '퍼셉트론', cat: '기술',
+      d: '프랭크 로젠블랫이 신경 세포의 동작을 흉내 낸 <b>퍼셉트론</b>을 고안했다. 오늘날 인공신경망과 딥러닝의 출발점이지만, 당시 컴퓨터로는 층을 깊게 쌓을 수 없었다.' },
+    { y: 1966, t: '엘리자(ELIZA)', cat: '사회',
+      d: '규칙만으로 상담사 흉내를 낸 대화 프로그램이 공개되었다. 사람들이 기계에게 속마음을 털어놓는 현상이 처음 관찰되어, <b>사람은 기계를 쉽게 사람처럼 대한다</b>는 사실이 드러났다.' },
+    { y: 1973, t: '라이트힐 보고서 — 첫 번째 겨울', cat: '제도',
+      d: '영국 정부가 의뢰한 보고서가 인공지능 연구의 성과가 약속에 크게 못 미친다고 평가했다. 영국과 미국의 연구비가 잇따라 끊기며 <b>첫 번째 인공지능의 겨울</b>이 시작되었다.' },
+    { y: 1980, t: '전문가 시스템의 상업화', cat: '사회',
+      d: '전문가의 지식을 <span class="mono">IF ~ THEN ~</span> 규칙으로 옮긴 <b>전문가 시스템</b>이 병원 진단 보조와 카드 승인 심사에 실제로 쓰였다. 인공지능이 처음으로 돈을 버는 기술이 되었다.' },
+    { y: 1987, t: '전문가 시스템의 한계 — 두 번째 겨울', cat: '제도',
+      d: '규칙을 사람이 하나하나 손으로 넣어야 하고 예외 상황에 약하다는 문제가 드러났다. 유지 비용이 커지며 투자가 급감해 <b>두 번째 겨울</b>이 왔다.' },
+    { y: 1997, t: '딥 블루의 승리', cat: '기술',
+      d: 'IBM의 체스 프로그램 <b>딥 블루</b>가 세계 챔피언 카스파로프를 이겼다. 학습이 아니라 <b>빠른 탐색과 사람이 만든 평가 기준</b>의 승리였다는 점이 중요하다.' },
+    { y: 2006, t: '심층 신경망 학습법', cat: '기술',
+      d: '제프리 힌턴 등이 층을 깊게 쌓은 신경망을 안정적으로 학습시키는 방법을 제시했다. 이때부터 <b>딥러닝</b>이라는 말이 널리 쓰이기 시작했다.' },
+    { y: 2011, t: '왓슨의 퀴즈 쇼 우승', cat: '사회',
+      d: 'IBM 왓슨이 미국 퀴즈 쇼에서 인간 챔피언들을 이겼다. 자연어로 된 문제를 이해하고 답을 찾는 인공지능이 처음으로 대중에게 각인되었다.' },
+    { y: 2012, t: '이미지넷 — 딥러닝의 부상', cat: '기술',
+      d: '대규모 이미지 인식 대회에서 GPU로 학습시킨 심층 합성곱 신경망이 오차율을 크게 낮추며 다른 방법들을 압도했다. <b>데이터 · GPU · 알고리즘</b>이 처음 함께 맞물린 전환점이다.' },
+    { y: 2016, t: '알파고와 이세돌', cat: '사회',
+      d: '알파고가 이세돌 9단에게 4승 1패를 기록했다. 경우의 수가 체스보다 훨씬 많은 바둑에서 인공지능이 이기자, 한국 사회 전체가 인공지능을 현실로 받아들였다.' },
+    { y: 2017, t: '트랜스포머 발표', cat: '기술',
+      d: '문장 속 단어들이 서로 어디에 <b>주의를 기울여야 하는지</b>를 학습하는 구조가 발표되었다. 오늘날 대규모 언어 모델과 생성형 인공지능의 뼈대가 되었다.' },
+    { y: 2020, t: '국가 인공지능 윤리기준', cat: '제도',
+      d: '대한민국 정부가 “인간성을 위한 인공지능”을 큰 방향으로 하는 3대 기본원칙과 10대 핵심요건을 발표했다. 기술 발전과 함께 <b>지켜야 할 선</b>을 사회가 정하기 시작했다.' },
+    { y: 2022, t: '생성형 인공지능의 대중화', cat: '사회',
+      d: '대화형 인공지능 서비스가 공개되어 두 달 만에 이용자가 1억 명 규모로 늘었다. 글·그림·코드를 만들어 주는 도구가 연구실을 떠나 <b>교실과 사무실</b>로 들어왔다.' },
+    { y: 2024, t: '유럽연합 인공지능법', cat: '제도',
+      d: '위험 수준에 따라 인공지능을 단계별로 규제하는 세계 최초의 포괄 법률이 통과되었다. 금지·고위험·제한적 위험으로 나누어 의무를 다르게 부과한다.' },
+    { y: 2026, t: '대한민국 인공지능 기본법 시행', cat: '제도',
+      d: '2025년에 공포된 「인공지능 발전과 신뢰 기반 조성 등에 관한 기본법」이 시행되었다. 인공지능 산업을 키우면서 동시에 <b>신뢰</b>를 제도로 뒷받침하려는 시도이다.' }
+  ];
+
+  const WINTERS = [
+    { a: 1974, b: 1980, label: '첫 번째 겨울' },
+    { a: 1987, b: 1993, label: '두 번째 겨울' }
+  ];
+
+  const body = AI.sim.panel('#sim1', {
+    title: '인공지능 발전 타임라인 — 겨울과 봄을 따라가기',
+    tag: '17개 사건',
+    desc: '점이나 이름표를 <b>클릭</b>하면 아래에 자세한 설명이 나옵니다. 화살표 키(← →)로도 넘길 수 있습니다. 분류로 걸러 보고, 연도 범위를 좁혀 특정 시기를 확대해 보세요. 배경이 어둡게 칠해진 두 구간이 <b>인공지능의 겨울</b>입니다.'
+  });
+
+  const cv = AI.sim.canvas(W, H);
+  cv.canvas.setAttribute('tabindex', '0');
+  cv.canvas.setAttribute('role', 'application');
+  cv.canvas.setAttribute('aria-label', '인공지능 발전 타임라인. 좌우 화살표 키로 사건을 선택할 수 있습니다.');
+  cv.canvas.style.cursor = 'pointer';
+  body.appendChild(cv.wrap);
+
+  body.appendChild(AI.ui.legend([
+    { color: 'var(--accent)', label: '기술 — 새 방법의 등장' },
+    { color: 'var(--ok)', label: '사회 — 대중이 체감한 사건' },
+    { color: 'var(--no)', label: '제도 — 정책·법·평가' },
+    { color: 'var(--warn-soft)', label: '인공지능의 겨울' }
+  ]));
+
+  const detail = AI.h('div', { class: 'tl-detail' });
+  const stats = AI.ui.stats([
+    { key: 'n', label: '표시된 사건' }, { key: 'span', label: '연도 범위' }, { key: 'cat', label: '필터' }
+  ]);
+
+  let filter = '전체';
+  let yFrom = 1945, yTo = 2030;
+  let sel = 1;                 // 선택된 사건의 EVENTS 인덱스
+  let hitBoxes = [];           // 클릭 판정용
+
+  const catColor = c => { const C = AI.sim.colors(); return c === '기술' ? C.a : (c === '사회' ? C.ok : C.no); };
+
+  function visible() {
+    return EVENTS.map((e, i) => ({ e, i }))
+      .filter(o => o.e.y >= yFrom && o.e.y <= yTo && (filter === '전체' || o.e.cat === filter));
+  }
+
+  const X = y => PADL + (y - yFrom) / (yTo - yFrom) * (W - PADL - PADR);
+
+  function draw() {
+    const C = AI.sim.colors(), ctx = cv.ctx;
+    const fam = getComputedStyle(document.body).fontFamily;
+    cv.clear(C.bg);
+
+    /* 겨울 구간 배경 */
+    WINTERS.forEach(w => {
+      const a = Math.max(w.a, yFrom), b = Math.min(w.b, yTo);
+      if (b <= a) return;
+      const x0 = X(a), x1 = X(b);
+      ctx.fillStyle = C.dark ? '#2e2416' : '#fdf2dd';
+      ctx.fillRect(x0, 14, x1 - x0, AXIS_Y - 14);
+      ctx.strokeStyle = C.dark ? '#5d4823' : '#efd49a';
+      ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x0, 14); ctx.lineTo(x0, AXIS_Y); ctx.moveTo(x1, 14); ctx.lineTo(x1, AXIS_Y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = C.warn;
+      ctx.font = '750 11px ' + fam;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText('❄ ' + w.label, (x0 + x1) / 2, 18);
+    });
+
+    /* 축과 눈금 */
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(PADL - 12, AXIS_Y); ctx.lineTo(W - PADR + 12, AXIS_Y); ctx.stroke();
+
+    const step = (yTo - yFrom) > 50 ? 10 : ((yTo - yFrom) > 24 ? 5 : 2);
+    const first = Math.ceil(yFrom / step) * step;
+    ctx.font = '600 11px ' + fam;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (let y = first; y <= yTo; y += step) {
+      const x = X(y);
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, 14); ctx.lineTo(x, AXIS_Y); ctx.stroke();
+      ctx.strokeStyle = C.axis;
+      ctx.beginPath(); ctx.moveTo(x, AXIS_Y); ctx.lineTo(x, AXIS_Y + 7); ctx.stroke();
+      ctx.fillStyle = C.ink3;
+      ctx.fillText(String(y), x, AXIS_Y + 11);
+    }
+
+    /* 사건 배치 — 레인 겹침을 피해 그린다 */
+    hitBoxes = [];
+    const laneEnd = LANES.map(() => -1e9);
+    const vis = visible();
+
+    vis.forEach(o => {
+      const e = o.e, x = X(e.y);
+      ctx.font = '700 13px ' + fam;
+      const tw = ctx.measureText(e.t).width;
+      const bw = Math.min(Math.max(tw + 18, 76), 230);
+      let bx = AI.clamp(x - bw / 2, 3, W - bw - 3);
+
+      let lane = LANES.findIndex((_, k) => laneEnd[k] + 7 < bx);
+      if (lane < 0) { lane = laneEnd.indexOf(Math.min.apply(null, laneEnd)); }
+      laneEnd[lane] = bx + bw;
+      const by = LANES[lane];
+
+      const col = catColor(e.cat);
+      const isSel = o.i === sel;
+
+      /* 연결선 */
+      ctx.strokeStyle = col; ctx.lineWidth = isSel ? 2 : 1;
+      ctx.globalAlpha = isSel ? 1 : .55;
+      ctx.beginPath();
+      ctx.moveTo(bx + bw / 2, by + BOXH);
+      ctx.lineTo(bx + bw / 2, AXIS_Y - 24);
+      ctx.lineTo(x, AXIS_Y - 8);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      /* 라벨 상자 */
+      ctx.fillStyle = isSel ? col : (C.dark ? '#1a1d25' : '#ffffff');
+      ctx.strokeStyle = col; ctx.lineWidth = isSel ? 2 : 1.2;
+      const r = 8;
+      ctx.beginPath();
+      ctx.moveTo(bx + r, by);
+      ctx.arcTo(bx + bw, by, bx + bw, by + BOXH, r);
+      ctx.arcTo(bx + bw, by + BOXH, bx, by + BOXH, r);
+      ctx.arcTo(bx, by + BOXH, bx, by, r);
+      ctx.arcTo(bx, by, bx + bw, by, r);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = isSel ? (C.dark ? '#12151c' : '#ffffff') : col;
+      ctx.font = '800 11.5px ' + fam;
+      ctx.fillText(String(e.y), bx + bw / 2, by + 14);
+      ctx.fillStyle = isSel ? (C.dark ? '#12151c' : '#ffffff') : C.ink;
+      ctx.font = '700 12.5px ' + fam;
+      let label = e.t;
+      while (ctx.measureText(label).width > bw - 12 && label.length > 4) label = label.slice(0, -2) + '…';
+      ctx.fillText(label, bx + bw / 2, by + 32);
+
+      /* 축 위의 점 */
+      ctx.beginPath();
+      ctx.arc(x, AXIS_Y, isSel ? 8 : 5.5, 0, Math.PI * 2);
+      ctx.fillStyle = col; ctx.fill();
+      if (isSel) {
+        ctx.beginPath(); ctx.arc(x, AXIS_Y, 12, 0, Math.PI * 2);
+        ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke();
+      }
+
+      hitBoxes.push({ i: o.i, x0: bx, y0: by, x1: bx + bw, y1: by + BOXH });
+      hitBoxes.push({ i: o.i, x0: x - 12, y0: AXIS_Y - 12, x1: x + 12, y1: AXIS_Y + 12 });
+    });
+
+    if (!vis.length) {
+      ctx.fillStyle = C.ink3; ctx.font = '600 14px ' + fam;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('이 조건에 해당하는 사건이 없습니다. 필터나 연도 범위를 바꿔 보세요.', W / 2, 140);
+    }
+
+    stats.set('n', vis.length + '개');
+    stats.set('span', yFrom + '–' + yTo);
+    stats.set('cat', filter);
+  }
+
+  function winterOf(y) {
+    return WINTERS.find(w => y >= w.a && y <= w.b) || null;
+  }
+
+  function renderDetail() {
+    const e = EVENTS[sel];
+    const w = winterOf(e.y);
+    detail.innerHTML =
+      '<span class="tl-year">' + e.y + '년</span><span class="tl-cat">' + e.cat + '</span>' +
+      '<h5>' + e.t + '</h5>' +
+      '<p>' + e.d + '</p>' +
+      (w ? '<p style="color:var(--warn);font-weight:650">❄ 이 시기는 <b>' + w.label + '</b>(' + w.a + '–' + w.b + ')에 걸쳐 있습니다. 겨울은 기술이 틀려서 온 것이 아니라, <b>기대가 성능보다 앞서 나가</b> 투자와 연구비가 끊겼기 때문에 왔습니다.</p>' : '') +
+      '<p style="font-size:13.5px;color:var(--ink-3)">이 사건은 <b>데이터 · 연산 능력 · 알고리즘</b> 중 무엇이 자란 결과일까요? 활동 기록에 적어 보세요.</p>';
+  }
+
+  function select(i) {
+    sel = i;
+    draw(); renderDetail();
+  }
+
+  function moveSel(dir) {
+    const vis = visible();
+    if (!vis.length) return;
+    const idxs = vis.map(o => o.i);
+    let k = idxs.indexOf(sel);
+    if (k < 0) k = dir > 0 ? -1 : idxs.length;
+    k = AI.clamp(k + dir, 0, idxs.length - 1);
+    select(idxs[k]);
+  }
+
+  cv.canvas.addEventListener('click', ev => {
+    const p = cv.pos(ev);
+    for (let k = hitBoxes.length - 1; k >= 0; k--) {
+      const b = hitBoxes[k];
+      if (p.x >= b.x0 && p.x <= b.x1 && p.y >= b.y0 && p.y <= b.y1) { select(b.i); return; }
+    }
+  });
+
+  cv.canvas.addEventListener('keydown', ev => {
+    if (ev.key === 'ArrowRight' || ev.key === 'ArrowDown') { ev.preventDefault(); moveSel(1); }
+    else if (ev.key === 'ArrowLeft' || ev.key === 'ArrowUp') { ev.preventDefault(); moveSel(-1); }
+  });
+
+  /* ---- 컨트롤 ---- */
+  const segCat = AI.ui.seg({
+    label: '분류', options: ['전체', '기술', '사회', '제도'], value: '전체',
+    onChange: v => {
+      filter = v;
+      const vis = visible();
+      if (vis.length && !vis.some(o => o.i === sel)) sel = vis[0].i;
+      draw(); renderDetail();
+    }
+  });
+
+  const sFrom = AI.ui.slider({
+    label: '시작 연도', min: 1945, max: 2010, step: 5, value: 1945,
+    onInput: v => {
+      if (v > yTo - 20) { sFrom.set(yTo - 20); return; }
+      yFrom = v; draw();
+    }
+  });
+  const sTo = AI.ui.slider({
+    label: '끝 연도', min: 1970, max: 2030, step: 5, value: 2030,
+    onInput: v => {
+      if (v < yFrom + 20) { sTo.set(yFrom + 20); return; }
+      yTo = v; draw();
+    }
+  });
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    segCat.el,
+    AI.ui.btn('◀ 이전 사건', () => moveSel(-1), 'small'),
+    AI.ui.btn('다음 사건 ▶', () => moveSel(1), 'small'),
+    AI.ui.btn('↺ 전체 보기', () => {
+      filter = '전체'; segCat.set('전체');
+      sFrom.set(1945); sTo.set(2030);
+      yFrom = 1945; yTo = 2030;
+      draw();
+    }, 'ghost'),
+    sFrom.el, sTo.el
+  ));
+  body.appendChild(stats.el);
+  body.appendChild(detail);
+
+  body.appendChild(AI.el(
+    '<div class="box box-info" style="margin:14px 0 0">' +
+    '<div class="box-label">❄ 두 번의 겨울은 왜 왔을까?</div>' +
+    '<p><b>첫 번째 겨울(1974~1980)</b> — 연구자들은 “20년 안에 사람 수준의 기계”를 약속했지만, 당시 컴퓨터의 연산 능력과 데이터는 그 목표에 한참 못 미쳤습니다. 성과가 나오지 않자 정부가 연구비를 끊었습니다.</p>' +
+    '<p><b>두 번째 겨울(1987~1993)</b> — 전문가 시스템은 규칙을 사람이 손으로 넣어야 했습니다. 다루는 분야가 넓어질수록 규칙이 수만 개로 불어나 유지가 불가능해지고, 규칙에 없는 예외에는 엉뚱한 답을 냈습니다.</p>' +
+    '<p style="color:var(--ink-3);font-size:14px">💡 두 겨울의 원인은 같습니다. <b>기대가 성능보다 앞서 나갔다.</b> 지금 우리가 인공지능에 대해 말하는 기대는 어느 쪽에 가까울까요?</p>' +
+    '</div>'
+  ));
+
+  window.addEventListener('ai:redraw', draw);
+
+  draw(); renderDetail();
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 사회 문제 ↔ 인공지능 해법 ===================== -->
+<script>
+(function () {
+  const TECHS = [
+    { k: 'img', n: '이미지 인식' },
+    { k: 'ts', n: '시계열 예측' },
+    { k: 'nlp', n: '자연어 처리' },
+    { k: 'ad', n: '이상 탐지' },
+    { k: 'path', n: '최적 경로 탐색' },
+    { k: 'rec', n: '추천 · 개인화' },
+    { k: 'none', n: '❌ 인공지능이 답이 아니다' }
+  ];
+
+  /* flags: d=데이터 확보, r=판단의 반복성, e=오류의 위험(y=낮음 / m=보통 / n=큼) */
+  const PROBS = [
+    {
+      emo: '🔥', name: '산불을 빨리 발견하기', ans: 'img',
+      data: '산림 감시 카메라 영상 수십만 장과 “연기 있음 / 없음” 라벨, 계절·시간대 정보',
+      flags: { d: 'y', r: 'y', e: 'm' },
+      why: '연기의 모양을 사진에서 알아보는 문제이므로 <b>이미지 인식</b>이 맞습니다.',
+      verdict: '감시 카메라가 이미 24시간 영상을 쌓고 있고(①), 같은 판단을 하루 수만 번 되풀이해야 하며(②), 사람이 최종 확인하는 절차를 둘 수 있습니다(③). 다만 놓치면 대형 피해가 되므로 <b>경보가 아니라 후보 제시</b>로 설계해야 합니다.'
+    },
+    {
+      emo: '⚡', name: '여름철 전력 수요 예측하기', ans: 'ts',
+      data: '10년치 시간별 전력 사용량, 기온·습도 관측값, 요일·공휴일 정보',
+      flags: { d: 'y', r: 'y', e: 'm' },
+      why: '시간 순서대로 쌓인 값에서 다음 값을 맞히는 문제이므로 <b>시계열 예측</b>입니다.',
+      verdict: '데이터가 정확한 숫자로 오래 쌓여 있어 학습에 매우 유리합니다. 틀리면 정전이나 발전 낭비가 생기므로, 예측값과 함께 <b>불확실성의 범위</b>를 함께 내놓는 것이 중요합니다.'
+    },
+    {
+      emo: '🌾', name: '농작물 병해충 발생 예측하기', ans: 'ts',
+      data: '과거 병해충 발생 기록(지역·날짜), 기상 관측 자료, 작물별 재배 이력',
+      flags: { d: 'm', r: 'y', e: 'y' },
+      why: '기상 변화에 따라 발생 위험이 오르내리는 문제이므로 <b>시계열 예측</b>입니다. 잎 사진으로 진단한다면 이미지 인식이 됩니다.',
+      verdict: '기상 데이터는 풍부하지만 발생 기록은 지역마다 들쭉날쭉합니다(①). 예측이 틀려도 “미리 살펴보라”는 안내이므로 위험이 크지 않아(③) 인공지능을 쓰기 좋은 문제입니다.'
+    },
+    {
+      emo: '🚦', name: '출퇴근 시간 교통 혼잡 줄이기', ans: 'path',
+      data: '도로망 그래프(교차로와 도로), 구간별 통행 속도 기록, 실시간 교통량',
+      flags: { d: 'y', r: 'y', e: 'y' },
+      why: '“어디를 거쳐 가면 가장 빠른가”를 찾는 문제이므로 <b>최적 경로 탐색</b>입니다. 1단원에서 배운 A* 탐색이 바로 여기에 쓰입니다.',
+      verdict: '데이터가 실시간으로 들어오고(①) 같은 계산을 초 단위로 반복하며(②) 틀려도 조금 늦을 뿐입니다(③). 단, 모두를 같은 우회로로 보내면 그 길이 막히는 <b>쏠림 현상</b>을 고려해야 합니다.'
+    },
+    {
+      emo: '📱', name: '쏟아지는 재난 제보 문자 분류하기', ans: 'nlp',
+      data: '과거 제보 문장 수만 건과 유형 라벨(화재 / 침수 / 붕괴 / 의료), 지역명 사전',
+      flags: { d: 'y', r: 'y', e: 'm' },
+      why: '사람이 쓴 문장의 뜻을 파악해 분류하는 문제이므로 <b>자연어 처리</b>입니다.',
+      verdict: '재난 상황에서는 1분에 수천 건이 들어오므로 사람이 다 읽을 수 없습니다(②). 잘못 분류하면 출동이 늦어질 수 있어(③), 분류 확률이 낮은 제보는 <b>사람에게 넘기는</b> 구조가 필요합니다.'
+    },
+    {
+      emo: '🩺', name: '희귀 질환 진단이 늦어지는 문제', ans: 'ad',
+      data: '대규모 정상 검사 수치, 확진된 희귀 질환 사례(매우 적음), 증상 기록',
+      flags: { d: 'n', r: 'm', e: 'n' },
+      why: '사례가 극히 드물어 “정상에서 크게 벗어난 패턴”을 찾는 방식이 맞습니다. 이것이 <b>이상 탐지</b>입니다.',
+      verdict: '조건부로만 적합합니다. 확진 사례가 워낙 적어 데이터가 부족하고(①), 틀렸을 때 환자에게 돌아가는 피해가 큽니다(③). <b>진단을 대신하는 도구가 아니라, 의사가 놓치기 쉬운 후보를 알려 주는 보조 도구</b>로만 써야 합니다.'
+    },
+    {
+      emo: '📚', name: '학교 안 학습 격차를 해소하기', ans: 'none',
+      data: '학생별 문제 풀이 기록은 모을 수 있지만, 격차의 원인(가정 환경·정서·건강·돌봄)은 데이터로 잡히지 않는다',
+      flags: { d: 'n', r: 'm', e: 'n' },
+      why: '<b>추천 · 개인화</b>로 “다음에 풀 문제”를 골라 줄 수는 있습니다. 그러나 그것은 격차의 <b>증상</b>을 다루는 것이고, 원인은 데이터 밖에 있습니다.',
+      verdict: '인공지능만으로는 해결되지 않습니다. 맞춤 문제 추천은 도움이 되지만, 기기와 인터넷이 없는 학생은 오히려 더 뒤처집니다(정보 격차). 학생을 “격차 위험군”으로 분류해 두면 <b>낙인</b>이라는 되돌릴 수 없는 피해가 생깁니다(③). 사람의 돌봄과 사회 정책이 함께 있어야 합니다.'
+    },
+    {
+      emo: '⚖️', name: '어떤 학생이 규칙을 어길지 미리 예측하기', ans: 'none',
+      data: '과거 징계 기록으로 학습하게 되는데, 그 기록 자체가 이미 편향되어 있을 수 있다',
+      flags: { d: 'n', r: 'n', e: 'n' },
+      why: '겉보기에는 분류 문제처럼 보이지만, 세 기준 모두에서 위험합니다. 그래서 정답은 <b>인공지능이 답이 아니다</b>입니다.',
+      verdict: '판단 대상이 <b>한 사람의 미래</b>입니다. 반복되는 판단이 아니고(②), 근거 데이터가 편향되어 있으며(①), 틀렸을 때 낙인이라는 되돌릴 수 없는 피해가 생깁니다(③). 게다가 예측이 아이의 행동을 실제로 그 방향으로 밀어 버리는 <b>자기실현적 예언</b>이 일어날 수 있습니다.'
+    }
+  ];
+
+  const FLAG_TXT = {
+    d: { y: '데이터 확보 ○', m: '데이터 확보 △', n: '데이터 확보 ×' },
+    r: { y: '판단의 반복성 ○', m: '판단의 반복성 △', n: '판단의 반복성 ×' },
+    e: { y: '오류의 위험 낮음', m: '오류의 위험 보통', n: '오류의 위험 큼' }
+  };
+
+  const body = AI.sim.panel('#sim2', {
+    title: '사회 문제와 인공지능 해법 짝짓기',
+    tag: '적합성 판단',
+    desc: '왼쪽 문제에 어울리는 인공지능 기술을 골라 보세요. 기술 카드 중에는 <b>어떤 문제에도 답이 아닌 것</b>이 있고, 반대로 <b>인공지능이 답이 아닌 문제</b>도 섞여 있습니다. 채점하면 필요한 데이터와 함께, 세 기준(데이터 확보 · 판단의 반복성 · 오류의 위험)으로 본 적합성이 표시됩니다.'
+  });
+
+  const list = AI.h('div');
+  const rows = PROBS.map((p, i) => {
+    const sel = AI.h('select', { 'aria-label': p.name + '에 어울리는 기술' },
+      AI.h('option', { value: '' }, '— 기술 고르기 —'),
+      ...TECHS.map(t => AI.h('option', { value: t.k }, t.n))
+    );
+    const detail = AI.h('div', { class: 'pm-detail' });
+    const row = AI.h('div', { class: 'pm-row' },
+      AI.h('span', { class: 'pm-name', html: p.emo + ' ' + p.name }),
+      sel, detail
+    );
+    list.appendChild(row);
+    return { p, sel, row, detail, i };
+  });
+  body.appendChild(list);
+
+  const stats = AI.ui.stats([
+    { key: 'c', label: '맞힌 짝' }, { key: 'fit', label: '적합한 문제' }, { key: 'unfit', label: '부적합한 문제' }
+  ]);
+  const fb = AI.h('div', { class: 'q-feedback' });
+
+  function flagHtml(p) {
+    return '<div class="pm-flags">' +
+      ['d', 'r', 'e'].map(k => '<span class="pm-flag ' + p.flags[k] + '">' + FLAG_TXT[k][p.flags[k]] + '</span>').join('') +
+      '</div>';
+  }
+
+  function grade() {
+    let c = 0, blank = 0;
+    rows.forEach(r => {
+      const v = r.sel.value;
+      if (!v) blank++;
+      const ok = v === r.p.ans;
+      if (ok) c++;
+      r.row.classList.remove('ok', 'no');
+      r.row.classList.add('graded', ok ? 'ok' : 'no');
+      const ansName = (TECHS.find(t => t.k === r.p.ans) || {}).n;
+      r.detail.innerHTML =
+        '<b>' + (ok ? '✓ 맞았습니다' : '✗ 정답: ' + ansName) + '</b> — ' + r.p.why +
+        '<span class="pm-data">🗄️ <b>필요한 데이터</b> — ' + r.p.data + '</span>' +
+        flagHtml(r.p) +
+        '<p style="margin:8px 0 0">' + r.p.verdict + '</p>';
+    });
+    const fit = PROBS.filter(p => p.ans !== 'none').length;
+    stats.set('c', c + ' / ' + rows.length);
+    stats.set('fit', fit + '개');
+    stats.set('unfit', (PROBS.length - fit) + '개');
+    fb.className = 'q-feedback show ' + (c === rows.length ? 'ok' : 'no');
+    fb.innerHTML = '<b>' + c + ' / ' + rows.length + ' 정답</b>' +
+      (blank ? ' · 아직 고르지 않은 문제가 ' + blank + '개 있습니다.' : '') +
+      (c === rows.length
+        ? ' — 훌륭합니다! 특히 마지막 두 문제에서 <b>인공지능을 쓰지 않는 것도 하나의 답</b>이라는 점을 확인했습니다.'
+        : ' — 빨간 칸의 해설을 읽고, <b>세 기준</b>으로 다시 판단해 보세요.');
+  }
+
+  function reset() {
+    rows.forEach(r => {
+      r.sel.value = '';
+      r.row.className = 'pm-row';
+      r.detail.innerHTML = '';
+    });
+    fb.className = 'q-feedback';
+    stats.set('c', '–'); stats.set('fit', '–'); stats.set('unfit', '–');
+  }
+
+  function reveal() {
+    rows.forEach(r => { r.sel.value = r.p.ans; });
+    grade();
+  }
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('채점하기', grade, 'primary'),
+    AI.ui.btn('다시 풀기', reset, 'ghost'),
+    AI.ui.btn('정답 보기', reveal, 'ghost')
+  ));
+  body.appendChild(stats.el);
+  body.appendChild(fb);
+
+  body.appendChild(AI.el(
+    '<div class="box box-info" style="margin:14px 0 0">' +
+    '<div class="box-label">🧭 판단의 순서</div>' +
+    '<p>기술을 먼저 고르고 문제를 찾는 것이 아니라, <b>문제를 먼저 정의하고 세 기준으로 따진 뒤</b> 기술을 고릅니다. 순서를 뒤집으면 “인공지능을 써 보고 싶어서 억지로 만든 프로젝트”가 됩니다.</p>' +
+    '<p style="color:var(--ink-3);font-size:14px">💡 마지막 두 문제처럼, <b>인공지능을 쓰지 않기로 결정하는 것</b>도 인공지능을 잘 아는 사람이 내리는 판단입니다.</p>' +
+    '</div>'
+  ));
+
+  reset();
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a3l1-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['다트머스', '겨울', '전문가 시스템', '데이터', 'GPU', '트랜스포머', '생성형', '딥페이크'],
+  sents: [
+    { text: '1956년 {0} 회의에서 ‘인공지능’이라는 이름이 처음 쓰였다.', answers: [['다트머스']] },
+    { text: '기대가 성능보다 앞서 나가 연구비가 끊긴 침체기를 인공지능의 {0}(이)라고 부른다.', answers: [['겨울']] },
+    { text: '1980년대에는 전문가의 지식을 규칙으로 옮긴 {0}이(가) 산업에 쓰였다.', answers: [['전문가 시스템']] },
+    { text: '최근의 도약은 대량의 {0}, {1}(으)로 얻은 연산 능력, 개선된 알고리즘이 함께 자란 결과이다.', answers: [['데이터'], ['GPU']] },
+    { text: '2017년에 발표된 {0} 구조는 오늘날 대규모 언어 모델의 뼈대가 되었다.', answers: [['트랜스포머']] },
+    { text: '글·그림·소리를 새로 만들어 내는 인공지능을 {0} 인공지능이라고 한다.', answers: [['생성형']] },
+    { text: '인공지능으로 만든 정교한 가짜 영상·음성을 {0}(이)라고 하며, 사회의 신뢰를 위협한다.', answers: [['딥페이크']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '1차시 확인 문제',
+  items: [
+    {
+      type: 'short',
+      q: '1956년, 이 분야에 ‘인공지능’이라는 이름을 처음 붙인 회의의 이름은 무엇인가?',
+      answer: ['다트머스 회의', '다트머스', '다트머스 학회', 'Dartmouth'],
+      placeholder: '예: ○○○○ 회의',
+      why: '<b>다트머스 회의</b>입니다. 미국 다트머스 대학에서 열린 이 회의에서 존 매카시를 비롯한 연구자들이 artificial intelligence라는 용어를 정했고, 이 해를 인공지능이 학문으로 출발한 해로 봅니다.'
+    },
+    {
+      type: 'ox',
+      q: '인공지능의 겨울은 인공지능이라는 아이디어 자체가 틀렸다는 사실이 증명되어 찾아왔다.',
+      answer: false,
+      why: '겨울의 원인은 아이디어가 틀렸기 때문이 아니라 <b>기대가 성능보다 앞서 나갔기</b> 때문입니다. 1970년대에는 연산 능력과 데이터가, 1980년대 말에는 규칙을 자동으로 얻는 방법이 없었습니다. 실제로 1958년의 퍼셉트론 아이디어는 2012년 딥러닝으로 다시 살아났습니다.'
+    },
+    {
+      type: 'order',
+      q: '다음 사건을 <b>일어난 순서</b>대로 배열하시오.',
+      items: [
+        '다트머스 회의에서 ‘인공지능’이라는 이름이 정해졌다',
+        '전문가 시스템이 병원과 은행에서 상업적으로 쓰였다',
+        '딥 블루가 체스 세계 챔피언을 이겼다',
+        '이미지 인식 대회에서 딥러닝이 다른 방법들을 크게 앞질렀다',
+        '알파고가 이세돌 9단에게 승리했다',
+        '생성형 인공지능이 누구나 쓰는 도구가 되었다'
+      ],
+      answer: [0, 1, 2, 3, 4, 5],
+      why: '1956년 다트머스 회의 → 1980년대 전문가 시스템 → 1997년 딥 블루 → 2012년 딥러닝의 부상 → 2016년 알파고 → 2022년 이후 생성형 인공지능의 대중화입니다. 딥 블루와 알파고 사이에 <b>2012년의 전환</b>이 있었다는 점이 중요합니다. 딥 블루는 탐색의 승리, 알파고는 학습의 승리였습니다.'
+    },
+    {
+      type: 'multi',
+      q: '최근 인공지능의 급격한 도약을 가능하게 한 <b>세 축</b>에 해당하는 것을 모두 고르시오.',
+      choices: [
+        '인터넷과 스마트폰으로 쌓인 대량의 데이터',
+        '병렬 계산에 강한 GPU가 만든 연산 능력',
+        '규칙을 사람이 손으로 하나하나 입력하는 방식의 확산',
+        '깊은 신경망을 학습시키는 방법과 트랜스포머 같은 새 구조'
+      ],
+      answer: [0, 1, 3],
+      why: '세 축은 <b>데이터 · 연산 능력 · 알고리즘</b>입니다. ③은 1980년대 전문가 시스템의 방식으로, 오히려 두 번째 겨울을 불러온 <b>한계</b>였습니다. 규칙을 사람이 넣는 방식은 분야가 넓어질수록 유지가 불가능해집니다.'
+    },
+    {
+      type: 'mc',
+      q: '다음 중 인공지능을 적용하기에 <b>가장 부적절한</b> 문제는 무엇인가?',
+      choices: [
+        '산림 감시 카메라 영상에서 산불 연기를 찾아내기',
+        '10년치 사용량 기록으로 다음 주 전력 수요를 예측하기',
+        '어떤 학생이 앞으로 문제를 일으킬지 미리 예측해 명단을 만들기',
+        '재난 제보 문자를 유형별로 분류해 담당 부서로 보내기'
+      ],
+      answer: 2,
+      why: '③은 세 기준 모두에서 위험합니다. 학습에 쓸 과거 징계 기록 자체가 <b>편향</b>되어 있고(데이터 확보 ×), 판단 대상이 한 사람의 미래여서 반복되는 판단이 아니며(반복성 ×), 틀렸을 때 <b>낙인</b>이라는 되돌릴 수 없는 피해가 생깁니다(오류의 위험 큼). 게다가 예측이 실제 행동을 그 방향으로 밀어 버리는 자기실현적 예언이 일어날 수 있습니다.'
+    },
+    {
+      type: 'match',
+      q: '다음 사회 문제에 가장 잘 맞는 인공지능 기술을 짝지으시오.',
+      left: [
+        '드론 영상에서 해양 쓰레기가 몰린 구역을 찾기',
+        '기온·습도 기록으로 다음 달 전력 수요를 예측하기',
+        '쏟아지는 민원 문장을 담당 부서별로 나누기',
+        '평소와 크게 다른 카드 결제를 찾아내기',
+        '공사 구간을 피해 가장 빠른 길을 안내하기'
+      ],
+      right: ['이미지 인식', '시계열 예측', '자연어 처리', '이상 탐지', '최적 경로 탐색'],
+      answer: [0, 1, 2, 3, 4],
+      why: '사진에서 무엇인지 알아보면 <b>이미지 인식</b>, 시간 순서대로 쌓인 값의 다음을 맞히면 <b>시계열 예측</b>, 사람이 쓴 문장의 뜻을 다루면 <b>자연어 처리</b>, 정상에서 크게 벗어난 것을 찾으면 <b>이상 탐지</b>, 그래프에서 가장 좋은 길을 찾으면 <b>최적 경로 탐색</b>입니다. 문제의 <b>입력이 무엇인지</b>를 보면 기술을 고를 수 있습니다.'
+    },
+    {
+      type: 'mc',
+      q: '1997년 딥 블루의 승리와 2016년 알파고의 승리의 <b>본질적인 차이</b>는 무엇인가?',
+      choices: [
+        '딥 블루는 사람이 만든 평가 기준과 빠른 탐색으로, 알파고는 데이터로부터 학습한 판단으로 이겼다',
+        '딥 블루는 소프트웨어이고 알파고는 하드웨어였다',
+        '딥 블루는 규칙을 몰랐고 알파고는 규칙을 알았다',
+        '두 사건 사이에 기술적 차이는 없고 상대의 실력만 달랐다'
+      ],
+      answer: 0,
+      why: '딥 블루는 사람이 “이 판이 얼마나 유리한가”를 판단하는 기준을 만들어 주고, 컴퓨터가 그 기준으로 수많은 경우를 <b>탐색</b>했습니다(1단원의 탐색). 알파고는 수많은 대국 데이터와 자기 대국으로 <b>스스로 판단 기준을 학습</b>했습니다(2단원의 기계학습). 그 사이에 2012년 딥러닝의 도약이 있었습니다.'
+    },
+    {
+      type: 'ox',
+      q: '인공지능은 사회 문제를 해결하기만 하며, 새로운 사회 문제를 만들지는 않는다.',
+      answer: false,
+      why: '인공지능은 문제를 푸는 도구이면서 동시에 <b>새 문제의 원인</b>입니다. 데이터 센터의 전력·물 소비, 일자리의 급격한 재편, 도구를 쓸 수 있는 사람과 없는 사람 사이의 <b>정보 격차</b>, 딥페이크로 인한 신뢰 붕괴가 대표적입니다. 그래서 기술을 도입할 때 <b>얻는 것과 잃는 것을 함께</b> 따져야 합니다.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a3l1-note',
+  title: '발전 흐름과 사회 문제 분석 기록',
+  prompt: '두 시뮬레이터를 충분히 다뤄 본 뒤 아래를 채워 보세요. <b>타임라인에서 사건을 최소 5개 이상 열어 보고</b>, 짝짓기 활동은 채점까지 마친 다음에 작성하면 좋습니다.',
+  fields: [
+    { key: 'era', label: '타임라인에서 가장 인상 깊었던 사건 (연도 · 이름)', type: 'text', placeholder: '예: 2012년 이미지넷 — 딥러닝의 부상' },
+    { key: 'axis', label: '그 사건은 세 축 중 무엇이 자란 결과인가?', type: 'select', options: ['데이터', '연산 능력', '알고리즘', '세 축이 함께'] },
+    { key: 'score', label: '짝짓기 활동 채점 결과 (맞힌 짝 / 전체)', type: 'text', placeholder: '예: 6 / 8' },
+    { key: 'wrong', label: '틀린 문제와 그 이유', type: 'text', placeholder: '예: 희귀 질환 — 이미지 인식으로 골랐다' },
+    {
+      key: 'winter', label: '두 번의 겨울은 왜 왔나요? 두 겨울의 공통점을 한 문장으로 정리해 보세요.',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 두 겨울 모두 기대가 성능보다 앞서 나갔기 때문에 왔다. 첫 번째는 …, 두 번째는 …'
+    },
+    {
+      key: 'pick', label: '내가 인공지능으로 풀어 보고 싶은 <b>우리 지역·학교의 사회적 문제</b> 한 가지를 적고, 세 기준으로 따져 보세요.',
+      type: 'textarea', rows: 5,
+      placeholder: '문제: 학교 앞 횡단보도의 위험한 시간대를 찾기\n① 데이터 확보 — 어떤 데이터를 어떻게 모을 수 있나?\n② 판단의 반복성 — 같은 판단을 여러 번 하는 일인가?\n③ 오류의 위험 — 틀리면 누가 어떤 피해를 입나?\n결론: 인공지능이 적합한가?'
+    },
+    {
+      key: 'risk', label: '내가 고른 문제에서 인공지능이 <b>오히려 문제를 키울</b> 가능성은 무엇일까요?',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 특정 지역만 위험하다고 표시되어 그 동네에 대한 편견이 생길 수 있다. …'
+    },
+    {
+      key: 'stance', label: '이 차시를 마친 지금, 인공지능의 발전 속도에 대한 나의 생각',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 나는 기대와 걱정 중 어느 쪽에 더 가까운가? 그 근거는 무엇인가?'
+    }
+  ]
+});
+</script>
+</body>
+</html>

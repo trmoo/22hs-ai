@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4차시 선 하나로 예측하기 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+  .fx { font-family: var(--font-mono); font-size: 14.5px; background: var(--surface-2);
+    border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 11px 14px; margin: 12px 0;
+    overflow-x: auto; white-space: nowrap; color: var(--ink); }
+  .fx b { color: var(--accent-ink); }
+  .panel-col { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px; background: var(--surface); }
+  .panel-col h5 { font-size: 13px; margin: 0 0 2px; }
+  .panel-col p.cap { font-size: 12px; color: var(--ink-3); margin: 0 0 6px; line-height: 1.55; }
+  .badge-bad { display: inline-block; padding: 2px 9px; border-radius: 999px; background: var(--no-soft);
+    border: 1px solid var(--no-line); color: var(--no); font-size: 12px; font-weight: 800; }
+  .badge-ok { display: inline-block; padding: 2px 9px; border-radius: 999px; background: var(--ok-soft);
+    border: 1px solid var(--ok-line); color: var(--ok); font-size: 12px; font-weight: 800; }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>같은 반 친구 다섯 명의 하루 공부 시간과 수학 점수를 모았습니다.</p>
+      <div class="table-wrap">
+        <table class="tb">
+          <thead><tr><th>공부 시간(시간)</th><th>1</th><th>3</th><th>5</th><th>7</th><th>9</th><th><b>6</b></th></tr></thead>
+          <tbody><tr><td><b>수학 점수</b></td><td class="num">38</td><td class="num">49</td><td class="num">63</td><td class="num">79</td><td class="num">92</td><td class="num"><b>?</b></td></tr></tbody>
+        </table>
+      </div>
+      <p>공부 시간이 <b>6시간</b>인 친구의 점수는 몇 점쯤일까요? 지난 차시의 k-최근접 이웃이라면 “가까운 이웃 몇 명의 점수를 평균”하겠지만, 여기서는 다른 길로 가 봅시다.</p>
+      <p>숫자들을 보면 <b>시간이 1시간 늘 때마다 점수가 대략 7점쯤 오르는</b> 규칙이 보입니다. 이 규칙을 <b>선 하나</b>로 표현할 수 있다면, 표에 없는 시간에 대해서도 점수를 계산할 수 있습니다.</p>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 그 “선”을 어떻게 정할까요?</summary>
+        <div class="more-body">
+          연필로 대충 그으면 사람마다 다른 선이 나옵니다. 컴퓨터는 <b>“모든 점에서 선까지의 어긋남을 다 합쳤을 때 가장 작아지는 선”</b>을 답으로 정합니다. 이 어긋남을 재는 방법과, 가장 작은 값을 찾아가는 방법이 이 차시의 핵심입니다.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 분류에서 회귀로 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>범주가 아니라 숫자를 맞히는 문제</h2></div>
+
+    <p>지난 차시의 분류는 “사과냐 감귤이냐”처럼 <b>정해진 칸 중 하나</b>를 골랐습니다. 그런데 “이 집은 얼마에 팔릴까”, “내일 몇 도일까”, “이 학생은 몇 점을 받을까”는 칸이 없습니다. 답이 <b>연속된 수치</b>이기 때문입니다. 이런 문제를 <b class="blank" data-a="회귀|regression" data-hint="연속된 수치를 예측하는 지도학습 문제">회귀</b>라고 합니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>지도학습의 두 갈래 — 무엇이 다른가</caption>
+        <thead><tr><th>구분</th><th>분류 (3차시)</th><th>회귀 (이 차시)</th></tr></thead>
+        <tbody>
+          <tr><td><b>예측 결과</b></td><td>범주(클래스)</td><td>수치(실수)</td></tr>
+          <tr><td><b>예시</b></td><td>스팸/정상, 합격/불합격</td><td>기온, 집값, 점수, 판매량</td></tr>
+          <tr><td><b>모델이 만드는 것</b></td><td>영역을 나누는 결정 경계</td><td>값을 계산하는 함수(직선·곡선)</td></tr>
+          <tr><td><b>성능 지표</b></td><td>정확도, 정밀도, 재현율</td><td>평균 제곱 오차, 결정계수</td></tr>
+          <tr><td><b>대표 알고리즘</b></td><td>k-최근접 이웃, 결정 트리</td><td>선형 회귀, 회귀 트리</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>주의할 점이 하나 있습니다. 3차시에서 배운 <b>로지스틱 회귀</b>는 이름에 회귀가 들어가지만 실제로는 <b>분류</b> 알고리즘입니다. 이름만으로 유형을 판단하면 안 됩니다.</p>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 순서가 있는 범주는 어느 쪽?</div>
+      <p>“상·중·하” 같은 등급은 범주이므로 분류입니다. 하지만 “1점~5점 별점”은 상황에 따라 회귀로 다루기도 합니다. 4.3점 같은 중간값이 의미를 가지면 회귀, “딱 별 4개”만 존재한다면 분류로 보는 것이 자연스럽습니다. <b>문제를 어떻게 정의하느냐</b>가 유형을 결정합니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. 선형 회귀 모델 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>선형 회귀 — 직선 하나가 모델이다</h2></div>
+
+    <p>가장 단순한 회귀 모델은 직선입니다. 입력 x 하나로 출력 y를 예측하는 <b>단순 선형 회귀</b>의 식은 다음과 같습니다.</p>
+
+    <div class="fx">ŷ = <b>w</b>x + <b>b</b>　　( ŷ : 예측값, x : 입력 속성, w : 가중치, b : 절편 )</div>
+
+    <p>여기서 x는 우리가 넣는 값(공부 시간)이고 ŷ는 모델이 내놓는 값(예상 점수)입니다. 모델이 학습으로 찾아야 하는 것은 오직 <b>두 숫자</b>, w와 b입니다. 이렇게 학습으로 값이 정해지는 숫자를 <b>매개변수(파라미터)</b>라고 부릅니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">📐</span>
+        <h4>w — 가중치(기울기)</h4>
+        <p>x가 <b>1 늘어날 때 ŷ가 얼마나 변하는가</b>를 뜻합니다. w = 7이면 “한 시간 더 공부하면 7점 오른다”는 의미입니다. 통계에서는 <b>회귀계수</b>라고도 합니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🎚️</span>
+        <h4>b — 절편</h4>
+        <p>x가 0일 때의 예측값, 즉 <b>출발점의 높이</b>입니다. 직선을 위아래로 평행 이동시키는 역할을 합니다.</p>
+      </div>
+    </div>
+
+    <p>x가 <b>1 커질 때 ŷ가 변하는 양</b>을 나타내는 것이 <b class="blank" data-a="가중치|기울기|회귀계수|w" data-hint="식 ŷ = wx + b 에서 w, 직선의 기울기">가중치</b>이고, x가 0일 때의 예측값을 <b class="blank" data-a="절편|b|y절편" data-hint="식 ŷ = wx + b 에서 b, 직선이 세로축과 만나는 높이">절편</b>이라고 합니다. 예측에 쓰는 입력 속성을 <b>독립 변수</b>, 예측하려는 값을 <b>종속 변수</b>라고 부릅니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념</div>
+      <p><b>선형 회귀</b>는 독립 변수와 종속 변수의 관계를 직선(또는 평면)으로 나타내어 수치를 예측하는 지도학습 알고리즘이다. 학습이란 데이터에 가장 잘 맞는 가중치 w와 절편 b를 찾는 일이다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. 오차와 평균 제곱 오차 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>“가장 잘 맞는 선”을 숫자로 정의하기</h2></div>
+
+    <p>“잘 맞는다”는 느낌만으로는 컴퓨터가 계산할 수 없습니다. 먼저 <b>얼마나 안 맞는지</b>를 숫자로 재야 합니다. 실제로 관측된 값을 <b>실젯값</b>(y), 모델이 계산한 값을 <b>예측값</b>(ŷ)이라고 할 때, 그 차이를 <b class="blank" data-a="오차|잔차|error" data-hint="실젯값과 예측값의 차이, 잔차라고도 한다">오차</b>라고 합니다. 그래프에서는 점에서 직선까지의 <b>세로 거리</b>로 보입니다.</p>
+
+    <p>그런데 오차를 그냥 다 더하면 큰 문제가 생깁니다. 어떤 점은 선 위에 있어 오차가 +10이고 어떤 점은 아래에 있어 −10이면, 둘을 더하면 0이 되어 <b>“완벽한 모델”</b>처럼 보입니다. 부호가 서로 상쇄되기 때문입니다.</p>
+
+    <p>그래서 오차를 <b>제곱해서</b> 더합니다. 제곱하면 부호가 사라지고, 덤으로 <b>큰 오차에 더 큰 벌점</b>이 붙습니다. 오차 2는 4가 되지만 오차 10은 100이 되니까요. 이렇게 오차를 제곱해 평균한 값이 <b class="blank" data-a="평균 제곱 오차|MSE|평균제곱오차" data-hint="영어 약자 MSE, 오차를 제곱해 평균한 값">평균 제곱 오차</b>(MSE)입니다.</p>
+
+    <div class="fx">MSE = (1/n) × Σ ( yᵢ − ŷᵢ )²　　= (1/n) × { (y₁−ŷ₁)² + (y₂−ŷ₂)² + … + (yₙ−ŷₙ)² }</div>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념</div>
+      <p>모델의 예측이 실젯값과 얼마나 어긋나는지를 하나의 수로 나타내는 함수를 <b>오차 함수</b>(손실 함수, 비용 함수)라고 한다. 회귀에서 가장 널리 쓰이는 오차 함수가 <b>평균 제곱 오차</b>(MSE)이며, 이 값이 작을수록 모델의 성능이 좋다.</p>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 왜 굳이 제곱인가 — 세 가지 이유</div>
+      <ul style="margin:0">
+        <li><b>부호 상쇄를 막는다.</b> +와 −가 서로 지워지지 않습니다.</li>
+        <li><b>큰 오차를 강하게 벌한다.</b> 크게 틀린 점을 먼저 고치도록 모델을 밀어붙입니다.</li>
+        <li><b>미분이 매끄럽다.</b> 절댓값 함수는 꼭짓점에서 뾰족해 미분이 안 되지만, 제곱은 어디서나 매끄럽게 미분됩니다. 뒤에 나올 경사 하강법이 바로 이 성질을 씁니다.</li>
+      </ul>
+    </div>
+
+    <p>다른 오차 함수도 있습니다. 오차의 절댓값을 평균한 <b>MAE</b>(평균 절대 오차)는 이상치에 덜 흔들리고, MSE에 제곱근을 씌운 <b>RMSE</b>(평균 제곱근 오차)는 단위가 원래 값과 같아 해석하기 쉽습니다.</p>
+
+    <h3 class="sub-head">최소 제곱법 — 공식으로 단번에 구하기</h3>
+    <p>단순 선형 회귀에서는 MSE를 가장 작게 만드는 w와 b를 <b>공식으로 한 번에</b> 구할 수 있습니다. MSE를 w와 b에 대해 미분해 0이 되는 지점을 풀면 다음 식이 나옵니다. 이 방법을 <b class="blank" data-a="최소 제곱법|최소제곱법|최소자승법" data-hint="오차의 제곱합을 최소로 만드는 해를 공식으로 구하는 방법">최소 제곱법</b>이라고 합니다.</p>
+
+    <div class="fx">w = Σ(xᵢ − x̄)(yᵢ − ȳ) ⁄ Σ(xᵢ − x̄)²　　　b = ȳ − w·x̄　　( x̄, ȳ 는 평균 )</div>
+
+    <p>공식으로 답이 나온다면 왜 굳이 다른 방법이 필요할까요? 속성이 수십만 개인 문제나 인공신경망처럼 매개변수가 수백만 개인 모델에서는 이런 공식을 풀 수 없기 때문입니다. 그래서 실제 기계학습은 다음 절의 방법을 씁니다.</p>
+
+    <h3 class="sub-head">결정계수 R² — 이 모델은 쓸 만한가</h3>
+    <p>MSE는 단위에 따라 값이 커지므로 “0.8이면 좋은 건가”를 판단하기 어렵습니다. 그래서 0~1 사이의 값으로 모델의 설명력을 나타내는 <b class="blank" data-a="결정계수|R2|R²|R제곱" data-hint="기호로 R², 1에 가까울수록 잘 설명한다">결정계수</b>(R²)를 함께 봅니다.</p>
+
+    <div class="fx">R² = 1 − ( Σ(yᵢ − ŷᵢ)² ⁄ Σ(yᵢ − ȳ)² )　　( 분모는 "그냥 평균으로 예측했을 때"의 오차 )</div>
+
+    <p>분모는 <b>아무 노력 없이 평균값만 답하는 모델</b>의 오차입니다. 그러니 R²는 “평균만 답하는 것보다 얼마나 나아졌는가”를 뜻합니다. R²가 1에 가까우면 데이터를 매우 잘 설명하는 것이고, 0이면 평균만 답하는 것과 다를 바 없습니다.</p>
+
+    <h3 class="sub-head">직선을 넘어서</h3>
+    <p>입력 속성이 여러 개면 <span class="mono">ŷ = w₁x₁ + w₂x₂ + … + wₙxₙ + b</span> 형태가 되고, 이를 <b class="blank" data-a="다중 선형 회귀|다중선형회귀|다중 회귀" data-hint="독립 변수가 두 개 이상인 선형 회귀">다중 선형 회귀</b>라고 합니다. 관계가 휘어 있을 때는 <span class="mono">x²</span>, <span class="mono">x³</span> 같은 항을 넣어 곡선을 만드는 <b class="blank" data-a="다항 회귀|다항회귀" data-hint="x의 거듭제곱 항을 넣어 곡선을 만드는 회귀">다항 회귀</b>를 씁니다. 다만 차수를 지나치게 높이면 모든 점을 억지로 지나가려다 <b>과대적합</b>에 빠집니다.</p>
+  </section>
+
+  <!-- ============ 4. 경사 하강법 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>경사 하강법 — 더듬어서 내려가기</h2></div>
+
+    <p>안개가 자욱한 산에 서 있다고 상상해 봅시다. 목표는 <b>가장 낮은 곳</b>으로 내려가는 것인데, 앞이 보이지 않습니다. 할 수 있는 일은 발밑의 <b>기울기</b>를 느끼고, 가장 급하게 내려가는 방향으로 <b>한 걸음</b> 옮기는 것뿐입니다. 이것을 계속 반복하면 결국 골짜기에 도달합니다.</p>
+
+    <p>기계학습이 오차를 줄이는 방식이 정확히 이렇습니다. w와 b를 조금씩 바꿔 가며 오차가 줄어드는 방향으로 옮기는 방법을 <b class="blank" data-a="경사 하강법|경사하강법|gradient descent" data-hint="오차 곡면의 기울기를 따라 내려가는 방법">경사 하강법</b>이라고 합니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념</div>
+      <p><b>경사 하강법</b>은 오차 함수를 매개변수에 대해 미분해 얻은 기울기의 <b>반대 방향</b>으로 매개변수를 조금씩 이동시켜, 오차가 최소가 되는 값을 찾아가는 최적화 방법이다.</p>
+    </div>
+
+    <h3 class="sub-head">한 걸음의 계산</h3>
+    <p>MSE를 w와 b에 대해 각각 미분하면 다음과 같습니다. 오차가 큰 점이, 그리고 x가 큰 점이 w를 더 강하게 끌어당긴다는 것을 식에서 읽을 수 있습니다.</p>
+
+    <div class="fx">∂MSE/∂w = (2/n) Σ ( ŷᵢ − yᵢ ) xᵢ　　　∂MSE/∂b = (2/n) Σ ( ŷᵢ − yᵢ )</div>
+    <div class="fx">w ← w − <b>η</b> × ∂MSE/∂w　　　b ← b − <b>η</b> × ∂MSE/∂b　　( η : 학습률 )</div>
+
+    <p>기울기 앞에 붙은 η가 <b>한 걸음의 크기</b>를 정하는 <b class="blank" data-a="학습률|learning rate|러닝 레이트" data-hint="기호 η, 한 걸음을 얼마나 크게 옮길지 정하는 값">학습률</b>입니다. 기울기의 <b>반대 방향</b>(빼기)으로 가는 것이 핵심입니다. 기울기가 양수라면 오른쪽이 올라가는 방향이니 왼쪽으로 가야 하기 때문입니다.</p>
+
+    <h3 class="sub-head">학습률을 잘못 정하면</h3>
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>학습률이 만드는 세 가지 결과</caption>
+        <thead><tr><th>학습률</th><th>일어나는 일</th><th>그래프 모양</th></tr></thead>
+        <tbody>
+          <tr><td><b>너무 작다</b></td><td class="bad">걸음이 티끌만 해서 수천 번 반복해도 골짜기에 못 닿는다</td><td>오차가 거의 수평으로 아주 천천히 내려간다</td></tr>
+          <tr><td><b>적당하다</b></td><td class="good">몇십~몇백 번 안에 오차가 최솟값에 안정적으로 도달한다</td><td>처음에 뚝 떨어지고 이내 평평해진다</td></tr>
+          <tr><td><b>너무 크다</b></td><td class="bad">골짜기를 건너뛰어 반대편 더 높은 곳에 착지하고, 이를 반복하며 튕겨 나간다</td><td>오차가 위아래로 진동하다 하늘로 치솟는다</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>학습률이 너무 커서 오차가 오히려 무한히 커지는 현상을 <b class="blank" data-a="발산|diverge" data-hint="값이 수렴하지 않고 무한히 커지는 것">발산</b>이라고 합니다. 반대로 오차가 최솟값에 안정적으로 다가가는 것을 <b>수렴</b>이라고 합니다. 아래 두 번째 시뮬레이터에서 학습률을 끝까지 올려 발산을 <b>직접 만들어 보세요</b>.</p>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 지역 최솟값과 배치</div>
+      <p>선형 회귀의 오차 곡면은 밥그릇 모양이라 골짜기가 하나뿐이어서, 학습률만 적당하면 항상 같은 답에 도달합니다. 하지만 인공신경망(7차시)의 오차 곡면은 울퉁불퉁해 <b>지역 최솟값</b>에 갇힐 수 있습니다. 그래서 데이터를 조금씩 나눠 쓰는 <b>확률적 경사 하강법</b>, 관성을 더한 <b>모멘텀</b>, 학습률을 자동 조절하는 <b>Adam</b> 같은 방법이 개발되었습니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 5. 시뮬레이터 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>직접 돌려 보기</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim1"></div>
+    <div id="sim2"></div>
+  </section>
+
+  <!-- ============ 6. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 7. 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 8. 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>활동 기록</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 상관관계는 인과관계가 아니다</summary>
+      <div class="more-body">
+        <p>선형 회귀가 “공부 시간이 1시간 늘면 점수가 7점 오른다”는 식을 내놓았다고 해서, 공부 시간이 점수를 <b>일으켰다</b>고 단정할 수는 없습니다. 회귀는 <b>같이 움직이는 관계(상관)</b>를 찾을 뿐 원인을 밝히지 않습니다.</p>
+        <p>유명한 예로 “아이스크림 판매량과 익사 사고 건수”는 강한 상관을 보입니다. 그러나 아이스크림이 사고를 일으킨 것이 아니라, <b>기온</b>이라는 숨은 변수가 둘 모두를 끌어올린 것입니다. 이런 변수를 <b>교란 변수</b>라고 합니다.</p>
+        <p>또한 학습에 쓴 범위를 벗어난 값을 넣으면 예측이 무의미해집니다. 공부 시간 0~10시간으로 학습한 모델에 40시간을 넣으면 300점이라는 답이 나옵니다. 모델은 <b>배운 범위 안에서만</b> 신뢰할 수 있습니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">코드</span> 파이썬으로 쓴 선형 회귀와 경사 하강법</summary>
+      <div class="more-body">
+        <p>왼쪽은 경사 하강법을 식 그대로 옮긴 코드입니다. 시뮬레이터 2가 정확히 이 계산을 반복합니다.</p>
+        <div class="table-wrap">
+          <table class="tb">
+            <thead><tr><th>경사 하강법 직접 구현</th><th>사이킷런</th></tr></thead>
+            <tbody><tr>
+              <td><pre style="margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.75;white-space:pre-wrap">w, b = 0.0, 0.0
+lr = 0.005          # 학습률
+n  = len(xs)
+
+for step in range(500):
+    # 1) 예측
+    pred = [w * x + b for x in xs]
+    # 2) 기울기
+    gw = 2 / n * sum((p - y) * x
+                     for p, y, x in zip(pred, ys, xs))
+    gb = 2 / n * sum(p - y
+                     for p, y in zip(pred, ys))
+    # 3) 기울기 반대 방향으로 한 걸음
+    w -= lr * gw
+    b -= lr * gb
+
+mse = sum((w*x + b - y) ** 2
+          for x, y in zip(xs, ys)) / n</pre></td>
+              <td><pre style="margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.75;white-space:pre-wrap">from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+
+model = LinearRegression()   # 최소 제곱법
+model.fit(X_train, y_train)
+
+print("가중치 w:", model.coef_)
+print("절편  b:", model.intercept_)
+
+pred = model.predict(X_test)
+print("MSE:", mean_squared_error(y_test, pred))
+print("R² :", model.score(X_test, y_test))</pre></td>
+            </tr></tbody>
+          </table>
+        </div>
+        <p style="margin-top:12px"><span class="mono">LinearRegression</span>은 경사 하강법이 아니라 <b>최소 제곱법 공식</b>으로 답을 구합니다. 그래서 반복 횟수나 학습률을 정해 줄 필요가 없습니다. 반면 데이터가 아주 클 때는 <span class="mono">SGDRegressor</span>처럼 경사 하강법을 쓰는 모델이 유리합니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> 회귀로 예측하는 것들</summary>
+      <div class="more-body">
+        <p><b>전력 수요 예측</b> — 기온, 습도, 요일, 시간대를 넣어 몇 시에 몇 MW가 필요한지 계산합니다. 예측이 어긋나면 정전이나 낭비가 생기므로 오차 1%가 큰 비용입니다.</p>
+        <p><b>배달 도착 시간</b> — 거리, 주문 수, 날씨, 시간대로 “몇 분 뒤 도착”을 계산합니다. 여러 속성을 쓰므로 다중 회귀입니다.</p>
+        <p><b>중고차 가격 산정</b> — 연식, 주행거리, 사고 이력, 모델을 넣어 가격을 예측합니다. 이때 가중치의 부호와 크기를 보면 “주행거리 1만 km당 얼마 떨어지는가”를 사람이 직접 읽을 수 있습니다. 선형 회귀의 큰 장점인 <b>설명 가능성</b>입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 다음 차시로 — 정답표가 아예 없다면</summary>
+      <div class="more-body">
+        3차시와 4차시는 모두 <b>정답이 붙은 데이터</b>로 배우는 지도학습이었습니다. 그런데 현실의 데이터에는 정답이 없는 경우가 훨씬 많습니다. 정답 없이 “비슷한 것끼리 알아서 묶기”는 어떻게 할까요? 다음 5차시에서 <b>비지도학습</b>과 <b>k-평균 군집</b>을 배웁니다. 그리고 이 차시에서 익힌 경사 하강법은 7차시 <b>인공신경망</b>의 학습 원리로 그대로 다시 등장합니다.
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 2, lesson: 4,
+  title: '선 하나로 예측하기',
+  sub: '지도학습 ② 회귀와 경사 하강',
+  lead: '점들 사이로 <b>가장 잘 맞는 직선</b>을 긋는 일이 회귀입니다. “잘 맞는다”를 평균 제곱 오차로 정의하고, 그 값이 작아지는 방향으로 조금씩 걸어 내려가는 <b>경사 하강법</b>을 직접 돌려 봅니다. 학습률을 잘못 정하면 어떻게 되는지도 눈으로 확인합니다.',
+  standards: ['12인기02-03'],
+  keywords: ['회귀', '선형 회귀', '평균 제곱 오차', '최소 제곱법', '경사 하강법', '학습률'],
+  goals: [
+    '분류와 회귀의 차이를 예측 결과의 형태로 구분하여 설명할 수 있다.',
+    '평균 제곱 오차의 의미와 오차를 제곱하는 이유를 설명하고, 직선의 적합도를 판단할 수 있다.',
+    '경사 하강법의 반복 과정을 실행하고, 학습률이 수렴과 발산에 미치는 영향을 실험으로 확인할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 시뮬레이터 1: 선형 회귀 손으로 맞춰 보기 ===================== -->
+<script>
+(function () {
+  const W = 440, H = 320;
+  const PAD_L = 46, PAD_R = 14, PAD_T = 14, PAD_B = 34;
+  const XMAX = 10, YMAX = 100;
+
+  const body = AI.sim.panel('#sim1', {
+    title: '선형 회귀 손으로 맞춰 보기',
+    tag: '슬라이더 · 클릭',
+    desc: '<b>공부 시간 → 수학 점수</b> 데이터입니다. 슬라이더로 기울기 w와 절편 b를 움직이면 각 점에서 직선까지의 <b>오차가 세로선</b>으로 나타나고, 평균 제곱 오차가 실시간으로 계산됩니다. <b>최소 제곱법</b> 버튼을 누르면 공식으로 구한 최적의 직선으로 이동합니다. 캔버스를 클릭해 점을 추가하거나 지울 수도 있습니다.'
+  });
+
+  /* 공부 시간(시간) → 수학 점수 */
+  const BASE = [
+    [1.0, 38], [1.5, 41], [2.0, 47], [2.5, 44], [3.0, 52], [3.5, 55],
+    [4.0, 58], [4.5, 66], [5.0, 63], [6.0, 72], [6.5, 78], [7.0, 76],
+    [8.0, 85], [8.5, 88], [9.0, 92], [9.5, 95]
+  ];
+  let pts = BASE.map(function (p) { return { x: p[0], y: p[1] }; });
+
+  let w = 3, b = 20, mode = 'add', showSq = false, syncing = false, stopAnim = null;
+
+  const cv = AI.sim.canvas(W, H);
+  cv.canvas.style.cursor = 'crosshair';
+
+  const stats = AI.ui.stats([
+    { key: 'w', label: '기울기 w' },
+    { key: 'b', label: '절편 b' },
+    { key: 'mse', label: '현재 MSE' },
+    { key: 'best', label: '최적 MSE(최소 제곱)' },
+    { key: 'r2', label: '결정계수 R²' }
+  ]);
+
+  body.appendChild(cv.wrap);
+  body.appendChild(stats.el);
+
+  const legendHolder = AI.h('div');
+  body.appendChild(legendHolder);
+
+  const verdict = AI.h('div', { class: 'box box-info', style: { marginTop: '14px' } });
+
+  /* ---- 좌표 변환 ---- */
+  function sx(x) { return PAD_L + (W - PAD_L - PAD_R) * (x / XMAX); }
+  function sy(y) { return H - PAD_B - (H - PAD_T - PAD_B) * (y / YMAX); }
+  function ix(px) { return (px - PAD_L) / (W - PAD_L - PAD_R) * XMAX; }
+  function iy(py) { return (H - PAD_B - py) / (H - PAD_T - PAD_B) * YMAX; }
+
+  /* ---- 계산 ---- */
+  function mseOf(ww, bb) {
+    if (!pts.length) return 0;
+    let s = 0;
+    pts.forEach(function (p) { const e = ww * p.x + bb - p.y; s += e * e; });
+    return s / pts.length;
+  }
+
+  function least() {
+    const n = pts.length;
+    if (n < 2) return null;
+    let mx = 0, my = 0;
+    pts.forEach(function (p) { mx += p.x; my += p.y; });
+    mx /= n; my /= n;
+    let num = 0, den = 0;
+    pts.forEach(function (p) { num += (p.x - mx) * (p.y - my); den += (p.x - mx) * (p.x - mx); });
+    if (Math.abs(den) < 1e-9) return null;
+    const ww = num / den;
+    return { w: ww, b: my - ww * mx };
+  }
+
+  function r2Of(ww, bb) {
+    const n = pts.length;
+    if (n < 2) return null;
+    let my = 0;
+    pts.forEach(function (p) { my += p.y; });
+    my /= n;
+    let sse = 0, sst = 0;
+    pts.forEach(function (p) {
+      const e = p.y - (ww * p.x + bb);
+      sse += e * e;
+      sst += (p.y - my) * (p.y - my);
+    });
+    if (sst < 1e-9) return null;
+    return 1 - sse / sst;
+  }
+
+  /* ---- 그리기 ---- */
+  function draw() {
+    const C = AI.sim.colors(), ctx = cv.ctx;
+    cv.clear(C.bg);
+
+    // 격자
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+    for (let gx = 0; gx <= XMAX; gx += 2) {
+      const px = sx(gx);
+      ctx.beginPath(); ctx.moveTo(px + .5, PAD_T); ctx.lineTo(px + .5, H - PAD_B); ctx.stroke();
+    }
+    for (let gy = 0; gy <= YMAX; gy += 20) {
+      const py = sy(gy);
+      ctx.beginPath(); ctx.moveTo(PAD_L, py + .5); ctx.lineTo(W - PAD_R, py + .5); ctx.stroke();
+    }
+
+    // 축
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(PAD_L, PAD_T); ctx.lineTo(PAD_L, H - PAD_B); ctx.lineTo(W - PAD_R, H - PAD_B);
+    ctx.stroke();
+
+    const FF = getComputedStyle(document.body).fontFamily;
+    ctx.fillStyle = C.ink3;
+    ctx.font = '600 10.5px ' + FF;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (let gx = 0; gx <= XMAX; gx += 2) ctx.fillText(String(gx), sx(gx), H - PAD_B + 6);
+    ctx.fillText('공부 시간 (시간)', (PAD_L + W - PAD_R) / 2, H - PAD_B + 20);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let gy = 0; gy <= YMAX; gy += 20) ctx.fillText(String(gy), PAD_L - 7, sy(gy));
+    ctx.save();
+    ctx.translate(13, (PAD_T + H - PAD_B) / 2); ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('수학 점수', 0, 0);
+    ctx.restore();
+
+    // 최적선 (점선)
+    const L = least();
+    if (L) {
+      ctx.strokeStyle = C.ok; ctx.lineWidth = 1.6; ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      ctx.moveTo(sx(0), sy(L.w * 0 + L.b));
+      ctx.lineTo(sx(XMAX), sy(L.w * XMAX + L.b));
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // 오차 제곱 사각형
+    if (showSq) {
+      ctx.fillStyle = C.no;
+      ctx.globalAlpha = 0.14;
+      pts.forEach(function (p) {
+        const px = sx(p.x), py = sy(p.y), ly = sy(w * p.x + b);
+        const side = Math.abs(ly - py);
+        ctx.fillRect(px, Math.min(py, ly), side, side);
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    // 오차 세로선
+    ctx.strokeStyle = C.no; ctx.lineWidth = 1.6;
+    pts.forEach(function (p) {
+      const px = sx(p.x);
+      ctx.beginPath();
+      ctx.moveTo(px, sy(p.y));
+      ctx.lineTo(px, sy(w * p.x + b));
+      ctx.stroke();
+    });
+
+    // 현재 직선
+    ctx.strokeStyle = C.a; ctx.lineWidth = 2.8;
+    ctx.beginPath();
+    ctx.moveTo(sx(0), sy(b));
+    ctx.lineTo(sx(XMAX), sy(w * XMAX + b));
+    ctx.stroke();
+
+    // 점
+    pts.forEach(function (p) {
+      ctx.beginPath();
+      ctx.arc(sx(p.x), sy(p.y), 5, 0, Math.PI * 2);
+      ctx.fillStyle = C.d; ctx.fill();
+      ctx.lineWidth = 1.4; ctx.strokeStyle = C.bg; ctx.stroke();
+    });
+
+    // 식
+    ctx.fillStyle = C.a;
+    ctx.font = '800 13px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillText('ŷ = ' + AI.sim.fmt(w, 2) + ' x + ' + AI.sim.fmt(b, 1), PAD_L + 9, PAD_T + 5);
+
+    // 숫자판
+    const cur = mseOf(w, b);
+    const bmse = L ? mseOf(L.w, L.b) : null;
+    const r2 = r2Of(w, b);
+    stats.set('w', AI.sim.fmt(w, 2));
+    stats.set('b', AI.sim.fmt(b, 1));
+    stats.set('mse', AI.sim.fmt(cur, 1));
+    stats.set('best', bmse === null ? '–' : AI.sim.fmt(bmse, 1));
+    stats.set('r2', r2 === null ? '–' : AI.sim.fmt(r2, 3));
+
+    // 범례
+    legendHolder.innerHTML = '';
+    legendHolder.appendChild(AI.ui.legend([
+      { color: C.d, label: '데이터 (실젯값)' },
+      { color: C.a, label: '내가 움직이는 직선' },
+      { color: C.ok, label: '최소 제곱법의 최적선(점선)' },
+      { color: C.no, label: '오차(실젯값 − 예측값)' }
+    ]));
+
+    // 판정
+    if (bmse === null) {
+      verdict.innerHTML = '<div class="box-label">📊 진단</div><p>점이 2개 이상 필요합니다.</p>';
+    } else {
+      const gap = cur - bmse;
+      let msg;
+      if (gap < 0.5) msg = '<span class="badge-ok">최적</span> 최소 제곱법이 구한 최적선과 사실상 같습니다. 더 줄일 수 없는 오차만 남았습니다.';
+      else if (gap < bmse * 0.35) msg = '거의 다 왔습니다. 최적 MSE보다 <b>' + AI.sim.fmt(gap, 1) + '</b>만큼 큽니다.';
+      else msg = '아직 <b>' + AI.sim.fmt(gap, 1) + '</b>만큼 더 줄일 수 있습니다. 초록 점선에 파란 직선을 겹쳐 보세요.';
+      verdict.innerHTML =
+        '<div class="box-label">📊 진단</div>' +
+        '<p>' + msg + '</p>' +
+        '<p style="color:var(--ink-3);font-size:14px">💡 R² = ' + (r2 === null ? '–' : AI.sim.fmt(r2, 3)) +
+        ' 는 “평균값만 답하는 모델”보다 오차를 ' + (r2 === null ? '–' : Math.round(Math.max(0, r2) * 100) + '%') +
+        ' 줄였다는 뜻입니다. 아래 <b>이상치 추가</b>를 눌러 최적선이 얼마나 끌려가는지 확인해 보세요.</p>';
+    }
+  }
+
+  /* ---- 컨트롤 ---- */
+  const wS = AI.ui.slider({
+    label: '기울기 w', min: -5, max: 20, step: 0.01, value: w,
+    format: function (v) { return AI.sim.fmt(v, 2); },
+    onInput: function (v) { if (syncing) return; if (stopAnim) { stopAnim(); stopAnim = null; } w = v; draw(); }
+  });
+  const bS = AI.ui.slider({
+    label: '절편 b', min: -20, max: 100, step: 0.1, value: b,
+    format: function (v) { return AI.sim.fmt(v, 1); },
+    onInput: function (v) { if (syncing) return; if (stopAnim) { stopAnim(); stopAnim = null; } b = v; draw(); }
+  });
+  const modeSeg = AI.ui.seg({
+    label: '캔버스 클릭',
+    options: [{ value: 'add', label: '점 추가' }, { value: 'del', label: '점 지우기' }],
+    value: 'add',
+    onChange: function (v) { mode = v; cv.canvas.style.cursor = v === 'del' ? 'not-allowed' : 'crosshair'; }
+  });
+  const sqSeg = AI.ui.seg({
+    label: '오차 제곱 보이기',
+    options: [{ value: 'off', label: '끔' }, { value: 'on', label: '켬' }],
+    value: 'off',
+    onChange: function (v) { showSq = (v === 'on'); draw(); }
+  });
+
+  function syncSliders() {
+    syncing = true;
+    wS.set(Math.round(w * 100) / 100);
+    bS.set(Math.round(b * 10) / 10);
+    syncing = false;
+    w = wS.value; b = bS.value;   // 슬라이더 눈금과 정확히 일치시킨다
+  }
+
+  function animateTo(tw, tb) {
+    if (stopAnim) { stopAnim(); stopAnim = null; }
+    const w0 = w, b0 = b, dur = 0.75;
+    stopAnim = AI.sim.raf(function (t) {
+      const u = AI.sim.clamp(t / dur, 0, 1);
+      const e = 1 - Math.pow(1 - u, 3);
+      w = AI.sim.lerp(w0, tw, e);
+      b = AI.sim.lerp(b0, tb, e);
+      draw();
+      if (u >= 1) {
+        if (stopAnim) { stopAnim(); stopAnim = null; }
+        w = tw; b = tb;
+        syncSliders();
+        draw();
+      }
+    });
+  }
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' }, wS.el, bS.el, modeSeg.el, sqSeg.el));
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('📐 최소 제곱법으로 맞추기', function () {
+      const L = least();
+      if (!L) { AI.toast('점이 2개 이상 필요해요'); return; }
+      animateTo(AI.sim.clamp(L.w, -5, 20), AI.sim.clamp(L.b, -20, 100));
+      AI.toast('공식으로 구한 최적 w, b 로 이동했어요');
+    }, 'primary'),
+    AI.ui.btn('💣 이상치 추가', function () {
+      pts.push({ x: 9.5, y: 20 });
+      draw();
+      AI.toast('오른쪽 아래에 이상치를 넣었어요. 초록 점선이 아래로 끌려갑니다');
+    }, 'ghost'),
+    AI.ui.btn('↺ 처음 데이터로', function () {
+      if (stopAnim) { stopAnim(); stopAnim = null; }
+      pts = BASE.map(function (p) { return { x: p[0], y: p[1] }; });
+      w = 3; b = 20; syncSliders(); draw();
+    }, 'ghost')
+  ));
+
+  body.appendChild(verdict);
+
+  body.appendChild(AI.el('<div class="box box-warn" style="margin-top:14px">' +
+    '<div class="box-label">🔬 이렇게 관찰해 보세요</div>' +
+    '<p><b>① w 만 움직여 보세요.</b> 직선이 원점 근처를 축으로 회전합니다. MSE가 가장 작아지는 w를 손으로 찾아본 뒤, <b>최소 제곱법</b> 버튼을 눌러 얼마나 가까웠는지 비교해 보세요.</p>' +
+    '<p><b>② 오차 제곱 보이기를 켜세요.</b> 각 오차가 <b>정사각형의 한 변</b>이 됩니다. MSE는 이 사각형들의 넓이의 평균입니다. 멀리 떨어진 점 하나가 만드는 사각형이 얼마나 큰지 보세요 — 이것이 “큰 오차에 큰 벌점”입니다.</p>' +
+    '<p><b>③ 이상치 추가를 누르세요.</b> 점 하나 때문에 초록 점선(최적선)이 눈에 띄게 아래로 기웁니다. MSE가 오차를 제곱하기 때문에 <b>먼 점 하나의 발언권이 지나치게 커진</b> 결과입니다. 2차시에서 이상치를 왜 다뤄야 했는지 다시 생각해 보세요.</p>' +
+    '</div>'));
+
+  /* ---- 점 추가·삭제 ---- */
+  cv.canvas.addEventListener('click', function (ev) {
+    const p = cv.pos(ev);
+    const dx = ix(p.x), dy = iy(p.y);
+    if (mode === 'del') {
+      let bi = -1, bd = 1e9;
+      pts.forEach(function (q, i) {
+        const d = Math.hypot(sx(q.x) - p.x, sy(q.y) - p.y);
+        if (d < bd) { bd = d; bi = i; }
+      });
+      if (bi >= 0 && bd < 15) { pts.splice(bi, 1); draw(); }
+      else AI.toast('지울 점 위를 정확히 눌러 주세요');
+      return;
+    }
+    if (dx < 0 || dx > XMAX || dy < 0 || dy > YMAX) { AI.toast('그래프 안쪽을 눌러 주세요'); return; }
+    pts.push({ x: Math.round(dx * 10) / 10, y: Math.round(dy) });
+    draw();
+  });
+
+  cv.canvas.addEventListener('contextmenu', function (ev) {
+    ev.preventDefault();
+    const p = cv.pos(ev);
+    let bi = -1, bd = 1e9;
+    pts.forEach(function (q, i) {
+      const d = Math.hypot(sx(q.x) - p.x, sy(q.y) - p.y);
+      if (d < bd) { bd = d; bi = i; }
+    });
+    if (bi >= 0 && bd < 15) { pts.splice(bi, 1); draw(); }
+  });
+
+  window.addEventListener('ai:redraw', draw);
+  draw();
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 경사 하강법 애니메이션 ===================== -->
+<script>
+(function () {
+  const CW = 320, CH = 260;
+  const XMAX = 10, YMAX = 100;
+
+  const body = AI.sim.panel('#sim2', {
+    title: '경사 하강법 애니메이션',
+    tag: '진짜로 반복 계산합니다',
+    desc: '앞과 같은 데이터로 <b>경사 하강법을 실제로 반복</b>합니다. 왼쪽에서는 직선이 조금씩 움직이고, 오른쪽에서는 반복 횟수에 따른 MSE 변화가 그려집니다. 학습률을 크게 올려 <b>발산</b>을 직접 만들어 보세요.'
+  });
+
+  const DATA = [
+    [1.0, 38], [1.5, 41], [2.0, 47], [2.5, 44], [3.0, 52], [3.5, 55],
+    [4.0, 58], [4.5, 66], [5.0, 63], [6.0, 72], [6.5, 78], [7.0, 76],
+    [8.0, 85], [8.5, 88], [9.0, 92], [9.5, 95]
+  ].map(function (p) { return { x: p[0], y: p[1] }; });
+  const N = DATA.length;
+
+  /* 최소 제곱법으로 구한 정답 — 비교 기준 */
+  const OPT = (function () {
+    let mx = 0, my = 0;
+    DATA.forEach(function (p) { mx += p.x; my += p.y; });
+    mx /= N; my /= N;
+    let num = 0, den = 0;
+    DATA.forEach(function (p) { num += (p.x - mx) * (p.y - my); den += (p.x - mx) * (p.x - mx); });
+    const ww = num / den;
+    return { w: ww, b: my - ww * mx };
+  })();
+
+  function mseOf(w, b) {
+    let s = 0;
+    DATA.forEach(function (p) { const e = w * p.x + b - p.y; s += e * e; });
+    return s / N;
+  }
+  const OPT_MSE = mseOf(OPT.w, OPT.b);
+
+  const TOL = 0.05;        // 최소 MSE 와의 차이가 이보다 작아지면 수렴으로 본다
+  const MAX_ITER = 3000;
+
+  let w = 0, b = 0, iter = 0, hist = [mseOf(0, 0)], diverged = false;
+  let lr = 0.011, perTick = 8, logScale = false;
+
+  const cvL = AI.sim.canvas(CW, CH);
+  const cvR = AI.sim.canvas(CW, CH);
+
+  const colL = AI.h('div', { class: 'panel-col' },
+    AI.h('h5', { text: '데이터와 현재 직선' }),
+    AI.h('p', { class: 'cap', html: '파란 실선이 학습 중인 직선, 초록 점선이 <b>최소 제곱법의 정답</b>입니다.' }),
+    cvL.wrap);
+  const colR = AI.h('div', { class: 'panel-col' },
+    AI.h('h5', { text: '반복 횟수에 따른 MSE' }),
+    AI.h('p', { class: 'cap', html: '오차가 <b>내려가면 수렴</b>, <b>치솟으면 발산</b>입니다.' }),
+    cvR.wrap);
+
+  body.appendChild(AI.h('div', { class: 'sim-grid' }, colL, colR));
+
+  const stats = AI.ui.stats([
+    { key: 'it', label: '반복 횟수' },
+    { key: 'w', label: '가중치 w' },
+    { key: 'b', label: '절편 b' },
+    { key: 'mse', label: '현재 MSE' },
+    { key: 'opt', label: '도달 가능한 최소 MSE' }
+  ]);
+  body.appendChild(stats.el);
+
+  const log = AI.ui.log();
+  const status = AI.h('div', { class: 'box box-info', style: { marginTop: '13px' } });
+
+  /* ---- 한 걸음: 기울기를 계산해 반대 방향으로 이동 ---- */
+  function stepOnce() {
+    if (diverged) return false;
+    let gw = 0, gb = 0;
+    for (let i = 0; i < N; i++) {
+      const p = DATA[i];
+      const e = (w * p.x + b) - p.y;
+      gw += e * p.x;
+      gb += e;
+    }
+    gw = 2 / N * gw;
+    gb = 2 / N * gb;
+    w = w - lr * gw;
+    b = b - lr * gb;
+    iter++;
+    const m = mseOf(w, b);
+    hist.push(m);
+    if (!isFinite(m) || m > 1e12 || Math.abs(w) > 1e8) {
+      diverged = true;
+      log.add('반복 ' + iter + ' — <b>발산</b>! 오차가 무한히 커져 학습을 멈췄습니다.', true);
+      return false;
+    }
+    if (iter % 100 === 0) {
+      log.add('반복 ' + iter + ' · w=' + AI.sim.fmt(w, 3) + ' b=' + AI.sim.fmt(b, 2) + ' MSE=' + AI.sim.fmt(m, 2));
+    }
+    if (m - OPT_MSE < TOL) {
+      log.add('반복 ' + iter + ' — 최소 MSE에 <b>수렴</b>했습니다. (w=' + AI.sim.fmt(w, 3) + ', b=' + AI.sim.fmt(b, 2) + ')', true);
+      return false;
+    }
+    if (iter >= MAX_ITER) {
+      log.add('반복 ' + MAX_ITER + '회에 도달했지만 <b>아직 수렴하지 못했습니다</b>. 학습률이 너무 작습니다.', true);
+      return false;
+    }
+    return true;
+  }
+
+  /* ---- 그리기 ---- */
+  function drawLeft() {
+    const C = AI.sim.colors(), ctx = cvL.ctx;
+    const PL = 40, PR = 12, PT = 12, PB = 30;
+    cvL.clear(C.bg);
+    function sx(x) { return PL + (CW - PL - PR) * (x / XMAX); }
+    function sy(y) { return CH - PB - (CH - PT - PB) * (y / YMAX); }
+
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+    for (let g = 0; g <= YMAX; g += 20) { const py = sy(g); ctx.beginPath(); ctx.moveTo(PL, py + .5); ctx.lineTo(CW - PR, py + .5); ctx.stroke(); }
+    for (let g = 0; g <= XMAX; g += 2) { const px = sx(g); ctx.beginPath(); ctx.moveTo(px + .5, PT); ctx.lineTo(px + .5, CH - PB); ctx.stroke(); }
+
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(PL, PT); ctx.lineTo(PL, CH - PB); ctx.lineTo(CW - PR, CH - PB); ctx.stroke();
+
+    const FF = getComputedStyle(document.body).fontFamily;
+    ctx.fillStyle = C.ink3; ctx.font = '600 10px ' + FF;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (let g = 0; g <= XMAX; g += 2) ctx.fillText(String(g), sx(g), CH - PB + 5);
+    ctx.fillText('공부 시간 (시간)', (PL + CW - PR) / 2, CH - PB + 17);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let g = 0; g <= YMAX; g += 20) ctx.fillText(String(g), PL - 6, sy(g));
+
+    // 최적선
+    ctx.strokeStyle = C.ok; ctx.lineWidth = 1.6; ctx.setLineDash([6, 4]);
+    ctx.beginPath(); ctx.moveTo(sx(0), sy(OPT.b)); ctx.lineTo(sx(XMAX), sy(OPT.w * XMAX + OPT.b)); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 오차 세로선
+    if (isFinite(w) && isFinite(b) && Math.abs(w) < 1e5) {
+      ctx.strokeStyle = C.no; ctx.lineWidth = 1.3;
+      DATA.forEach(function (p) {
+        const py2 = AI.sim.clamp(sy(w * p.x + b), PT - 40, CH - PB + 40);
+        ctx.beginPath(); ctx.moveTo(sx(p.x), sy(p.y)); ctx.lineTo(sx(p.x), py2); ctx.stroke();
+      });
+      // 현재 직선
+      ctx.strokeStyle = C.a; ctx.lineWidth = 2.6;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(PL, PT - 30, CW - PL - PR, CH - PT - PB + 60); ctx.clip();
+      ctx.beginPath(); ctx.moveTo(sx(0), sy(b)); ctx.lineTo(sx(XMAX), sy(w * XMAX + b)); ctx.stroke();
+      ctx.restore();
+    }
+
+    DATA.forEach(function (p) {
+      ctx.beginPath(); ctx.arc(sx(p.x), sy(p.y), 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = C.d; ctx.fill();
+      ctx.lineWidth = 1.2; ctx.strokeStyle = C.bg; ctx.stroke();
+    });
+
+    ctx.fillStyle = diverged ? C.no : C.a;
+    ctx.font = '800 12px ' + FF;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillText(diverged ? '발산 — 직선을 그릴 수 없음' : 'ŷ = ' + AI.sim.fmt(w, 2) + ' x + ' + AI.sim.fmt(b, 1), PL + 7, PT + 4);
+  }
+
+  function drawRight() {
+    const C = AI.sim.colors(), ctx = cvR.ctx;
+    const PL = 46, PR = 12, PT = 14, PB = 30;
+    cvR.clear(C.bg);
+
+    const n = hist.length;
+    let vmax = 0, vmin = Infinity;
+    for (let i = 0; i < n; i++) {
+      const v = isFinite(hist[i]) ? hist[i] : 1e12;
+      if (v > vmax) vmax = v;
+      if (v < vmin) vmin = v;
+    }
+    if (!isFinite(vmax) || vmax <= 0) vmax = 1;
+    vmin = Math.max(vmin, 0);
+
+    function tv(v) {                        // 값 → 0~1
+      const x = isFinite(v) ? v : vmax;
+      if (logScale) {
+        const lo = Math.log10(Math.max(vmin, 0.01)), hi = Math.log10(Math.max(vmax, vmin + 0.02));
+        return AI.sim.clamp((Math.log10(Math.max(x, 0.01)) - lo) / (hi - lo || 1), 0, 1);
+      }
+      return AI.sim.clamp(x / vmax, 0, 1);
+    }
+    function px(i) { return PL + (CW - PL - PR) * (n <= 1 ? 0 : i / (n - 1)); }
+    function py(v) { return CH - PB - (CH - PT - PB) * tv(v); }
+
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+    for (let g = 0; g <= 4; g++) {
+      const y = CH - PB - (CH - PT - PB) * g / 4;
+      ctx.beginPath(); ctx.moveTo(PL, y + .5); ctx.lineTo(CW - PR, y + .5); ctx.stroke();
+    }
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(PL, PT); ctx.lineTo(PL, CH - PB); ctx.lineTo(CW - PR, CH - PB); ctx.stroke();
+
+    const FF = getComputedStyle(document.body).fontFamily;
+    ctx.fillStyle = C.ink3; ctx.font = '600 10px ' + FF;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let g = 0; g <= 4; g++) {
+      const y = CH - PB - (CH - PT - PB) * g / 4;
+      let v;
+      if (logScale) {
+        const lo = Math.log10(Math.max(vmin, 0.01)), hi = Math.log10(Math.max(vmax, vmin + 0.02));
+        v = Math.pow(10, lo + (hi - lo) * g / 4);
+      } else v = vmax * g / 4;
+      ctx.fillText(v >= 1000 ? v.toExponential(0) : AI.sim.fmt(v, v < 10 ? 1 : 0), PL - 6, y);
+    }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText('반복 횟수 (0 ~ ' + Math.max(iter, 1) + ')', (PL + CW - PR) / 2, CH - PB + 14);
+    ctx.save();
+    ctx.translate(13, (PT + CH - PB) / 2); ctx.rotate(-Math.PI / 2);
+    ctx.textBaseline = 'middle';
+    ctx.fillText('MSE' + (logScale ? ' (로그 눈금)' : ''), 0, 0);
+    ctx.restore();
+
+    // 도달 가능한 최소 MSE 기준선
+    if (OPT_MSE <= vmax) {
+      ctx.strokeStyle = C.ok; ctx.lineWidth = 1.4; ctx.setLineDash([5, 4]);
+      ctx.beginPath(); ctx.moveTo(PL, py(OPT_MSE)); ctx.lineTo(CW - PR, py(OPT_MSE)); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = C.ok; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+      ctx.font = '700 9.5px ' + FF;
+      ctx.fillText('최소 MSE ' + AI.sim.fmt(OPT_MSE, 1), PL + 5, py(OPT_MSE) - 2);
+    }
+
+    // MSE 곡선
+    ctx.strokeStyle = diverged ? C.no : C.a;
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    for (let i = 0; i < n; i++) {
+      const X = px(i), Y = py(hist[i]);
+      if (i === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+    }
+    ctx.stroke();
+
+    if (n > 1) {
+      ctx.beginPath();
+      ctx.arc(px(n - 1), py(hist[n - 1]), 4, 0, Math.PI * 2);
+      ctx.fillStyle = diverged ? C.no : C.a; ctx.fill();
+    }
+
+    if (diverged) {
+      ctx.fillStyle = C.no;
+      ctx.font = '800 15px ' + FF;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('발산!', (PL + CW - PR) / 2, PT + 26);
+    }
+  }
+
+  function refresh() {
+    drawLeft(); drawRight();
+    const m = hist[hist.length - 1];
+    stats.set('it', iter);
+    stats.set('w', diverged ? '—' : AI.sim.fmt(w, 3));
+    stats.set('b', diverged ? '—' : AI.sim.fmt(b, 2));
+    stats.set('mse', (!isFinite(m) || m > 1e9) ? '∞' : AI.sim.fmt(m, 2));
+    stats.set('opt', AI.sim.fmt(OPT_MSE, 2));
+
+    let msg;
+    if (diverged) {
+      msg = '<span class="badge-bad">발산</span> 학습률 ' + lr.toPrecision(2) + ' 는 이 데이터에 <b>너무 큽니다</b>. ' +
+        '한 걸음이 골짜기를 건너뛰어 반대편 더 높은 곳에 착지하고, 그것이 반복되며 오차가 폭발했습니다. ' +
+        '학습률을 <b>0.01 이하</b>로 낮추고 초기화해 보세요.';
+    } else if (iter === 0) {
+      msg = 'w = 0, b = 0 에서 출발합니다. 지금 직선은 가로축에 붙어 있고 MSE는 ' + AI.sim.fmt(hist[0], 1) + ' 입니다. <b>학습 시작</b>을 눌러 보세요.';
+    } else if (m - OPT_MSE < TOL * 1.5) {
+      msg = '<span class="badge-ok">수렴</span> ' + iter + '번 반복으로 최소 MSE(' + AI.sim.fmt(OPT_MSE, 2) + ')에 도달했습니다. ' +
+        '경사 하강법이 찾은 w = ' + AI.sim.fmt(w, 3) + ', b = ' + AI.sim.fmt(b, 2) +
+        ' 는 최소 제곱법의 답 w = ' + AI.sim.fmt(OPT.w, 3) + ', b = ' + AI.sim.fmt(OPT.b, 2) + ' 와 거의 같습니다.';
+    } else if (iter >= MAX_ITER) {
+      msg = '<span class="badge-bad">시간 초과</span> ' + MAX_ITER + '번을 반복했는데도 최소 MSE(' + AI.sim.fmt(OPT_MSE, 2) +
+        ')에 닿지 못했습니다. 지금 MSE는 ' + AI.sim.fmt(m, 2) + ' 입니다. 학습률 ' + lr.toPrecision(2) +
+        ' 는 <b>틀린 값은 아니지만 너무 작습니다</b> — 걸음이 티끌만 해서 끝나지 않는 것입니다.';
+    } else {
+      const pct = Math.round((1 - (m - OPT_MSE) / Math.max(hist[0] - OPT_MSE, 1e-9)) * 100);
+      msg = '내려가는 중입니다. 첫 오차에서 최소 오차까지의 거리를 <b>' + AI.sim.clamp(pct, 0, 100) + '%</b> 만큼 좁혔습니다.';
+    }
+    status.innerHTML = '<div class="box-label">📊 지금 상태</div><p>' + msg + '</p>';
+  }
+
+  const loop = AI.sim.loop({
+    fps: 24,
+    step: function () {
+      let cont = true;
+      for (let i = 0; i < perTick && cont; i++) cont = stepOnce();
+      refresh();
+      return cont;
+    },
+    onState: function (playing) { playBtn.textContent = playing ? '⏸ 멈춤' : '▶ 학습 시작'; }
+  });
+
+  /* ---- 컨트롤 ---- */
+  const LR_MIN = -4, LR_MAX = Math.log10(0.5);   // 10^-4 ~ 0.5 (로그 눈금)
+  const lrS = AI.ui.slider({
+    label: '학습률 η', min: 0, max: 100, step: 1, value: 55,
+    format: function (v) {
+      const e = LR_MIN + (LR_MAX - LR_MIN) * v / 100;
+      const val = Math.pow(10, e);
+      return val < 0.001 ? val.toExponential(1) : String(Math.round(val * 100000) / 100000);
+    },
+    onInput: function (v) {
+      const e = LR_MIN + (LR_MAX - LR_MIN) * v / 100;
+      lr = Math.pow(10, e);
+      refresh();
+    }
+  });
+  lrS.set(55);   // 약 0.011 — 안정적으로 수렴하는 값
+
+  const spS = AI.ui.slider({
+    label: '한 번에 진행할 반복', min: 1, max: 50, step: 1, value: 8, unit: '회',
+    onInput: function (v) { perTick = v; }
+  });
+
+  const scaleSeg = AI.ui.seg({
+    label: 'MSE 세로 눈금',
+    options: [{ value: 'lin', label: '보통' }, { value: 'log', label: '로그' }],
+    value: 'lin',
+    onChange: function (v) { logScale = (v === 'log'); refresh(); }
+  });
+
+  function reset() {
+    loop.pause();
+    w = 0; b = 0; iter = 0; diverged = false;
+    hist = [mseOf(0, 0)];
+    log.clear();
+    log.add('초기화 — w=0, b=0, 학습률 ' + lr.toPrecision(2));
+    refresh();
+  }
+
+  const playBtn = AI.ui.btn('▶ 학습 시작', function () {
+    if (diverged) { AI.toast('발산했어요. 초기화한 뒤 학습률을 낮춰 보세요'); return; }
+    loop.toggle();
+  }, 'primary');
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' }, lrS.el, spS.el, scaleSeg.el));
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    playBtn,
+    AI.ui.btn('⏭ 한 걸음', function () { loop.step(); }),
+    AI.ui.btn('↺ 초기화', reset, 'ghost'),
+    AI.ui.btn('💥 발산시켜 보기', function () { lrS.set(100); reset(); AI.toast('학습률을 0.5로 올렸어요. 학습 시작을 눌러 보세요'); }, 'ghost'),
+    AI.ui.btn('🐢 아주 느리게', function () { lrS.set(8); reset(); AI.toast('학습률을 0.0002 근처로 낮췄어요. 3000번을 돌려도 못 끝납니다'); }, 'ghost')
+  ));
+  body.appendChild(status);
+  body.appendChild(log.el);
+
+  body.appendChild(AI.el('<div class="box box-warn" style="margin-top:14px">' +
+    '<div class="box-label">🔬 이렇게 관찰해 보세요</div>' +
+    '<p><b>① 기본값(약 0.011)으로 학습 시작.</b> MSE 곡선이 처음에 뚝 떨어지고 이내 평평해집니다. 초록 기준선(최소 MSE)에 닿으면 자동으로 멈춥니다. 이때 w, b 가 <b>최소 제곱법의 답과 거의 같아지는지</b> 확인하세요.</p>' +
+    '<p><b>② 학습률을 0.024 ~ 0.029 사이로.</b> MSE가 <b>위아래로 진동</b>하며 내려갑니다. 골짜기를 살짝 지나쳤다가 되돌아오기를 반복하는 모습입니다. 세로 눈금을 <b>로그</b>로 바꾸면 훨씬 잘 보입니다.</p>' +
+    '<p><b>③ 학습률을 0.03 이상으로 올려 발산을 만들어 보세요.</b> 몇 번 만에 MSE가 하늘로 치솟습니다. 학습률은 클수록 빠른 것이 아니라, <b>어느 선을 넘으면 아예 학습이 불가능</b>해집니다. 이 데이터에서 그 경계는 약 0.029입니다.</p>' +
+    '<p><b>④ 학습률을 0.0002 근처로 낮춰 보세요.</b> 3000번을 돌려도 최소 오차에 닿지 못하고 멈춥니다. 너무 작은 학습률은 <b>틀리지는 않지만 끝나지 않습니다</b>.</p>' +
+    '<p style="color:var(--ink-3)">💡 잘 수렴하는 학습률에서도 반복이 수백 번 필요한 이유는, 이 데이터가 <b>x 값의 범위(0~10)와 y 값의 범위(0~100)가 크게 다르기</b> 때문입니다. 2차시의 정규화가 학습 속도까지 좋게 만든다는 뜻이기도 합니다.</p>' +
+    '</div>'));
+
+  window.addEventListener('ai:redraw', refresh);
+  log.add('준비 완료 — w=0, b=0 에서 출발합니다');
+  refresh();
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a2l4-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['회귀', '기울기', '절편', '오차', '평균 제곱 오차', '최소 제곱법', '경사 하강법', '학습률', '발산', '결정계수'],
+  sents: [
+    { text: '예측 결과가 연속된 수치인 지도학습 문제를 {0}(이)라고 한다.', answers: [['회귀']] },
+    { text: '선형 회귀 모델 ŷ = wx + b 에서 w는 직선의 {0}, b는 {1}이다.', answers: [['기울기'], ['절편']] },
+    { text: '실젯값과 예측값의 차이를 {0}(이)라고 하며, 그래프에서는 점과 직선 사이의 세로 거리로 나타난다.', answers: [['오차']] },
+    { text: '오차를 제곱해 평균한 값을 {0}(이)라고 하며, 작을수록 모델의 성능이 좋다.', answers: [['평균 제곱 오차']] },
+    { text: '오차의 제곱합을 가장 작게 만드는 w와 b를 공식으로 한 번에 구하는 방법을 {0}(이)라고 한다.', answers: [['최소 제곱법']] },
+    { text: '오차가 줄어드는 방향으로 w와 b를 조금씩 옮겨 가는 방법을 {0}(이)라고 하며, 한 걸음의 크기를 정하는 값을 {1}(이)라고 한다.', answers: [['경사 하강법'], ['학습률']] },
+    { text: '학습률이 너무 크면 오차가 오히려 무한히 커지며 {0}하고, 모델이 데이터를 얼마나 잘 설명하는지 0~1로 나타내는 값을 {1}(이)라고 한다.', answers: [['발산'], ['결정계수']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '4차시 확인 문제',
+  items: [
+    {
+      type: 'mc',
+      q: '다음 중 <b>회귀</b> 문제에 해당하는 것은?',
+      choices: [
+        '메일이 스팸인지 정상인지 판단한다',
+        '내일 서울의 최고 기온이 몇 도일지 예측한다',
+        '사진 속 동물이 개인지 고양이인지 구분한다',
+        '학생의 성적이 상·중·하 중 어디에 해당하는지 정한다'
+      ],
+      answer: 1,
+      why: '기온은 24.7 ℃처럼 <b>연속된 수치</b>이므로 회귀입니다. ①③④는 정해진 범주 중 하나를 고르는 <b>분류</b>입니다. 특히 ④의 상·중·하는 순서가 있지만 여전히 범주이므로 분류로 다룹니다.'
+    },
+    {
+      type: 'ox',
+      q: '오차를 제곱하지 않고 그대로 모두 더해도 모델의 성능을 잘 나타낼 수 있다.',
+      answer: false,
+      why: '오차를 그대로 더하면 +10과 −10이 서로 <b>상쇄되어 0</b>이 되므로, 크게 어긋난 모델도 완벽해 보입니다. 제곱하면 부호가 사라지고, 큰 오차에 더 큰 벌점이 붙으며, 미분이 매끄러워 경사 하강법에 쓸 수 있습니다.'
+    },
+    {
+      type: 'short',
+      q: '데이터가 (1, 3), (2, 5), (3, 7) 이고 모델이 ŷ = 2x + 1 일 때 <b>평균 제곱 오차(MSE)</b>는 얼마인가? (숫자만)',
+      answer: ['0'],
+      placeholder: '예: 0',
+      why: '각 점의 예측값은 3, 5, 7 로 실젯값과 <b>완전히 같습니다</b>. 오차가 모두 0이므로 MSE = (0² + 0² + 0²)/3 = <b>0</b> 입니다. 이때 결정계수 R²는 1이 됩니다. 실제 데이터에서 MSE가 0이 되는 일은 거의 없습니다.'
+    },
+    {
+      type: 'mc',
+      q: '경사 하강법에서 <b>학습률을 지나치게 크게</b> 잡았을 때 나타나는 현상은?',
+      choices: [
+        '오차가 아주 천천히 줄어들어 수천 번 반복해야 한다',
+        '오차가 진동하다가 점점 커져 발산한다',
+        '항상 최솟값에 정확히 한 번에 도달한다',
+        '기울기가 0이 되어 학습이 멈춘다'
+      ],
+      answer: 1,
+      why: '한 걸음이 너무 커서 골짜기를 <b>건너뛰어</b> 반대편 더 높은 곳에 착지하고, 이것이 반복되며 오차가 폭발합니다. ①은 학습률이 너무 <b>작을</b> 때의 현상입니다. 시뮬레이터 2에서 학습률을 0.03 이상으로 올려 직접 확인할 수 있습니다.'
+    },
+    {
+      type: 'order',
+      q: '경사 하강법이 한 걸음 나아가는 과정을 <b>올바른 순서</b>로 배열하시오.',
+      items: [
+        '현재 w, b로 모든 데이터의 예측값 ŷ를 구한다',
+        '예측값과 실젯값의 오차로 평균 제곱 오차를 계산한다',
+        'w와 b에 대한 기울기(미분값)를 구한다',
+        '기울기의 반대 방향으로 학습률만큼 w와 b를 옮긴다'
+      ],
+      answer: [0, 1, 2, 3],
+      why: '예측 → 오차 계산 → 기울기 계산 → 갱신 순서이며, 이 네 단계를 오차가 충분히 작아질 때까지 <b>반복</b>합니다. 마지막 단계에서 기울기를 <b>더하지 않고 빼는</b> 것이 핵심입니다. 기울기는 오차가 커지는 방향을 가리키기 때문입니다.'
+    },
+    {
+      type: 'match',
+      q: '다음 용어와 설명을 짝지으시오.',
+      left: [
+        '한 걸음을 얼마나 크게 옮길지 정하는 값',
+        '오차의 제곱합을 최소로 만드는 해를 공식으로 구하는 방법',
+        '모델의 설명력을 0~1로 나타내는 값',
+        'x가 1 늘어날 때 예측값이 변하는 양'
+      ],
+      right: ['학습률', '최소 제곱법', '결정계수 R²', '가중치 w'],
+      answer: [0, 1, 2, 3],
+      why: '학습률은 <b>얼마나 크게</b>, 가중치는 <b>얼마나 기울게</b>를 정합니다. 최소 제곱법은 공식으로 한 번에 답을 구하고, 경사 하강법은 반복해서 찾아갑니다. 결정계수는 “평균값만 답하는 모델보다 얼마나 나아졌는가”를 뜻합니다.'
+    },
+    {
+      type: 'multi',
+      q: '선형 회귀와 평균 제곱 오차에 대한 설명으로 <b>옳은 것을 모두</b> 고르시오.',
+      choices: [
+        '평균 제곱 오차는 값이 작을수록 모델의 성능이 좋다',
+        '이상치가 하나 생기면 최소 제곱법으로 구한 직선이 그쪽으로 끌려간다',
+        '결정계수가 0에 가까우면 평균값만 답하는 것과 비슷한 수준이다',
+        '경사 하강법으로 찾은 w, b는 최소 제곱법의 답과 원리적으로 다른 값이다'
+      ],
+      answer: [0, 1, 2],
+      why: '④가 틀렸습니다. 두 방법은 <b>같은 평균 제곱 오차를 최소화</b>하므로 도달하는 답도 같습니다. 다만 최소 제곱법은 공식으로 한 번에, 경사 하강법은 조금씩 반복해서 그 답에 다가갑니다. 시뮬레이터 2에서 두 값이 거의 같아지는 것을 확인할 수 있습니다.'
+    },
+    {
+      type: 'short',
+      q: '독립 변수가 두 개 이상인 선형 회귀를 무엇이라고 하는가?',
+      answer: ['다중 선형 회귀', '다중선형회귀', '다중 회귀', '다중회귀'],
+      placeholder: '예: ○○ ○○ ○○',
+      why: '<b>다중 선형 회귀</b>이며 식은 ŷ = w₁x₁ + w₂x₂ + … + wₙxₙ + b 입니다. 반면 하나의 x에 x², x³ 같은 거듭제곱 항을 넣어 <b>곡선</b>을 만드는 것은 <b>다항 회귀</b>입니다. 이름이 비슷하니 구분해 두세요.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a2l4-note',
+  title: '회귀와 경사 하강 실험 기록',
+  prompt: '두 시뮬레이터에서 관찰한 값을 적어 보세요. 특히 <b>학습률을 바꿔 가며 발산이 시작되는 지점</b>을 직접 찾아보는 것이 이 활동의 핵심입니다.',
+  fields: [
+    { key: 'hand', label: '손으로 맞춘 최소 MSE (슬라이더만 써서)', type: 'text', placeholder: '예: 21.4' },
+    { key: 'best', label: '최소 제곱법의 w / b / MSE', type: 'text', placeholder: '예: w=6.62 b=32.1 MSE=17.3' },
+    { key: 'r2', label: '최적선의 결정계수 R²', type: 'text', placeholder: '예: 0.972' },
+    { key: 'lrOk', label: '잘 수렴한 학습률과 그때의 반복 횟수', type: 'text', placeholder: '예: 0.005 / 210회' },
+    { key: 'lrBad', label: '발산이 시작된 학습률', type: 'text', placeholder: '예: 0.03 부터' },
+    {
+      key: 'outlier', label: '이상치를 하나 추가했을 때 최적선이 어떻게 달라졌나요? 왜 그럴까요?',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 초록 점선의 기울기가 6.6에서 5.1로 줄고 오른쪽 끝이 아래로 내려갔다. MSE는 오차를 제곱하므로 멀리 떨어진 점 하나가 …'
+    },
+    {
+      key: 'lr', label: '학습률이 너무 클 때와 너무 작을 때 MSE 곡선의 모양을 각각 설명하고, 그 이유를 “한 걸음의 크기”로 설명해 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 너무 클 때는 곡선이 위아래로 튀다가 치솟았다. 골짜기를 건너뛰어 반대편 더 높은 곳에 …'
+    }
+  ]
+});
+</script>
+</body>
+</html>

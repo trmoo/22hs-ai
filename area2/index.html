@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2단원 인공지능과 학습 — 인공지능 기초 웹교과서</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+</head>
+<body>
+<div id="tb-top"></div>
+<main class="wrap">
+  <div id="areaIndex"></div>
+</main>
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+const A = AI.DATA.area(2);
+AI.page({
+  area: 2,
+  crumb: '단원 목차',
+  title: A.title,
+  sub: A.tagline,
+  lead: A.summary,
+  blankBar: false
+});
+AI.renderAreaIndex(2, '#areaIndex');
+</script>
+</body>
+</html>

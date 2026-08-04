@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5차시 아는 것에서 새것을 — 지식의 표현과 추론 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+  /* 이 페이지에서만 쓰는 보조 스타일 */
+  .fig { display:flex; justify-content:center; padding:6px 0 2px; overflow-x:auto; }
+  .fig svg { max-width:100%; height:auto; }
+  .fig-cap { text-align:center; font-size:13px; color:var(--ink-3); margin:2px 0 0; }
+  .fnote { font-size:13.5px; color:var(--ink-3); margin:8px 0 0; }
+
+  /* 사실 후보 체크박스 */
+  .fact-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); gap:6px; }
+  .fact-item { display:flex; gap:7px; align-items:center; font-size:13px; padding:6px 9px;
+               border:1px solid var(--line); border-radius:8px; background:var(--surface-2); cursor:pointer; }
+  .fact-item:hover { border-color:var(--accent-line); }
+  .fact-item input { accent-color:var(--accent); margin:0; }
+
+  /* 규칙 목록 */
+  .rule-list { display:flex; flex-direction:column; gap:5px; max-height:340px; overflow-y:auto; padding-right:3px; }
+  .rule-row { font-size:12.5px; line-height:1.65; padding:7px 10px; border:1px solid var(--line);
+              border-radius:8px; background:var(--surface-2); transition:background .2s, border-color .2s; }
+  .rule-row.fired { border-color:var(--ok-line); background:var(--ok-soft); }
+  .rule-row.active { border-color:var(--warn); background:var(--warn-soft); box-shadow:0 0 0 2px var(--warn-line); }
+  .rule-row .rn { font-family:var(--font-mono); font-weight:800; color:var(--accent-ink); margin-right:5px; }
+  .rule-row .kw { font-family:var(--font-mono); font-weight:750; color:var(--ink-4); margin:0 3px; }
+
+  /* 사실 칩 */
+  .fact-chips { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 0; min-height:32px; }
+  .fchip { font-size:12.5px; padding:5px 11px; border-radius:999px; border:1px solid var(--line-strong);
+           background:var(--surface-2); color:var(--ink-2); }
+  .fchip.derived { border-color:var(--accent-line); background:var(--accent-soft); color:var(--accent-ink); font-weight:700; }
+  .fchip.fresh { border-color:var(--ok); background:var(--ok-soft); color:var(--ok); font-weight:800;
+                 animation:fpop .55s cubic-bezier(.2,1.4,.4,1); }
+  @keyframes fpop { from { transform:scale(.55); opacity:0 } to { transform:scale(1); opacity:1 } }
+
+  /* 추론 사슬 나무 */
+  .chain-box { margin:10px 0 0; padding:12px 14px; border:1px solid var(--line); border-radius:10px;
+               background:var(--surface-2); font-size:13.5px; overflow-x:auto; }
+  .chain-node { padding-left:18px; margin-top:5px; border-left:2px solid var(--accent-line); }
+  .chain-node.root { padding-left:0; border-left:0; margin-top:12px; }
+  .chain-node.root:first-child { margin-top:0; }
+  .chain-fact { font-weight:700; color:var(--ink); }
+  .chain-fact.derived { color:var(--accent-ink); }
+  .chain-rule { font-size:11.5px; color:var(--ok); font-family:var(--font-mono); margin-left:6px; }
+  .chain-base { font-size:11.5px; color:var(--ink-4); margin-left:6px; }
+
+  /* 삼단논법 판정기 */
+  .syl-form { font-family:var(--font-mono); font-size:14px; line-height:2; padding:12px 14px;
+              border:1px solid var(--line); border-radius:10px; background:var(--surface-2); margin:10px 0 0; }
+  .syl-form .lbl { display:inline-block; min-width:56px; color:var(--ink-3); font-weight:700; font-size:12.5px; }
+  .syl-form .sym { font-weight:800; color:var(--accent-ink); }
+  .syl-form .plain { color:var(--ink-3); font-family:var(--font-sans); font-size:13px; }
+  .syl-form .bar { border-top:2px solid var(--line-strong); margin:6px 0; }
+  .syl-sel { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin:10px 0 0; }
+  .syl-sel .field { display:flex; flex-direction:column; gap:4px; }
+  .syl-sel label { font-size:12.5px; font-weight:650; color:var(--ink-3); }
+  .syl-sel select { font:inherit; font-size:13.5px; padding:8px 10px; border:1px solid var(--line-strong);
+                    border-radius:8px; background:var(--surface); color:var(--ink); }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>어떤 동물에 대해 딱 두 가지만 알려 드립니다.</p>
+      <ul>
+        <li>이 동물은 <b>젖을 먹입니다</b>.</li>
+        <li>이 동물은 <b>고기를 먹고, 이빨이 날카롭습니다</b>.</li>
+      </ul>
+      <p>사진도 없고 이름도 알려 주지 않았습니다. 그런데 여러분은 벌써 “<b>포유류</b>이고, <b>육식 동물</b>이겠구나”라고 생각했을 것입니다. 알려 준 적 없는 사실을 어떻게 알아냈을까요?</p>
+      <p>여러분 머릿속에 <b>“젖을 먹이면 포유류다”</b>라는 규칙이 이미 들어 있었기 때문입니다. 컴퓨터에게도 이런 규칙을 넣어 주면, 같은 일을 할 수 있을까요?</p>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 지난 차시와 무엇이 다를까?</summary>
+        <div class="more-body">
+          지난 네 차시는 “<b>어디로 가야 하나</b>”를 찾는 <b>탐색</b>이었습니다. 이번 차시는 “<b>이미 아는 것에서 무엇을 더 알아낼 수 있나</b>”를 다루는 <b>추론</b>입니다. 인공지능의 두 축 가운데 나머지 하나이지요.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 자료 · 정보 · 지식 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>자료에서 지식까지</h2></div>
+
+    <p>“추론에 쓰는 지식”을 이야기하기 전에, 비슷해 보이는 세 낱말을 구별해야 합니다. 관찰·측정·조사로 얻은 <b>가공되지 않은 사실</b>을 <b class="blank" data-a="데이터|자료" data-hint="영어로 data · 우리말로는 '자료'">데이터</b>라고 합니다. 이것을 가공하여 <b>의미를 부여한 것</b>이 <b class="blank" data-a="정보|information" data-hint="데이터를 가공해 의미를 붙인 것">정보</b>이고, 정보를 일반화·체계화하여 <b>여러 상황에 두루 쓸 수 있게 만든 것</b>이 <b class="blank" data-a="지식|knowledge" data-hint="교육이나 경험으로 알게 된 명확한 인식">지식</b>입니다.</p>
+
+    <div class="fig">
+      <svg viewBox="0 0 560 250" role="img" aria-label="데이터, 정보, 지식, 지혜의 관계">
+        <g font-size="13">
+          <polygon points="280,16 348,74 212,74" fill="var(--accent)" opacity=".92"/>
+          <polygon points="212,78 348,78 392,136 168,136" fill="var(--accent)" opacity=".68"/>
+          <polygon points="168,140 392,140 436,198 124,198" fill="var(--accent)" opacity=".44"/>
+          <polygon points="124,202 436,202 470,246 90,246" fill="var(--accent)" opacity=".22"/>
+          <text x="280" y="62" text-anchor="middle" font-weight="800" fill="#fff" font-size="14">지혜</text>
+          <text x="280" y="115" text-anchor="middle" font-weight="800" fill="#fff" font-size="14">지식</text>
+          <text x="280" y="177" text-anchor="middle" font-weight="800" fill="var(--ink)" font-size="14">정보</text>
+          <text x="280" y="230" text-anchor="middle" font-weight="800" fill="var(--ink)" font-size="14">데이터</text>
+          <text x="486" y="62" fill="var(--ink-3)" font-size="12">종합된 지식으로 옳은 판단을 내리는 능력</text>
+          <text x="486" y="115" fill="var(--ink-3)" font-size="12">정보를 일반화·체계화한 패턴</text>
+          <text x="486" y="177" fill="var(--ink-3)" font-size="12">의미가 부여된 데이터</text>
+          <text x="486" y="230" fill="var(--ink-3)" font-size="12">가공되지 않은 사실</text>
+        </g>
+      </svg>
+    </div>
+    <p class="fig-cap">그림 1. 아래에서 위로 갈수록 가공의 정도가 높아진다</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>벚꽃 개화 시기를 예로 본 구분</caption>
+        <thead><tr><th>구분</th><th>보기</th><th>왜 그렇게 부르나</th></tr></thead>
+        <tbody>
+          <tr><td><b>데이터</b></td><td>서울 4월 3일, 대전 3월 31일, 제주 3월 22일</td><td>관찰로 얻은 날짜 그 자체 — 아직 아무 해석이 없다</td></tr>
+          <tr><td><b>정보</b></td><td>지역별 개화일을 지도에 표시한 결과</td><td>“남쪽이 먼저 핀다”처럼 <b>읽어 낼 의미</b>가 생겼다</td></tr>
+          <tr><td><b>지식</b></td><td>“우리나라 벚꽃 개화 시기가 해마다 빨라지고 있다”</td><td>여러 해의 정보를 묶어 <b>일반화한 규칙성</b>이다</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>인공지능이 추론을 하려면, 이 <b>지식을 컴퓨터가 다룰 수 있는 형태로 바꾸어</b> 저장해야 합니다. 이것을 <span class="term">지식 표현</span>이라고 합니다.</p>
+  </section>
+
+  <!-- ============ 2. 지식을 표현하는 방법 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>지식을 기호로 적는 방법</h2></div>
+
+    <h3 class="sub-head">명제 논리 — 참·거짓을 기호로</h3>
+    <p>참 또는 거짓을 판별할 수 있는 문장을 <b class="blank" data-a="명제|proposition" data-hint="참·거짓을 판별할 수 있는 문장">명제</b>라고 합니다. 명제 논리는 명제를 <span class="mono">A</span>, <span class="mono">B</span> 같은 기호로 바꾸고, 논리 연산자로 이어 붙여 지식을 표현합니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>A: “비가 온다”, B: “습도가 높아진다”, C: “나는 우산을 가지고 있다”</caption>
+        <thead><tr><th>논리 연산자</th><th>기호 표현</th><th>읽는 법</th></tr></thead>
+        <tbody>
+          <tr><td>논리 부정 (NOT)</td><td class="mono">NOT A</td><td>비가 오지 않는다</td></tr>
+          <tr><td>논리곱 (AND)</td><td class="mono">A AND B</td><td>비가 오고, 습도가 높아진다</td></tr>
+          <tr><td>논리합 (OR)</td><td class="mono">A OR C</td><td>비가 오거나, 나는 우산을 가지고 있다</td></tr>
+          <tr><td>조건 또는 <b class="blank" data-a="함축|조건|조건 또는 함축|implication" data-hint="A → B 를 부르는 이름 · 두 글자">함축</b> (→)</td><td class="mono">A → B</td><td>비가 오면 습도가 높아진다</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>추론에서 가장 중요한 연산자는 <span class="mono">→</span>입니다. “<span class="mono">A → B</span>이고 A가 참이면 B도 참”이라는 규칙 하나로 새로운 사실을 만들어 낼 수 있기 때문입니다.</p>
+
+    <h3 class="sub-head">술어 논리 — 대상과 관계까지</h3>
+    <p>명제 논리는 문장 하나를 기호 하나로 뭉뚱그리므로, “<b>누가</b> 어떻다”를 표현할 수 없습니다. 문장을 주어와 술부로 나누고 <b>변수와 한정자</b>를 도입해 대상과 관계를 표현하는 방법이 <b class="blank" data-a="술어 논리|술어논리|predicate logic" data-hint="명제 논리를 확장한 표현 방법">술어 논리</b>입니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 술어 논리로 삼단논법 쓰기</div>
+      <p><span class="mono">∀x, 사람(x) → 죽는다(x)</span> &nbsp;— 모든 x에 대하여, x가 사람이면 x는 죽는다.<br>
+         <span class="mono">사람(소크라테스)</span> &nbsp;— 소크라테스는 사람이다.<br>
+         <span class="mono">∴ 죽는다(소크라테스)</span> &nbsp;— 그러므로 소크라테스는 죽는다.</p>
+      <p class="fnote"><span class="mono">∀</span>는 “모든”(전칭 기호), <span class="mono">∃</span>는 “어떤”(존재 기호)을 뜻합니다. 술어 논리를 프로그래밍 언어로 만든 것이 <b>프롤로그(Prolog)</b>입니다.</p>
+    </div>
+
+    <h3 class="sub-head">규칙과 사실 — 이 차시의 주인공</h3>
+    <p>“~이면 …이다” 꼴로 조건과 결론을 서술하는 표현 방법을 <b class="blank" data-a="규칙|rule" data-hint="IF ~ THEN ~ 형태의 지식 표현">규칙</b>이라고 합니다. <span class="mono">IF 조건 THEN 결론</span> 형태라 사람이 읽고 이해하기 아주 쉽습니다. 조건이 여러 개면 <span class="mono">AND</span>, <span class="mono">OR</span>로 연결합니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>규칙으로 표현한 지식</caption>
+        <thead><tr><th>부분</th><th>보기 1</th><th>보기 2</th></tr></thead>
+        <tbody>
+          <tr><td><b class="mono">IF</b> (조건)</td><td>신호등이 녹색불이다</td><td>눈이 충혈되었다 <span class="mono">AND</span> 눈을 깜빡일 때 통증이 있다</td></tr>
+          <tr><td><b class="mono">THEN</b> (결론)</td><td>횡단보도를 건넌다</td><td>결막염으로 진단한다</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>규칙과 짝을 이루는 것이 <b class="blank" data-a="사실|fact" data-hint="지금 참이라고 알고 있는 개별 정보 · 두 글자">사실</b>입니다. 규칙이 “일반적으로 이러하다”는 지식이라면, 사실은 “지금 이 경우는 이러하다”는 개별 정보입니다. <b>규칙 + 사실 → 새로운 사실</b>이 이 차시의 핵심 공식입니다.</p>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 그 밖의 표현 방법</div>
+      <p><b>의미망</b>은 개념을 점으로, 관계를 선으로 그려 “참새 —is a→ 새 —has→ 날개”처럼 나타냅니다. <b>프레임</b>은 하나의 대상을 “속성: 값” 묶음으로 정리합니다. <b>지식 그래프</b>는 이 아이디어를 거대한 규모로 확장한 것으로, 오늘날 검색 엔진이 “봉준호 감독의 영화”를 이해하는 데 쓰입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. 규칙 기반 시스템과 추론 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>규칙 기반 시스템 — 지식 베이스와 추론 엔진</h2></div>
+
+    <p>규칙과 사실을 모아 두고, 거기서 새 사실을 만들어 내는 프로그램을 <b>규칙 기반 시스템</b>이라고 합니다. 특정 분야 전문가의 판단을 모방한 규칙 기반 시스템을 특히 <b class="blank" data-a="전문가 시스템|전문가시스템|expert system" data-hint="특정 분야 전문가의 의사 결정을 모방한 시스템">전문가 시스템</b>이라고 부릅니다. 전문가 시스템은 세 부분으로 이루어집니다.</p>
+
+    <div class="fig">
+      <svg viewBox="0 0 600 210" role="img" aria-label="전문가 시스템의 구성">
+        <defs>
+          <marker id="ar2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L7,3 L0,6 z" fill="var(--ink-3)"/>
+          </marker>
+        </defs>
+        <rect x="14" y="70" width="132" height="70" rx="12" fill="var(--surface-3)" stroke="var(--line-strong)" stroke-width="1.5"/>
+        <text x="80" y="100" text-anchor="middle" font-size="13" font-weight="750" fill="var(--ink)">사용자</text>
+        <text x="80" y="120" text-anchor="middle" font-size="13" font-weight="750" fill="var(--ink)">인터페이스</text>
+
+        <rect x="232" y="60" width="140" height="90" rx="12" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2"/>
+        <text x="302" y="98" text-anchor="middle" font-size="14" font-weight="800" fill="var(--warn)">추론 엔진</text>
+        <text x="302" y="122" text-anchor="middle" font-size="11.5" fill="var(--ink-3)">규칙을 사실에 맞춰 본다</text>
+
+        <rect x="452" y="42" width="134" height="126" rx="12" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="519" y="76" text-anchor="middle" font-size="14" font-weight="800" fill="var(--accent-ink)">지식 베이스</text>
+        <text x="519" y="102" text-anchor="middle" font-size="11.5" fill="var(--ink-3)">규칙 (IF ~ THEN ~)</text>
+        <text x="519" y="122" text-anchor="middle" font-size="11.5" fill="var(--ink-3)">사실</text>
+        <text x="519" y="148" text-anchor="middle" font-size="11.5" fill="var(--ink-3)">전문가의 지식 저장</text>
+
+        <path d="M148,90 L228,90" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ar2)"/>
+        <text x="188" y="82" text-anchor="middle" font-size="11" fill="var(--ink-3)">사실 입력</text>
+        <path d="M228,124 L150,124" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ar2)"/>
+        <text x="190" y="142" text-anchor="middle" font-size="11" fill="var(--ink-3)">결론·설명</text>
+        <path d="M376,86 L448,86" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ar2)"/>
+        <text x="412" y="78" text-anchor="middle" font-size="11" fill="var(--ink-3)">조회</text>
+        <path d="M448,124 L378,124" stroke="var(--ink-3)" stroke-width="2" marker-end="url(#ar2)"/>
+        <text x="414" y="142" text-anchor="middle" font-size="11" fill="var(--ink-3)">새 사실 저장</text>
+      </svg>
+    </div>
+    <p class="fig-cap">그림 2. 전문가 시스템의 세 구성 요소</p>
+
+    <p>규칙과 사실이 저장되는 곳이 <b class="blank" data-a="지식 베이스|지식베이스|knowledge base" data-hint="규칙과 사실을 모아 둔 저장소">지식 베이스</b>이고, 지식 베이스를 이용해 새로운 사실을 만들어 내는 부분이 <b class="blank" data-a="추론 엔진|추론엔진|inference engine" data-hint="규칙을 사실에 맞춰 보며 새 사실을 만드는 부분">추론 엔진</b>입니다. 사람은 <b>사용자 인터페이스</b>를 통해 사실을 넣고 결론을 받습니다.</p>
+
+    <h3 class="sub-head">전방 추론과 후방 추론</h3>
+    <p>추론 엔진이 일하는 방향은 두 가지입니다. 지금 가진 <b>사실에서 출발</b>해 발동할 수 있는 규칙을 찾아 새 사실을 계속 더해 가는 방식을 <b class="blank" data-a="전방 추론|순방향 추론|전향 추론|정방향 추론" data-hint="사실 → 결론 방향으로 나아가는 추론">전방 추론</b>이라고 합니다. 반대로 <b>알고 싶은 결론에서 출발</b>해 “이 결론을 내려면 어떤 조건이 필요한가”를 거꾸로 따라가는 방식을 <b class="blank" data-a="후방 추론|역방향 추론|후향 추론" data-hint="결론 → 사실 방향으로 거슬러 가는 추론">후방 추론</b>이라고 합니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>두 추론 방향의 비교</caption>
+        <thead><tr><th>구분</th><th>전방 추론</th><th>후방 추론</th></tr></thead>
+        <tbody>
+          <tr><td><b>출발점</b></td><td>지금 알고 있는 사실</td><td>확인하고 싶은 결론(가설)</td></tr>
+          <tr><td><b>진행 방향</b></td><td>사실 → 규칙 → 새 사실 → …</td><td>결론 → 필요한 조건 → 그 조건의 조건 → …</td></tr>
+          <tr><td><b>알맞은 상황</b></td><td>사실은 많고 무엇이 나올지 모를 때 (모니터링·진단)</td><td>확인할 결론이 정해져 있을 때 (질의 응답)</td></tr>
+          <tr><td><b>비유</b></td><td>재료를 다 늘어놓고 만들 수 있는 요리를 찾기</td><td>먹고 싶은 요리를 정하고 재료가 있는지 확인하기</td></tr>
+          <tr><td><b>탐색과의 연결</b></td><td>초기 상태에서 목표로 나아가는 탐색</td><td>목표에서 초기 상태로 되짚는 탐색</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub-head">삼단논법 — 추론의 가장 오래된 뼈대</h3>
+    <p>대전제와 소전제에서 결론을 이끌어 내는 논증 형식을 <b class="blank" data-a="삼단논법|삼단 논법|삼단론법" data-hint="아리스토텔레스의 논증 형식 · 대전제·소전제·결론">삼단논법</b>이라고 합니다. 규칙 기반 시스템의 한 단계가 바로 이 구조입니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">✅</span>
+        <h4>긍정 논법 — 타당</h4>
+        <p>대전제 <span class="mono">P → Q</span>, 소전제 <span class="mono">P</span> ⇒ 결론 <span class="mono">Q</span>. “사람은 죽는다 + 소크라테스는 사람이다 ⇒ 소크라테스는 죽는다”</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">✅</span>
+        <h4>부정 논법 — 타당</h4>
+        <p>대전제 <span class="mono">P → Q</span>, 소전제 <span class="mono">NOT Q</span> ⇒ 결론 <span class="mono">NOT P</span>. “비가 오면 땅이 젖는다 + 땅이 젖지 않았다 ⇒ 비가 오지 않았다”</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">⛔</span>
+        <h4>후건 긍정 — 부당</h4>
+        <p><span class="mono">P → Q</span>, <span class="mono">Q</span> ⇒ <span class="mono">P</span>는 <b>틀립니다</b>. 땅이 젖었다고 반드시 비가 온 것은 아닙니다. 물청소를 했을 수도 있습니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">⛔</span>
+        <h4>전건 부정 — 부당</h4>
+        <p><span class="mono">P → Q</span>, <span class="mono">NOT P</span> ⇒ <span class="mono">NOT Q</span>도 <b>틀립니다</b>. 비가 오지 않아도 다른 이유로 땅이 젖을 수 있습니다.</p>
+      </div>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 가장 많이 하는 실수</div>
+      <p><span class="mono">P → Q</span>가 참이라고 해서 <span class="mono">Q → P</span>가 참인 것은 <b>아닙니다</b>. “열이 나면 감염이다”가 성립해도 “감염이면 열이 난다”는 별개의 주장입니다. 화살표의 방향을 뒤집는 순간 논증은 무너집니다. 시뮬레이터 2에서 직접 판정해 보세요.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4. 시뮬레이터 1 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>규칙 기반 추론 엔진</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim1"></div>
+  </section>
+
+  <!-- ============ 5. 시뮬레이터 2 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>삼단논법 판정기</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim2"></div>
+  </section>
+
+  <!-- ============ 6. 규칙 기반 방식의 빛과 그림자 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>규칙 기반 방식의 빛과 그림자</h2></div>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">💡</span>
+        <h4>장점 ① 설명할 수 있다</h4>
+        <p>“규칙 5와 규칙 9를 거쳐 호랑이라고 판단했습니다”처럼 <b>근거를 그대로 보여 줄 수 있습니다</b>. 의료·법률처럼 이유를 반드시 밝혀야 하는 분야에서 큰 강점입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🔧</span>
+        <h4>장점 ② 고치기 쉽다</h4>
+        <p>판단이 틀렸으면 <b>해당 규칙만 수정</b>하면 됩니다. 데이터를 다시 모아 처음부터 학습시킬 필요가 없습니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">😵</span>
+        <h4>한계 ① 규칙을 사람이 다 만들어야 한다</h4>
+        <p>동물 몇 종만 해도 규칙이 수십 개입니다. 고양이 사진을 알아보는 규칙을 사람이 손으로 쓸 수 있을까요? <b>사실상 불가능합니다.</b></p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🌫️</span>
+        <h4>한계 ② 애매함을 못 견딘다</h4>
+        <p>“털이 조금 있다”, “아마도 날 수 있다” 같은 <b>불확실한 사실</b>을 다루기 어렵습니다. 규칙이 늘어날수록 서로 충돌하기도 합니다.</p>
+      </div>
+    </div>
+
+    <p>1980년대 전문가 시스템의 유행이 가라앉은 이유가 바로 여기에 있습니다. 지식 베이스에 넣을 <b>충분한 양의 전문가 지식을 확보하고 관리하는 일</b>이 사람의 힘으로는 너무 힘들었기 때문입니다. 그래서 사람들은 질문을 바꾸었습니다.</p>
+
+    <div class="box box-ok">
+      <div class="box-label">✅ 다음 단원으로 이어지는 질문</div>
+      <p>“규칙을 사람이 쓰는 것이 어렵다면, <b>데이터를 주고 컴퓨터가 스스로 규칙을 찾게</b> 할 수는 없을까?”</p>
+      <p>이 질문의 답이 2단원의 <b>기계학습</b>입니다. 규칙 기반 방식이 <b>사람이 규칙을 쓰고 컴퓨터가 적용</b>하는 방식이라면, 기계학습은 <b>데이터에서 컴퓨터가 규칙을 찾아내는</b> 방식입니다. 대신 “왜 그렇게 판단했는지”를 설명하기 어려워지는 대가를 치릅니다. 두 방식은 서로를 대체하는 것이 아니라 <b>맞바꿈 관계</b>에 있습니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 7. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 8. 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 9. 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">9</span><h2>활동 기록</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 연역적 추론과 귀납적 추론</summary>
+      <div class="more-body">
+        <p>이 차시에서 다룬 규칙 기반 추론은 <b>연역적 추론</b>입니다. 일반적인 규칙에서 개별 사실을 이끌어 내며, <b>전제가 참이면 결론도 반드시 참</b>입니다. 그래서 결론이 확실하지만, 새로운 규칙을 발견하지는 못합니다.</p>
+        <p>반대로 <b>귀납적 추론</b>은 여러 개별 사례에서 일반 규칙을 이끌어 냅니다. “관찰한 백조가 모두 흰색이었다 ⇒ 백조는 흰색이다”처럼요. 규칙을 새로 만들어 낼 수 있지만, <b>결론이 반드시 참이라는 보장은 없습니다</b>(검은 백조가 나타날 수 있으니까요).</p>
+        <p>2단원의 기계학습은 본질적으로 <b>귀납적 추론</b>입니다. 데이터에서 규칙을 찾아내지만, 학습에 쓰지 않은 새 데이터에서 틀릴 수 있습니다. “왜 성능 평가가 반드시 필요한가”의 뿌리가 여기에 있습니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">코드</span> 파이썬 20줄로 만든 전방 추론 엔진</summary>
+      <div class="more-body">
+        <p>시뮬레이터 1이 실제로 하는 일을 파이썬으로 옮기면 이렇게 짧습니다.</p>
+        <pre style="margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;white-space:pre-wrap">rules = [
+    (["젖을 먹인다"],                          "포유류"),
+    (["포유류", "고기를 먹는다"],               "육식 동물"),
+    (["육식 동물", "검은 줄무늬가 있다"],        "호랑이"),
+]
+
+def forward_chain(facts, rules):
+    facts = set(facts)
+    while True:
+        fired = False
+        for i, (conds, concl) in enumerate(rules):
+            if concl in facts:
+                continue                       # 이미 알고 있는 사실
+            if all(c in facts for c in conds):  # 조건이 모두 만족되면
+                facts.add(concl)                # 새 사실 도출
+                print(f"규칙 {i+1} 발동 → {concl}")
+                fired = True
+                break
+        if not fired:                           # 더 발동할 규칙이 없으면
+            return facts                        # 추론 종료
+
+print(forward_chain(["젖을 먹인다", "고기를 먹는다", "검은 줄무늬가 있다"], rules))</pre>
+        <p style="margin-top:12px">핵심은 <span class="mono">while</span> 안의 두 줄입니다. <b>조건이 모두 사실 집합에 들어 있으면 결론을 사실 집합에 넣는다</b> — 이것을 더 넣을 것이 없을 때까지 반복하면 전방 추론이 됩니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> MYCIN — 의사보다 잘 진단한 1970년대 인공지능</summary>
+      <div class="more-body">
+        <p>1972년 스탠퍼드 대학에서 만든 <b>MYCIN</b>은 혈액 감염병의 원인균을 찾아 항생제를 추천하는 전문가 시스템입니다. 약 600개의 규칙을 담았고, 후방 추론으로 “이 균이 원인이려면 어떤 검사 결과가 필요한가”를 거꾸로 물어 가며 환자에게 질문했습니다. 평가 실험에서 <b>전문의보다 높은 정확도</b>를 보인 것으로 알려져 있습니다.</p>
+        <p>그런데 MYCIN은 병원에서 널리 쓰이지 못했습니다. 규칙 600개를 계속 갱신할 사람이 필요했고, 새 항생제가 나올 때마다 지식 베이스를 손봐야 했기 때문입니다. <b>“성능은 좋지만 유지할 수 없다”</b>는 것이 규칙 기반 인공지능의 결정적 한계였습니다.</p>
+        <p class="fnote">MYCIN은 규칙마다 확신도(0~1)를 붙여 불확실성을 다뤘습니다. 오늘날 기계학습 모델이 확률을 출력하는 것과 같은 문제 의식입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 1단원 마무리 — 탐색과 추론, 그리고 그다음</summary>
+      <div class="more-body">
+        1단원에서는 인공지능이 지능적으로 판단하는 두 가지 방식을 배웠습니다. 문제를 상태 공간으로 바꾸어 <b>길을 찾는 탐색</b>(2~4차시)과, 지식을 규칙으로 적어 <b>새 사실을 만드는 추론</b>(5차시)입니다. 두 방식의 공통점은 <b>사람이 규칙과 평가 기준을 직접 설계한다</b>는 점입니다. 2단원에서는 이 역할을 데이터에 넘기는 <b>기계학습</b>으로 넘어갑니다. 그전에 <b>단원 마무리</b>에서 배운 내용을 한 번에 정리해 보세요.
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 1, lesson: 5,
+  title: '아는 것에서 새것을',
+  sub: '지식의 표현과 추론',
+  lead: '“젖을 먹인다”는 사실 하나에서 “포유류다”를 이끌어 내는 일 — 이것이 <b>추론</b>입니다. 지식을 <b>규칙과 사실</b>로 적어 두면 컴퓨터도 같은 일을 할 수 있습니다. 규칙 기반 추론 엔진을 직접 돌려 보며 새 지식이 생겨나는 과정을 눈으로 확인합니다.',
+  standards: ['12인기01-05'],
+  keywords: ['자료와 정보와 지식', '명제 논리', '규칙', '사실', '추론', '전방 추론'],
+  goals: [
+    '데이터·정보·지식을 구별하고, 지식을 컴퓨터에 표현하는 여러 방법을 설명할 수 있다.',
+    '명제 논리의 논리 연산자와 규칙(IF-THEN) 표현을 이용해 주어진 지식을 형식화할 수 있다.',
+    '지식 베이스와 추론 엔진으로 이루어진 규칙 기반 시스템에서 <b>전방 추론</b>이 진행되는 과정을 단계별로 설명할 수 있다.',
+    '삼단논법의 타당한 형식과 그럴듯하지만 부당한 형식을 구별하고, 그 까닭을 논리 구조로 설명할 수 있다.',
+    '규칙 기반 방식의 장점과 한계를 근거를 들어 평가하고, 기계학습이 필요한 까닭을 말할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 시뮬레이터 1: 규칙 기반 추론 엔진 ===================== -->
+<script>
+(function () {
+  /* ---------- 지식 베이스 ---------- */
+  const BASE_FACTS = [
+    '털이 있다', '젖을 먹인다', '깃털이 있다', '알을 낳는다',
+    '날 수 있다', '날지 못한다', '부리가 있다', '헤엄을 잘 친다',
+    '이빨이 날카롭다', '고기를 먹는다', '발굽이 있다', '되새김질을 한다',
+    '목이 매우 길다', '황갈색이다', '검은 줄무늬가 있다', '검은 점이 있다'
+  ];
+
+  const RULES = [
+    { ifs: ['털이 있다'], then: '포유류' },
+    { ifs: ['젖을 먹인다'], then: '포유류' },
+    { ifs: ['깃털이 있다'], then: '새' },
+    { ifs: ['알을 낳는다', '날 수 있다', '부리가 있다'], then: '새' },
+    { ifs: ['포유류', '고기를 먹는다'], then: '육식 동물' },
+    { ifs: ['포유류', '이빨이 날카롭다'], then: '육식 동물' },
+    { ifs: ['포유류', '발굽이 있다'], then: '발굽 동물' },
+    { ifs: ['포유류', '되새김질을 한다'], then: '발굽 동물' },
+    { ifs: ['육식 동물', '황갈색이다', '검은 줄무늬가 있다'], then: '호랑이' },
+    { ifs: ['육식 동물', '황갈색이다', '검은 점이 있다'], then: '치타' },
+    { ifs: ['발굽 동물', '목이 매우 길다', '황갈색이다'], then: '기린' },
+    { ifs: ['발굽 동물', '검은 줄무늬가 있다'], then: '얼룩말' },
+    { ifs: ['새', '날지 못한다', '헤엄을 잘 친다'], then: '펭귄' },
+    { ifs: ['새', '날지 못한다', '목이 매우 길다'], then: '타조' }
+  ];
+
+  const PRESETS = [
+    { label: '🐯 사례 1', facts: ['털이 있다', '고기를 먹는다', '이빨이 날카롭다', '황갈색이다', '검은 줄무늬가 있다'] },
+    { label: '🦒 사례 2', facts: ['털이 있다', '되새김질을 한다', '목이 매우 길다', '황갈색이다'] },
+    { label: '🐧 사례 3', facts: ['깃털이 있다', '알을 낳는다', '부리가 있다', '날지 못한다', '헤엄을 잘 친다'] },
+    { label: '🦓 사례 4', facts: ['젖을 먹인다', '발굽이 있다', '검은 줄무늬가 있다'] }
+  ];
+
+  const body = AI.sim.panel('#sim1', {
+    title: '규칙 기반 추론 엔진 — 동물 분류 전문가 시스템',
+    tag: '핵심 활동 · 전방 추론',
+    desc: '왼쪽에서 <b>알고 있는 사실</b>을 골라 체크하고 <b>한 단계</b>를 눌러 보세요. ' +
+          '추론 엔진이 조건이 만족되는 규칙을 찾아 <b>노란색으로 강조</b>하고, 도출한 새 사실을 사실 목록에 더합니다. ' +
+          '더 이상 발동할 규칙이 없으면 추론이 끝납니다. 아래쪽 <b>추론 사슬</b>에서 결론이 어떤 근거로 나왔는지 되짚어 볼 수 있습니다.'
+  });
+
+  /* ---------- 상태 ---------- */
+  let rules = RULES.map(r => ({ ifs: r.ifs.slice(), then: r.then, custom: false }));
+  let facts = new Set();
+  let prov = new Map();     // 도출된 사실 → { ri, conds }
+  let fired = [];           // 발동한 규칙 번호 순서
+  let activeRule = null;    // 방금 발동한 규칙
+  let freshFact = null;     // 방금 도출된 사실
+  let finished = false;
+
+  /* ---------- 왼쪽: 사실 후보 ---------- */
+  const factGrid = AI.h('div', { class: 'fact-grid' });
+  const checks = {};
+  BASE_FACTS.forEach(f => {
+    const cb = AI.h('input', { type: 'checkbox' });
+    cb.addEventListener('change', () => reset(false));
+    checks[f] = cb;
+    factGrid.appendChild(AI.h('label', { class: 'fact-item' }, cb, AI.h('span', { text: f })));
+  });
+
+  const leftCol = AI.h('div', {},
+    AI.h('h4', { class: 'mini-head', style: { marginTop: 0 }, text: '① 알고 있는 사실 고르기' }),
+    AI.h('p', { style: { fontSize: '12.5px', color: 'var(--ink-3)', margin: '0 0 8px' }, text: '관찰로 얻은 기초 사실만 고릅니다. 「포유류」처럼 규칙으로 도출되는 것은 목록에 없습니다.' }),
+    factGrid
+  );
+
+  /* ---------- 오른쪽: 규칙 목록 ---------- */
+  const ruleList = AI.h('div', { class: 'rule-list' });
+  const rightCol = AI.h('div', {},
+    AI.h('h4', { class: 'mini-head', style: { marginTop: 0 }, text: '② 지식 베이스의 규칙' }),
+    AI.h('p', { style: { fontSize: '12.5px', color: 'var(--ink-3)', margin: '0 0 8px' }, text: '위에서 아래로 순서대로 검사합니다. 조건이 모두 만족되고 결론이 아직 없는 규칙이 발동합니다.' }),
+    ruleList
+  );
+
+  function renderRules() {
+    ruleList.innerHTML = '';
+    rules.forEach((r, ri) => {
+      const row = AI.h('div', { class: 'rule-row' + (fired.indexOf(ri) >= 0 ? ' fired' : '') + (activeRule === ri ? ' active' : '') });
+      let html = '<span class="rn">R' + (ri + 1) + '</span>';
+      html += '<span class="kw">IF</span> ';
+      html += r.ifs.map(c => AI.esc(c)).join(' <span class="kw">AND</span> ');
+      html += ' <span class="kw">THEN</span> <b>' + AI.esc(r.then) + '</b>';
+      if (r.custom) html += ' <span style="font-size:11px;color:var(--ink-4)">(내가 추가)</span>';
+      row.innerHTML = html;
+      ruleList.appendChild(row);
+    });
+  }
+
+  body.appendChild(AI.h('div', { class: 'sim-grid' }, leftCol, rightCol));
+
+  /* ---------- 사실 목록 · 추론 사슬 ---------- */
+  const chips = AI.h('div', { class: 'fact-chips' });
+  const chainBox = AI.h('div', { class: 'chain-box' });
+  const stats = AI.ui.stats([
+    { key: 'f', label: '입력한 사실' },
+    { key: 'd', label: '도출한 사실' },
+    { key: 'r', label: '발동한 규칙' },
+    { key: 'c', label: '최종 결론' }
+  ]);
+  const log = AI.ui.log();
+
+  body.appendChild(AI.h('h4', { class: 'mini-head', text: '③ 지금까지 알게 된 사실' }));
+  body.appendChild(chips);
+  body.appendChild(stats.el);
+  body.appendChild(AI.h('h4', { class: 'mini-head', text: '④ 추론 사슬 — 이 결론은 어떤 근거에서 나왔나' }));
+  body.appendChild(chainBox);
+  body.appendChild(log.el);
+
+  function baseChecked() {
+    return BASE_FACTS.filter(f => checks[f].checked);
+  }
+
+  function chainNode(fact, isRoot) {
+    const p = prov.get(fact);
+    const node = AI.h('div', { class: 'chain-node' + (isRoot ? ' root' : '') });
+    node.appendChild(AI.h('span', { class: 'chain-fact' + (p ? ' derived' : ''), text: fact }));
+    if (p) {
+      node.appendChild(AI.h('span', { class: 'chain-rule', text: '← 규칙 R' + (p.ri + 1) }));
+      p.conds.forEach(c => node.appendChild(chainNode(c, false)));
+    } else {
+      node.appendChild(AI.h('span', { class: 'chain-base', text: '(입력한 사실)' }));
+    }
+    return node;
+  }
+
+  function render() {
+    renderRules();
+
+    // 사실 칩
+    chips.innerHTML = '';
+    const base = baseChecked();
+    base.forEach(f => chips.appendChild(AI.h('span', { class: 'fchip', text: f })));
+    [...facts].filter(f => prov.has(f)).forEach(f => {
+      chips.appendChild(AI.h('span', { class: 'fchip ' + (f === freshFact ? 'fresh' : 'derived'), text: f }));
+    });
+    if (!chips.children.length) chips.appendChild(AI.h('span', { style: { fontSize: '13px', color: 'var(--ink-4)' }, text: '아직 아무 사실도 없습니다. 왼쪽에서 사실을 골라 보세요.' }));
+
+    // 최종 결론 = 도출된 사실 중 다른 규칙의 조건으로 쓰이지 않은 것
+    const used = new Set();
+    fired.forEach(ri => rules[ri].ifs.forEach(c => used.add(c)));
+    const derived = [...facts].filter(f => prov.has(f));
+    const finals = derived.filter(f => !used.has(f));
+
+    // 추론 사슬
+    chainBox.innerHTML = '';
+    if (!derived.length) {
+      chainBox.appendChild(AI.h('span', { style: { fontSize: '13px', color: 'var(--ink-4)' }, text: '아직 도출된 사실이 없습니다. 「한 단계」를 눌러 추론을 시작해 보세요.' }));
+    } else {
+      (finals.length ? finals : derived).forEach(f => chainBox.appendChild(chainNode(f, true)));
+    }
+
+    stats.set('f', base.length);
+    stats.set('d', derived.length);
+    stats.set('r', fired.length);
+    stats.set('c', finals.length ? finals.join(', ') : '–');
+  }
+
+  /* ---------- 전방 추론 한 단계 ---------- */
+  function step() {
+    if (finished) return false;
+    for (let ri = 0; ri < rules.length; ri++) {
+      const r = rules[ri];
+      if (facts.has(r.then)) continue;                        // 이미 아는 사실이면 건너뛴다
+      if (!r.ifs.every(c => facts.has(c))) continue;          // 조건이 다 만족되지 않으면 건너뛴다
+      facts.add(r.then);
+      prov.set(r.then, { ri: ri, conds: r.ifs.slice() });
+      fired.push(ri);
+      activeRule = ri;
+      freshFact = r.then;
+      log.add('규칙 <b>R' + (ri + 1) + '</b> 발동 — 조건 「' + AI.esc(r.ifs.join('」, 「')) + '」이 모두 만족되어 새 사실 <b>「' + AI.esc(r.then) + '」</b>을 도출했습니다', true);
+      render();
+      return true;
+    }
+    finished = true;
+    activeRule = null;
+    freshFact = null;
+    const derived = [...facts].filter(f => prov.has(f));
+    log.add(derived.length
+      ? '더 이상 발동할 규칙이 없습니다 — <b>추론 종료</b> (새로 알아낸 사실 ' + derived.length + '개)'
+      : '발동할 수 있는 규칙이 하나도 없습니다 — 사실을 더 골라 보세요', true);
+    render();
+    return false;
+  }
+
+  function reset(quiet) {
+    loop.pause();
+    facts = new Set(baseChecked());
+    prov = new Map();
+    fired = [];
+    activeRule = null;
+    freshFact = null;
+    finished = false;
+    if (!quiet) {
+      log.clear();
+      const n = facts.size;
+      log.add(n ? '사실 ' + n + '개를 지식 베이스에 넣었습니다 — 추론 준비 완료' : '사실이 비어 있습니다 — 왼쪽에서 골라 주세요');
+    }
+    render();
+  }
+
+  const loop = AI.sim.loop({
+    fps: 1.4,
+    step() { return step(); },
+    onState(playing) { autoBtn.textContent = playing ? '⏸ 멈춤' : '▶ 자동 추론'; }
+  });
+
+  const autoBtn = AI.ui.btn('▶ 자동 추론', () => loop.toggle(), 'primary');
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('⏭ 한 단계', () => { loop.pause(); step(); }),
+    autoBtn,
+    AI.ui.btn('⏩ 끝까지', () => { loop.pause(); let g = 0; while (step() && g++ < 500) { } }, 'ghost'),
+    AI.ui.btn('↺ 초기화', () => reset(false), 'ghost'),
+    AI.ui.btn('🧹 사실 모두 지우기', () => { BASE_FACTS.forEach(f => { checks[f].checked = false; }); reset(false); }, 'ghost')
+  ));
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.h('span', { style: { fontSize: '12.5px', fontWeight: '650', color: 'var(--ink-3)' }, text: '사실 묶음 불러오기:' }),
+    ...PRESETS.map(p => AI.ui.btn(p.label, () => {
+      BASE_FACTS.forEach(f => { checks[f].checked = p.facts.indexOf(f) >= 0; });
+      reset(false);
+      AI.toast('사실을 불러왔어요 — 「끝까지」를 눌러 결론을 확인해 보세요');
+    }, 'small'))
+  ));
+
+  /* ---------- 규칙 직접 추가 ---------- */
+  const condIn = AI.h('input', { type: 'text', placeholder: '예: 포유류, 물에서 산다', style: { flex: '1 1 220px', font: 'inherit', fontSize: '13.5px', padding: '8px 10px', border: '1px solid var(--line-strong)', borderRadius: '8px', background: 'var(--surface)', color: 'var(--ink)' } });
+  const thenIn = AI.h('input', { type: 'text', placeholder: '예: 물에 사는 포유류', style: { flex: '1 1 160px', font: 'inherit', fontSize: '13.5px', padding: '8px 10px', border: '1px solid var(--line-strong)', borderRadius: '8px', background: 'var(--surface)', color: 'var(--ink)' } });
+
+  function addRule() {
+    const conds = condIn.value.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+    const concl = thenIn.value.trim();
+    if (!conds.length || !concl) { AI.toast('조건과 결론을 모두 적어 주세요'); return; }
+    rules.push({ ifs: conds, then: concl, custom: true });
+    condIn.value = ''; thenIn.value = '';
+    reset(false);
+    log.add('규칙 <b>R' + rules.length + '</b>을 지식 베이스에 추가했습니다 — IF ' + AI.esc(conds.join(' AND ')) + ' THEN ' + AI.esc(concl), true);
+    AI.toast('규칙 R' + rules.length + '을 추가했어요');
+  }
+  thenIn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addRule(); } });
+
+  body.appendChild(AI.h('div', { class: 'box box-info', style: { marginTop: '14px' } },
+    AI.h('div', { class: 'box-label', text: '🧑‍🏫 규칙을 직접 추가해 보기' }),
+    AI.h('p', { html: '지식 베이스는 사람이 채워 넣는 것입니다. 아래에 <b>IF 조건</b>(쉼표로 구분)과 <b>THEN 결론</b>을 적어 규칙을 추가해 보세요. 조건에는 이미 있는 사실이나 도출된 사실(포유류, 새, 육식 동물, 발굽 동물 …)을 쓸 수 있습니다.' }),
+    AI.h('div', { class: 'sim-controls' },
+      AI.h('span', { class: 'mono', style: { fontWeight: '750', color: 'var(--ink-3)' }, text: 'IF' }), condIn,
+      AI.h('span', { class: 'mono', style: { fontWeight: '750', color: 'var(--ink-3)' }, text: 'THEN' }), thenIn,
+      AI.ui.btn('＋ 규칙 추가', addRule)
+    )
+  ));
+
+  /* ---------- 시작 ---------- */
+  PRESETS[0].facts.forEach(f => { if (checks[f]) checks[f].checked = true; });
+  reset(false);
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 삼단논법 판정기 ===================== -->
+<script>
+(function () {
+  /* ---------- 주제 ---------- */
+  const TOPICS = [
+    {
+      name: '비와 땅',
+      P: { t: '비가 온다', cond: '비가 오면', neg: '비가 오지 않는다' },
+      Q: { t: '땅이 젖는다', cond: '땅이 젖으면', neg: '땅이 젖지 않는다' },
+      converseEx: '비가 오지 않아도 물청소를 하면 땅이 젖을 수 있습니다. 땅이 젖은 원인은 비 말고도 있습니다.',
+      inverseEx: '비가 오지 않아도 다른 이유로 땅이 젖을 수 있으므로, 「땅이 젖지 않는다」고 단정할 수 없습니다.'
+    },
+    {
+      name: '소크라테스',
+      P: { t: '소크라테스는 사람이다', cond: '소크라테스가 사람이면', neg: '소크라테스는 사람이 아니다' },
+      Q: { t: '소크라테스는 죽는다', cond: '소크라테스가 죽으면', neg: '소크라테스는 죽지 않는다' },
+      converseEx: '사람이 아닌 생물도 죽습니다. 「죽는다」에서 「사람이다」를 이끌어 낼 수는 없습니다.',
+      inverseEx: '사람이 아니어도 죽을 수 있으므로, 「죽지 않는다」고 단정할 수 없습니다.'
+    },
+    {
+      name: '공부와 성적',
+      P: { t: '열심히 공부한다', cond: '열심히 공부하면', neg: '열심히 공부하지 않는다' },
+      Q: { t: '성적이 오른다', cond: '성적이 오르면', neg: '성적이 오르지 않는다' },
+      converseEx: '원래 잘하던 과목이었거나 시험이 쉬웠을 수도 있습니다. 성적이 오른 원인은 공부 말고도 있습니다.',
+      inverseEx: '공부를 열심히 하지 않아도 다른 이유로 성적이 오를 수 있습니다.'
+    }
+  ];
+
+  /* ---------- 연습 문항 (8개) ---------- */
+  const SET = [
+    { t: 0, impl: 'PQ', p2: 'P', c: 'Q' },
+    { t: 0, impl: 'PQ', p2: 'Q', c: 'P' },
+    { t: 0, impl: 'PQ', p2: 'notQ', c: 'notP' },
+    { t: 0, impl: 'PQ', p2: 'notP', c: 'notQ' },
+    { t: 1, impl: 'PQ', p2: 'P', c: 'Q' },
+    { t: 1, impl: 'PQ', p2: 'notQ', c: 'notP' },
+    { t: 2, impl: 'PQ', p2: 'Q', c: 'P' },
+    { t: 2, impl: 'QP', p2: 'Q', c: 'P' }
+  ];
+
+  const body = AI.sim.panel('#sim2', {
+    title: '삼단논법 판정기 — 타당한 추론과 그럴듯한 오류',
+    tag: '판정 활동',
+    desc: '전제 두 개와 결론을 조합해 보고, 그 추론이 <b>타당한지 부당한지</b> 먼저 스스로 판정해 보세요. ' +
+          '판정 버튼을 누르면 논리 구조로 이유를 설명해 줍니다. ' +
+          '<b>연습 문제</b> 모드에는 타당한 추론과 그럴듯하지만 틀린 추론이 섞인 8문항이 들어 있습니다.'
+  });
+
+  /* ---------- 상태 ---------- */
+  let ti = 0;                 // 주제
+  let impl = 'PQ';            // 전제 1: 'PQ' = P→Q, 'QP' = Q→P
+  let p2 = 'P';               // 전제 2
+  let concl = 'Q';            // 결론
+  let mode = 'free';          // 'free' | 'set'
+  let qi = 0, tried = 0, right = 0;
+
+  const T = () => TOPICS[ti];
+  const litText = code => {
+    const k = code.replace('not', '');
+    const s = T()[k];
+    return code.indexOf('not') === 0 ? s.neg : s.t;
+  };
+  const litSym = code => code.indexOf('not') === 0 ? 'NOT ' + code.replace('not', '') : code;
+
+  function implSym() { return impl === 'PQ' ? 'P → Q' : 'Q → P'; }
+  function implText() {
+    const A = impl === 'PQ' ? T().P : T().Q;
+    const B = impl === 'PQ' ? T().Q : T().P;
+    return A.cond + ' ' + B.t;
+  }
+
+  /* ---------- 판정 ---------- */
+  function judge() {
+    const A = impl === 'PQ' ? 'P' : 'Q';   // 전건
+    const B = impl === 'PQ' ? 'Q' : 'P';   // 후건
+    if (p2 === concl) {
+      return {
+        ok: true, name: '동일 반복',
+        why: '전제 2를 그대로 결론으로 옮겼습니다. 논리적으로 틀린 말은 아니지만 <b>새로운 지식이 하나도 생기지 않습니다</b>. 추론의 목적은 모르던 사실을 알아내는 것이므로, 이런 형식은 쓸 일이 없습니다.'
+      };
+    }
+    if (p2 === A && concl === B) {
+      return {
+        ok: true, name: '긍정 논법 (전건 긍정 · modus ponens)',
+        why: '<b>전건</b>(→ 앞)이 참이라고 확인했으므로 <b>후건</b>(→ 뒤)도 반드시 참입니다. 아리스토텔레스의 삼단논법이 바로 이 구조이고, 규칙 기반 시스템의 <b>전방 추론 한 단계</b>도 이것입니다. 「IF 조건 THEN 결론」에서 조건이 만족되면 결론을 새 사실로 더하는 일과 똑같습니다.'
+      };
+    }
+    if (p2 === 'not' + B && concl === 'not' + A) {
+      return {
+        ok: true, name: '부정 논법 (후건 부정 · modus tollens)',
+        why: '후건이 거짓이면 전건도 거짓이어야 합니다. 만약 전건이 참이라면 전제 1에 따라 후건도 참이어야 하는데, 후건이 거짓이라고 확인했으니 전건은 참일 수 없습니다. <b>가설을 반박할 때</b> 쓰는 강력한 형식입니다.'
+      };
+    }
+    if (p2 === B && concl === A) {
+      return {
+        ok: false, name: '후건 긍정의 오류 (역의 오류)',
+        why: '<b>「A → B」는 「B → A」를 뜻하지 않습니다.</b> 화살표를 뒤집는 순간 다른 주장이 됩니다. B가 참인 <b>다른 원인</b>이 있을 수 있기 때문입니다. ' + T().converseEx
+      };
+    }
+    if (p2 === 'not' + A && concl === 'not' + B) {
+      return {
+        ok: false, name: '전건 부정의 오류 (이의 오류)',
+        why: '전제 1은 “전건이 참일 때 후건도 참”이라고만 말합니다. <b>전건이 거짓일 때는 아무 말도 하지 않습니다.</b> ' + T().inverseEx
+      };
+    }
+    return {
+      ok: false, name: '전제와 무관하거나 어긋나는 결론',
+      why: '전제 두 개로부터 이 결론을 이끌어 낼 수 없습니다. 전제 2와 결론이 서로 관계가 없거나, 오히려 전제 1과 어긋납니다. 타당한 형식은 <b>긍정 논법</b>(전건 → 후건)과 <b>부정 논법</b>(후건 부정 → 전건 부정) 두 가지뿐임을 기억하세요.'
+    };
+  }
+
+  /* ---------- 화면 ---------- */
+  const form = AI.h('div', { class: 'syl-form' });
+  const fb = AI.h('div', { class: 'q-feedback' });
+  const stats = AI.ui.stats([
+    { key: 'q', label: '문항' }, { key: 't', label: '시도' }, { key: 'r', label: '맞힘' }, { key: 'p', label: '정답률' }
+  ]);
+
+  const topicSeg = AI.ui.seg({
+    label: '주제',
+    options: TOPICS.map((t, i) => ({ value: i, label: t.name })),
+    value: 0,
+    onChange(v) { ti = Number(v); clearFb(); render(); }
+  });
+  const modeSeg = AI.ui.seg({
+    label: '모드',
+    options: [{ value: 'free', label: '자유 조합' }, { value: 'set', label: '연습 문제 8' }],
+    value: 'free',
+    onChange(v) { mode = v; clearFb(); if (mode === 'set') loadQ(0); render(); }
+  });
+
+  function mkSelect(label, opts, getter, setter) {
+    const sel = AI.h('select', {}, ...opts.map(o => AI.h('option', { value: o.v }, o.l)));
+    sel.addEventListener('change', () => { setter(sel.value); clearFb(); render(); });
+    const wrap = AI.h('div', { class: 'field' }, AI.h('label', { text: label }), sel);
+    return { wrap, sel, sync() { sel.value = getter(); } };
+  }
+
+  const LITS = () => [
+    { v: 'P', l: 'P — ' + T().P.t },
+    { v: 'notP', l: 'NOT P — ' + T().P.neg },
+    { v: 'Q', l: 'Q — ' + T().Q.t },
+    { v: 'notQ', l: 'NOT Q — ' + T().Q.neg }
+  ];
+
+  const sel1 = mkSelect('전제 1 (일반 규칙)', [{ v: 'PQ', l: 'P → Q' }, { v: 'QP', l: 'Q → P' }], () => impl, v => { impl = v; });
+  const sel2 = mkSelect('전제 2 (개별 사실)', LITS(), () => p2, v => { p2 = v; });
+  const sel3 = mkSelect('결론', LITS(), () => concl, v => { concl = v; });
+  const selBox = AI.h('div', { class: 'syl-sel' }, sel1.wrap, sel2.wrap, sel3.wrap);
+
+  function refreshOptions() {
+    [sel2, sel3].forEach(s => {
+      const keep = s.sel.value;
+      s.sel.innerHTML = '';
+      LITS().forEach(o => s.sel.appendChild(AI.h('option', { value: o.v }, o.l)));
+      s.sel.value = keep;
+    });
+  }
+
+  function render() {
+    refreshOptions();
+    sel1.sync(); sel2.sync(); sel3.sync();
+    const dis = (mode === 'set');
+    [sel1.sel, sel2.sel, sel3.sel].forEach(s => { s.disabled = dis; });
+
+    form.innerHTML =
+      '<div><span class="lbl">전제 1</span> <span class="sym">' + implSym() + '</span>' +
+      ' <span class="plain">· ' + AI.esc(implText()) + '</span></div>' +
+      '<div><span class="lbl">전제 2</span> <span class="sym">' + litSym(p2) + '</span>' +
+      ' <span class="plain">· ' + AI.esc(litText(p2)) + '</span></div>' +
+      '<div class="bar"></div>' +
+      '<div><span class="lbl">결론</span> <span class="sym">∴ ' + litSym(concl) + '</span>' +
+      ' <span class="plain">· ' + AI.esc(litText(concl)) + '</span></div>';
+
+    stats.set('q', mode === 'set' ? (qi + 1) + ' / ' + SET.length : '자유');
+    stats.set('t', tried);
+    stats.set('r', right);
+    stats.set('p', tried ? Math.round(right / tried * 100) + '%' : '–');
+  }
+
+  function clearFb() { fb.className = 'q-feedback'; fb.innerHTML = ''; nextBtn.style.display = 'none'; }
+
+  function answer(saysValid) {
+    const v = judge();
+    const correct = (saysValid === v.ok);
+    tried++;
+    if (correct) right++;
+    fb.className = 'q-feedback show ' + (correct ? 'ok' : 'no');
+    fb.innerHTML = '<b>' + (correct ? '✓ 잘 판정했어요' : '✗ 다시 생각해 봐요') + '</b><br>' +
+      '이 추론은 <b>' + (v.ok ? '타당' : '부당') + '</b>합니다 — ' + v.name + '<br>' + v.why;
+    render();
+    if (mode === 'set') nextBtn.style.display = qi < SET.length - 1 ? '' : 'none';
+  }
+
+  function loadQ(n) {
+    qi = n;
+    const s = SET[n];
+    ti = s.t; impl = s.impl; p2 = s.p2; concl = s.c;
+    topicSeg.set(ti);
+    clearFb();
+    render();
+  }
+
+  const nextBtn = AI.ui.btn('다음 문항 →', () => { if (qi < SET.length - 1) loadQ(qi + 1); }, 'ghost');
+  nextBtn.style.display = 'none';
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.h('div', { class: 'ctl' }, AI.h('label', {}, AI.h('span', { text: '모드' })), modeSeg.el),
+    AI.h('div', { class: 'ctl' }, AI.h('label', {}, AI.h('span', { text: '주제' })), topicSeg.el)
+  ));
+  body.appendChild(selBox);
+  body.appendChild(form);
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('👍 타당하다', () => answer(true), 'primary'),
+    AI.ui.btn('👎 부당하다', () => answer(false), 'primary'),
+    nextBtn,
+    AI.ui.btn('↺ 점수 초기화', () => { tried = 0; right = 0; clearFb(); render(); AI.toast('점수를 초기화했어요'); }, 'ghost')
+  ));
+  body.appendChild(stats.el);
+  body.appendChild(fb);
+
+  body.appendChild(AI.h('div', { class: 'box box-info', style: { marginTop: '14px' } },
+    AI.h('div', { class: 'box-label', text: '💡 판정하는 요령' }),
+    AI.h('p', { html: '전제 1의 화살표에서 <b>앞이 전건, 뒤가 후건</b>입니다. 타당한 형식은 딱 두 가지입니다 — <b>전건을 긍정</b>해서 후건을 얻거나(긍정 논법), <b>후건을 부정</b>해서 전건의 부정을 얻는 것(부정 논법)입니다. 그 밖의 조합, 특히 <b>후건을 긍정</b>하거나 <b>전건을 부정</b>하는 조합은 그럴듯해 보여도 모두 부당합니다.' })
+  ));
+
+  render();
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a1l5-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['데이터', '정보', '지식', '명제', '규칙', '지식 베이스', '추론 엔진', '전방 추론'],
+  sents: [
+    { text: '관찰이나 측정으로 얻은, 가공되지 않은 사실을 {0}(이)라고 한다.', answers: [['데이터', '자료']] },
+    { text: '데이터를 가공하여 의미를 부여한 것을 {0}(이)라 하고, 그것을 일반화·체계화한 것을 {1}(이)라고 한다.', answers: [['정보'], ['지식']] },
+    { text: '참 또는 거짓을 판별할 수 있는 문장을 {0}(이)라고 한다.', answers: [['명제']] },
+    { text: '“IF 조건 THEN 결론” 형태로 지식을 표현하는 방법을 {0}(이)라고 한다.', answers: [['규칙']] },
+    { text: '규칙과 사실이 저장되는 곳은 {0}이고, 이를 이용해 새 사실을 만들어 내는 부분은 {1}이다.', answers: [['지식 베이스'], ['추론 엔진']] },
+    { text: '가진 사실에서 출발해 발동할 수 있는 규칙을 찾아 새 사실을 계속 더해 가는 방식을 {0}(이)라고 한다.', answers: [['전방 추론']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '5차시 확인 문제',
+  items: [
+    {
+      type: 'mc',
+      q: '다음 중 <b>지식</b>에 해당하는 것은?',
+      choices: [
+        '서울 4월 3일, 대전 3월 31일, 제주 3월 22일',
+        '지역별 벚꽃 개화일을 표시한 지도',
+        '우리나라 벚꽃 개화 시기가 해마다 빨라지고 있다',
+        '올해 벚꽃 개화일을 측정한 기록지'
+      ],
+      answer: 2,
+      why: '①④는 가공되지 않은 <b>데이터</b>, ②는 의미가 부여된 <b>정보</b>입니다. ③처럼 여러 해의 정보를 묶어 <b>일반화한 규칙성</b>이 지식입니다. 지식은 다른 해, 다른 지역에도 적용해 볼 수 있는 형태를 갖춥니다.'
+    },
+    {
+      type: 'ox',
+      q: '명제 논리에서 <span class="mono">A → B</span>가 참이면 <span class="mono">B → A</span>도 반드시 참이다.',
+      answer: false,
+      why: '화살표의 방향을 뒤집은 것은 <b>완전히 다른 주장</b>입니다. “비가 오면 땅이 젖는다”가 참이어도 “땅이 젖으면 비가 왔다”는 참이 아닙니다. 물청소처럼 <b>다른 원인</b>이 있을 수 있기 때문입니다. 이 잘못을 <b>후건 긍정의 오류</b>라고 합니다.'
+    },
+    {
+      type: 'match',
+      q: '다음 설명을 알맞은 용어와 짝지으시오.',
+      left: [
+        '규칙과 사실이 저장되는 곳',
+        '지식 베이스를 이용해 새 사실을 만들어 내는 부분',
+        '사람이 사실을 넣고 결론을 받는 창구',
+        '명제 논리를 확장해 대상과 관계까지 표현하는 방법'
+      ],
+      right: ['지식 베이스', '추론 엔진', '사용자 인터페이스', '술어 논리'],
+      answer: [0, 1, 2, 3],
+      why: '전문가 시스템은 <b>사용자 인터페이스 · 추론 엔진 · 지식 베이스</b>의 세 부분으로 이루어집니다. 술어 논리는 지식 표현 방법 중 하나로, 「사람(소크라테스)」처럼 대상과 관계를 나타냅니다.'
+    },
+    {
+      type: 'order',
+      q: '규칙 <span class="mono">R1: IF 젖을 먹인다 THEN 포유류</span>, <span class="mono">R2: IF 포유류 AND 고기를 먹는다 THEN 육식 동물</span>이 있고, 사실로 「젖을 먹인다」와 「고기를 먹는다」가 주어졌다. <b>전방 추론</b>의 진행 순서를 배열하시오.',
+      items: [
+        '사실 집합에 「젖을 먹인다」, 「고기를 먹는다」가 들어 있다',
+        'R1의 조건이 만족되므로 R1이 발동한다',
+        '새 사실 「포유류」가 사실 집합에 더해진다',
+        'R2의 조건이 이제 모두 만족되므로 R2가 발동한다',
+        '새 사실 「육식 동물」이 더해지고, 더 발동할 규칙이 없어 종료한다'
+      ],
+      answer: [0, 1, 2, 3, 4],
+      why: '전방 추론은 <b>사실에서 출발</b>합니다. 처음에는 R2의 조건 「포유류」가 없으므로 R2가 발동하지 못합니다. R1이 먼저 「포유류」를 만들어 준 뒤에야 R2가 발동할 수 있습니다. 이렇게 <b>한 규칙의 결론이 다음 규칙의 조건이 되며 사슬이 이어집니다</b>.'
+    },
+    {
+      type: 'short',
+      q: '“비가 오면 땅이 젖는다. 땅이 젖지 않았다. 그러므로 비가 오지 않았다.” 이 <b>타당한</b> 추론 형식의 이름은 무엇인가?',
+      answer: ['부정 논법', '후건 부정', '모두스 톨렌스', 'modus tollens', '후건 부정 논법'],
+      placeholder: '예: ○○ ○○',
+      why: '<b>부정 논법(후건 부정)</b>입니다. 후건이 거짓이면 전건도 거짓이어야 합니다. 만약 비가 왔다면 땅이 젖어야 하는데 젖지 않았으니, 비는 오지 않은 것입니다. 가설을 <b>반박</b>할 때 쓰는 형식입니다.'
+    },
+    {
+      type: 'multi',
+      q: '규칙 기반 시스템(전문가 시스템)에 대한 설명으로 <b>옳은 것을 모두</b> 고르시오.',
+      choices: [
+        '판단의 근거를 규칙으로 제시할 수 있어 설명이 가능하다',
+        '데이터를 많이 모으면 규칙이 저절로 만들어진다',
+        '판단이 틀렸을 때 해당 규칙만 고쳐도 된다',
+        '“털이 조금 있다”처럼 애매한 사실을 다루기 어렵다',
+        '규칙이 많아지면 규칙끼리 충돌할 수 있다'
+      ],
+      answer: [0, 2, 3, 4],
+      why: '②가 틀렸습니다. 규칙 기반 방식에서는 <b>규칙을 사람이 직접 만들어 넣어야</b> 합니다. 데이터에서 규칙을 스스로 찾아내는 것은 2단원에서 배울 <b>기계학습</b>입니다. 바로 이 점 때문에 1980년대 전문가 시스템의 유행이 가라앉았습니다.'
+    },
+    {
+      type: 'mc',
+      q: '“먹고 싶은 요리를 먼저 정하고, 그 요리에 필요한 재료가 있는지 하나씩 확인한다.” 이 방식에 해당하는 추론은?',
+      choices: ['전방 추론', '후방 추론', '귀납적 추론', '맹목적 탐색'],
+      answer: 1,
+      why: '<b>후방 추론</b>입니다. 확인하고 싶은 <b>결론(가설)에서 출발</b>해 “이 결론을 내려면 어떤 조건이 필요한가”를 거꾸로 따라갑니다. 반대로 전방 추론은 “냉장고에 있는 재료로 만들 수 있는 요리를 찾기”에 해당합니다. 확인할 결론이 정해져 있을 때 후방 추론이 효율적입니다.'
+    },
+    {
+      type: 'ox',
+      q: '연역적 추론은 전제가 참이면 결론도 반드시 참이지만, 새로운 규칙을 발견하지는 못한다.',
+      answer: true,
+      why: '맞습니다. 연역적 추론은 이미 가진 규칙을 적용해 개별 사실을 이끌어 내므로 <b>결론이 확실</b>합니다. 대신 규칙 자체를 새로 만들어 내지는 못합니다. 여러 사례에서 일반 규칙을 찾아내는 것은 <b>귀납적 추론</b>이고, 기계학습이 바로 이쪽입니다. 다만 귀납은 결론이 반드시 참이라는 보장이 없습니다.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a1l5-note',
+  title: '추론 엔진 실험 기록',
+  prompt: '시뮬레이터 1에서 <b>사실 묶음을 바꿔 가며</b> 추론을 끝까지 돌려 보고, 시뮬레이터 2에서 <b>연습 문제 8문항</b>을 풀고 나서 아래를 채워 보세요.',
+  fields: [
+    { key: 'facts', label: '내가 입력한 사실 (한 사례를 골라 적기)', type: 'text', placeholder: '예: 털이 있다, 고기를 먹는다, 황갈색이다, 검은 점이 있다' },
+    { key: 'fired', label: '발동한 규칙 번호와 개수', type: 'text', placeholder: '예: R1 → R5 → R10 (3개)' },
+    { key: 'derived', label: '도출한 사실 개수 / 최종 결론', type: 'text', placeholder: '예: 3개 / 치타' },
+    { key: 'score', label: '삼단논법 판정기 점수 (맞힘 / 시도)', type: 'text', placeholder: '예: 7 / 8' },
+    {
+      key: 'chain', label: '추론 사슬을 글로 풀어 써 보세요 — 어떤 사실에서 어떤 규칙을 거쳐 결론에 이르렀나요?',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 「털이 있다」라는 사실에서 R1이 발동해 「포유류」가 나왔고, 그 「포유류」와 「고기를 먹는다」가 만나 R5가 …'
+    },
+    {
+      key: 'wrong', label: '삼단논법 판정기에서 <b>틀렸던 문항</b>을 하나 골라, 왜 그렇게 착각했는지와 올바른 이유를 써 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 「땅이 젖었으니 비가 왔다」가 맞다고 생각했다. 하지만 …'
+    },
+    {
+      key: 'myrule', label: '내가 직접 추가한 규칙과, 그 규칙이 발동하도록 하려면 어떤 사실이 필요한지 써 보세요.',
+      type: 'textarea', rows: 3,
+      placeholder: '예) IF 포유류 AND 헤엄을 잘 친다 THEN 물에 사는 포유류 — 이 규칙이 발동하려면 …'
+    },
+    {
+      key: 'limit', label: '규칙 기반 방식으로는 풀기 어려운 문제를 하나 들고, 왜 어려운지 설명해 보세요.',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 사진에서 고양이를 알아보는 문제 — 고양이의 생김새를 IF-THEN 규칙으로 적으려면 …'
+    }
+  ]
+});
+</script>
+</body>
+</html>

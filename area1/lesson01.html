@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1차시 기계도 생각할 수 있을까 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+/* ---- 튜링 테스트 판별 게임 ---- */
+.tt-stage { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-2); padding: 14px 16px; }
+.tt-meta { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: var(--ink-3); margin-bottom: 11px; }
+.tt-meta .tt-prog { margin-left: auto; font-family: var(--font-mono); font-size: 13.5px; font-weight: 800; color: var(--accent-ink); }
+.tt-chat { display: flex; flex-direction: column; gap: 9px; }
+.tt-row { display: flex; }
+.tt-row.a { justify-content: flex-end; }
+.tt-bub { max-width: min(80%, 520px); padding: 9px 13px; border-radius: 14px; font-size: 14.5px; line-height: 1.72; border: 1px solid var(--line); background: var(--surface); }
+.tt-row.q .tt-bub { border-bottom-left-radius: 4px; }
+.tt-row.a .tt-bub { background: var(--accent-soft); border-color: var(--accent-line); border-bottom-right-radius: 4px; }
+.tt-who { display: block; font-size: 11px; font-weight: 800; letter-spacing: .03em; color: var(--ink-4); margin-bottom: 2px; }
+.tt-cues { margin: 12px 0 0; padding-left: 1.25em; font-size: 14.2px; color: var(--ink-2); }
+.tt-cues li { margin: .35em 0; }
+/* ---- 접근 방법 분류기 ---- */
+.cls-tray { display: flex; flex-wrap: wrap; gap: 8px; padding: 11px; background: var(--surface-2); border: 1px dashed var(--line-strong); border-radius: var(--radius-sm); }
+.cls-tray .tray-label { width: 100%; font-size: 12px; font-weight: 700; color: var(--ink-3); margin-bottom: 2px; }
+.cls-card { font: inherit; font-size: 13.5px; font-weight: 650; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); cursor: pointer; }
+.cls-card:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.cls-card[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+:root[data-theme="dark"] .cls-card[aria-pressed="true"],
+:root:not([data-theme="light"]) .cls-card[aria-pressed="true"] { color: #10131a; }
+.cls-bins { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); margin-top: 14px; }
+.cls-bin { border: 2px dashed var(--line-strong); border-radius: var(--radius); background: var(--surface); padding: 12px; min-height: 140px; cursor: pointer; }
+.cls-bin:hover { border-color: var(--accent-line); }
+.cls-bin.armed { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.cls-bin h5 { font-size: 14.5px; margin: 0 0 3px; }
+.cls-bin .bd { font-size: 12px; color: var(--ink-3); line-height: 1.6; margin-bottom: 9px; }
+.cls-list { display: flex; flex-direction: column; gap: 6px; }
+.cls-item { display: block; width: 100%; text-align: left; font: inherit; font-size: 13px; font-weight: 650; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); cursor: pointer; }
+.cls-item:hover { border-color: var(--no-line); }
+.cls-item.ok { border-color: var(--ok); background: var(--ok-soft); }
+.cls-item.no { border-color: var(--no); background: var(--no-soft); }
+.cls-item .rz { display: block; font-size: 11.5px; font-weight: 600; color: var(--ink-3); margin-top: 3px; line-height: 1.58; }
+.cls-empty { font-size: 12.5px; color: var(--ink-4); }
+/* ---- 구조 그림 ---- */
+.svg-wrap { overflow-x: auto; padding: 4px 0 2px; }
+.svg-wrap svg { display: block; min-width: 560px; }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>모르는 사람과 채팅으로만 대화합니다. 얼굴도, 목소리도, 이름도 알 수 없습니다. 딱 <b>다섯 마디</b>만 주고받은 뒤 맞혀야 합니다. 상대는 <b>사람</b>일까요, <b>인공지능</b>일까요?</p>
+      <p>이번에는 질문을 직접 골라 봅시다. 아래 세 질문 가운데 상대의 정체를 가장 잘 드러낼 질문은 무엇일까요?</p>
+      <ul>
+        <li>“대한민국의 수도는 어디예요?”</li>
+        <li>“어제 저녁에 뭐 먹었어요? 맛은 어땠어요?”</li>
+        <li>“17 곱하기 43은 얼마예요?”</li>
+      </ul>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 좋은 질문의 조건을 생각해 보기</summary>
+        <div class="more-body">
+          첫 번째와 세 번째는 <b>사람도 기계도 똑같이 잘 답합니다</b>. 오히려 계산은 기계가 더 빠르고 정확하죠. 두 번째 질문은 다릅니다. <b>몸을 가지고 하루를 살아 본 적이 있는지</b>를 묻기 때문입니다. 좋은 질문은 답의 정확함이 아니라 <b>답할 수 있는 처지인지</b>를 겨냥합니다.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 지능이란 무엇인가 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>지능이란 무엇인가</h2></div>
+
+    <p>인공지능을 배우기 전에 “<b>지능</b>”이라는 말부터 정리해야 합니다. 인공지능은 결국 지능을 인공적으로 만든 것이니까요.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 · 지능</div>
+      <p><b class="blank" data-hint="새로운 상황을 이해하고 판단하여 문제를 푸는 능력">지능</b>은 새로운 상황을 이해하고, 그 상황에 맞는 합리적인 판단과 해결 방법을 이끌어 내는 지적 능력이다.</p>
+    </div>
+
+    <p>지능은 하나의 덩어리가 아닙니다. 화분의 잎이 노랗게 변한 상황 하나만 놓고 보아도 여러 능력이 동시에 작동합니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">👁️</span>
+        <h4>인식</h4>
+        <p>“잎이 노랗게 변했다.” 눈·귀로 들어온 이미지·소리·언어를 알아보고 이해하는 능력을 <b class="blank" data-hint="눈과 귀로 들어온 것을 알아보고 이해하는 능력">인식</b>이라고 합니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🔗</span>
+        <h4>추론</h4>
+        <p>“노랗게 변했다면 물이나 햇빛이 문제일 것이다.” 이미 아는 사실에서 새로운 사실을 이끌어 내는 것이 <b class="blank" data-hint="아는 사실에서 새로운 사실을 이끌어 내는 것">추론</b>입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">📈</span>
+        <h4>학습</h4>
+        <p>“지난번에도 이랬는데 그때는 물이 부족했다.” 경험한 예시에서 일반적인 규칙을 뽑아내는 것이 <b class="blank" data-a="학습|기계학습" data-hint="경험한 예시에서 일반적인 규칙을 뽑아내는 것">학습</b>입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🎯</span>
+        <h4>예측 · 문제 해결 · 생성</h4>
+        <p>“이렇게 하면 나아질 것이다”(예측), “가장 좋은 물의 양을 찾자”(문제 해결), “성장 일지를 써서 공유하자”(생성)로 이어집니다.</p>
+      </div>
+    </div>
+
+    <p>이 여섯 가지 — 인식, 추론, 학습, 예측, 문제 해결, 생성 — 를 <span class="term">지능적 특성</span>이라고 부릅니다. 인공지능 연구는 이 특성들을 하나씩 컴퓨터로 옮기는 과정이었습니다. 그래서 인공지능 기술의 이름을 보면 어떤 특성을 겨냥했는지 알 수 있습니다. 음성 인식은 인식, 전문가 시스템은 추론, 기계학습은 학습, 생성형 인공지능은 생성을 겨냥한 것입니다.</p>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 지능은 “정답을 아는 것”이 아니다</div>
+      <p>계산기는 사람보다 계산을 훨씬 잘하지만 우리는 계산기를 지능이 있다고 하지 않습니다. 반대로 사람은 계산이 느려도 “처음 보는 길에서 어디로 가야 할지” 판단합니다. 지능의 핵심은 <b>정답을 이미 아는 것</b>이 아니라 <b>처음 보는 상황에서 판단을 만들어 내는 것</b>입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. 인공지능의 정의와 구조 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>인공지능은 무엇을 흉내 내는가</h2></div>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 · 인공지능</div>
+      <p><b class="blank" data-a="인공지능|AI" data-hint="영어 약자로 AI">인공지능</b>(AI, Artificial Intelligence)은 인식·추론·학습·예측·문제 해결·생성과 같은 인간의 지능적인 판단과 행위를 컴퓨터로 흉내 내어 구현한 것이다.</p>
+    </div>
+
+    <p>‘인공지능’이라는 말은 1956년 미국 다트머스 대학교에서 열린 학회에서 존 매카시가 처음 사용했습니다. 그때부터 지금까지 인공지능의 목표는 한 문장으로 요약됩니다. <b>사람이 판단해야만 했던 일을 기계가 판단하게 만드는 것</b>입니다.</p>
+
+    <h3 class="sub-head">인공지능 시스템의 구조</h3>
+    <p>인공지능이 들어 있는 컴퓨터 시스템을 <span class="term">인공지능 시스템</span>이라고 합니다. 자율주행 자동차, 챗봇, 상품 추천 시스템, 의료 영상 진단 시스템이 모두 인공지능 시스템입니다. 겉모습은 저마다 다르지만 속을 열어 보면 구조가 놀랍도록 비슷합니다.</p>
+
+    <div class="svg-wrap">
+      <svg viewBox="0 0 720 200" role="img" aria-label="인공지능 시스템의 구조: 입력에서 판단을 거쳐 출력으로 이어지고, 결과가 다시 입력으로 되돌아온다">
+        <defs>
+          <marker id="ah1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path>
+          </marker>
+        </defs>
+        <rect x="14" y="42" width="188" height="92" rx="14" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="2"></rect>
+        <text x="108" y="72" text-anchor="middle" font-size="17" font-weight="800" fill="var(--accent-ink)">① 입력</text>
+        <text x="108" y="97" text-anchor="middle" font-size="13" fill="var(--ink-2)">센서 · 데이터</text>
+        <text x="108" y="117" text-anchor="middle" font-size="12" fill="var(--ink-3)">카메라, 마이크, 표, 문장</text>
+
+        <rect x="266" y="42" width="188" height="92" rx="14" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2.5"></rect>
+        <text x="360" y="72" text-anchor="middle" font-size="17" font-weight="800" fill="var(--accent-ink)">② 판단</text>
+        <text x="360" y="97" text-anchor="middle" font-size="13" fill="var(--ink-2)">모델 · 탐색 · 추론</text>
+        <text x="360" y="117" text-anchor="middle" font-size="12" fill="var(--ink-3)">인공지능의 심장</text>
+
+        <rect x="518" y="42" width="188" height="92" rx="14" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="2"></rect>
+        <text x="612" y="72" text-anchor="middle" font-size="17" font-weight="800" fill="var(--accent-ink)">③ 출력</text>
+        <text x="612" y="97" text-anchor="middle" font-size="13" fill="var(--ink-2)">행동 · 결과</text>
+        <text x="612" y="117" text-anchor="middle" font-size="12" fill="var(--ink-3)">조향, 답변, 추천 목록</text>
+
+        <line x1="206" y1="88" x2="260" y2="88" stroke="var(--accent)" stroke-width="2.5" marker-end="url(#ah1)"></line>
+        <line x1="458" y1="88" x2="512" y2="88" stroke="var(--accent)" stroke-width="2.5" marker-end="url(#ah1)"></line>
+        <path d="M612,140 L612,172 L108,172 L108,140" fill="none" stroke="var(--ink-4)" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#ah1)"></path>
+        <text x="360" y="190" text-anchor="middle" font-size="12.5" fill="var(--ink-3)">결과를 다시 데이터로 모아 성능을 개선한다 (되먹임)</text>
+      </svg>
+    </div>
+
+    <p>먼저 <b class="blank" data-a="센서|sensor" data-hint="빛·소리·거리를 재어 디지털 값으로 바꾸는 부품">센서</b>나 이미 모아 둔 데이터로 세상의 상태를 <b>입력</b>받습니다. 다음으로 판단 규칙을 담은 <b class="blank" data-a="모델|model" data-hint="판단 규칙을 담고 있는 것 · 학습의 결과물">모델</b>이 그 입력을 보고 결정을 내립니다. 마지막으로 그 결정을 행동이나 답변으로 <b>출력</b>합니다. 자율주행 자동차라면 카메라·라이다(입력) → 주행 판단 모델(판단) → 조향과 제동(출력)이 됩니다.</p>
+
+    <h3 class="sub-head">인간 지능과 인공지능은 어떻게 다른가</h3>
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>같은 일을 하지만 방식이 다르다 — 비교하며 읽어 보세요.</caption>
+        <thead><tr><th>구분</th><th>인간의 지능</th><th>인공지능</th></tr></thead>
+        <tbody>
+          <tr><td><b>배우는 방법</b></td><td>몇 개의 예시와 설명만으로 감을 잡는다</td><td>보통 수천~수억 개의 데이터가 필요하다</td></tr>
+          <tr><td><b>속도와 정확성</b></td><td>느리고 실수가 잦다</td><td class="good">엄청나게 빠르고 지치지 않는다</td></tr>
+          <tr><td><b>다루는 범위</b></td><td class="good">한 사람이 요리·운전·대화를 모두 한다</td><td>주로 정해진 한 가지 일만 잘한다</td></tr>
+          <tr><td><b>맥락 이해</b></td><td class="good">농담·비꼬기·상황의 분위기를 읽는다</td><td>표면적 패턴에 의존해 자주 놓친다</td></tr>
+          <tr><td><b>판단의 근거</b></td><td>“왜 그렇게 생각했는지” 말로 설명한다</td><td class="bad">근거를 설명하기 어려운 경우가 많다</td></tr>
+          <tr><td><b>몸과 경험</b></td><td class="good">몸으로 겪은 기억이 판단에 쓰인다</td><td>몸이 없어 직접 겪은 경험이 없다</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 흔한 오해</div>
+      <p>“인공지능은 사람보다 똑똑하다”거나 “인공지능은 사람보다 멍청하다”는 말은 둘 다 정확하지 않습니다. <b>비교의 축이 다릅니다.</b> 속도·규모·일관성에서는 인공지능이 압도적이고, 처음 보는 상황에 대한 융통성·맥락 이해·책임에서는 사람이 앞섭니다. 그래서 두 지능은 경쟁 관계가 아니라 <b>역할을 나누는 관계</b>로 보아야 합니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. 기계도 생각할 수 있을까 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>기계도 생각할 수 있을까</h2></div>
+
+    <p>“기계가 생각할 수 있는가?”라는 질문에는 함정이 있습니다. ‘생각’이 무엇인지부터 사람마다 다르게 쓰기 때문입니다. 1950년, 영국의 수학자 <b>앨런 튜링</b>은 이 질문을 아예 바꿔 버렸습니다. “기계가 생각하는가?”가 아니라 <b>“대화만으로 사람과 구별할 수 없는가?”</b>로요.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 · 튜링 테스트</div>
+      <p><b class="blank" data-a="튜링 테스트|튜링테스트|Turing test" data-hint="제안한 사람의 이름이 붙은 검사">튜링 테스트</b>는 질문자가 벽 너머의 상대와 문자로만 대화한 뒤, 그 상대가 사람인지 컴퓨터인지 구별하지 못하면 그 컴퓨터를 ‘지능적이다’라고 판정하는 검사이다. 튜링은 1950년 논문 『컴퓨팅 기계와 지능』에서 이를 <b class="blank" data-a="이미테이션 게임|모방 게임|imitation game" data-hint="영화 제목으로도 쓰인 이름 · 흉내 내기 게임">이미테이션 게임</b>이라고 불렀다.</p>
+    </div>
+
+    <p>진행 방식은 단순합니다. 서로 분리된 방에 사람 한 명과 컴퓨터 한 대가 들어갑니다. 바깥의 질문자는 안에 누가 있는지 모른 채 문자로 질문하고 답을 받습니다. 그리고 어느 쪽이 컴퓨터인지 맞힙니다. 질문자가 <b>충분히 자주 틀린다면</b> 그 컴퓨터는 테스트를 통과합니다.</p>
+
+    <p>이 발상의 힘은 <b>측정할 수 있게 만들었다</b>는 데 있습니다. “생각한다”는 애매한 말을 “구별되지 않는다”는 관찰 가능한 조건으로 바꾸었으니까요. 하지만 바로 이 지점이 한계이기도 합니다.</p>
+
+    <h3 class="sub-head">중국어 방 — 통과했다고 이해한 것은 아니다</h3>
+    <p>1980년 철학자 <b>존 설</b>은 튜링 테스트가 지능을 판정하는 기준이 될 수 없다고 반박하며 <b class="blank" data-a="중국어 방|중국어방|Chinese room" data-hint="어떤 나라 말의 이름 + 방">중국어 방</b>이라는 사고 실험을 제안했습니다.</p>
+
+    <div class="box box-info">
+      <div class="box-label">🧠 중국어 방 사고 실험</div>
+      <p>방 안에 중국어를 전혀 모르는 사람이 앉아 있습니다. 문틈으로 중국어 질문이 적힌 종이가 들어옵니다. 방 안에는 “이런 글자가 들어오면 저런 글자를 내보내라”는 <b>규칙책</b>과 글자 카드 상자가 있습니다. 그는 뜻은 하나도 모른 채 규칙만 따라 카드를 골라 밖으로 내보냅니다.</p>
+      <p>밖에서 보면 방 안의 사람은 중국어를 유창하게 하는 것처럼 보입니다. 그러나 <b>그는 중국어를 한 글자도 이해하지 못합니다.</b> 존 설의 결론은 이렇습니다. 규칙에 따라 그럴듯한 답을 내놓는 것과 그 뜻을 이해하는 것은 <b>다른 일</b>이며, 따라서 튜링 테스트를 통과했다고 해서 지능이나 이해를 가졌다고 판정할 수는 없습니다.</p>
+    </div>
+
+    <p>정리하면 튜링 테스트의 한계는 세 가지입니다. 첫째, <b>사람을 속이는 능력</b>을 재는 것이지 이해나 의식을 재는 것이 아닙니다. 둘째, 질문자의 실력과 대화 시간에 따라 결과가 달라져 <b>객관적이지 않습니다</b>. 셋째, 오늘날의 인공지능은 오히려 <b>사람보다 지나치게 정확해서</b> 들키기도 합니다. 그래서 요즘은 “사람 흉내를 얼마나 잘 내는가”보다 “<b>맡긴 문제를 얼마나 잘 푸는가</b>”로 성능을 평가합니다.</p>
+
+    <h3 class="sub-head">약인공지능과 강인공지능</h3>
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">🔧</span>
+        <h4>약인공지능</h4>
+        <p>정해진 한 가지 일만 잘 처리하는 인공지능을 <b class="blank" data-a="약인공지능|약한 인공지능|약 인공지능" data-hint="한 가지 일만 잘하는, 오늘날 실제로 쓰이는 인공지능">약인공지능</b>이라고 합니다. 번역기, 얼굴 인식, 추천 시스템, 바둑 프로그램이 모두 여기에 속합니다. <b>오늘날 우리가 쓰는 인공지능은 전부 약인공지능입니다.</b></p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🌌</span>
+        <h4>강인공지능</h4>
+        <p>사람처럼 스스로 이해하고 어떤 분야의 문제든 다룰 수 있는 인공지능을 <b class="blank" data-a="강인공지능|강한 인공지능|강 인공지능" data-hint="사람처럼 모든 분야를 다루는, 아직 존재하지 않는 인공지능">강인공지능</b>이라고 합니다. 아직 <b>실현되지 않았고</b>, 가능한지조차 논쟁 중입니다.</p>
+      </div>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 오해 주의</div>
+      <p>생성형 인공지능이 시를 쓰고 코드를 짜는 것을 보고 “이제 강인공지능이 왔다”고 말하기 쉽습니다. 그러나 아무리 여러 일을 해내더라도 <b>스스로 목표를 세우고 이해하며 책임을 지는 수준</b>에는 이르지 못했습니다. 여러 가지를 잘하는 것과 이해하는 것은 다릅니다. 이것이 바로 중국어 방이 던진 질문입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4. 인공지능을 구현하는 세 가지 접근 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>인공지능을 구현하는 세 가지 접근</h2></div>
+
+    <p>“지능적으로 판단하게 만든다”는 목표는 하나지만, 그 목표에 이르는 길은 크게 세 가닥입니다. 이 세 가닥이 이 과목의 지도이기도 합니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>세 가지 접근 — 무엇을 사람이 정해 주고, 무엇을 기계가 알아내는가</caption>
+        <thead><tr><th>접근</th><th>핵심 생각</th><th>사람이 하는 일</th><th>대표 사례</th><th>이 과목에서</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>탐색</b></td>
+            <td>가능한 경우를 <b>따져 보며</b> 목표까지의 길을 찾는다</td>
+            <td>상태와 연산자, 목표를 정의한다</td>
+            <td>내비게이션 경로, 퍼즐, 바둑의 다음 수</td>
+            <td>1단원 2~4차시</td>
+          </tr>
+          <tr>
+            <td><b>추론</b></td>
+            <td>사실과 규칙에서 <b>새로운 사실을 이끌어 낸다</b></td>
+            <td>규칙(지식)을 직접 써 준다</td>
+            <td>의료 진단 전문가 시스템, 세금 계산</td>
+            <td>1단원 5차시</td>
+          </tr>
+          <tr>
+            <td><b>학습</b></td>
+            <td>데이터에서 <b>규칙성을 스스로 찾아낸다</b></td>
+            <td>데이터를 모으고 다듬는다</td>
+            <td>스팸 분류, 얼굴 인식, 추천, 번역</td>
+            <td>2단원 전체</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>첫째는 <b class="blank" data-hint="수많은 경우 가운데 목표까지의 길을 찾아가는 일">탐색</b>입니다. 규칙이 분명하고 경우의 수를 셀 수 있을 때 강력합니다. 지도 앱이 최단 경로를 찾는 방식이 바로 이것입니다. 둘째는 <span class="term">추론</span>입니다. 전문가의 지식을 “만약 ~이면 ~이다” 형태의 규칙으로 옮겨 적고, 그 규칙을 이어 붙여 결론을 냅니다. 셋째는 <b class="blank" data-a="기계학습|머신러닝" data-hint="데이터에서 규칙을 스스로 찾게 하는 방법">기계학습</b>입니다. 규칙을 사람이 쓰기 어려울 때 — 예를 들어 “고양이 사진을 알아보는 규칙”처럼 말로 옮기기 힘든 일에 씁니다.</p>
+
+    <div class="box box-ok">
+      <div class="box-label">✅ 실제로는 섞어 쓴다</div>
+      <p>알파고는 다음 수를 고를 때 <b>탐색</b>으로 앞을 내다보고, 어느 수가 유망한지 판단할 때는 <b>학습</b>한 신경망을 씁니다. 자율주행 자동차도 사물을 알아볼 때는 학습, 경로를 잡을 때는 탐색, 교통 법규를 지킬 때는 규칙(추론)을 씁니다. <b>세 접근은 경쟁자가 아니라 도구 상자입니다.</b></p>
+    </div>
+
+    <h3 class="sub-head">분야별 활용 사례 비교</h3>
+    <p>같은 인공지능 기술도 분야에 따라 겨냥하는 지능적 특성과 얻는 이득이 다릅니다. 아래 표를 비교하며 읽어 보고, 마지막 칸의 “주의할 점”에 특히 눈길을 두세요.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>인공지능 활용 사례의 비교·분석 — 성취기준 12인기01-01</caption>
+        <thead><tr><th>분야 · 사례</th><th>주로 쓰는 지능적 특성</th><th>접근</th><th>사람에게 주는 이득</th><th>주의할 점</th></tr></thead>
+        <tbody>
+          <tr><td><b>의료</b><br>영상 판독 보조</td><td>인식 · 예측</td><td>학습</td><td>사람이 놓치기 쉬운 미세한 병변을 표시해 준다</td><td>최종 판단과 책임은 의사에게 있다</td></tr>
+          <tr><td><b>교통</b><br>자율주행</td><td>인식 · 문제 해결</td><td>학습 + 탐색</td><td>사고와 정체를 줄인다</td><td>돌발 상황에서의 판단 기준과 사고 책임</td></tr>
+          <tr><td><b>언어</b><br>기계 번역</td><td>인식 · 생성</td><td>학습</td><td>언어의 장벽을 낮춘다</td><td>미묘한 어감·전문 용어 오역</td></tr>
+          <tr><td><b>문화</b><br>생성형 인공지능</td><td>생성</td><td>학습</td><td>글·그림·소리를 빠르게 만들어 준다</td><td>사실이 아닌 내용을 그럴듯하게 만들어 낸다, 저작권</td></tr>
+          <tr><td><b>상거래</b><br>추천 시스템</td><td>예측</td><td>학습</td><td>취향에 맞는 것을 빨리 찾아 준다</td><td>비슷한 것만 보게 되는 편향, 개인정보</td></tr>
+          <tr><td><b>행정</b><br>규칙 기반 심사</td><td>추론</td><td>추론</td><td>같은 기준을 일관되게 적용한다</td><td>규칙에 없는 예외 상황을 다루지 못한다</td></tr>
+          <tr><td><b>환경</b><br>위성 영상 산림 감시</td><td>인식 · 예측</td><td>학습</td><td>사람이 갈 수 없는 넓은 지역을 감시한다</td><td>구름·계절에 따른 오탐</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>표를 세로로 훑어보면 공통점이 보입니다. 인공지능은 <b>넓고 반복적이며 빠른 판단</b>에 강하고, <b>드물고 책임이 무거운 판단</b>에는 사람의 확인이 필요합니다. 이 경계선을 어디에 그을지가 3단원에서 다룰 문제입니다.</p>
+  </section>
+
+  <!-- ============ 5. 시뮬레이터 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>직접 판별해 보기</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim1"></div>
+    <div id="sim2"></div>
+  </section>
+
+  <!-- ============ 6. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 7. 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 8. 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>활동 기록</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 튜링 테스트를 대신하는 요즘의 평가 방법</summary>
+      <div class="more-body">
+        <p>오늘날 인공지능의 성능은 “사람을 속였는지”가 아니라 <b>정해진 문제를 얼마나 정확히 푸는지</b>로 평가합니다. 이렇게 성능을 재기 위해 만든 표준 문제 모음을 <b>벤치마크</b>라고 합니다. 예를 들어 이미지 분류라면 수만 장의 사진을 맞힌 비율을, 번역이라면 사람이 번역한 문장과의 유사도를 점수로 냅니다.</p>
+        <p>또 하나 중요한 흐름은 <b>과정에 대한 평가</b>입니다. 답이 맞았는지뿐 아니라 “<b>왜</b> 그렇게 판단했는지 설명할 수 있는가”, “특정 집단에게 불리하게 작동하지 않는가”를 함께 봅니다. 앞의 것은 2단원(성능 평가), 뒤의 것은 3단원(인공지능 윤리)에서 다룹니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> 최신 인공지능은 어디까지 왔을까</summary>
+      <div class="more-body">
+        <ul>
+          <li><b>생성형 인공지능</b> — 문장·그림·음악·코드를 만들어 냅니다. 그럴듯하지만 사실이 아닌 내용을 만들어 내는 현상(환각)이 있어 <b>반드시 사실 확인</b>이 필요합니다.</li>
+          <li><b>자율주행</b> — 정해진 구간의 셔틀·화물 운송에서는 이미 운행 중이지만, 모든 도로에서 사람 없이 달리는 단계에는 이르지 못했습니다.</li>
+          <li><b>의료 영상 판독</b> — 특정 질환의 판독 보조에서는 전문의와 견줄 만한 정확도를 보이지만, 학습에 쓰인 병원의 장비·환자 구성과 다른 곳에서는 성능이 떨어질 수 있습니다.</li>
+          <li><b>기계 번역</b> — 일상 문장은 매우 자연스럽지만, 법률·의학처럼 용어 하나가 결과를 바꾸는 분야에서는 전문가 감수가 필수입니다.</li>
+          <li><b>단백질 구조 예측</b> — 사람이 수년 걸려 밝히던 구조를 몇 분 안에 예측해, 신약 개발의 속도를 크게 끌어올렸습니다.</li>
+        </ul>
+        <p>공통점을 찾아보세요. <b>범위를 좁게 정해 준 문제</b>에서는 놀라운 성능을 내고, <b>범위가 열려 있고 책임이 무거운 문제</b>에서는 사람과 함께 일합니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 다음 차시로 — 왜 ‘탐색’부터 배울까?</summary>
+      <div class="more-body">
+        <p>세 접근 가운데 <b>탐색</b>이 가장 먼저 나오는 이유는 두 가지입니다. 첫째, 인공지능이 “판단한다”는 말의 뜻이 가장 또렷하게 드러납니다. 가능한 경우를 늘어놓고 그중에서 고르는 것, 그게 판단입니다. 둘째, 탐색을 이해하면 나머지 둘이 쉬워집니다. 추론도 결국 규칙을 이어 붙이며 결론을 <b>찾아가는</b> 일이고, 기계학습도 오차가 가장 작은 모델을 <b>찾아가는</b> 일이기 때문입니다.</p>
+        <p>다음 차시에서는 “길찾기, 퍼즐, 일정 짜기, 게임”처럼 서로 달라 보이는 문제들이 모두 <b>상태 공간에서 길 찾기</b>라는 하나의 틀로 바뀌는 것을 확인합니다.</p>
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 1, lesson: 1,
+  title: '기계도 생각할 수 있을까',
+  sub: '인공지능의 원리와 지능적 판단',
+  lead: '지능이란 무엇인지 따져 보고, 그것을 기계로 옮긴 <b>인공지능</b>이 어떻게 판단을 만들어 내는지 살펴봅니다. 튜링 테스트로 직접 사람과 인공지능을 가려내 보고, 실생활 사례를 <b>탐색·추론·학습</b>의 세 접근으로 분류해 봅니다.',
+  standards: ['12인기01-01'],
+  keywords: ['인공지능', '지능적 판단', '튜링 테스트', '약인공지능', '강인공지능'],
+  goals: [
+    '지능적 특성(인식·추론·학습·예측·문제 해결·생성)을 들어 인공지능의 개념을 설명할 수 있다.',
+    '튜링 테스트의 원리와 한계를 중국어 방 논변과 연결하여 설명할 수 있다.',
+    '실생활과 여러 학문 분야의 인공지능 활용 사례를 <b>탐색·추론·학습</b>의 관점에서 비교·분석할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 시뮬레이터 1: 튜링 테스트 판별 게임 ===================== -->
+<script>
+(function () {
+  const body = AI.sim.panel('#sim1', {
+    title: '튜링 테스트 판별 게임',
+    tag: '6문항',
+    desc: '문자 대화 여섯 편을 차례로 보여 줍니다. 각 대화의 <b>답하는 쪽</b>이 사람인지 인공지능인지 판별해 보세요. 고르면 바로 <b>왜 그렇게 판단할 수 있는지</b> 해설이 나옵니다. 정답률보다 <b>근거를 찾는 연습</b>이 중요합니다.'
+  });
+
+  /* ---- 대화 자료 (판별 근거를 일부러 심어 두었다) ---- */
+  const CASES = [
+    {
+      who: 'human',
+      title: '대화 A',
+      turns: [
+        { q: '어제 저녁에 뭐 먹었어요?', a: '편의점 삼각김밥ㅋㅋ 학원 가느라 급하게 먹었어요' },
+        { q: '맛은 어땠어요?', a: '김치볶음밥맛이었는데 그거 원래 별로... 근데 배고파서 그냥 먹음' },
+        { q: '학원은 몇 시에 끝나요?', a: '10시요 ㅠㅠ 진짜 힘들어요. 님은 학원 다니세요?' },
+        { q: '저는 안 다녀요.', a: '와 부럽다 진짜' }
+      ],
+      why: '<b>사람</b>입니다. 근거가 셋입니다. ① “삼각김밥 김치볶음밥맛”처럼 <b>아주 사소하고 구체적인 개인 경험</b>을 말합니다. ② 오타·줄임말·감정 표현(ㅠㅠ, 부럽다)이 자연스럽게 섞입니다. ③ <b>질문을 되묻습니다</b>(“님은 학원 다니세요?”). 되묻기는 대화의 주인이 되려는 행동으로, 몸으로 하루를 살아 본 상대에게서 잘 나타납니다.'
+    },
+    {
+      who: 'ai',
+      title: '대화 B',
+      turns: [
+        { q: '어제 저녁에 뭐 먹었어요?', a: '저녁 식사는 하루의 피로를 풀어 주는 소중한 시간입니다. 균형 잡힌 식단은 건강에 큰 도움이 됩니다.' },
+        { q: '그러니까 무엇을 먹었는지 궁금해요.', a: '특정한 음식을 지정하기는 어렵지만, 일반적으로 밥과 국, 반찬으로 구성된 한식이 널리 사랑받습니다.' },
+        { q: '지금 창밖에 비가 오나요?', a: '날씨는 지역에 따라 다르므로 기상청 정보를 확인하시는 것이 좋습니다.' }
+      ],
+      why: '<b>인공지능</b>입니다. 세 번 모두 “내가 겪은 일”을 말하지 못하고 <b>일반적인 설명으로 비껴갑니다</b>. 인공지능은 몸이 없어 어제 저녁을 먹은 적도, 창밖을 본 적도 없습니다. 그래서 개인 경험을 묻는 질문은 <b>지식의 양으로는 메울 수 없는 빈칸</b>을 드러냅니다. 문장이 지나치게 매끄럽고 어조가 일정한 것도 단서입니다.'
+    },
+    {
+      who: 'ai',
+      title: '대화 C',
+      turns: [
+        { q: '오늘 아침에 뭐 하셨어요?', a: '오늘 아침에는 일찍 일어나 창문을 열고 상쾌한 공기를 마셨어요. 따뜻한 커피를 마시며 하루를 계획했습니다.' },
+        { q: '창밖에 뭐가 보였어요?', a: '푸른 하늘과 나무들이 보였고, 새들이 지저귀는 소리가 들려 기분이 좋았습니다.' },
+        { q: '오늘은 새벽부터 폭우가 쏟아졌는데요?', a: '비 오는 날의 창밖 풍경도 참 아름답지요. 빗소리는 마음을 편안하게 해 줍니다.' }
+      ],
+      why: '<b>인공지능</b>입니다. 이번에는 사람처럼 꾸며 답하지만 <b>앞뒤가 어긋납니다</b>. “푸른 하늘을 봤다”고 했는데 폭우였다는 지적을 받고도 <b>모순을 알아채거나 정정하지 않고</b> 그럴듯한 말로 넘어갑니다. 실제로 창밖을 본 적이 없으니 자기 말이 틀렸다는 것조차 확인할 수 없는 것입니다. 사람이라면 “아 그거 어제였나?” 하고 고쳤을 자리입니다.'
+    },
+    {
+      who: 'human',
+      title: '대화 D',
+      turns: [
+        { q: '작년 여름에 어디 여행 갔어요?', a: '강릉이요! 아 아니다 그건 재작년... 작년엔 부산 갔어요' },
+        { q: '부산에서 뭐가 제일 좋았어요?', a: '광안대교 야경이요. 근데 솔직히 숙소 에어컨이 고장나서 기억이 그렇게 좋지는 않아요' },
+        { q: '다시 가고 싶어요?', a: '음... 에어컨 되는 데면요 ㅎㅎ' }
+      ],
+      why: '<b>사람</b>입니다. ① 기억을 잘못 떠올렸다가 <b>스스로 고칩니다</b>(“아 아니다 그건 재작년”). 이런 자기 수정은 실제 기억을 더듬을 때 나타납니다. ② “제일 좋았던 것”을 물었는데 <b>에어컨 고장</b>이라는 예상 밖의 불만을 덧붙입니다. 사람의 기억은 좋은 것과 나쁜 것이 뒤섞여 있습니다. 매끄러움이 아니라 <b>불완전함</b>이 사람다움의 단서입니다.'
+    },
+    {
+      who: 'human',
+      title: '대화 E',
+      turns: [
+        { q: '당신은 사람인가요?', a: '그걸 어떻게 증명해요 ㅋㅋ 님은요?' },
+        { q: '저는 사람이에요.', a: '그럼 저도요. 근데 이런 거 물으면 좀 기분 이상하네요. 제가 로봇 같아 보여요?' },
+        { q: '아니요, 그냥 확인하는 거예요.', a: '아 다행. 저 아까 라면 먹다가 국물을 키보드에 흘려서 지금 ㅋ 키가 잘 안 눌려요 ㅜ' }
+      ],
+      why: '<b>사람</b>입니다. ① 질문을 되받아 <b>상대를 시험합니다</b>. ② “기분 이상하다”처럼 대화 자체에 대한 감정을 드러냅니다. ③ “국물을 흘려서 키가 안 눌린다”는 <b>몸과 물건이 있어야만 생기는 사고</b>를 말합니다. 인공지능에게는 라면도 키보드도 없습니다. 이렇게 <b>물리적 세계에 얽힌 사소한 사고</b>는 흉내 내기 가장 어려운 부분입니다.'
+    },
+    {
+      who: 'ai',
+      title: '대화 F',
+      turns: [
+        { q: '17 곱하기 43은 얼마예요?', a: '731입니다.' },
+        { q: '그럼 731의 제곱은요?', a: '534,361입니다.' },
+        { q: '계산이 지겹지 않아요?', a: '저는 피로를 느끼지 않으므로 계속 도와드릴 수 있습니다. 추가로 궁금한 계산이 있으신가요?' },
+        { q: '89237 곱하기 4413은요?', a: '393,802,881입니다.' }
+      ],
+      why: '<b>인공지능</b>입니다. 흥미로운 점은 <b>너무 잘해서 들켰다</b>는 것입니다. 사람은 731의 제곱을 즉답하지 못하고 “잠깐만”이라고 말합니다. 또 “피로를 느끼지 않는다”며 <b>지치지 않음</b>을 스스로 밝히고, 답변 형식이 매번 똑같습니다. 튜링 테스트를 통과하려면 인공지능은 오히려 <b>일부러 틀리고 망설여야</b> 합니다. 이것이 이 테스트의 이상한 점입니다.'
+    }
+  ];
+
+  const LABEL = { human: '사람', ai: '인공지능' };
+
+  let idx = 0, correct = 0;
+  let answered = new Array(CASES.length).fill(null);
+
+  const stage = AI.h('div', { class: 'tt-stage' });
+  const fb = AI.h('div', { class: 'q-feedback' });
+  const stats = AI.ui.stats([
+    { key: 'n', label: '진행' }, { key: 'c', label: '맞힌 개수' }, { key: 'p', label: '정답률' }
+  ]);
+
+  const btnHuman = AI.ui.btn('🙋 사람', () => choose('human'), 'primary');
+  const btnAI = AI.ui.btn('🤖 인공지능', () => choose('ai'), 'primary');
+  const btnNext = AI.ui.btn('다음 대화 →', next);
+  const btnReset = AI.ui.btn('↺ 다시하기', reset, 'ghost');
+  const controls = AI.h('div', { class: 'sim-controls' }, btnHuman, btnAI, btnNext, btnReset);
+
+  body.appendChild(stage);
+  body.appendChild(controls);
+  body.appendChild(fb);
+  body.appendChild(stats.el);
+
+  const summary = AI.h('div', { class: 'box box-info', style: { display: 'none', marginTop: '16px' } });
+  body.appendChild(summary);
+
+  function renderStage() {
+    stage.innerHTML = '';
+    if (idx >= CASES.length) {
+      stage.appendChild(AI.h('p', { style: { margin: '0', color: 'var(--ink-3)' }, text: '여섯 대화를 모두 판별했습니다. 아래 정리를 읽고, 다시하기로 한 번 더 해 보세요.' }));
+      return;
+    }
+    const c = CASES[idx];
+    stage.appendChild(AI.h('div', { class: 'tt-meta' },
+      AI.h('span', { text: '📨 ' + c.title + ' — 벽 너머의 상대와 문자로만 대화합니다' }),
+      AI.h('span', { class: 'tt-prog', text: (idx + 1) + ' / ' + CASES.length })
+    ));
+    const chat = AI.h('div', { class: 'tt-chat' });
+    c.turns.forEach(t => {
+      chat.appendChild(AI.h('div', { class: 'tt-row q' },
+        AI.h('div', { class: 'tt-bub' }, AI.h('span', { class: 'tt-who', text: '질문자' }), t.q)));
+      chat.appendChild(AI.h('div', { class: 'tt-row a' },
+        AI.h('div', { class: 'tt-bub' }, AI.h('span', { class: 'tt-who', text: '상대 ?' }), t.a)));
+    });
+    stage.appendChild(chat);
+  }
+
+  function refresh() {
+    const done = answered.filter(x => x !== null).length;
+    stats.set('n', Math.min(idx + 1, CASES.length) + ' / ' + CASES.length);
+    stats.set('c', correct);
+    stats.set('p', done ? Math.round(correct / done * 100) + '%' : '–');
+    const isAnswered = idx < CASES.length && answered[idx] !== null;
+    btnHuman.disabled = idx >= CASES.length || isAnswered;
+    btnAI.disabled = btnHuman.disabled;
+    btnNext.disabled = !isAnswered || idx >= CASES.length;
+  }
+
+  function choose(pick) {
+    if (idx >= CASES.length || answered[idx] !== null) return;
+    const c = CASES[idx];
+    const ok = pick === c.who;
+    answered[idx] = pick;
+    if (ok) correct++;
+    fb.className = 'q-feedback show ' + (ok ? 'ok' : 'no');
+    fb.innerHTML = '<b>' + (ok ? '✓ 맞혔습니다' : '✗ 아쉽습니다') + '</b> — 정답은 <b>' + LABEL[c.who] + '</b>입니다.<br>' + c.why;
+    refresh();
+  }
+
+  function next() {
+    if (answered[idx] === null) return;
+    idx++;
+    fb.className = 'q-feedback';
+    renderStage();
+    refresh();
+    if (idx >= CASES.length) showSummary();
+  }
+
+  function showSummary() {
+    summary.style.display = '';
+    summary.innerHTML =
+      '<div class="box-label">📊 무엇을 근거로 판단했는가</div>' +
+      '<p>여섯 대화에서 <b>' + correct + ' / ' + CASES.length + '</b>을 맞혔습니다. 정답보다 중요한 것은 <b>근거의 목록</b>입니다. 우리가 실제로 쓴 단서를 정리해 봅시다.</p>' +
+      '<ul class="tt-cues">' +
+      '<li><b>몸으로 겪은 경험의 구체성</b> — 어제 저녁 메뉴, 숙소 에어컨, 키보드에 흘린 국물. 인공지능은 몸이 없어 이 빈칸을 메울 수 없습니다.</li>' +
+      '<li><b>불완전함</b> — 오타, 줄임말, 잘못 떠올린 기억을 스스로 고치는 일. 너무 매끄러운 답은 오히려 의심스럽습니다.</li>' +
+      '<li><b>감정과 되묻기</b> — 대화를 자기 쪽으로 끌어오려는 태도.</li>' +
+      '<li><b>앞뒤 모순을 알아채는가</b> — 대화 C처럼, 사실이 아닌 말을 하고도 정정하지 않는 것은 강한 단서입니다.</li>' +
+      '<li><b>지나친 정확함과 지치지 않음</b> — 대화 F처럼 큰 수 계산을 즉답하는 것은 사람답지 않습니다.</li>' +
+      '</ul>' +
+      '<p style="margin-top:12px"><b>그런데 여기서 한 걸음 더.</b> 우리가 방금 잰 것은 “상대가 <b>이해하는가</b>”가 아니라 “상대가 <b>사람 흉내를 잘 내는가</b>”였습니다. 대화 F의 인공지능은 일부러 틀리게 답하도록 만들면 쉽게 우리를 속일 수 있습니다. 흉내를 잘 낸다고 이해한 것은 아니라는 <b>중국어 방</b>의 지적이 바로 이 지점을 겨냥합니다.</p>';
+  }
+
+  function reset() {
+    idx = 0; correct = 0;
+    answered = new Array(CASES.length).fill(null);
+    fb.className = 'q-feedback';
+    summary.style.display = 'none';
+    renderStage();
+    refresh();
+    AI.toast('처음부터 다시 판별해 보세요');
+  }
+
+  renderStage();
+  refresh();
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 인공지능 접근 방법 분류기 ===================== -->
+<script>
+(function () {
+  const body = AI.sim.panel('#sim2', {
+    title: '인공지능 접근 방법 분류기',
+    tag: '사례 9개',
+    desc: '실생활 사례 카드를 <b>탐색 / 규칙·추론 / 기계학습</b> 세 칸에 나누어 넣어 보세요. <b>카드를 누른 뒤 칸을 누르면</b> 들어갑니다. 칸 안의 카드를 누르면 다시 꺼낼 수 있습니다. 모두 넣은 뒤 채점하면 사례마다 <b>왜 그 접근인지</b> 한 줄 해설이 붙습니다.'
+  });
+
+  const BINS = [
+    { id: 'search', name: '🧭 탐색', desc: '가능한 경우를 따져 보며 목표까지의 길을 찾는다' },
+    { id: 'rule', name: '📜 규칙 · 추론', desc: '사람이 써 준 사실과 규칙을 이어 결론을 낸다' },
+    { id: 'ml', name: '📊 기계학습', desc: '데이터에서 규칙성을 스스로 찾아낸다' }
+  ];
+
+  const CARDS = [
+    { id: 'nav', name: '내비게이션 최단 경로', bin: 'search', why: '도로망이 지도로 이미 주어져 있고, 갈 수 있는 길을 하나씩 따져 가장 짧은 경로를 고르는 문제입니다.' },
+    { id: 'spam', name: '스팸 메일 분류', bin: 'ml', why: '“스팸의 조건”을 규칙으로 다 쓸 수 없습니다. 스팸과 정상 메일 데이터를 모아 구분하는 기준을 학습시킵니다.' },
+    { id: 'diag', name: '병원 진단 규칙 시스템', bin: 'rule', why: '“열이 38도 이상이고 기침이 있으면 …”처럼 전문가의 지식을 규칙으로 옮겨 적고, 규칙을 이어 결론을 냅니다.' },
+    { id: 'go', name: '바둑 다음 수 선택', bin: 'search', why: '내가 두면 상대는 어떻게 둘지 앞을 내다보며 유리한 수를 고르는 탐색 문제입니다. 실제 알파고는 어느 수가 유망한지 판단할 때 학습을 함께 씁니다.' },
+    { id: 'cat', name: '사진 속 고양이 인식', bin: 'ml', why: '“고양이처럼 보이는 조건”을 말로 옮기기 거의 불가능합니다. 사진 데이터를 많이 보여 주어 스스로 특징을 찾게 합니다.' },
+    { id: 'metro', name: '지하철 노선 안내', bin: 'search', why: '역과 환승 관계가 지도로 주어집니다. 역을 상태로 두고 이동을 따라가며 최소 환승·최단 시간 경로를 찾습니다.' },
+    { id: 'voice', name: '음성 명령 인식', bin: 'ml', why: '같은 말도 사람·억양·잡음에 따라 파형이 전혀 다릅니다. 규칙으로 적을 수 없어 음성 데이터로 학습시킵니다.' },
+    { id: 'tax', name: '세금 계산 규칙', bin: 'rule', why: '법으로 계산 규칙이 이미 정해져 있습니다. 데이터로 배울 필요 없이 규칙을 그대로 적용하면 되고, 그래야 공정합니다.' },
+    { id: 'movie', name: '영화 추천', bin: 'ml', why: '누가 무엇을 좋아할지에 대한 규칙은 없습니다. 사람들이 남긴 시청·평점 데이터에서 취향의 규칙성을 찾아냅니다.' }
+  ];
+
+  const place = {};                 // cardId -> binId
+  let armed = null;                 // 선택된 카드 id
+  let graded = false;
+
+  const tray = AI.h('div', { class: 'cls-tray' }, AI.h('span', { class: 'tray-label', text: '아직 넣지 않은 사례' }));
+  const binEls = {};
+  const binsWrap = AI.h('div', { class: 'cls-bins' });
+  BINS.forEach(b => {
+    const list = AI.h('div', { class: 'cls-list' });
+    const box = AI.h('div', { class: 'cls-bin', role: 'button', tabindex: '0' },
+      AI.h('h5', { text: b.name }),
+      AI.h('div', { class: 'bd', text: b.desc }),
+      list
+    );
+    box.addEventListener('click', ev => { if (!ev.target.closest('.cls-item')) drop(b.id); });
+    box.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); drop(b.id); } });
+    binEls[b.id] = { box, list };
+    binsWrap.appendChild(box);
+  });
+
+  const fb = AI.h('div', { class: 'q-feedback' });
+  const stats = AI.ui.stats([{ key: 'p', label: '분류한 사례' }, { key: 'c', label: '맞힌 사례' }]);
+
+  body.appendChild(tray);
+  body.appendChild(binsWrap);
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('채점하기', grade, 'primary'),
+    AI.ui.btn('↺ 초기화', reset, 'ghost')
+  ));
+  body.appendChild(fb);
+  body.appendChild(stats.el);
+
+  function render() {
+    /* 트레이 */
+    tray.innerHTML = '';
+    tray.appendChild(AI.h('span', { class: 'tray-label', text: '아직 넣지 않은 사례 — 카드를 눌러 고르세요' }));
+    const rest = CARDS.filter(c => !place[c.id]);
+    if (!rest.length) tray.appendChild(AI.h('span', { class: 'cls-empty', text: '모두 넣었습니다. 채점해 보세요.' }));
+    rest.forEach(c => {
+      const b = AI.h('button', {
+        class: 'cls-card', type: 'button', 'aria-pressed': armed === c.id ? 'true' : 'false',
+        onclick: () => { armed = (armed === c.id ? null : c.id); render(); }
+      }, c.name);
+      tray.appendChild(b);
+    });
+
+    /* 칸 */
+    BINS.forEach(bn => {
+      const { box, list } = binEls[bn.id];
+      box.classList.toggle('armed', !!armed);
+      list.innerHTML = '';
+      const mine = CARDS.filter(c => place[c.id] === bn.id);
+      if (!mine.length) list.appendChild(AI.h('span', { class: 'cls-empty', text: '(비어 있음)' }));
+      mine.forEach(c => {
+        const ok = c.bin === bn.id;
+        const it = AI.h('button', {
+          class: 'cls-item' + (graded ? (ok ? ' ok' : ' no') : ''), type: 'button',
+          onclick: ev => { ev.stopPropagation(); delete place[c.id]; graded = false; fb.className = 'q-feedback'; render(); }
+        }, AI.h('b', { text: (graded ? (ok ? '✓ ' : '✗ ') : '') + c.name }));
+        if (graded) {
+          it.appendChild(AI.h('span', {
+            class: 'rz',
+            html: ok ? c.why : '여기가 아닙니다 · 알맞은 칸은 <b>' + BINS.find(x => x.id === c.bin).name + '</b> — ' + c.why
+          }));
+        }
+        list.appendChild(it);
+      });
+    });
+
+    stats.set('p', Object.keys(place).length + ' / ' + CARDS.length);
+    stats.set('c', graded ? CARDS.filter(c => place[c.id] === c.bin).length : '–');
+  }
+
+  function drop(binId) {
+    if (!armed) { AI.toast('먼저 위에서 사례 카드를 하나 고르세요'); return; }
+    place[armed] = binId;
+    armed = null;
+    graded = false;
+    fb.className = 'q-feedback';
+    render();
+  }
+
+  function grade() {
+    const n = Object.keys(place).length;
+    if (n < CARDS.length) { AI.toast('아직 ' + (CARDS.length - n) + '개가 남았어요'); return; }
+    graded = true;
+    const c = CARDS.filter(x => place[x.id] === x.bin).length;
+    fb.className = 'q-feedback show ' + (c === CARDS.length ? 'ok' : 'no');
+    fb.innerHTML = '<b>' + c + ' / ' + CARDS.length + ' 정답</b>' +
+      (c === CARDS.length
+        ? ' — 완벽합니다! 🎉 판별 기준을 한 문장으로 정리해 보세요. “규칙을 사람이 쓸 수 있는가, 경우를 따져 볼 수 있는가, 데이터밖에 없는가.”'
+        : ' — 빨간 카드의 해설을 읽어 보세요. 헷갈릴 때는 <b>“이 일의 규칙을 내가 글로 적을 수 있을까?”</b>를 먼저 물어보면 좋습니다. 적을 수 있으면 규칙·추론, 경우를 따져 고르는 문제면 탐색, 적을 수 없으면 기계학습입니다.');
+    render();
+  }
+
+  function reset() {
+    Object.keys(place).forEach(k => delete place[k]);
+    armed = null; graded = false;
+    fb.className = 'q-feedback';
+    render();
+  }
+
+  render();
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a1l1-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['튜링 테스트', '중국어 방', '약인공지능', '기계학습', '탐색', '추론', '입력', '출력'],
+  sents: [
+    { text: '앨런 튜링이 1950년에 제안한, 대화만으로 기계의 지능을 판정하는 검사를 {0}(이)라고 한다.', answers: [['튜링 테스트']] },
+    { text: '존 설은 {0} 사고 실험으로, 규칙에 따라 답을 내놓는 것이 곧 이해는 아니라고 주장하였다.', answers: [['중국어 방']] },
+    { text: '정해진 한 가지 일만 잘 처리하는, 오늘날 실제로 쓰이는 인공지능을 {0}(이)라고 부른다.', answers: [['약인공지능']] },
+    { text: '사실과 규칙을 이어 붙여 새로운 사실을 이끌어 내는 방법은 {0}이고, 데이터에서 규칙성을 스스로 찾아내게 하는 방법은 {1}이다.', answers: [['추론'], ['기계학습']] },
+    { text: '수많은 경우 가운데 목표에 이르는 길을 따져 가며 찾는 방법은 {0}이다.', answers: [['탐색']] },
+    { text: '인공지능 시스템은 센서와 데이터로 세상의 상태를 {0}받고, 모델이 판단한 결과를 행동으로 {1}한다.', answers: [['입력'], ['출력']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '1차시 확인 문제',
+  items: [
+    {
+      type: 'mc',
+      q: '튜링 테스트에서 컴퓨터가 ‘지능적이다’라고 판정되는 조건은 무엇인가?',
+      choices: [
+        '사람보다 계산을 빠르고 정확하게 해낼 때',
+        '질문자가 대화 상대가 사람인지 컴퓨터인지 구별하지 못할 때',
+        '컴퓨터가 스스로 자신이 인공지능이라고 밝힐 때',
+        '컴퓨터가 질문의 뜻을 이해했다고 증명할 때'
+      ],
+      answer: 1,
+      why: '튜링은 “생각하는가”라는 애매한 질문을 “<b>대화만으로 구별할 수 없는가</b>”라는 관찰 가능한 조건으로 바꾸었습니다. 계산 속도(①)는 사람도 기계도 지능의 기준으로 삼기 어렵고, ④의 ‘이해했음의 증명’은 튜링이 일부러 피한 조건입니다.'
+    },
+    {
+      type: 'ox',
+      q: '어떤 컴퓨터가 튜링 테스트를 통과했다면, 그 컴퓨터가 대화의 뜻을 이해하고 있다고 단정할 수 있다.',
+      answer: false,
+      why: '단정할 수 없습니다. 존 설의 <b>중국어 방</b>이 바로 이 점을 겨냥합니다. 방 안의 사람은 중국어를 한 글자도 모르지만 규칙책만으로 유창해 보입니다. 즉 튜링 테스트가 재는 것은 <b>사람 흉내를 내는 능력</b>이고, 이해나 의식은 그와 별개의 문제입니다.'
+    },
+    {
+      type: 'mc',
+      q: '다음 중 <b>강인공지능</b>에 대한 설명으로 옳은 것은?',
+      choices: [
+        '오늘날의 번역기와 추천 시스템이 강인공지능의 예이다',
+        '한 가지 일을 사람보다 훨씬 잘하면 강인공지능이라고 한다',
+        '사람처럼 스스로 이해하며 어떤 분야의 문제든 다루는 인공지능으로, 아직 실현되지 않았다',
+        '계산 속도가 사람의 1만 배를 넘으면 강인공지능이 된다'
+      ],
+      answer: 2,
+      why: '강인공지능은 <b>분야를 가리지 않고 스스로 이해하며 판단하는</b> 인공지능으로, 아직 실현되지 않았습니다. ①·②처럼 한 가지 일을 아주 잘하는 것은 <b>약인공지능</b>이고, ④처럼 속도가 빠른 것은 지능의 종류와 관계가 없습니다.'
+    },
+    {
+      type: 'match',
+      q: '다음 사례를 인공지능을 구현하는 알맞은 접근과 짝지으시오.',
+      left: [
+        '지하철 최소 환승 경로를 알려 준다',
+        '수만 장의 사진을 보여 주어 고양이를 알아보게 한다',
+        '“소득이 A 이상이고 B에 해당하면 세율은 C”라는 법 규칙을 적용한다',
+        '수십 수 앞을 내다보며 바둑의 다음 수를 고른다'
+      ],
+      right: ['탐색', '규칙·추론', '기계학습'],
+      answer: [0, 2, 1, 0],
+      why: '판별 기준은 <b>“규칙을 사람이 글로 적을 수 있는가”</b>입니다. 적을 수 있으면 규칙·추론(세법), 경우를 따져 고르는 문제면 탐색(경로·바둑), 규칙을 적을 수 없어 데이터에 의존해야 하면 기계학습(고양이 인식)입니다.'
+    },
+    {
+      type: 'short',
+      q: '규칙에 따라 답을 내놓는 것과 그 뜻을 이해하는 것은 다르다고 주장하며 존 설이 제안한 사고 실험의 이름을 쓰시오.',
+      answer: ['중국어 방', '중국어방', 'Chinese room', '중국어 방 논변'],
+      placeholder: '예: ○○○ ○',
+      why: '<b>중국어 방</b>입니다. 방 안의 사람은 뜻을 모른 채 규칙책만 보고 글자 카드를 내보내지만 밖에서는 중국어를 잘하는 것처럼 보입니다. 이는 <b>겉으로 드러난 행동</b>만으로 <b>내부의 이해</b>를 판정할 수 없음을 보여 줍니다.'
+    },
+    {
+      type: 'order',
+      q: '인공지능 시스템이 판단을 만들어 내는 과정을 <b>올바른 순서</b>로 배열하시오.',
+      items: [
+        '센서나 데이터로 세상의 상태를 입력받는다',
+        '입력을 모델이 다룰 수 있는 형태로 정리한다',
+        '모델이 정리된 입력을 보고 판단한다',
+        '판단 결과를 행동이나 답변으로 출력한다',
+        '출력의 결과를 다시 데이터로 모아 성능을 개선한다'
+      ],
+      answer: [0, 1, 2, 3, 4],
+      why: '입력 → 정리 → 판단 → 출력 → 되먹임의 순서입니다. 마지막 단계가 있어야 시스템이 <b>쓰면 쓸수록 나아집니다</b>. 자율주행이라면 카메라 영상(입력) → 영상 정리 → 주행 판단(판단) → 조향·제동(출력) → 주행 기록 수집(되먹임)이 됩니다.'
+    },
+    {
+      type: 'multi',
+      q: '인간의 지능과 인공지능을 비교한 설명으로 <b>옳은 것을 모두</b> 고르시오.',
+      choices: [
+        '인공지능은 같은 일을 지치지 않고 일관되게 반복할 수 있다',
+        '사람은 적은 예시만 보고도 감을 잡는 편이지만, 기계학습은 보통 많은 데이터가 필요하다',
+        '인공지능은 판단의 근거를 언제나 사람이 알아듣게 설명할 수 있다',
+        '오늘날의 인공지능은 대부분 정해진 한 가지 일에 특화되어 있다'
+      ],
+      answer: [0, 1, 3],
+      why: '③이 틀렸습니다. 특히 딥러닝 모델은 <b>왜 그렇게 판단했는지 설명하기 어려운 경우가 많고</b>, 이를 해결하려는 연구를 설명 가능한 인공지능이라고 부릅니다. 나머지는 모두 맞습니다. 속도·일관성은 인공지능이, 적은 예시로 배우는 융통성은 사람이 앞섭니다.'
+    },
+    {
+      type: 'mc',
+      q: '“인공지능이 그럴듯하지만 사실이 아닌 내용을 만들어 냈다”는 문제가 가장 두드러지는 활용 분야는?',
+      choices: [
+        '내비게이션 최단 경로 안내',
+        '생성형 인공지능의 글 작성',
+        '세금 계산 규칙 시스템',
+        '지하철 환승 안내'
+      ],
+      answer: 1,
+      why: '<b>생성형 인공지능</b>입니다. 생성은 “그럴듯한 것을 만들어 내는” 일이므로, 사실 여부가 보장되지 않습니다(환각). 반면 ①·④는 지도 데이터를 따라 <b>탐색</b>한 결과이고 ③은 법 <b>규칙</b>을 그대로 적용한 결과여서, 근거를 그대로 짚어 확인할 수 있습니다.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a1l1-note',
+  title: '판별 근거와 사례 분석 기록',
+  prompt: '두 시뮬레이터를 <b>끝까지</b> 돌린 뒤 아래를 채워 보세요. 시뮬레이터에서 관찰한 <b>실제 값</b>과 <b>내가 쓴 근거</b>를 함께 적는 것이 핵심입니다.',
+  fields: [
+    { key: 'ttScore', label: '튜링 테스트 판별 게임 점수 (예: 4 / 6)', type: 'text', placeholder: '예: 4 / 6' },
+    { key: 'clsScore', label: '접근 방법 분류기 첫 채점 점수 (예: 7 / 9)', type: 'text', placeholder: '예: 7 / 9' },
+    { key: 'hardest', label: '가장 헷갈린 사례 카드 하나', type: 'select', options: ['내비게이션 최단 경로', '스팸 메일 분류', '병원 진단 규칙 시스템', '바둑 다음 수 선택', '사진 속 고양이 인식', '지하철 노선 안내', '음성 명령 인식', '세금 계산 규칙', '영화 추천'] },
+    {
+      key: 'cue', label: '내가 사람과 인공지능을 가른 근거를 두 가지 이상 적어 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) ① 어제 저녁 메뉴처럼 몸으로 겪어야만 알 수 있는 것을 말하는지 보았다. ② 앞에서 한 말과 어긋나는 지적을 받았을 때 정정하는지 보았다. …'
+    },
+    {
+      key: 'limit', label: '튜링 테스트의 한계를 중국어 방과 연결해 설명해 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 튜링 테스트는 상대가 사람처럼 보이는지만 재기 때문에 …'
+    },
+    {
+      key: 'case', label: '주변에서 찾은 인공지능 활용 사례 하나를 골라, 어떤 지능적 특성과 접근을 쓰는지 분석해 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 학교 급식 잔반 사진 분류 → 인식(지능적 특성), 기계학습(접근). 규칙으로 적을 수 없고 사진 데이터가 필요하기 때문이다. …'
+    },
+    {
+      key: 'care', label: '그 사례에서 사람이 반드시 확인해야 할 점은 무엇일까요?',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 잘못 분류했을 때 누가 책임지는지, 학습 데이터가 우리 학교 급식만 담고 있어 다른 학교에서는 틀릴 수 있다는 점 …'
+    }
+  ]
+});
+</script>
+</body>
+</html>

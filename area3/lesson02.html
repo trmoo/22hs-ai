@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2차시 사라지는 일, 생겨나는 일 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+/* 이 쪽에서만 쓰는 최소한의 추가 클래스 */
+.gauge { height: 16px; border-radius: 999px; background: var(--surface-3); border: 1px solid var(--line); overflow: hidden; margin: 6px 0 0; }
+.gauge i { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width .35s; }
+.gauge-row { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.gauge-num { font-family: var(--font-mono); font-size: 26px; font-weight: 800; color: var(--accent-ink); letter-spacing: -.03em; }
+.gauge-band { font-size: 12px; font-weight: 750; padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink); }
+.job-table-wrap { max-height: 330px; overflow-y: auto; }
+table.tb tbody tr.sel td { background: var(--accent-soft); font-weight: 700; }
+table.tb tbody tr.pick { cursor: pointer; }
+.minibar { display: inline-block; vertical-align: middle; width: 74px; height: 8px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
+.minibar i { display: block; height: 100%; background: var(--accent); }
+.rule-line { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.9; color: var(--ink-2); }
+.rule-line .rid { color: var(--ink-4); margin-right: 7px; }
+.rule-line .kw { color: var(--accent-ink); font-weight: 700; }
+.rule-line .w { color: var(--ok); font-weight: 700; }
+.job-card { padding: 15px 16px; border-radius: var(--radius); border: 1px solid var(--accent-line); background: var(--accent-soft); margin-bottom: 10px; }
+.job-card h5 { font-size: 16.5px; margin: 0 0 4px; }
+.job-card .rank { font-family: var(--font-mono); font-size: 12px; font-weight: 800; color: var(--accent-ink); }
+.job-card dl { margin: 8px 0 0; font-size: 14px; }
+.job-card dt { font-weight: 750; color: var(--accent-ink); font-size: 12.5px; margin-top: 7px; }
+.job-card dd { margin: 2px 0 0; color: var(--ink-2); }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>1900년 무렵 서울에는 <b>전화 교환원</b>이라는 직업이 있었습니다. 전화를 걸면 교환원이 직접 선을 꽂아 연결해 주었습니다. 자동 교환기가 등장하면서 이 직업은 사라졌습니다.</p>
+      <p>그런데 흥미로운 사실이 있습니다. 자동 교환기가 퍼진 뒤 통신 산업의 <b>일자리는 오히려 늘었습니다</b>. 전화가 싸고 편해지자 쓰는 사람이 폭발적으로 늘었고, 설비를 놓고 고치고 운영하는 새로운 일이 생겼기 때문입니다.</p>
+      <ul>
+        <li>사라진 것은 <b>직업</b>이었을까요, 아니면 그 직업 안의 <b>어떤 일</b>이었을까요?</li>
+        <li>지금 인공지능이 만드는 변화는 이 이야기와 얼마나 비슷하고, 얼마나 다를까요?</li>
+      </ul>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 한 직업은 여러 개의 ‘일’로 이루어져 있다</summary>
+        <div class="more-body">
+          교사라는 직업 안에는 수업하기, 채점하기, 상담하기, 자료 만들기, 기록 정리하기가 모두 들어 있습니다. 인공지능은 이 중 <b>몇 가지</b>를 가져갑니다. 그러면 남은 일의 비중이 달라지고, 직업의 모습 자체가 바뀝니다.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 기술과 직업의 역사 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>기술은 늘 직업을 바꿔 왔다</h2></div>
+
+    <p>기술이 직업을 바꾸는 일은 인공지능에서 처음 시작된 것이 아닙니다. 증기 기관, 전기, 컴퓨터가 등장할 때마다 사람들은 “일자리가 사라진다”고 걱정했고, 실제로 어떤 직업은 사라졌습니다. 그러나 매번 전체 일자리의 수는 줄어들기보다 <b>구성이 바뀌었습니다</b>.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>기술 변화와 직업의 변화 — 네 번의 물결</caption>
+        <thead><tr><th>시기 · 기술</th><th>줄어든 일</th><th>늘어난 일</th></tr></thead>
+        <tbody>
+          <tr><td><b>1차 · 증기 기관</b><br><span class="mono">18세기 후반</span></td><td>손으로 실을 뽑고 천을 짜는 일</td><td>공장 노동, 기계 정비, 철도 운영</td></tr>
+          <tr><td><b>2차 · 전기와 대량 생산</b><br><span class="mono">19세기 후반</span></td><td>얼음 배달, 등불 관리, 전화 교환</td><td>전기 기술자, 생산 라인 관리, 통신 설비 운영</td></tr>
+          <tr><td><b>3차 · 컴퓨터와 인터넷</b><br><span class="mono">20세기 후반</span></td><td>타자수, 계산원, 필름 현상, 지도 제작 보조</td><td>프로그래머, 통신망 관리자, 디지털 디자이너</td></tr>
+          <tr><td><b>4차 · 인공지능</b><br><span class="mono">21세기</span></td><td>단순 서류 처리, 단순 검사, 정형화된 응대</td><td>데이터 관련 직군, 인공지능 검증·윤리, 인간과 인공지능의 협업 설계</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>다만 인공지능이 이전 기술과 다른 점이 하나 있습니다. 이전의 기계는 주로 <b>몸으로 하는 일</b>을 대신했지만, 인공지능은 <b>머리로 하는 일의 일부</b>를 대신합니다. 그래서 사무직과 전문직도 변화의 대상이 되었습니다.</p>
+
+    <h3 class="sub-head">세 가지 변화 양상 — 대체 · 보완 · 신생</h3>
+    <p>인공지능이 직업에 미치는 영향을 이야기할 때는 세 가지를 구분해야 합니다. “없어진다 / 남는다”의 이분법으로는 실제 변화를 설명할 수 없습니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">🔁</span>
+        <h4>① <b class="blank" data-hint="사람이 하던 일을 인공지능이 대신 맡는 변화">대체</b></h4>
+        <p>사람이 하던 일을 인공지능이 대신 맡습니다. 단순 서류 입력, 정형화된 검사, 반복되는 응대가 여기에 해당합니다. 대체는 <b>직업 전체</b>보다 <b>직업 안의 일부 작업</b>에서 일어납니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🤝</span>
+        <h4>② <b class="blank" data-hint="사람과 함께 일하며 사람의 능력을 키워 주는 변화">보완</b></h4>
+        <p>인공지능이 사람의 능력을 키워 줍니다. 의사가 판독할 영상에 이상 소견 후보를 미리 표시해 주는 것처럼, 사람은 더 어려운 판단에 집중하게 됩니다. 실제로 가장 흔한 형태입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🌱</span>
+        <h4>③ <b class="blank" data-hint="전에 없던 직업이 새로 생기는 변화">신생</b></h4>
+        <p>전에 없던 직업이 생깁니다. 데이터를 정리하고 모델을 검증하고 윤리 기준을 만드는 일은 20년 전에는 존재하지 않았습니다. 새 기술은 새 일을 함께 만듭니다.</p>
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 — 직업이 아니라 직무가 바뀐다</div>
+      <p>인공지능은 대개 직업을 통째로 없애지 않고, 직업을 이루는 여러 <b class="blank" data-hint="직업 안에서 실제로 수행하는 일의 묶음 — 채점하기, 상담하기처럼">직무</b> 가운데 일부를 가져간다. 그러면 남은 직무의 비중이 커지고 새로운 직무가 더해져 직업의 모습이 <b>재구성</b>된다. 그래서 “이 직업은 사라진다”보다 “이 직업의 직무는 이렇게 재구성된다”가 더 정확한 표현이다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. 무엇이 자동화되기 쉬운가 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>어떤 일이 자동화되기 쉬운가</h2></div>
+
+    <p>어떤 일이 인공지능에게 넘어가기 쉬운지는 직업의 이름이 아니라 <b>그 일의 성질</b>로 결정됩니다. 다음 세 가지가 함께 성립할 때 자동화가 쉽습니다.</p>
+
+    <ol>
+      <li><b class="blank" data-hint="같은 일을 되풀이하는 정도 — 이것이 높으면 자동화되기 쉽다">반복성</b>이 높다 — 같은 종류의 판단을 하루에 수백 번 되풀이한다.</li>
+      <li><b class="blank" data-a="규칙|기준|판단 기준" data-hint="무엇이 옳고 그른지 판단하는 기준 — 명확할수록 자동화하기 쉽다">규칙</b>이 명확하다 — 무엇이 정답인지 사람들 사이에 이견이 적다.</li>
+      <li>데이터가 많다 — 과거의 판단 결과가 기록으로 남아 있어 학습할 수 있다.</li>
+    </ol>
+
+    <p>반대로 <b>맥락을 새로 해석해야 하는 일</b>, <b>사람의 마음을 다루는 일</b>, <b>틀리면 되돌릴 수 없는 판단</b>, <b>몸을 써서 예측하기 어려운 환경에 대응하는 일</b>은 자동화가 어렵습니다. 흥미롭게도 예전에는 “단순 노동”이라 불렸던 일 가운데 상당수가 여기에 해당합니다. 좁은 배관 아래에 몸을 넣어 낡은 부품을 갈아 끼우는 일은, 서류를 정리하는 일보다 훨씬 자동화가 어렵습니다.</p>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 오해 주의 — “전문직은 안전하다”</div>
+      <p>전문직이라도 <b>정해진 절차에 따라 반복하는 직무</b>가 많다면 그 부분은 자동화됩니다. 판례를 검색해 요약하는 일, 계약서에서 위험 조항을 찾는 일이 그 예입니다. 반대로 대인 관계와 현장 판단이 핵심인 일은 학력과 무관하게 자동화가 어렵습니다. <b>자동화 가능성은 직업의 지위가 아니라 직무의 성질로 결정됩니다.</b></p>
+    </div>
+
+    <h3 class="sub-head">그래서 무엇이 더 중요해지는가</h3>
+    <p>인공지능이 “정해진 답을 빠르게 내는 일”을 가져가면, 사람에게는 <b>답을 내기 전에 해야 하는 일</b>과 <b>답을 낸 뒤에 해야 하는 일</b>이 남습니다. 그것이 다음 다섯 가지 역량입니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>인공지능 시대에 더 중요해지는 역량</caption>
+        <thead><tr><th>역량</th><th>왜 중요해지는가</th><th>지금 기를 수 있는 방법</th></tr></thead>
+        <tbody>
+          <tr><td><b class="blank" data-a="문제 정의|문제 발견|문제 정의력" data-hint="무엇이 문제인지 정하는 능력 — 인공지능은 문제를 풀지만 문제를 정하지는 못한다">문제 정의</b></td><td>인공지능은 주어진 문제를 풀지만, <b>무엇을 풀어야 하는지</b>는 정해 주지 않는다</td><td>불편한 상황을 관찰해 “진짜 문제는 무엇인가”를 한 문장으로 써 보기</td></tr>
+          <tr><td><b>창의성</b></td><td>인공지능은 배운 것을 조합한다. 전에 없던 방향을 정하는 일은 사람의 몫이다</td><td>같은 과제를 세 가지 다른 방식으로 풀어 보기</td></tr>
+          <tr><td><b>공감과 소통</b></td><td>결정을 사람들에게 설명하고 함께 움직이게 만드는 일은 자동화되지 않는다</td><td>내 결론을 반대하는 사람의 이유를 먼저 정리해 보기</td></tr>
+          <tr><td><b>윤리적 판단</b></td><td>할 수 있는 일과 해도 되는 일은 다르다. 그 선을 정하는 것은 사람이다</td><td>인공지능 활용 사례에서 누가 피해를 입을 수 있는지 찾아보기</td></tr>
+          <tr><td><b>인공지능 활용 능력</b></td><td>도구를 잘 쓰는 사람과 그렇지 못한 사람의 차이가 커진다</td><td>결과를 그대로 믿지 않고 <b>검증하는 습관</b>을 들이기</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 다섯 역량의 공통점</div>
+      <p>모두 <b>인공지능을 쓰지 않아도 되는 능력</b>이 아니라, <b>인공지능을 쓰면서 더 필요해지는 능력</b>입니다. 인공지능이 초안을 열 개 만들어 줄 때, 그중 무엇을 고를지 판단하고 왜 그것인지 설명하는 사람이 결국 일의 방향을 정합니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. 인공지능과 관련된 직업군 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>인공지능과 함께 생겨난 직업들</h2></div>
+
+    <p>인공지능 관련 직업은 “컴퓨터를 아주 잘하는 사람”만의 영역이 아닙니다. 데이터를 다루는 사람, 사람의 마음을 읽는 사람, 규칙과 기준을 세우는 사람, 글을 정확하게 쓰는 사람이 모두 필요합니다. 아래 표에서 자신의 강점과 연결되는 직업을 찾아보세요.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>인공지능과 관련된 주요 직업군</caption>
+        <thead><tr><th>직업</th><th>하는 일</th><th>주로 쓰는 강점</th></tr></thead>
+        <tbody>
+          <tr><td><b>데이터 분석가</b></td><td>데이터를 정리하고 그 안의 규칙을 찾아 결정의 근거로 만든다</td><td>수리적 사고, 해석과 설명</td></tr>
+          <tr><td><b class="blank" data-a="기계학습 엔지니어|머신러닝 엔지니어" data-hint="모델을 설계하고 학습시켜 실제 서비스에 올리는 사람">기계학습 엔지니어</b></td><td>문제에 맞는 모델을 골라 학습시키고, 성능을 평가해 서비스에 올린다</td><td>프로그래밍, 수학, 실험 설계</td></tr>
+          <tr><td><b class="blank" data-a="데이터 라벨러|라벨러|데이터 레이블러" data-hint="인공지능이 학습할 사진·문장에 정답을 표시하는 사람">데이터 라벨러</b></td><td>학습 데이터에 정답을 표시하고, 기준이 흔들리지 않게 관리한다</td><td>꼼꼼함, 해당 분야의 배경 지식</td></tr>
+          <tr><td><b class="blank" data-a="인공지능 윤리 전문가|AI 윤리 전문가|인공지능 윤리학자" data-hint="인공지능이 누구에게 피해를 줄 수 있는지 살펴 기준을 만드는 사람">인공지능 윤리 전문가</b></td><td>인공지능이 줄 수 있는 피해를 미리 살펴 기준과 지침을 만든다</td><td>사회·윤리적 감각, 논리적 글쓰기</td></tr>
+          <tr><td><b class="blank" data-a="프롬프트 엔지니어|프롬프트엔지니어" data-hint="인공지능에게 줄 지시문을 설계하고 다듬는 사람">프롬프트 엔지니어</b></td><td>지시문을 설계해 원하는 품질의 결과가 안정적으로 나오게 만든다</td><td>정확한 언어 표현, 업무 이해</td></tr>
+          <tr><td><b>인공지능 서비스 기획자</b></td><td>사람들의 불편을 인공지능으로 풀 수 있는 형태로 다듬고, 개발자와 사용자를 잇는다</td><td>관찰력, 소통, 기획</td></tr>
+          <tr><td><b>로봇 엔지니어</b></td><td>주변을 인식하고 스스로 움직이는 로봇의 하드웨어와 제어 소프트웨어를 만든다</td><td>물리·기계 감각, 프로그래밍</td></tr>
+          <tr><td><b>의료 인공지능 전문가</b></td><td>의료 영상과 기록으로 학습한 모델을 만들고, 병원에서 안전하게 쓰이도록 검증한다</td><td>생명과학 지식, 신중함</td></tr>
+          <tr><td><b>인공지능 교사</b></td><td>인공지능의 원리와 윤리를 가르치고, 인공지능을 활용한 수업을 설계한다</td><td>설명 능력, 학생에 대한 이해</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-ok">
+      <div class="box-label">✅ 진짜 중요한 관점</div>
+      <p>위의 직업 목록은 5년 뒤에 달라질 것입니다. 어떤 이름은 사라지고 어떤 이름은 새로 생깁니다. 그래서 진로를 준비할 때 <b>직업의 이름</b>을 외우는 것보다 <b>그 직업이 쓰는 능력</b>을 기르는 것이 훨씬 안전합니다. 데이터를 읽는 힘, 정확하게 쓰는 힘, 사람을 이해하는 힘은 이름이 바뀌어도 계속 쓰입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4. 진로 설계 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>변화 속에서 진로를 설계하는 법</h2></div>
+
+    <p>변화가 빠를 때 “정답인 직업 하나”를 찾으려 하면 실패하기 쉽습니다. 대신 다음 다섯 단계를 <b>돌고 도는 순환</b>으로 생각하는 편이 좋습니다. 이것이 <b class="blank" data-a="진로 설계|진로 계획" data-hint="자신의 관심과 강점을 바탕으로 앞으로의 길을 계획하고 고쳐 나가는 일">진로 설계</b>입니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>진로 설계의 다섯 단계 — 한 번이 아니라 반복한다</caption>
+        <thead><tr><th>단계</th><th>내가 할 일</th><th>구체적인 예</th></tr></thead>
+        <tbody>
+          <tr><td><b>① 나를 알기</b></td><td>무엇을 할 때 시간이 빨리 가는지, 무엇을 잘하는지 기록한다</td><td>한 달간 “재미있었던 활동”을 메모해 공통점 찾기</td></tr>
+          <tr><td><b>② 세계를 알기</b></td><td>관심 분야에서 실제로 어떤 일이 벌어지는지 조사한다</td><td>그 분야의 직업 세 개를 골라 하는 일을 비교하기</td></tr>
+          <tr><td><b>③ 역량을 잇기</b></td><td>그 일에 필요한 역량과 지금 나의 상태 사이의 차이를 확인한다</td><td>필요한 과목·전공과 지금 성적·경험을 나란히 적기</td></tr>
+          <tr><td><b>④ 작게 해 보기</b></td><td>큰 결심 대신 작은 경험을 만든다. 경험이 관심을 검증한다</td><td>동아리 활동, 작은 프로젝트, 관련 도구 써 보기</td></tr>
+          <tr><td><b>⑤ 돌아보고 고치기</b></td><td>해 본 뒤 느낀 것으로 계획을 고친다. 바꿔도 실패가 아니다</td><td>학기말에 계획을 다시 쓰기</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 두 가지 흔한 함정</div>
+      <p><b>① “인공지능 때문에 다 없어질 텐데”</b> — 변화의 방향을 남의 예측에 맡기는 태도입니다. 예측을 참고할 수는 있지만, 예측은 자주 틀립니다. 2013년의 유명한 연구는 여러 직업의 자동화 확률을 계산했지만, 실제로 사라진 직업은 예측보다 훨씬 적었습니다.</p>
+      <p><b>② “인공지능 관련 학과에 가야 안전하다”</b> — 인공지능은 <b>도구</b>입니다. 도구는 쓰일 <b>분야</b>가 있어야 의미가 있습니다. 의료·환경·예술·교육에 대한 이해가 있는 사람이 그 분야의 인공지능을 만듭니다. 관심 분야를 버리지 말고, 거기에 인공지능을 더하는 길을 찾으세요.</p>
+    </div>
+  </section>
+
+  <!-- ============ 5. 시뮬레이터 1 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>직업 변화 탐색기</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim1"></div>
+  </section>
+
+  <!-- ============ 6. 시뮬레이터 2 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>나의 인공지능 진로 찾기</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim2"></div>
+  </section>
+
+  <!-- ============ 7. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 8. 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 9. 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">9</span><h2>활동 기록 — 나의 진로 설계</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 자동화 확률 예측은 왜 자주 틀리는가</summary>
+      <div class="more-body">
+        <p>2013년, 옥스퍼드 대학의 연구자들이 미국 직업 702개의 자동화 확률을 계산해 발표했습니다. 이 연구는 “미국 일자리의 47%가 위험하다”는 문장으로 널리 인용되었습니다. 그런데 10년이 지난 지금, 예측대로 사라진 직업은 훨씬 적습니다. 왜일까요?</p>
+        <ul>
+          <li><b>직업을 하나의 덩어리로 봤다</b> — 실제로는 직업 안의 일부 <b>직무</b>만 자동화됩니다. 직무가 자동화되면 사람은 남은 직무로 옮겨 갑니다.</li>
+          <li><b>기술적 가능성과 실제 도입은 다르다</b> — 도입에는 비용, 법과 제도, 사회적 수용, 책임 문제가 걸립니다. “할 수 있다”와 “하게 된다”의 사이는 넓습니다.</li>
+          <li><b>새로 생기는 일을 세지 못했다</b> — 예측은 사라질 일을 셀 수 있지만, 아직 이름조차 없는 일을 셀 수는 없습니다.</li>
+        </ul>
+        <p>그래서 자동화 확률이나 영향도 같은 숫자는 <b>순위를 외우는 데</b> 쓰는 것이 아니라, <b>왜 그런 순위가 나왔는지 성질을 파악하는 데</b> 쓰는 것이 맞습니다. 시뮬레이터의 영향도 역시 같은 태도로 보아야 합니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">코드</span> 규칙 기반 추천을 파이썬으로 써 보면</summary>
+      <div class="more-body">
+        <p>시뮬레이터 2의 추천은 1단원 5차시에서 배운 <b>규칙 기반 추론</b>과 똑같은 방식입니다. 사실(관심, 선호)이 주어지면 조건이 맞는 규칙이 발동하고, 결론이 쌓입니다.</p>
+        <pre style="margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;white-space:pre-wrap">rules = [
+    # (관심, 선호, 추천 직업, 가중치)  — None 은 "무엇이든"
+    ('의료', '데이터 분석', '의료 인공지능 전문가', 3.0),
+    (None,   '데이터 분석', '데이터 분석가',        2.0),
+    ('의료', None,          '의료 인공지능 전문가', 1.0),
+]
+
+def recommend(interest, activity, top=3):
+    score = {}
+    fired = []
+    for cond_i, cond_a, job, w in rules:
+        if (cond_i is None or cond_i == interest) and \
+           (cond_a is None or cond_a == activity):
+            score[job] = score.get(job, 0) + w      # 결론을 쌓는다
+            fired.append((cond_i, cond_a, job, w))  # 발동한 규칙을 기록
+    ranked = sorted(score.items(), key=lambda kv: -kv[1])
+    return ranked[:top], fired</pre>
+        <p style="margin-top:12px">전문가 시스템의 한계도 그대로 물려받습니다. 규칙에 없는 조합은 엉뚱한 답을 내고, 규칙을 늘리면 관리가 어려워집니다. <b>그래서 이 추천을 정답으로 받아들이면 안 됩니다.</b></p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> 같은 직업, 달라진 하루 — 방사선사와 회계사</summary>
+      <div class="more-body">
+        <p><b>영상 판독</b> — 인공지능이 이상 소견 후보를 표시해 주자, 의사의 하루에서 “정상 영상을 넘기는 시간”이 크게 줄었습니다. 대신 애매한 영상을 두고 고민하는 시간과, 환자에게 설명하는 시간이 늘었습니다. 판독 건수는 늘었지만 일의 성격은 <b>더 어려운 판단</b>으로 이동했습니다.</p>
+        <p><b>회계</b> — 영수증 입력과 분개가 자동화되자, 회계 담당자의 일은 “숫자를 맞추는 일”에서 “숫자가 왜 그렇게 나왔는지 설명하고 앞을 내다보는 일”로 옮겨 갔습니다. 자동화 시스템이 틀렸을 때 그것을 잡아내는 역할도 새로 생겼습니다.</p>
+        <p>두 사례의 공통점은 <b>일의 총량이 줄어든 것이 아니라 난이도의 분포가 바뀌었다</b>는 점입니다. 쉬운 일이 줄고 어려운 일의 비중이 커졌습니다. 이것이 “직무가 재구성된다”는 말의 실제 모습입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 다음 차시로 — 그러면 우리는 어떻게 함께 살까?</summary>
+      <div class="more-body">
+        이 차시에서 인공지능이 일과 진로를 어떻게 바꾸는지 살펴보았습니다. 그런데 변화의 속도를 사람이 따라가지 못하면 어떻게 해야 할까요? 누가 그 비용을 감당해야 할까요? 다음 차시에서는 인공지능을 무조건 받아들이거나 무조건 거부하지 않고, <b>비판적으로 따져 공존의 방식을 정하는 방법</b>을 다룹니다.
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 3, lesson: 2,
+  title: '사라지는 일, 생겨나는 일',
+  sub: '인공지능과 진로',
+  lead: '인공지능은 직업을 없애기보다 <b>직무를 재구성</b>합니다. 어떤 일이 자동화되기 쉬운지, 어떤 역량이 더 중요해지는지, 인공지능과 함께 생겨난 직업은 무엇인지 살펴보고 <b>나의 진로를 스스로 설계</b>해 봅니다.',
+  standards: ['12인기03-02'],
+  keywords: ['직업의 변화', '자동화', '인공지능 직업군', '미래 역량', '진로 설계'],
+  goals: [
+    '기술 변화가 직업을 바꿔 온 흐름을 <b>대체·보완·신생</b>의 세 양상으로 설명할 수 있다.',
+    '어떤 직무가 자동화되기 쉬운지 반복성·규칙·데이터의 관점에서 판단할 수 있다.',
+    '인공지능과 관련된 직업군의 하는 일과 필요한 역량을 조사하여 비교할 수 있다.',
+    '나의 관심과 강점을 바탕으로 진로 설계 계획을 세우고, 근거를 들어 설명할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 시뮬레이터 1: 직업 변화 탐색기 ===================== -->
+<script>
+(function () {
+  /* rep=반복성, cre=창의성, soc=대인관계, phy=신체성 (0~10) */
+  const JOBS = [
+    { emo: '🧾', n: '회계·급여 사무원', rep: 9, cre: 2, soc: 3, phy: 1,
+      ai: '영수증·급여 자료 입력과 계산, 규정에 어긋난 항목 자동 표시',
+      hu: '예외 상황의 해석, 경영진에게 뜻을 설명하는 일, 최종 책임',
+      nw: '자동화 시스템의 오류를 잡아내는 회계 감사·검증 담당' },
+    { emo: '🏭', n: '제조 라인 검사원', rep: 9, cre: 1, soc: 2, phy: 5,
+      ai: '제품 사진으로 불량 판정, 설비 진동·소음으로 고장 예측',
+      hu: '처음 보는 유형의 불량 판단, 설비 조정, 검사 기준 자체를 정하는 일',
+      nw: '검사 모델의 학습 데이터를 만들고 성능을 관리하는 담당' },
+    { emo: '💳', n: '은행 창구 직원', rep: 8, cre: 2, soc: 6, phy: 2,
+      ai: '단순 입출금·이체 처리, 서류 확인, 상품 안내 응답',
+      hu: '복잡한 사정을 가진 고객 상담, 신뢰가 필요한 대면 설명',
+      nw: '금융 인공지능이 내린 판단을 고객에게 설명하는 상담 전문가' },
+    { emo: '🚚', n: '화물 운전기사', rep: 8, cre: 2, soc: 3, phy: 6,
+      ai: '고속도로 구간의 주행 보조, 배차와 경로 최적화',
+      hu: '좁은 골목·공사 구간 대응, 화물 상태 확인, 고객 인계',
+      nw: '자율주행 차량군을 원격으로 감시하는 관제사' },
+    { emo: '📞', n: '고객 상담원', rep: 7, cre: 3, soc: 8, phy: 1,
+      ai: '자주 묻는 질문 응답, 대화 내용 요약, 문의 유형 분류',
+      hu: '화가 난 고객을 진정시키기, 규정 밖 사정의 판단, 사과와 책임',
+      nw: '상담 인공지능의 답변 품질을 검수하고 개선하는 담당' },
+    { emo: '🎧', n: '번역가', rep: 6, cre: 7, soc: 3, phy: 1,
+      ai: '초벌 번역, 용어 일관성 검사, 형식과 분량 맞추기',
+      hu: '문화적 뜻의 옮김, 문학적 표현의 선택, 오역의 최종 책임',
+      nw: '기계 번역을 다듬는 감수자, 지역화(로컬라이제이션) 전문가' },
+    { emo: '🌾', n: '농업인', rep: 6, cre: 5, soc: 3, phy: 9,
+      ai: '병해충 발생 예측, 급수·시비량 결정, 수확 시기 추천',
+      hu: '흙과 날씨를 읽는 현장 경험, 재배 방향 결정, 판로 개척',
+      nw: '스마트 팜 설비를 설계하고 관리하는 스마트 팜 전문가' },
+    { emo: '🩺', n: '영상의학과 의사', rep: 6, cre: 6, soc: 5, phy: 2,
+      ai: '엑스레이·CT에서 이상 소견 후보 표시, 병변 크기 자동 측정',
+      hu: '환자의 전체 맥락을 고려한 진단, 설명과 위로, 최종 책임',
+      nw: '의료 인공지능의 성능을 임상 현장에서 검증하는 전문가' },
+    { emo: '🧑‍⚕️', n: '간호사', rep: 5, cre: 5, soc: 9, phy: 8,
+      ai: '환자 상태 악화의 조기 경보, 투약 기록 확인, 일정 관리',
+      hu: '환자와 가족의 정서적 지지, 손이 필요한 처치, 현장 판단',
+      nw: '병원 인공지능 시스템을 운용하는 의료 정보 간호사' },
+    { emo: '🧑‍🍳', n: '요리사', rep: 5, cre: 7, soc: 5, phy: 8,
+      ai: '재고와 주문량 예측, 조리 시간 관리, 재료 조합 아이디어 제시',
+      hu: '맛의 최종 판단, 새로운 메뉴의 창작, 손의 감각',
+      nw: '조리 로봇을 운용하고 조리법을 데이터로 옮기는 담당' },
+    { emo: '📊', n: '데이터 분석가', rep: 5, cre: 7, soc: 5, phy: 1,
+      ai: '데이터 정리와 기초 통계, 그래프 생성, 모델 후보 비교',
+      hu: '무엇을 물을지 정하는 일, 결과의 해석, 의사 결정자에게 설명',
+      nw: '모델의 편향과 성능을 지속적으로 감시하는 담당' },
+    { emo: '💻', n: '소프트웨어 개발자', rep: 5, cre: 8, soc: 5, phy: 1,
+      ai: '반복되는 코드 작성, 오류 원인 후보 제시, 테스트 코드 생성',
+      hu: '무엇을 만들지 정하는 일, 전체 구조 설계, 성능과 안전의 판단',
+      nw: '인공지능이 쓴 코드를 검증하고 통합하는 역할' },
+    { emo: '📰', n: '기자', rep: 4, cre: 8, soc: 8, phy: 3,
+      ai: '자료 검색과 요약, 통계 기사 초안, 녹음 내용 정리',
+      hu: '현장 취재, 취재원과의 신뢰, 무엇이 중요한지 판단',
+      nw: '데이터 저널리스트, 생성물의 사실 검증 담당' },
+    { emo: '⚖️', n: '변호사', rep: 4, cre: 7, soc: 8, phy: 1,
+      ai: '판례 검색과 요약, 계약서 위험 조항 표시, 서류 초안 작성',
+      hu: '변론 전략, 의뢰인과의 신뢰, 법정에서의 설득',
+      nw: '법률 인공지능의 근거를 검증하는 법률 기술 전문가' },
+    { emo: '👩‍🏫', n: '교사', rep: 4, cre: 7, soc: 10, phy: 3,
+      ai: '문제 추천과 채점, 학습 기록 정리, 수업 자료 제작 보조',
+      hu: '학생의 마음 읽기, 동기 부여, 관계 형성과 생활 지도',
+      nw: '인공지능 도구를 수업에 설계해 넣는 인공지능 교육 전문가' },
+    { emo: '🎨', n: '일러스트레이터', rep: 3, cre: 10, soc: 4, phy: 2,
+      ai: '시안 대량 생성, 배경과 질감 채우기, 색 조합 제안',
+      hu: '무엇을 왜 그릴지 정하는 일, 고유한 화풍, 의뢰인과의 조율',
+      nw: '생성형 인공지능을 도구로 쓰는 콘텐츠 디렉터' }
+  ];
+
+  /* 자동화 영향도 — 계산식을 화면에 공개한다 */
+  function impact(j) {
+    return AI.clamp(Math.round(50 + 4.4 * j.rep - 2.6 * j.cre - 2.2 * j.soc - 1.2 * j.phy), 0, 100);
+  }
+  function band(v) {
+    if (v >= 60) return '많은 직무가 재구성됨';
+    if (v >= 35) return '일부 직무가 재구성됨';
+    return '변화가 완만한 편';
+  }
+
+  const body = AI.sim.panel('#sim1', {
+    title: '직업 변화 탐색기 — 직무는 어떻게 재구성되는가',
+    tag: '16개 직업',
+    desc: '직업을 고르면 네 속성의 <b>레이더 차트</b>와, 그 점수로 계산한 <b>자동화 영향도</b>가 나옵니다. 계산식은 아래에 그대로 공개되어 있으니 직접 검산해 보세요. 표의 순위를 외우지 말고, <b>왜 그런 순서가 되었는지</b>를 찾는 것이 이 활동의 목표입니다.'
+  });
+
+  let sel = 0;
+
+  const cv = AI.sim.canvas(340, 320);
+  const gaugeNum = AI.h('span', { class: 'gauge-num', text: '–' });
+  const gaugeBand = AI.h('span', { class: 'gauge-band', text: '–' });
+  const gaugeBar = AI.h('i', { style: { width: '0%' } });
+  const calcLine = AI.h('div', { class: 'rule-line', style: { marginTop: '8px' } });
+  const attrTable = AI.h('div');
+
+  const right = AI.h('div', {},
+    AI.h('h4', { class: 'mini-head', style: { marginTop: 0 }, text: '자동화 영향도' }),
+    AI.h('div', { class: 'gauge-row' }, gaugeNum, AI.h('span', { style: { color: 'var(--ink-3)', fontSize: '13px' }, text: '/ 100' }), gaugeBand),
+    AI.h('div', { class: 'gauge' }, gaugeBar),
+    calcLine,
+    attrTable
+  );
+
+  const head = AI.h('div', { class: 'sim-grid' }, AI.h('div', {}, cv.wrap), right);
+  const jobTitle = AI.h('h4', { class: 'mini-head', style: { marginTop: 0, fontSize: '17px' } });
+  body.appendChild(jobTitle);
+  body.appendChild(head);
+
+  const three = AI.h('div', { class: 'card-grid', style: { marginTop: '14px' } });
+  body.appendChild(three);
+
+  /* ---- 레이더 차트 ---- */
+  const AXES = [
+    { k: 'rep', label: '반복성', ang: -Math.PI / 2 },
+    { k: 'cre', label: '창의성', ang: 0 },
+    { k: 'soc', label: '대인관계', ang: Math.PI / 2 },
+    { k: 'phy', label: '신체성', ang: Math.PI }
+  ];
+
+  function draw() {
+    const C = AI.sim.colors(), ctx = cv.ctx;
+    const fam = getComputedStyle(document.body).fontFamily;
+    cv.clear(C.bg);
+    const cx = 170, cy = 162, R = 102;
+    const j = JOBS[sel];
+
+    /* 격자 */
+    for (let g = 2; g <= 10; g += 2) {
+      const r = R * g / 10;
+      ctx.beginPath();
+      AXES.forEach((a, i) => {
+        const x = cx + Math.cos(a.ang) * r, y = cy + Math.sin(a.ang) * r;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillStyle = C.ink3; ctx.font = '600 9.5px ' + fam;
+      ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillText(String(g), cx + 3, cy - r);
+    }
+    /* 축 */
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 1;
+    AXES.forEach(a => {
+      ctx.beginPath(); ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(a.ang) * R, cy + Math.sin(a.ang) * R);
+      ctx.stroke();
+    });
+    /* 값 다각형 */
+    ctx.beginPath();
+    AXES.forEach((a, i) => {
+      const r = R * j[a.k] / 10;
+      const x = cx + Math.cos(a.ang) * r, y = cy + Math.sin(a.ang) * r;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.closePath();
+    ctx.fillStyle = C.dark ? 'rgba(240,168,102,.28)' : 'rgba(179,84,30,.16)';
+    ctx.fill();
+    ctx.strokeStyle = C.c; ctx.lineWidth = 2.4; ctx.stroke();
+    /* 값 점 */
+    AXES.forEach(a => {
+      const r = R * j[a.k] / 10;
+      const x = cx + Math.cos(a.ang) * r, y = cy + Math.sin(a.ang) * r;
+      ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = C.c; ctx.fill();
+    });
+    /* 축 이름 */
+    ctx.font = '750 12.5px ' + fam;
+    ctx.fillStyle = C.ink;
+    AXES.forEach(a => {
+      const x = cx + Math.cos(a.ang) * (R + 24), y = cy + Math.sin(a.ang) * (R + 20);
+      ctx.textAlign = Math.abs(Math.cos(a.ang)) < .3 ? 'center' : (Math.cos(a.ang) > 0 ? 'right' : 'left');
+      if (Math.cos(a.ang) > .5) ctx.textAlign = 'left';
+      if (Math.cos(a.ang) < -.5) ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(a.label + ' ' + j[a.k], x, y);
+    });
+    /* 제목 */
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillStyle = C.ink3; ctx.font = '650 12px ' + fam;
+    ctx.fillText('네 속성 (0~10)', cx, 8);
+  }
+
+  /* ---- 정렬 목록 ---- */
+  const listWrap = AI.h('div', { class: 'table-wrap job-table-wrap', style: { marginTop: '16px' } });
+  let sortDesc = true;
+  const rowEls = [];
+
+  function buildList() {
+    listWrap.innerHTML = '';
+    rowEls.length = 0;
+    const order = JOBS.map((j, i) => ({ j, i, v: impact(j) })
+    ).sort((a, b) => sortDesc ? b.v - a.v : a.v - b.v);
+    const tb = AI.h('tbody');
+    order.forEach((o, k) => {
+      const tr = AI.h('tr', { class: 'pick' },
+        AI.h('td', { style: { width: '34px', color: 'var(--ink-4)', fontWeight: '700' }, text: String(k + 1) }),
+        AI.h('td', { html: o.j.emo + ' <b>' + o.j.n + '</b>' }),
+        AI.h('td', { class: 'num', text: o.v }),
+        AI.h('td', { html: '<span class="minibar"><i style="width:' + o.v + '%"></i></span>' }),
+        AI.h('td', { style: { fontSize: '12.5px', color: 'var(--ink-3)' }, text: '반복 ' + o.j.rep + ' · 창의 ' + o.j.cre + ' · 대인 ' + o.j.soc + ' · 신체 ' + o.j.phy })
+      );
+      tr.addEventListener('click', () => select(o.i));
+      tb.appendChild(tr);
+      rowEls.push({ tr, i: o.i });
+    });
+    const table = AI.h('table', { class: 'tb' },
+      AI.h('caption', { html: '영향도 순 정렬 — 행을 <b>클릭</b>하면 그 직업을 자세히 볼 수 있습니다' }),
+      AI.h('thead', {}, AI.h('tr', {},
+        AI.h('th', { text: '#' }), AI.h('th', { text: '직업' }), AI.h('th', { text: '영향도' }),
+        AI.h('th', { text: '' }), AI.h('th', { text: '네 속성' })
+      )),
+      tb
+    );
+    listWrap.appendChild(table);
+    markSel();
+  }
+
+  function markSel() {
+    rowEls.forEach(r => r.tr.classList.toggle('sel', r.i === sel));
+  }
+
+  function renderInfo() {
+    const j = JOBS[sel], v = impact(j);
+    jobTitle.innerHTML = j.emo + ' ' + j.n + ' <span style="font-size:13px;font-weight:650;color:var(--ink-3)">— 직무가 어떻게 재구성될까?</span>';
+    gaugeNum.textContent = v;
+    gaugeBand.textContent = band(v);
+    gaugeBar.style.width = v + '%';
+    calcLine.innerHTML =
+      '<span class="kw">영향도</span> = 50 + 4.4×<b>' + j.rep + '</b> − 2.6×<b>' + j.cre + '</b> − 2.2×<b>' + j.soc + '</b> − 1.2×<b>' + j.phy + '</b> = <span class="w">' + v + '</span>';
+    attrTable.innerHTML =
+      '<p style="font-size:13px;color:var(--ink-3);margin:10px 0 0">반복성은 영향도를 <b>올리고</b>, 창의성·대인관계·신체성은 <b>내립니다</b>. 이 식은 학습을 위해 만든 <b>단순한 모형</b>이며, 실제 노동 시장의 예측값이 아닙니다.</p>';
+
+    three.innerHTML = '';
+    [
+      { t: '🤖 인공지능이 잘할 부분', v: j.ai, c: 'var(--accent-line)' },
+      { t: '🧑 사람이 계속 맡을 부분', v: j.hu, c: 'var(--ok-line)' },
+      { t: '🌱 새로 생길 역할', v: j.nw, c: 'var(--warn-line)' }
+    ].forEach(x => {
+      three.appendChild(AI.el(
+        '<div class="mini-card" style="border-color:' + x.c + '"><h4>' + x.t + '</h4><p>' + x.v + '</p></div>'
+      ));
+    });
+  }
+
+  function select(i) { sel = i; draw(); renderInfo(); markSel(); }
+
+  const segJob = AI.ui.seg({
+    label: '직업 고르기',
+    options: JOBS.map((j, i) => ({ value: i, label: j.emo + ' ' + j.n })),
+    value: 0,
+    onChange: v => select(v)
+  });
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' }, segJob.el));
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('↕ 정렬 뒤집기', () => { sortDesc = !sortDesc; buildList(); }, 'small'),
+    AI.ui.btn('🔍 영향도가 가장 높은 직업 보기', () => {
+      let best = 0;
+      JOBS.forEach((j, i) => { if (impact(j) > impact(JOBS[best])) best = i; });
+      segJob.set(best);
+    }, 'ghost'),
+    AI.ui.btn('🔍 가장 낮은 직업 보기', () => {
+      let low = 0;
+      JOBS.forEach((j, i) => { if (impact(j) < impact(JOBS[low])) low = i; });
+      segJob.set(low);
+    }, 'ghost')
+  ));
+  body.appendChild(listWrap);
+
+  body.appendChild(AI.el(
+    '<div class="box box-warn" style="margin:14px 0 0">' +
+    '<div class="box-label">⚠️ 이 숫자를 읽는 올바른 방법</div>' +
+    '<p>영향도가 높다는 것은 그 직업이 <b>없어진다</b>는 뜻이 <b>아닙니다</b>. “그 직업 안에서 인공지능에게 넘어갈 직무의 비중이 크다”는 뜻입니다. 회계 사무원이 사라진 나라는 없지만, 회계 사무원의 하루는 20년 전과 완전히 다릅니다.</p>' +
+    '<p>또한 이 식은 <b>수업을 위해 만든 단순한 모형</b>입니다. 실제로는 도입 비용, 법과 제도, 사회적 수용, 책임 문제가 모두 영향을 줍니다. 순위를 외우지 말고 <b>규칙성</b>을 찾으세요.</p>' +
+    '<p style="color:var(--ink-3);font-size:14px">💡 정렬 목록의 위쪽 직업들과 아래쪽 직업들을 비교해 보세요. 위쪽에는 어떤 속성이 공통으로 높고, 아래쪽에는 어떤 속성이 공통으로 높은가요? 활동 기록에 적어 보세요.</p>' +
+    '</div>'
+  ));
+
+  window.addEventListener('ai:redraw', draw);
+
+  buildList();
+  select(0);
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 규칙 기반 진로 추천 ===================== -->
+<script>
+(function () {
+  const INTERESTS = ['의료', '환경', '예술', '교육', '제조', '금융', '게임', '교통'];
+  const ACTIVITIES = ['데이터 분석', '사람 만나기', '글쓰기', '만들기', '설계', '가르치기'];
+
+  const JOBS = {
+    '데이터 분석가': { emo: '📊',
+      do: '데이터를 모아 정리하고, 그 안에서 의미 있는 규칙을 찾아 결정에 필요한 근거로 만듭니다.',
+      study: '수학(확률과 통계), 정보 / 통계학·산업공학·경영정보 계열',
+      now: '학교 급식 만족도나 도서 대출 기록을 표로 정리해 그래프로 만들어 보기' },
+    '기계학습 엔지니어': { emo: '🤖',
+      do: '문제에 맞는 모델을 골라 학습시키고, 성능을 평가해 실제 서비스에 올립니다.',
+      study: '수학(미적분·행렬), 정보 / 컴퓨터공학·인공지능학과',
+      now: '공개 데이터셋을 내려받아 파이썬으로 간단한 분류 모델을 만들어 보기' },
+    '데이터 라벨러': { emo: '🏷️',
+      do: '인공지능이 학습할 사진·문장·소리에 정답을 표시하고, 기준이 흔들리지 않게 관리합니다.',
+      study: '정보, 국어(정확한 기준 문서 작성) / 해당 분야의 배경 지식',
+      now: '친구들과 같은 사진 100장에 같은 기준으로 라벨을 달아 보고, 얼마나 일치하는지 세어 보기' },
+    '인공지능 윤리 전문가': { emo: '⚖️',
+      do: '인공지능이 누구에게 어떤 피해를 줄 수 있는지 미리 살펴 기준과 지침을 만듭니다.',
+      study: '사회·윤리, 법과 정치, 정보 / 철학·법학·사회학 계열',
+      now: '학교에 인공지능 도구를 도입한다고 가정하고, 지켜야 할 규칙 다섯 가지를 써 보기' },
+    '프롬프트 엔지니어': { emo: '✍️',
+      do: '인공지능에게 줄 지시문을 설계하고 다듬어, 원하는 품질의 결과가 안정적으로 나오게 만듭니다.',
+      study: '국어(정확한 글쓰기), 영어, 정보 / 해당 업무 분야의 지식',
+      now: '같은 과제를 세 가지 다른 지시문으로 요청해 결과의 차이를 기록해 보기' },
+    '인공지능 서비스 기획자': { emo: '🧭',
+      do: '사람들이 겪는 불편을 찾아 인공지능으로 풀 수 있는 형태로 다듬고, 개발자와 사용자를 잇습니다.',
+      study: '국어, 사회, 정보 / 경영·서비스디자인·산업공학 계열',
+      now: '우리 학교의 불편함 하나를 골라, 어떤 데이터로 어떻게 해결할지 한 장으로 정리해 보기' },
+    '로봇 엔지니어': { emo: '🦾',
+      do: '센서로 주변을 인식하고 스스로 움직이는 로봇의 하드웨어와 제어 소프트웨어를 만듭니다.',
+      study: '물리학, 수학, 정보 / 기계공학·전자공학·로봇공학',
+      now: '작은 제어 보드로 장애물을 피해 움직이는 로봇을 만들어 보기' },
+    '의료 인공지능 전문가': { emo: '🩺',
+      do: '의료 영상과 검사 기록으로 학습한 모델을 만들고, 병원 현장에서 안전하게 쓰이도록 검증합니다.',
+      study: '생명과학, 화학, 수학, 정보 / 의학·간호학·의공학·보건통계',
+      now: '공개된 의료 영상 데이터로 무엇을 판별할 수 있을지 조사해 정리해 보기' },
+    '인공지능 교사': { emo: '👩‍🏫',
+      do: '인공지능의 원리와 윤리를 가르치고, 인공지능 도구를 활용한 수업을 설계합니다.',
+      study: '정보, 수학, 교육학 / 컴퓨터교육과·정보교육 관련 학과',
+      now: '이 교과서의 시뮬레이터 하나를 골라 친구에게 5분 안에 설명해 보기' },
+    '생성형 인공지능 콘텐츠 디자이너': { emo: '🎨',
+      do: '생성형 인공지능을 도구로 써서 그림·영상·음악의 시안을 만들고, 최종 결과의 방향을 정합니다.',
+      study: '미술·음악, 국어, 정보 / 디자인·영상·미디어 계열',
+      now: '하나의 주제로 시안을 여러 개 만들고, 왜 그중 하나를 골랐는지 이유를 적어 보기' },
+    '환경 데이터 과학자': { emo: '🌱',
+      do: '대기·수질·기후 데이터를 분석해 오염의 원인을 찾고 변화를 예측합니다.',
+      study: '지구과학, 화학, 수학 / 환경공학·대기과학·통계학',
+      now: '우리 지역의 공개 미세먼지 데이터를 내려받아 계절별 변화를 그려 보기' },
+    '스마트 팜 전문가': { emo: '🚜',
+      do: '센서와 인공지능으로 온실 환경을 조절하고, 작물의 생육과 수확량을 예측합니다.',
+      study: '생명과학, 물리학, 정보 / 농업생명과학·원예·시스템공학',
+      now: '화분 하나의 온도·습도를 2주간 기록하고 생장과의 관계를 살펴보기' },
+    '금융 인공지능 엔지니어': { emo: '💳',
+      do: '거래 데이터로 사기 거래를 탐지하고, 신용 평가와 자산 관리 모델을 만듭니다.',
+      study: '수학(확률과 통계), 경제, 정보 / 금융공학·경제학·컴퓨터공학',
+      now: '용돈 지출 기록을 항목별로 정리해 평소와 다른 지출을 스스로 찾아보기' },
+    '게임 인공지능 개발자': { emo: '🎮',
+      do: '게임 속 캐릭터의 행동과 난이도를 설계하고, 플레이어에 맞춰 반응하는 규칙과 모델을 만듭니다.',
+      study: '수학, 물리학, 정보 / 게임공학·컴퓨터공학',
+      now: '간단한 게임을 만들어, 적 캐릭터가 플레이어를 찾아오는 탐색 알고리즘을 넣어 보기' },
+    '인공지능 품질 검증 전문가': { emo: '🔎',
+      do: '모델이 어떤 상황에서 틀리는지 집요하게 찾아내고, 출시 전에 위험을 걸러 냅니다.',
+      study: '수학, 정보, 사회(공정성) / 소프트웨어공학·품질경영',
+      now: '인공지능 서비스에 일부러 까다로운 입력을 넣어 실패 사례 10개를 모아 보기' },
+    '자율주행 인공지능 엔지니어': { emo: '🚗',
+      do: '카메라·라이다 신호로 주변을 인식하고, 안전한 경로를 결정하는 소프트웨어를 만듭니다.',
+      study: '물리학, 수학, 정보 / 전자공학·기계공학·컴퓨터공학',
+      now: '교차로에서 5분간 차와 사람의 움직임을 관찰해, 규칙으로 쓸 판단 기준을 적어 보기' }
+  };
+
+  /* ---- 규칙 집합 — ifI(관심), ifA(선호) 중 없는 조건은 '무엇이든' 을 뜻한다 ---- */
+  const RULES = [
+    /* ① 관심 + 선호 조합 규칙 (가장 강하다) */
+    { ifI: '의료', ifA: '데이터 분석', then: '의료 인공지능 전문가', w: 3 },
+    { ifI: '의료', ifA: '만들기', then: '로봇 엔지니어', w: 3 },
+    { ifI: '의료', ifA: '사람 만나기', then: '인공지능 서비스 기획자', w: 3 },
+    { ifI: '환경', ifA: '데이터 분석', then: '환경 데이터 과학자', w: 3 },
+    { ifI: '환경', ifA: '만들기', then: '스마트 팜 전문가', w: 3 },
+    { ifI: '환경', ifA: '글쓰기', then: '인공지능 윤리 전문가', w: 3 },
+    { ifI: '예술', ifA: '만들기', then: '생성형 인공지능 콘텐츠 디자이너', w: 3 },
+    { ifI: '예술', ifA: '글쓰기', then: '프롬프트 엔지니어', w: 3 },
+    { ifI: '교육', ifA: '가르치기', then: '인공지능 교사', w: 3 },
+    { ifI: '교육', ifA: '데이터 분석', then: '데이터 분석가', w: 3 },
+    { ifI: '제조', ifA: '설계', then: '로봇 엔지니어', w: 3 },
+    { ifI: '제조', ifA: '만들기', then: '로봇 엔지니어', w: 3 },
+    { ifI: '금융', ifA: '데이터 분석', then: '금융 인공지능 엔지니어', w: 3 },
+    { ifI: '금융', ifA: '설계', then: '인공지능 품질 검증 전문가', w: 3 },
+    { ifI: '게임', ifA: '만들기', then: '게임 인공지능 개발자', w: 3 },
+    { ifI: '게임', ifA: '설계', then: '게임 인공지능 개발자', w: 3 },
+    { ifI: '교통', ifA: '설계', then: '자율주행 인공지능 엔지니어', w: 3 },
+    { ifI: '교통', ifA: '데이터 분석', then: '자율주행 인공지능 엔지니어', w: 3 },
+
+    /* ② 선호 활동 규칙 */
+    { ifA: '데이터 분석', then: '데이터 분석가', w: 2 },
+    { ifA: '데이터 분석', then: '기계학습 엔지니어', w: 1.6 },
+    { ifA: '데이터 분석', then: '데이터 라벨러', w: 1.1 },
+    { ifA: '사람 만나기', then: '인공지능 서비스 기획자', w: 2 },
+    { ifA: '사람 만나기', then: '인공지능 윤리 전문가', w: 1.6 },
+    { ifA: '글쓰기', then: '프롬프트 엔지니어', w: 2 },
+    { ifA: '글쓰기', then: '인공지능 서비스 기획자', w: 1.5 },
+    { ifA: '만들기', then: '로봇 엔지니어', w: 2 },
+    { ifA: '만들기', then: '생성형 인공지능 콘텐츠 디자이너', w: 1.6 },
+    { ifA: '설계', then: '기계학습 엔지니어', w: 2 },
+    { ifA: '설계', then: '인공지능 품질 검증 전문가', w: 1.5 },
+    { ifA: '가르치기', then: '인공지능 교사', w: 2 },
+    { ifA: '가르치기', then: '인공지능 서비스 기획자', w: 1.4 },
+    { ifA: '가르치기', then: '인공지능 윤리 전문가', w: 1.2 },
+
+    /* ③ 관심 분야 규칙 */
+    { ifI: '의료', then: '의료 인공지능 전문가', w: 1 },
+    { ifI: '의료', then: '데이터 분석가', w: 0.8 },
+    { ifI: '환경', then: '환경 데이터 과학자', w: 1 },
+    { ifI: '환경', then: '데이터 분석가', w: 0.8 },
+    { ifI: '예술', then: '생성형 인공지능 콘텐츠 디자이너', w: 1 },
+    { ifI: '예술', then: '프롬프트 엔지니어', w: 0.8 },
+    { ifI: '교육', then: '인공지능 교사', w: 1 },
+    { ifI: '교육', then: '인공지능 서비스 기획자', w: 0.8 },
+    { ifI: '제조', then: '로봇 엔지니어', w: 1 },
+    { ifI: '제조', then: '인공지능 품질 검증 전문가', w: 0.8 },
+    { ifI: '금융', then: '금융 인공지능 엔지니어', w: 1 },
+    { ifI: '금융', then: '데이터 분석가', w: 0.8 },
+    { ifI: '게임', then: '게임 인공지능 개발자', w: 1 },
+    { ifI: '게임', then: '기계학습 엔지니어', w: 0.8 },
+    { ifI: '교통', then: '자율주행 인공지능 엔지니어', w: 1 },
+    { ifI: '교통', then: '로봇 엔지니어', w: 0.8 }
+  ];
+  RULES.forEach((r, i) => { r.id = 'R' + String(i + 1).padStart(2, '0'); });
+
+  const body = AI.sim.panel('#sim2', {
+    title: '나의 인공지능 진로 찾기 — 규칙 기반 추천',
+    tag: '규칙 ' + RULES.length + '개',
+    desc: '관심 분야와 선호 활동을 고르면 <b>규칙 기반 추론</b>으로 어울리는 직업 세 개를 추천합니다. 1단원 5차시에서 배운 그 방식입니다. 어떤 규칙이 발동했는지 <b>그대로 보여 주므로</b>, 추천의 근거를 직접 확인할 수 있습니다.'
+  });
+
+  let interest = '의료', activity = '데이터 분석';
+
+  const segI = AI.ui.seg({ label: '관심 분야', options: INTERESTS, value: interest, onChange: v => { interest = v; run(); } });
+  const segA = AI.ui.seg({ label: '선호 활동', options: ACTIVITIES, value: activity, onChange: v => { activity = v; run(); } });
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.h('span', { style: { fontSize: '12.5px', fontWeight: '700', color: 'var(--ink-3)' }, text: '관심 분야' }), segI.el));
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.h('span', { style: { fontSize: '12.5px', fontWeight: '700', color: 'var(--ink-3)' }, text: '선호 활동' }), segA.el));
+
+  const factBox = AI.h('div', { class: 'box box-info', style: { marginTop: '14px' } });
+  const ruleLog = AI.ui.log();
+  const result = AI.h('div', { style: { marginTop: '14px' } });
+
+  body.appendChild(factBox);
+  body.appendChild(AI.h('h4', { class: 'mini-head', text: '⚙️ 발동한 규칙 (추론 과정)' }));
+  body.appendChild(ruleLog.el);
+  body.appendChild(AI.h('h4', { class: 'mini-head', text: '🎯 추천 결과 — 상위 3개' }));
+  body.appendChild(result);
+
+  function condText(r) {
+    const p = [];
+    if (r.ifI) p.push('<span class="kw">관심</span> = ' + r.ifI);
+    if (r.ifA) p.push('<span class="kw">선호</span> = ' + r.ifA);
+    return p.join(' AND ');
+  }
+
+  function run() {
+    factBox.innerHTML =
+      '<div class="box-label">📥 입력된 사실 (fact)</div>' +
+      '<p class="rule-line" style="margin:0"><span class="kw">관심</span> = ' + interest +
+      ' &nbsp;·&nbsp; <span class="kw">선호</span> = ' + activity + '</p>';
+
+    const fired = RULES.filter(r => (!r.ifI || r.ifI === interest) && (!r.ifA || r.ifA === activity));
+    const score = {};
+    ruleLog.clear();
+    fired.forEach(r => {
+      score[r.then] = (score[r.then] || 0) + r.w;
+      ruleLog.add('<span class="rid">' + r.id + '</span> IF ' + condText(r) +
+        ' THEN <b>' + r.then + '</b> <span style="color:var(--ok);font-weight:700">(+' + AI.fmt(r.w, 1) + ')</span>',
+        r.w >= 3);
+    });
+    ruleLog.add('발동한 규칙 <b>' + fired.length + '개</b> · 점수를 모아 상위 3개를 추천합니다.', true);
+
+    const ranked = Object.keys(score).map(k => ({ n: k, v: score[k] })).sort((a, b) => b.v - a.v).slice(0, 3);
+
+    result.innerHTML = '';
+    ranked.forEach((o, k) => {
+      const j = JOBS[o.n];
+      result.appendChild(AI.el(
+        '<div class="job-card">' +
+        '<span class="rank">' + (k + 1) + '순위 · 점수 ' + AI.fmt(o.v, 1) + '</span>' +
+        '<h5>' + j.emo + ' ' + o.n + '</h5>' +
+        '<dl>' +
+        '<dt>하는 일</dt><dd>' + j.do + '</dd>' +
+        '<dt>필요한 공부 (과목 · 전공)</dt><dd>' + j.study + '</dd>' +
+        '<dt>지금 해 볼 수 있는 활동</dt><dd>' + j.now + '</dd>' +
+        '</dl></div>'
+      ));
+    });
+  }
+
+  body.appendChild(AI.el(
+    '<div class="box box-warn" style="margin:14px 0 0">' +
+    '<div class="box-label">⚠️ 이 추천을 믿지 마세요 — 정확히 말하면, 이렇게 믿으세요</div>' +
+    '<p>이 시스템은 규칙 <b>' + RULES.length + '개</b>로 만든 아주 단순한 추천기입니다. 여러분이 고른 두 가지 정보만 보고, 사람이 미리 적어 둔 규칙을 발동시킨 것이 전부입니다. 1단원에서 배운 <b>전문가 시스템의 한계</b>가 그대로 들어 있습니다. 규칙에 없는 조합은 어색한 답을 내고, 규칙을 만든 사람의 편견도 그대로 들어갑니다.</p>' +
+    '<p>실제 진로는 관심과 활동 두 가지로 정해지지 않습니다. 성적, 가정 형편, 몸의 조건, 살고 싶은 지역, 함께 일하고 싶은 사람, 그리고 <b>해 보고 나서 바뀌는 마음</b>이 모두 관여합니다.</p>' +
+    '<p style="font-weight:700;color:var(--ink)">💡 이 추천은 <b>생각을 시작하기 위한 재료</b>입니다. <b>진로는 스스로 정하는 것입니다.</b> 추천된 직업이 마음에 들지 않는다면, 그 이유를 적어 보세요. 그것이 자신에 대해 가장 많이 알려 주는 정보입니다.</p>' +
+    '</div>'
+  ));
+
+  run();
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a3l2-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['대체', '보완', '신생', '반복성', '직무', '문제 정의', '데이터 라벨러', '프롬프트 엔지니어', '인공지능 윤리 전문가'],
+  sents: [
+    { text: '사람이 하던 일을 인공지능이 대신 맡는 변화를 {0}, 사람의 능력을 키워 주는 변화를 {1}, 전에 없던 직업이 생기는 변화를 {2}(이)라고 한다.', answers: [['대체'], ['보완'], ['신생']] },
+    { text: '{0}이(가) 높고 규칙이 명확하며 데이터가 많은 일은 자동화되기 쉽다.', answers: [['반복성']] },
+    { text: '인공지능은 직업을 통째로 없애기보다 그 직업을 이루는 {0}의 일부를 가져가 전체를 재구성한다.', answers: [['직무']] },
+    { text: '인공지능은 주어진 문제를 풀지만 무엇을 풀어야 하는지는 정해 주지 않으므로, 사람에게는 {0} 능력이 더 중요해진다.', answers: [['문제 정의']] },
+    { text: '인공지능이 학습할 사진과 문장에 정답을 표시하고 그 기준을 관리하는 직업은 {0}이다.', answers: [['데이터 라벨러']] },
+    { text: '인공지능에게 줄 지시문을 설계해 원하는 결과가 안정적으로 나오게 만드는 직업은 {0}이다.', answers: [['프롬프트 엔지니어']] },
+    { text: '인공지능이 누구에게 어떤 피해를 줄 수 있는지 미리 살펴 기준과 지침을 만드는 직업은 {0}이다.', answers: [['인공지능 윤리 전문가']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '2차시 확인 문제',
+  items: [
+    {
+      type: 'mc',
+      q: '어떤 직무가 <b>자동화되기 쉬운지</b>를 가장 잘 설명한 것은?',
+      choices: [
+        '학력이 낮은 사람이 주로 하는 일일수록 자동화되기 쉽다',
+        '반복성이 높고 규칙이 명확하며 데이터가 많은 일일수록 자동화되기 쉽다',
+        '몸을 많이 쓰는 일일수록 자동화되기 쉽다',
+        '급여가 낮은 일일수록 자동화되기 쉽다'
+      ],
+      answer: 1,
+      why: '자동화 가능성은 직업의 <b>지위나 급여</b>가 아니라 <b>직무의 성질</b>로 결정됩니다. 반복성·규칙의 명확성·데이터의 양이 핵심입니다. 오히려 좁은 공간에서 낡은 설비를 다루는 것처럼 <b>몸을 쓰며 상황이 매번 다른 일</b>은 자동화가 매우 어렵습니다.'
+    },
+    {
+      type: 'ox',
+      q: '인공지능의 영향을 설명할 때 “이 직업은 사라진다”보다 “이 직업의 직무가 재구성된다”가 더 정확한 표현이다.',
+      answer: true,
+      why: '한 직업은 여러 직무로 이루어져 있고, 인공지능은 그중 일부를 가져갑니다. 남은 직무의 비중이 커지고 새로운 직무가 더해지면서 직업의 모습이 바뀝니다. 회계 사무원은 사라지지 않았지만, 그들의 하루 업무는 20년 전과 완전히 다릅니다.'
+    },
+    {
+      type: 'multi',
+      q: '인공지능 시대에 <b>더 중요해지는 역량</b>으로 이 차시에서 다룬 것을 모두 고르시오.',
+      choices: [
+        '무엇이 문제인지 정하는 문제 정의 능력',
+        '정해진 계산을 빠르고 정확하게 수행하는 능력',
+        '결정을 사람들에게 설명하고 함께 움직이게 만드는 공감과 소통',
+        '할 수 있는 일과 해도 되는 일을 구별하는 윤리적 판단'
+      ],
+      answer: [0, 2, 3],
+      why: '②는 인공지능이 사람보다 훨씬 잘하는 영역이므로 상대적 중요도가 낮아집니다. 나머지 세 가지는 인공지능을 <b>쓰면서 오히려 더 필요해지는</b> 능력입니다. 인공지능이 초안 열 개를 만들어 줄 때, 무엇을 고르고 왜 그것인지 설명하는 사람이 방향을 정합니다.'
+    },
+    {
+      type: 'short',
+      q: '인공지능이 학습할 사진·문장·소리에 정답을 표시하고, 그 표시 기준이 흔들리지 않게 관리하는 직업의 이름은 무엇인가?',
+      answer: ['데이터 라벨러', '라벨러', '데이터 레이블러', '데이터 라벨링 전문가'],
+      placeholder: '예: ○○○ ○○○',
+      why: '<b>데이터 라벨러</b>입니다. 지도학습은 정답이 붙은 데이터로 배우기 때문에, 라벨의 품질이 곧 모델의 품질이 됩니다. 여러 사람이 같은 데이터에 다른 라벨을 붙이면 모델이 혼란스러워하므로, <b>기준을 일관되게 유지하는 일</b>이 핵심 역량입니다.'
+    },
+    {
+      type: 'order',
+      q: '진로 설계의 다섯 단계를 <b>올바른 순서</b>로 배열하시오.',
+      items: [
+        '무엇을 할 때 시간이 빨리 가는지 기록하며 나를 알아본다',
+        '관심 분야에서 실제로 어떤 일이 벌어지는지 조사한다',
+        '그 일에 필요한 역량과 지금 나의 상태 사이의 차이를 확인한다',
+        '작은 프로젝트나 동아리 활동으로 직접 경험해 본다',
+        '경험을 돌아보고 계획을 고쳐 쓴다'
+      ],
+      answer: [0, 1, 2, 3, 4],
+      why: '나를 알기 → 세계를 알기 → 역량을 잇기 → 작게 해 보기 → 돌아보고 고치기 순서입니다. 중요한 것은 이 과정이 <b>한 번으로 끝나지 않고 순환한다</b>는 점입니다. 해 본 뒤 계획을 바꾸는 것은 실패가 아니라 설계의 일부입니다.'
+    },
+    {
+      type: 'match',
+      q: '다음 하는 일을 알맞은 직업과 짝지으시오.',
+      left: [
+        '문제에 맞는 모델을 학습시키고 성능을 평가해 서비스에 올린다',
+        '인공지능에게 줄 지시문을 설계해 결과 품질을 안정시킨다',
+        '인공지능이 줄 수 있는 피해를 미리 살펴 기준과 지침을 만든다',
+        '사람들의 불편을 인공지능으로 풀 형태로 다듬고 개발자와 사용자를 잇는다',
+        '모델이 어떤 상황에서 틀리는지 찾아내 출시 전에 위험을 걸러 낸다'
+      ],
+      right: ['기계학습 엔지니어', '프롬프트 엔지니어', '인공지능 윤리 전문가', '인공지능 서비스 기획자', '인공지능 품질 검증 전문가'],
+      answer: [0, 1, 2, 3, 4],
+      why: '인공지능 관련 직업은 프로그래밍만으로 이루어지지 않습니다. <b>정확한 언어 표현</b>(프롬프트 엔지니어), <b>사회·윤리적 감각</b>(윤리 전문가), <b>관찰력과 소통</b>(서비스 기획자), <b>집요함</b>(품질 검증)처럼 다양한 강점이 쓰입니다.'
+    },
+    {
+      type: 'mc',
+      q: '시뮬레이터의 자동화 영향도 계산식은 <span class="mono">50 + 4.4×반복성 − 2.6×창의성 − 2.2×대인관계 − 1.2×신체성</span>이다. 이 식에서 읽어 낼 수 있는 것은?',
+      choices: [
+        '반복성이 1점 오르면 영향도가 4.4점 오르고, 창의성이 1점 오르면 2.6점 내려간다',
+        '이 식은 각 직업이 몇 년 뒤에 사라질지 알려 준다',
+        '네 속성이 모두 같으면 영향도도 같으므로, 같은 직업으로 볼 수 있다',
+        '신체성이 높은 일은 자동화가 가장 쉽다'
+      ],
+      answer: 0,
+      why: '계수의 부호와 크기가 각 속성의 <b>영향 방향과 세기</b>를 나타냅니다. 반복성만 영향도를 올리고 나머지 셋은 내립니다. ②는 틀렸습니다. 이 식은 수업을 위해 만든 <b>단순한 모형</b>이며, 실제 도입에는 비용·법·제도·사회적 수용이 함께 작용합니다. ④는 계수가 음수(−1.2)이므로 반대입니다.'
+    },
+    {
+      type: 'ox',
+      q: '시뮬레이터 2의 진로 추천은 규칙 기반 추론으로 만들어졌으므로, 규칙에 없는 조합에도 항상 알맞은 답을 낸다.',
+      answer: false,
+      why: '규칙 기반 시스템의 가장 큰 한계가 바로 이것입니다. 사람이 미리 적어 둔 규칙에 없는 상황에서는 <b>엉뚱한 답을 내거나 아무 답도 내지 못합니다.</b> 1980년대 전문가 시스템이 두 번째 겨울을 맞은 이유이기도 합니다. 그래서 그 추천은 정답이 아니라 <b>생각을 시작하기 위한 재료</b>로 보아야 합니다.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a3l2-note',
+  title: '직업 변화 탐색과 나의 진로 설계',
+  prompt: '두 시뮬레이터를 충분히 다뤄 본 뒤 아래를 채워 보세요. <b>직업 변화 탐색기에서 최소 6개 직업을 열어 보고</b>, 진로 찾기에서는 관심 분야와 선호 활동을 <b>두 번 이상 바꿔 가며</b> 결과를 비교해 보세요.',
+  fields: [
+    { key: 'high', label: '영향도가 가장 높았던 직업 (직업 · 점수)', type: 'text', placeholder: '예: 제조 라인 검사원 · 82' },
+    { key: 'low', label: '영향도가 가장 낮았던 직업 (직업 · 점수)', type: 'text', placeholder: '예: 일러스트레이터 · 12' },
+    { key: 'field', label: '나의 관심 분야', type: 'select', options: ['의료', '환경', '예술', '교육', '제조', '금융', '게임', '교통', '아직 모르겠다'] },
+    { key: 'act', label: '나의 선호 활동', type: 'select', options: ['데이터 분석', '사람 만나기', '글쓰기', '만들기', '설계', '가르치기', '아직 모르겠다'] },
+    {
+      key: 'rule', label: '정렬 목록에서 찾은 <b>규칙성</b> — 위쪽 직업들과 아래쪽 직업들은 어떤 속성이 달랐나요?',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 위쪽 직업들은 반복성이 모두 7 이상이었고, 아래쪽 직업들은 창의성이나 대인관계가 8 이상이었다. 신체성이 높은 직업은 …'
+    },
+    {
+      key: 'recomm', label: '진로 찾기에서 추천받은 직업 3개와, 발동한 규칙 가운데 가장 인상 깊었던 것',
+      type: 'textarea', rows: 4,
+      placeholder: '추천: 1) …  2) …  3) …\n인상 깊었던 규칙: IF 관심=환경 AND 선호=만들기 THEN 스마트 팜 전문가\n이 추천에 동의하는가? 그 이유는?'
+    },
+    {
+      key: 'dream', label: '나의 진로 설계 ① — 10년 뒤 나는 어떤 모습으로 일하고 있을까요? 어떤 문제를 풀고 있을지 구체적으로 적어 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 나는 환경 분야에서 우리 지역의 하천 오염 원인을 데이터로 찾아내는 일을 하고 있을 것 같다. 사람들에게 결과를 설명하는 일도 함께 …'
+    },
+    {
+      key: 'plan', label: '나의 진로 설계 ② — 필요한 역량과 <b>지금 시작할 일</b> (이번 학기에 할 것 하나, 올해 안에 할 것 하나)',
+      type: 'textarea', rows: 5,
+      placeholder: '필요한 역량: 데이터를 읽는 힘, 결과를 설명하는 글쓰기, …\n부족한 점: …\n이번 학기: 우리 지역 공개 데이터로 그래프 하나 만들어 보기\n올해 안에: 관련 동아리 활동 또는 작은 프로젝트 …'
+    }
+  ]
+});
+</script>
+</body>
+</html>

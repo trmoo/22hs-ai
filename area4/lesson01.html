@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1차시 인류의 숙제 17개 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+/* 이 차시에서만 쓰는 보조 클래스 */
+.sdg-grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(116px, 1fr)); margin: 4px 0 0; }
+.sdg-cell { position: relative; }
+.sdg-tile {
+  width: 100%; min-height: 84px; border: 2px solid transparent; border-radius: 12px;
+  font: inherit; text-align: left; padding: 8px 28px 8px 10px; cursor: pointer;
+  display: flex; flex-direction: column; gap: 2px; line-height: 1.32;
+}
+.sdg-tile .n { font-size: 19px; font-weight: 800; font-family: var(--font-mono); letter-spacing: -.03em; }
+.sdg-tile .t { font-size: 12.3px; font-weight: 750; }
+.sdg-tile:hover { filter: brightness(1.08); }
+.sdg-tile[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 3px var(--accent-soft); }
+.sdg-cell.dim { opacity: .2; }
+.sdg-star {
+  position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; padding: 0;
+  border: 0; border-radius: 50%; background: rgba(255, 255, 255, .3); color: #fff;
+  font-size: 12px; line-height: 1; cursor: pointer;
+}
+.sdg-star:hover { background: rgba(255, 255, 255, .55); }
+.sdg-star[aria-pressed="true"] { background: #ffffff; color: #c07f00; }
+.sdg-detail { margin: 15px 0 0; padding: 15px 16px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface-2); }
+.sdg-detail .dh { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; flex-wrap: wrap; }
+.sdg-detail .dno { width: 34px; height: 34px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-family: var(--font-mono); flex: 0 0 auto; }
+.sdg-detail .dl { font-size: 12px; font-weight: 750; color: var(--ink-3); margin: 11px 0 3px; letter-spacing: .02em; }
+.sdg-detail ul { margin: 0; padding-left: 1.2em; font-size: 14.3px; color: var(--ink-2); }
+.sdg-detail p { font-size: 14.5px; margin: 0; color: var(--ink-2); }
+.pick-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 14px 0 0; }
+.pick-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 6px 4px 11px; border-radius: 999px; background: var(--accent-soft); border: 1px solid var(--accent-line); font-size: 12.5px; font-weight: 700; color: var(--accent-ink); }
+.pick-chip button { border: 0; background: transparent; color: inherit; font: inherit; font-weight: 800; cursor: pointer; padding: 0 3px; line-height: 1; }
+.step-bar { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 15px; }
+.step-dot { flex: 1 1 0; min-width: 104px; padding: 8px 9px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); font: inherit; font-size: 12.5px; font-weight: 700; color: var(--ink-3); text-align: center; cursor: pointer; }
+.step-dot[aria-current="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
+.step-dot.done::before { content: "✓ "; color: var(--ok); font-weight: 900; }
+.step-panel { padding: 15px 16px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); }
+.step-panel h5 { font-size: 15px; margin: 0 0 4px; }
+.step-panel .sp-help { font-size: 13.5px; color: var(--ink-3); margin: 0 0 12px; }
+.ex-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin: 12px 0 0; }
+.ex-box { padding: 11px 13px; border-radius: var(--radius-sm); font-size: 13.6px; line-height: 1.66; border: 1px solid var(--line); }
+.ex-box.bad { background: var(--no-soft); border-color: var(--no-line); }
+.ex-box.good { background: var(--ok-soft); border-color: var(--ok-line); }
+.ex-box .exl { display: block; font-size: 11.5px; font-weight: 800; margin-bottom: 4px; }
+.ex-box.bad .exl { color: var(--no); }
+.ex-box.good .exl { color: var(--ok); }
+.topic-out { margin: 16px 0 0; padding: 15px 17px; border-radius: var(--radius); border: 2px solid var(--accent-line); background: var(--accent-soft); }
+.topic-out .tol { font-size: 12px; font-weight: 800; color: var(--accent-ink); margin-bottom: 6px; letter-spacing: .03em; }
+.topic-out .tot { font-size: 15.5px; font-weight: 700; color: var(--ink); line-height: 1.8; }
+.btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>세계 여러 나라의 대표들이 한자리에 모여 “2030년까지 인류가 반드시 풀어야 할 문제” 목록을 만들었다고 해 봅시다. 그 목록에는 몇 개의 항목이 들어갈까요? 그리고 여러분이 그 목록을 만든다면 <b>1번</b>에 무엇을 적을까요?</p>
+      <p>이제 질문을 하나 더 던져 봅니다. 그 목록의 문제들 가운데 <b>인공지능이 실제로 거들 수 있는 것</b>은 무엇일까요? 인공지능은 굶주린 사람에게 밥을 줄 수는 없지만, <b>어느 지역이 언제 식량 부족에 빠질지 미리 알려 줄 수는</b> 있습니다.</p>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 인공지능이 잘하는 일은 딱 네 가지로 정리된다</summary>
+        <div class="more-body">
+          <p>인공지능이 사회 문제에서 맡는 역할은 대체로 <b>예측</b>(앞일을 미리 알려 준다), <b>탐지</b>(사람이 놓치는 것을 찾아낸다), <b>최적화</b>(가장 나은 배분을 계산한다), <b>접근성 향상</b>(도움이 필요한 사람에게 서비스를 닿게 한다) 중 하나입니다.</p>
+          <p>이 차시에서는 실제 국제 목표 17개를 하나씩 열어 보며, 그 안에서 <b>우리가 직접 해 볼 수 있는 프로젝트 주제</b>를 뽑아냅니다.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 지속가능발전목표 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>인류가 함께 쓴 숙제 목록</h2></div>
+
+    <p>2015년, 세계 각국은 “이대로 가면 다음 세대가 살 수 없다”는 위기의식을 공유했습니다. 기후는 빠르게 바뀌고, 어떤 나라에서는 아이들이 굶고, 어떤 나라에서는 음식이 버려집니다. 그래서 각국 대표들은 <b>모두가 함께 해결해야 하는 문제</b>를 하나의 목록으로 정리했습니다.</p>
+
+    <p>그 목록이 바로 <b class="blank" data-a="지속가능발전목표|SDGs|에스디지에스|지속 가능 발전 목표" data-hint="영어 약자 SDGs로 부른다">지속가능발전목표</b>입니다. 이 목표는 <b class="blank" data-a="2015" data-hint="유엔 총회에서 결의된 해">2015</b>년 유엔 총회에서 결의된 것으로, <b class="blank" data-a="17" data-hint="주요 목표의 개수">17</b>개의 주요 목표와 <b class="blank" data-a="169" data-hint="세부 목표의 개수 — 세 자리 수">169</b>개의 세부 목표로 구성됩니다. 달성 시점은 <b class="blank" data-a="2030" data-hint="목표 달성 시점이 되는 해">2030</b>년입니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념</div>
+      <p><b>지속가능발전목표(SDGs, Sustainable Development Goals)</b>는 2015년 유엔 총회에서 결의한 국제 사회의 공동 목표이다. 17개의 주요 목표와 169개의 세부 목표로 구성되며, 2030년까지 달성하는 것을 목표로 한다. “지속가능”이란 <b>지금 세대의 필요를 채우면서도 다음 세대가 살아갈 여지를 남기는 것</b>을 뜻한다.</p>
+    </div>
+
+    <p>중요한 것은 이 17개가 <b>서로 얽혀 있다</b>는 점입니다. 예를 들어 깨끗한 물이 없으면(목표 6) 아이들이 병에 걸려 학교에 가지 못하고(목표 3·4), 학교에 가지 못하면 좋은 일자리를 얻기 어렵습니다(목표 8). 하나만 잘 풀어도 여러 목표가 함께 좋아지고, 반대로 하나를 방치하면 여러 목표가 함께 나빠집니다.</p>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 왜 “세부 목표”가 169개나 필요할까?</div>
+      <p>“빈곤을 끝내자”는 말만으로는 무엇을 했는지 확인할 수 없습니다. 그래서 각 주요 목표 아래에 “2030년까지 하루 소득이 일정 기준 미만인 인구를 절반으로 줄인다”처럼 <b>측정할 수 있는 세부 목표</b>를 붙였습니다. 세부 목표에는 각각 지표(indicator)가 붙고, 그 지표가 바로 <b>데이터</b>입니다. 데이터가 있는 곳에 인공지능이 들어갈 자리가 생깁니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. 다섯 묶음 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>17개를 다섯 묶음으로 보기</h2></div>
+
+    <p>17개를 번호 순서로 외우려 하면 금방 헷갈립니다. 그래서 흔히 <b>사람 · 지구 · 번영 · 평화 · 협력</b>의 다섯 묶음으로 나누어 이해합니다. 앞의 세 묶음은 “무엇을 지킬 것인가”, 뒤의 두 묶음은 “어떻게 지킬 것인가”에 해당합니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">👤</span>
+        <h4>사람 — 목표 1~5</h4>
+        <p>빈곤·기아·건강·교육·성평등. 한 사람 한 사람의 <b>기본적인 삶</b>을 지키는 묶음입니다. 데이터가 사람의 몸과 생활에 관한 것이라 <b>민감 정보</b>가 많습니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🌍</span>
+        <h4>지구 — 목표 6·12·13·14·15</h4>
+        <p>물, 소비와 생산, 기후변화, 바다와 땅의 생태계. <b>환경</b>을 지키는 묶음입니다. 위성 영상·센서 기록처럼 <b>공개 데이터가 많아</b> 프로젝트로 다루기 쉽습니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">📈</span>
+        <h4>번영 — 목표 7~11</h4>
+        <p>에너지, 일자리, 산업과 사회기반시설, 불평등, 도시. 사람이 <b>안정적으로 살 수 있는 환경</b>을 만드는 묶음입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🕊️</span>
+        <h4>평화 — 목표 16</h4>
+        <p>폭력과 부패를 줄이고 모두에게 정의가 닿게 하는 목표입니다. 제도와 신뢰가 무너지면 다른 16개 목표도 함께 무너집니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🤝</span>
+        <h4>협력 — 목표 17</h4>
+        <p>나머지 16개를 <b>실제로 이루기 위한 수단</b>입니다. 기술·재원·데이터를 나라 사이에서 나누는 일을 다룹니다.</p>
+      </div>
+    </div>
+
+    <p>다섯 묶음 가운데 <b class="blank" data-a="번영" data-hint="에너지·일자리·산업·도시를 묶은 이름, 목표 7~11">번영</b> 묶음은 경제 활동과 사회기반시설을 다루기 때문에 교통량·전력 사용량처럼 <b>기계가 자동으로 기록하는 데이터</b>가 많습니다. 그래서 학생 프로젝트에서 인공지능을 적용해 보기 좋은 영역입니다.</p>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 흔한 오해</div>
+      <p>“17개 목표는 개발도상국을 위한 것”이라는 오해가 많습니다. 그러나 지속가능발전목표는 <b>모든 나라가 함께 달성해야 하는 목표</b>입니다. 우리나라도 폐기물 발생량(목표 12), 온실가스 배출량(목표 13), 성별 임금 격차(목표 5) 같은 지표에서 갈 길이 멉니다. 즉 <b>우리 학교·우리 동네에서도 얼마든지 프로젝트 주제를 찾을 수 있습니다.</b></p>
+    </div>
+  </section>
+
+  <!-- ============ 3. 인공지능의 두 얼굴 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>인공지능이 돕는 방식과, 해치는 방식</h2></div>
+
+    <h3 class="sub-head">돕는 방식 — 네 가지로 정리된다</h3>
+    <p>인공지능이 지속가능발전목표에 기여하는 방법은 아주 다양해 보이지만, 자세히 보면 네 가지 유형으로 정리됩니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>인공지능이 지속가능발전목표에 기여하는 네 가지 방식</caption>
+        <thead><tr><th>방식</th><th>하는 일</th><th>사례</th><th>관련 목표</th></tr></thead>
+        <tbody>
+          <tr><td><b>예측</b></td><td>과거 데이터로 앞일을 미리 추정한다</td><td>기상·토양 데이터로 수확량과 식량 부족 시기를 추정</td><td>2, 13</td></tr>
+          <tr><td><b>탐지</b></td><td>사람이 놓치는 신호를 찾아낸다</td><td>위성 영상 변화에서 불법 벌목을 찾아냄</td><td>15, 14</td></tr>
+          <tr><td><b>최적화</b></td><td>한정된 자원을 가장 잘 배분한다</td><td>교통 흐름을 학습해 신호 주기를 조정</td><td>11, 7</td></tr>
+          <tr><td><b>접근성 향상</b></td><td>도움이 필요한 사람에게 서비스를 닿게 한다</td><td>음성 인식·번역으로 교육과 의료 정보를 전달</td><td>4, 3</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>어떤 문제가 <b class="blank" data-a="예측" data-hint="과거 데이터로 앞일을 미리 추정하는 것">예측</b> 문제인지, <b class="blank" data-a="탐지" data-hint="영상·소리에서 이상한 것을 찾아내는 것">탐지</b> 문제인지, <b class="blank" data-a="최적화" data-hint="한정된 자원을 가장 잘 배분하는 것">최적화</b> 문제인지 먼저 가려내면, 뒤에서 어떤 기계학습 알고리즘을 쓸지도 훨씬 쉽게 정해집니다. 시각장애인에게 화면 내용을 읽어 주는 것처럼 서비스가 닿지 않던 사람에게 닿게 하는 것은 <b class="blank" data-a="접근성|접근성 향상" data-hint="장벽 때문에 서비스를 못 쓰던 사람에게 닿게 하는 것">접근성</b> 향상에 해당합니다.</p>
+
+    <h3 class="sub-head">해치는 방식 — 인공지능도 지구에 발자국을 남긴다</h3>
+    <p>인공지능은 지속가능성에 늘 도움만 주는 것이 아닙니다. 큰 모델 하나를 학습시키려면 수많은 그래픽 처리 장치를 오랫동안 돌려야 하고, 그 전력과 냉각용 물이 모두 <b>온실가스와 자원 소비</b>로 이어집니다. 목표 13(기후변화 대응)을 도우려던 기술이 목표 13을 해칠 수도 있는 것입니다.</p>
+
+    <p>또한 인공지능 장비는 몇 년 뒤 <b class="blank" data-a="전자 폐기물|전자폐기물|E-waste" data-hint="수명이 끝난 전자 기기가 남기는 쓰레기">전자 폐기물</b>이 되어 목표 12(책임 있는 소비와 생산)에 부담을 줍니다. 여기에 더해, 인터넷과 컴퓨터를 쓸 수 있는 사람만 인공지능의 이익을 누리게 되면 <b class="blank" data-a="디지털 격차|정보 격차|디지털격차" data-hint="기술을 쓸 수 있는 사람과 없는 사람 사이의 차이">디지털 격차</b>가 벌어져 목표 10(불평등 감소)이 오히려 나빠집니다.</p>
+
+    <div class="box box-ok">
+      <div class="box-label">✅ 그래서 이렇게 판단한다</div>
+      <p>프로젝트를 기획할 때는 “인공지능으로 무엇을 좋게 만들까?”와 함께 “<b>그 과정에서 무엇이 나빠지는가?</b>”를 반드시 함께 적습니다. 더 작은 모델로 같은 성능을 낼 수 있는지, 필요한 데이터만 모았는지, 특정 집단이 불리해지지 않는지 점검하는 것이 프로젝트의 일부입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4. 좋은 주제 고르기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>큰 목표에서 다룰 수 있는 문제로</h2></div>
+
+    <p>“기후변화를 해결한다”는 훌륭한 목표지만 프로젝트 주제로는 쓸 수 없습니다. 무엇을 만들어야 하는지, 언제 끝나는지, 잘했는지 못했는지를 아무도 판단할 수 없기 때문입니다. 좋은 주제는 다음 네 가지 조건을 모두 만족합니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>좋은 프로젝트 주제의 네 가지 조건</caption>
+        <thead><tr><th>조건</th><th>확인 질문</th><th>나쁜 예</th><th>좋은 예</th></tr></thead>
+        <tbody>
+          <tr><td><b>구체성</b></td><td>누가, 어디서, 무엇을 판단하는지 한 문장으로 쓸 수 있나?</td><td>환경을 지킨다</td><td>우리 학교 분리배출장 사진으로 재활용 가능 여부를 판정한다</td></tr>
+          <tr><td><b>데이터 확보</b></td><td>필요한 데이터를 학기 안에 실제로 모을 수 있나?</td><td>전 세계 해양 오염 데이터를 모은다</td><td>학급별로 쓰레기 사진 300장을 직접 촬영한다</td></tr>
+          <tr><td><b>수준 적합성</b></td><td>우리가 쓸 수 있는 도구로 만들 수 있나?</td><td>새로운 언어 모델을 처음부터 학습시킨다</td><td>이미지 분류 도구로 두 가지 범주를 학습시킨다</td></tr>
+          <tr><td><b>의미</b></td><td>잘 되면 누군가에게 실제로 도움이 되나?</td><td>재미있어 보여서 고른 주제</td><td>급식 잔반을 줄여 식재료 낭비와 비용을 줄인다</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>네 조건 가운데 학생들이 가장 자주 놓치는 것은 <b class="blank" data-a="데이터" data-hint="모델을 학습시키려면 반드시 있어야 하는 것">데이터</b> 확보입니다. 아이디어는 좋은데 필요한 자료를 구할 수 없어 프로젝트가 멈추는 일이 흔합니다. 그래서 주제를 정할 때 “이 데이터를 어디서, 어떻게, 몇 개 모을 것인가”를 함께 적어야 합니다.</p>
+
+    <h3 class="sub-head">좁혀 가는 네 단계</h3>
+    <p>큰 목표를 다룰 수 있는 문제로 바꾸는 과정은 다음 순서를 따릅니다.</p>
+    <ol>
+      <li><b>목표 고르기</b> — 17개 중 마음이 끌리는 목표를 고릅니다.</li>
+      <li><b>구체적 문제 찾기</b> — 그 목표가 <b>우리 지역·우리 학교</b>에서 어떤 모습으로 나타나는지 관찰합니다.</li>
+      <li><b>판단 정의하기</b> — 인공지능이 사람 대신 내릴 <b class="blank" data-a="판단" data-hint="모델이 입력을 보고 내놓는 결정(분류·예측 값)">판단</b>을 한 문장으로 씁니다. 무엇을 입력하면 무엇이 나오는지가 분명해야 합니다.</li>
+      <li><b>데이터 계획 세우기</b> — 그 판단을 배우게 하려면 어떤 자료가 몇 개 필요한지, 어떻게 모을지 정합니다.</li>
+    </ol>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 “판단 한 문장”을 쓰는 요령</div>
+      <p><span class="mono">〔무엇을 입력하면〕 → 〔무엇을 내놓는다〕</span> 형태로 쓰면 실패하지 않습니다. 예를 들어 “쓰레기 사진을 입력하면 → 재활용 가능 / 불가능 중 하나를 내놓는다”처럼 씁니다. 내놓는 것이 <b>범주</b>이면 분류 문제, <b>수치</b>이면 회귀 문제, <b>비슷한 것끼리의 묶음</b>이면 군집 문제입니다. 다음 차시에서 이 구분이 알고리즘 선택으로 곧바로 이어집니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 5. 시뮬레이터 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>17개 목표를 직접 열어 보기</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim1"></div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>주제를 한 문장으로 좁히기</h2><span class="sec-tag">시뮬레이터</span></div>
+    <div id="sim2"></div>
+  </section>
+
+  <!-- ============ 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">9</span><h2>활동 기록</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 데이터는 어디서 구하나 — 프로젝트를 살리는 자료의 출처</summary>
+      <div class="more-body">
+        <p>지속가능발전목표는 <b>지표로 관리되는 목표</b>이므로, 이미 공개된 통계가 아주 많습니다. 프로젝트에서 쓸 수 있는 자료의 출처는 대체로 네 갈래입니다.</p>
+        <ul>
+          <li><b>국제기구 공개 통계</b> — 국가별·연도별 지표를 표로 내려받을 수 있습니다. 회귀 문제(추세 예측)에 적합합니다.</li>
+          <li><b>국내 공공 데이터</b> — 국가통계포털이나 공공데이터포털에서 대기질·교통량·폐기물량 같은 자료를 구할 수 있습니다.</li>
+          <li><b>학교·지역에서 직접 수집</b> — 사진 촬영, 설문, 저울로 잔반 무게 측정 등. 자료 수가 적지만 <b>주제와 가장 잘 맞는</b> 데이터입니다.</li>
+          <li><b>센서 기록</b> — 온습도계, 미세먼지 측정기, 스마트폰 센서 등에서 시계열 데이터를 얻습니다.</li>
+        </ul>
+        <p style="margin-top:10px">직접 수집한 데이터는 반드시 <b>개인정보가 담기지 않도록</b> 처리해야 합니다. 사람 얼굴이 찍혔다면 흐리게 처리하거나 촬영 각도를 바꾸고, 설문에서는 이름·학번을 받지 않는 것이 원칙입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> 목표 하나를 도우면서 다른 목표를 해치는 경우</summary>
+      <div class="more-body">
+        <p>인공지능으로 농작물 수확량을 크게 늘려 목표 2(기아 종식)에 기여했다고 해 봅시다. 그런데 그 방법이 지하수를 과도하게 끌어 쓰는 것이었다면 목표 6(깨끗한 물과 위생)이 나빠지고, 비료를 늘리는 것이었다면 목표 14(해양 생태계 보전)가 나빠집니다.</p>
+        <p>이처럼 목표들은 서로 <b>보완 관계</b>이기도 하고 <b>상충 관계</b>이기도 합니다. 프로젝트 계획서에 “이 해법이 나빠지게 만드는 다른 목표는 무엇인가”를 한 줄 적어 두는 습관이 필요합니다. 3단원에서 배운 <b>비판적 관점</b>이 여기서 실제로 쓰입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 다음 차시로 — 주제 한 문장이 계획서가 되기까지</summary>
+      <div class="more-body">
+        <p>이 차시에서 조립한 <b>주제 한 문장</b>은 다음 차시의 출발점입니다. 다음 차시에서는 <b>문제 정의 → 데이터 수집 및 전처리 → 기계학습 유형과 알고리즘 선정 → 모델 생성 → 성능 평가 및 수정</b>의 다섯 단계에 맞추어 계획서를 완성합니다.</p>
+        <p>이 페이지의 워크시트에 적은 내용은 브라우저에 저장되어, 다음 차시의 기획 워크벤치 1단계에 자동으로 불려 옵니다. 그러니 <b>지금 적는 문장을 진지하게 써 두는 것</b>이 다음 차시를 훨씬 편하게 만듭니다.</p>
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 4, lesson: 1,
+  title: '인류의 숙제 17개',
+  sub: 'SDGs에서 프로젝트 주제 찾기',
+  lead: '2015년 유엔 총회는 인류가 2030년까지 풀어야 할 문제를 <b>17개 주요 목표와 169개 세부 목표</b>로 정리했습니다. 그 큰 목표들을 하나씩 열어 보며, 우리 학교·우리 지역에서 <b>인공지능으로 실제로 다룰 수 있는 주제 한 문장</b>을 뽑아냅니다.',
+  standards: ['12인기04-01'],
+  keywords: ['지속가능발전목표', 'SDGs', '17개 목표', '프로젝트 주제', '데이터'],
+  goals: [
+    '지속가능발전목표가 2015년 유엔 총회에서 결의된 17개 주요 목표와 169개 세부 목표로 구성됨을 설명할 수 있다.',
+    '17개 목표를 다섯 묶음으로 분류하고, 인공지능이 기여할 수 있는 목표와 그 방식(예측·탐지·최적화·접근성 향상)을 찾을 수 있다.',
+    '인공지능이 지속가능성을 해칠 수 있는 측면을 함께 고려하여 프로젝트 주제를 비판적으로 검토할 수 있다.',
+    '큰 목표를 좁혀 데이터 확보가 가능한 <b>주제 한 문장</b>을 도출할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 시뮬레이터 1: SDGs 17목표 탐색기 ===================== -->
+<script>
+(function () {
+  const KEY = 'aibasics.a4l1.interest';
+
+  /* ---- 17개 목표 데이터 (공식 한국어 명칭 · 유엔 목표 색 참고) ---- */
+  const GOALS = [
+    {
+      no: 1, title: '빈곤 종식', group: '사람', color: '#E5243B', high: true,
+      desc: '모든 곳에서 모든 형태의 빈곤을 끝낸다.',
+      ind: '하루 소득이 국제 빈곤선 미만인 인구 비율',
+      ai: ['위성 사진의 지붕 재질과 야간 조명 밝기로 지역별 빈곤 정도를 추정한다', '가계 통계로 복지 지원이 급한 가구를 먼저 찾아낸다'],
+      data: '위성 영상, 야간 조명 데이터, 가계 소득·소비 통계, 복지 신청 기록'
+    },
+    {
+      no: 2, title: '기아 종식', group: '사람', color: '#DDA63A', high: true,
+      desc: '기아를 끝내고 식량 안보와 영양을 개선하며 지속가능한 농업을 강화한다.',
+      ind: '영양 부족 인구 비율, 세계 기아 지수(GHI)',
+      ai: ['드론·위성 영상으로 작물의 병해를 조기에 탐지한다', '기상·토양 데이터로 수확량과 식량 부족 시기를 예측한다'],
+      data: '작물 잎 사진, 기상 관측값, 토양 수분, 국가별 식량 생산·수입 통계'
+    },
+    {
+      no: 3, title: '건강과 웰빙', group: '사람', color: '#4C9F38', high: true,
+      desc: '모든 연령의 모든 사람이 건강한 삶을 누리도록 보장한다.',
+      ind: '영아 사망률, 기대 수명, 필수 의료 서비스 이용률',
+      ai: ['흉부 X선·안저 사진에서 질병 징후를 판독하도록 돕는다', '감염병 신고 데이터로 유행 확산을 예측한다'],
+      data: '의료 영상, 익명화된 진료 기록, 감염병 신고 통계, 웨어러블 심박·수면 기록'
+    },
+    {
+      no: 4, title: '양질의 교육', group: '사람', color: '#C5192D', high: true,
+      desc: '모두를 위한 포용적이고 공평한 양질의 교육을 보장하고 평생 학습 기회를 늘린다.',
+      ind: '초·중등 이수율, 기초 학력 도달 학생 비율',
+      ai: ['학습 이력을 보고 다음에 풀 문제를 개별 맞춤으로 추천한다', '음성 인식으로 읽기 연습을 자동으로 교정해 준다'],
+      data: '문항별 정답·오답 기록, 학습 시간 로그, 학생 음성 녹음, 교과서 텍스트'
+    },
+    {
+      no: 5, title: '성평등', group: '사람', color: '#FF3A21', high: false,
+      desc: '성평등을 달성하고 모든 여성과 여아의 역량을 강화한다.',
+      ind: '성별 임금 격차, 의사 결정 직위의 여성 비율',
+      ai: ['채용·평가 기록에서 성별에 따른 편향을 탐지한다', '온라인 혐오·성희롱 표현을 자동으로 선별한다'],
+      data: '성별이 표기된 임금·승진 통계, 채용 심사 기록, 댓글 텍스트'
+    },
+    {
+      no: 6, title: '깨끗한 물과 위생', group: '지구', color: '#26BDE2', high: true,
+      desc: '모두를 위한 물과 위생 시설의 이용과 지속가능한 관리를 보장한다.',
+      ind: '안전하게 관리된 음용수를 이용하는 인구 비율',
+      ai: ['수질 센서 값의 이상치를 탐지해 오염 사고를 조기 경보한다', '수압·유량 데이터로 상수도 누수 위치를 추정한다'],
+      data: '수질 센서 시계열(pH·탁도), 수압·유량 기록, 상수관 지도, 강우량'
+    },
+    {
+      no: 7, title: '모두를 위한 깨끗한 에너지', group: '번영', color: '#FCC30B', high: true,
+      desc: '모두에게 적정 가격의 신뢰할 수 있고 지속가능한 현대적 에너지 접근을 보장한다.',
+      ind: '최종 에너지 소비 중 재생에너지 비중, 전기 이용 인구 비율',
+      ai: ['일사량·풍속 예보로 태양광·풍력 발전량을 예측한다', '건물 사용 패턴을 학습해 냉난방 에너지를 최적화한다'],
+      data: '일사량·풍속 관측값, 시간별 발전량, 건물 전력 사용량, 실내 온도'
+    },
+    {
+      no: 8, title: '양질의 일자리와 경제 성장', group: '번영', color: '#A21942', high: false,
+      desc: '지속적·포용적·지속가능한 경제 성장과 완전 고용, 양질의 일자리를 촉진한다.',
+      ind: '청년 실업률, 1인당 실질 국내총생산 성장률',
+      ai: ['채용 공고 텍스트를 분석해 요구 역량의 변화를 파악한다', '산업재해 기록으로 위험한 작업 조건을 미리 경고한다'],
+      data: '채용 공고 텍스트, 고용·실업 통계, 산업재해 신고 기록, 작업장 센서'
+    },
+    {
+      no: 9, title: '산업·혁신·사회기반시설', group: '번영', color: '#FD6925', high: true,
+      desc: '회복력 있는 사회기반시설을 구축하고 포용적·지속가능한 산업화와 혁신을 촉진한다.',
+      ind: '연구개발 투자 비율, 도로·통신망 보급률',
+      ai: ['교량·도로 사진에서 균열을 자동으로 검출한다', '설비 진동 데이터로 고장 시점을 예측한다(예지 보전)'],
+      data: '구조물 사진, 진동·온도 센서 시계열, 정비 이력, 교통량'
+    },
+    {
+      no: 10, title: '불평등 감소', group: '번영', color: '#DD1367', high: false,
+      desc: '국가 내부와 국가 사이의 불평등을 줄인다.',
+      ind: '소득 하위 40% 계층의 소득 증가율, 지니 계수',
+      ai: ['대출·채용 심사 모형의 지역·성별 편향을 측정한다', '공공 서비스 접근 격차가 큰 지역을 군집으로 찾아낸다'],
+      data: '지역별 소득 분포, 공공시설 위치, 심사 승인 기록, 인구 통계'
+    },
+    {
+      no: 11, title: '지속가능한 도시와 공동체', group: '번영', color: '#FD9D24', high: true,
+      desc: '도시와 사람이 사는 곳을 포용적·안전하고 회복력 있게, 지속가능하게 만든다.',
+      ind: '초미세먼지 연평균 농도, 대중교통을 편리하게 이용하는 인구 비율',
+      ai: ['교통 흐름을 학습해 신호 주기를 최적화한다', '도로 영상에서 보행자 위험 상황을 탐지한다'],
+      data: '교통량·통행 속도, 대기질 측정값, 버스 승하차 기록, 도로 영상'
+    },
+    {
+      no: 12, title: '책임 있는 소비와 생산', group: '지구', color: '#BF8B2E', high: true,
+      desc: '지속가능한 소비와 생산 방식을 보장한다.',
+      ind: '1인당 폐기물 발생량, 재활용률, 식품 손실·폐기율',
+      ai: ['쓰레기 사진을 분류해 재활용 가능 여부를 자동 판정한다', '급식 잔반량을 예측해 식재료 주문량을 조절한다'],
+      data: '분리배출 사진, 잔반 무게 기록, 급식 인원, 요일·메뉴·날씨'
+    },
+    {
+      no: 13, title: '기후변화 대응', group: '지구', color: '#3F7E44', high: true,
+      desc: '기후변화와 그 영향에 맞서 긴급히 행동한다.',
+      ind: '온실가스 배출량, 기후 재난으로 인한 피해 인구',
+      ai: ['위성 열적외 영상으로 산불 발생을 조기에 탐지한다', '기상 데이터로 집중호우·폭염 위험을 예측한다'],
+      data: '위성 영상, 기상 관측 시계열, 온실가스 배출 통계, 재난 피해 기록'
+    },
+    {
+      no: 14, title: '해양 생태계 보전', group: '지구', color: '#0A97D9', high: true,
+      desc: '지속가능발전을 위해 해양과 해양 자원을 보전하고 지속가능하게 이용한다.',
+      ind: '해양 보호구역 비율, 지속가능한 수준에서 관리되는 어족 자원 비율',
+      ai: ['선박 위치 신호로 불법 조업을 탐지한다', '수중 사진과 소리로 어종·해양 생물을 자동 식별한다'],
+      data: '선박 항적 데이터, 수중 카메라 영상, 해양 생물 소리 녹음, 해수 온도·염분'
+    },
+    {
+      no: 15, title: '육상 생태계 보전', group: '지구', color: '#56C02B', high: true,
+      desc: '육상 생태계를 보호·복원하고 지속가능하게 이용하며, 사막화와 생물다양성 손실을 막는다.',
+      ind: '국토 면적 중 산림 비율, 멸종 위기종 지수',
+      ai: ['시기별 위성 영상의 변화를 비교해 불법 벌목을 찾아낸다', '무인 카메라 사진에서 야생동물의 종을 자동 분류한다'],
+      data: '시기별 위성 영상, 무인 센서 카메라 사진, 동물 울음 녹음, 산림 대장'
+    },
+    {
+      no: 16, title: '평화·정의·포용적 제도', group: '평화', color: '#00689D', high: false,
+      desc: '평화롭고 포용적인 사회를 만들고, 모두에게 정의가 닿게 하며, 책임 있는 제도를 세운다.',
+      ind: '인구 10만 명당 살인 발생 건수, 출생 등록된 5세 미만 아동 비율',
+      ai: ['허위 정보의 확산 경로를 분석해 빠르게 대응한다', '판례·법령 텍스트를 검색해 법률 상담 접근성을 높인다'],
+      data: '범죄 통계, 소셜미디어 게시물, 판결문 텍스트, 행정 민원 기록'
+    },
+    {
+      no: 17, title: '지구촌 협력', group: '협력', color: '#19486A', high: false,
+      desc: '지속가능발전을 위한 이행 수단을 강화하고 지구촌 협력 관계를 되살린다.',
+      ind: '공적개발원조(ODA) 규모, 개발도상국의 인터넷 이용률',
+      ai: ['국가별 지표를 모아 목표 달성 진척도를 자동으로 집계한다', '여러 나라의 보고서를 요약해 공통 과제를 정리한다'],
+      data: '국제기구 공개 통계, 원조 집행 내역, 각국 이행 보고서 텍스트'
+    }
+  ];
+
+  const GROUP_COLOR = { '사람': '#E5243B', '지구': '#3F7E44', '번영': '#FD6925', '평화': '#00689D', '협력': '#19486A' };
+  const GROUP_DESC = {
+    '사람': '목표 1~5 · 한 사람의 기본적인 삶',
+    '지구': '목표 6·12·13·14·15 · 환경과 생태계',
+    '번영': '목표 7~11 · 경제와 사회기반시설',
+    '평화': '목표 16 · 제도와 정의',
+    '협력': '목표 17 · 이행 수단과 협력'
+  };
+
+  /* 배경색 밝기에 따라 읽기 쉬운 글자색을 고른다 */
+  function txtOn(hex) {
+    const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+    return (0.299 * r + 0.587 * g + 0.114 * b) > 165 ? '#1b1d22' : '#ffffff';
+  }
+
+  let picks = (function () {
+    try { const v = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(v) ? v : []; } catch (_) { return []; }
+  })();
+
+  function savePicks() {
+    try { localStorage.setItem(KEY, JSON.stringify(picks)); } catch (_) { /* 저장 불가 환경 무시 */ }
+    window.dispatchEvent(new CustomEvent('a4l1:interest', { detail: picks.slice() }));
+  }
+
+  const body = AI.sim.panel('#sim1', {
+    title: 'SDGs 17목표 탐색기',
+    tag: '17개 전부',
+    desc: '번호 타일을 누르면 그 목표의 <b>설명 · 대표 지표 · 인공지능 활용 사례 · 필요한 데이터</b>가 아래에 열립니다. 마음에 드는 목표는 오른쪽 위 <b>★</b>를 눌러 <b>관심 목록</b>에 담아 두세요. 관심 목록은 저장되어 아래 워크시트로 이어집니다.'
+  });
+
+  /* ---- 필터 ---- */
+  let groupFilter = 'all';
+  let highOnly = false;
+
+  const groupSeg = AI.ui.seg({
+    label: '묶음 필터',
+    options: [{ value: 'all', label: '전체 17개' }, { value: '사람', label: '👤 사람' }, { value: '지구', label: '🌍 지구' },
+    { value: '번영', label: '📈 번영' }, { value: '평화', label: '🕊️ 평화' }, { value: '협력', label: '🤝 협력' }],
+    value: 'all',
+    onChange: v => { groupFilter = v; render(); }
+  });
+
+  const highBtn = AI.ui.btn('🤖 인공지능 적용 가능성 높음', () => {
+    highOnly = !highOnly;
+    highBtn.setAttribute('aria-pressed', highOnly ? 'true' : 'false');
+    render();
+  }, 'small');
+  highBtn.setAttribute('aria-pressed', 'false');
+
+  const stats = AI.ui.stats([
+    { key: 'shown', label: '보이는 목표' }, { key: 'high', label: '적용 가능성 높음' }, { key: 'pick', label: '관심 목록' }
+  ]);
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' }, groupSeg.el, highBtn,
+    AI.ui.btn('★ 관심 목록 비우기', () => { picks = []; savePicks(); render(); AI.toast('관심 목록을 비웠어요'); }, 'ghost small')));
+
+  const grid = AI.h('div', { class: 'sdg-grid' });
+  body.appendChild(grid);
+  body.appendChild(stats.el);
+
+  const pickRow = AI.h('div', { class: 'pick-row' });
+  body.appendChild(pickRow);
+
+  const detail = AI.h('div', { class: 'sdg-detail' });
+  body.appendChild(detail);
+
+  body.appendChild(AI.ui.legend(Object.keys(GROUP_COLOR).map(g => ({ color: GROUP_COLOR[g], label: g + ' — ' + GROUP_DESC[g] }))));
+
+  let current = null;
+
+  function visible(g) {
+    if (groupFilter !== 'all' && g.group !== groupFilter) return false;
+    if (highOnly && !g.high) return false;
+    return true;
+  }
+
+  function renderDetail() {
+    detail.innerHTML = '';
+    if (!current) {
+      detail.appendChild(AI.h('p', { html: '👆 위의 번호 타일을 눌러 목표를 열어 보세요. <b>어떤 데이터가 필요한지</b>를 눈여겨보면, 우리가 실제로 할 수 있는 주제가 보입니다.' }));
+      return;
+    }
+    const g = current;
+    detail.appendChild(AI.el(
+      '<div class="dh">' +
+      '<span class="dno" style="background:' + g.color + ';color:' + txtOn(g.color) + '">' + g.no + '</span>' +
+      '<b style="font-size:16.5px">목표 ' + g.no + ' · ' + g.title + '</b>' +
+      '<span class="chip">' + g.group + '</span>' +
+      '<span class="chip">' + (g.high ? '🤖 인공지능 적용 가능성 높음' : '🧩 제도·사회 변화가 더 중요') + '</span>' +
+      '</div>'
+    ));
+    detail.appendChild(AI.h('p', { text: g.desc }));
+    detail.appendChild(AI.h('div', { class: 'dl', text: '📏 대표 지표' }));
+    detail.appendChild(AI.h('p', { text: g.ind }));
+    detail.appendChild(AI.h('div', { class: 'dl', text: '🤖 인공지능 활용 사례' }));
+    detail.appendChild(AI.h('ul', {}, ...g.ai.map(t => AI.h('li', { text: t }))));
+    detail.appendChild(AI.h('div', { class: 'dl', text: '📦 필요한 데이터 예시' }));
+    detail.appendChild(AI.h('p', { text: g.data }));
+
+    const inList = picks.indexOf(g.no) >= 0;
+    detail.appendChild(AI.h('div', { class: 'sim-controls' },
+      AI.ui.btn(inList ? '★ 관심 목록에서 빼기' : '☆ 관심 목록에 담기', () => { toggle(g.no); }, inList ? 'ghost' : 'primary')
+    ));
+  }
+
+  function toggle(no) {
+    const i = picks.indexOf(no);
+    if (i >= 0) picks.splice(i, 1); else picks.push(no);
+    picks.sort((a, b) => a - b);
+    savePicks();
+    render();
+  }
+
+  function render() {
+    grid.innerHTML = '';
+    let shown = 0, high = 0;
+    GOALS.forEach(g => {
+      const on = visible(g);
+      if (on) { shown++; if (g.high) high++; }
+      const starred = picks.indexOf(g.no) >= 0;
+      const tile = AI.h('button', {
+        class: 'sdg-tile', type: 'button',
+        'aria-pressed': current && current.no === g.no ? 'true' : 'false',
+        title: '목표 ' + g.no + ' ' + g.title,
+        style: { background: g.color, color: txtOn(g.color) },
+        onclick: () => { current = g; render(); }
+      },
+        AI.h('span', { class: 'n', text: g.no }),
+        AI.h('span', { class: 't', text: g.title })
+      );
+      const star = AI.h('button', {
+        class: 'sdg-star', type: 'button', 'aria-pressed': starred ? 'true' : 'false',
+        title: starred ? '관심 목록에서 빼기' : '관심 목록에 담기',
+        'aria-label': '목표 ' + g.no + ' 관심 목록',
+        onclick: () => toggle(g.no)
+      }, starred ? '★' : '☆');
+      grid.appendChild(AI.h('div', { class: 'sdg-cell' + (on ? '' : ' dim') }, tile, star));
+    });
+
+    stats.set('shown', shown + ' / 17');
+    stats.set('high', high);
+    stats.set('pick', picks.length);
+
+    pickRow.innerHTML = '';
+    pickRow.appendChild(AI.h('span', { style: { fontSize: '12.5px', fontWeight: '750', color: 'var(--ink-3)' }, text: '★ 관심 목록' }));
+    if (!picks.length) {
+      pickRow.appendChild(AI.h('span', { style: { fontSize: '13px', color: 'var(--ink-4)' }, text: '아직 담은 목표가 없어요 — 타일의 ☆를 눌러 담아 보세요' }));
+    } else {
+      picks.forEach(no => {
+        const g = GOALS.find(x => x.no === no);
+        const chip = AI.h('span', { class: 'pick-chip' }, g.no + ' ' + g.title);
+        chip.appendChild(AI.h('button', { type: 'button', title: '빼기', 'aria-label': g.title + ' 빼기', onclick: () => toggle(no) }, '×'));
+        pickRow.appendChild(chip);
+      });
+    }
+
+    renderDetail();
+  }
+
+  window.addEventListener('ai:redraw', render);
+  render();
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 주제 좁히기 워크시트 ===================== -->
+<script>
+(function () {
+  const KEY = 'aibasics.a4l1.topic';          // ← 다음 차시(기획 워크벤치)가 읽어 가는 저장 키
+  const IKEY = 'aibasics.a4l1.interest';
+
+  const TITLES = {
+    1: '빈곤 종식', 2: '기아 종식', 3: '건강과 웰빙', 4: '양질의 교육', 5: '성평등',
+    6: '깨끗한 물과 위생', 7: '모두를 위한 깨끗한 에너지', 8: '양질의 일자리와 경제 성장',
+    9: '산업·혁신·사회기반시설', 10: '불평등 감소', 11: '지속가능한 도시와 공동체',
+    12: '책임 있는 소비와 생산', 13: '기후변화 대응', 14: '해양 생태계 보전',
+    15: '육상 생태계 보전', 16: '평화·정의·포용적 제도', 17: '지구촌 협력'
+  };
+
+  const state = (function () {
+    const blank = { goal: '', problem: '', judgeType: '분류(범주를 고른다)', judge: '', dataKind: '', how: '', sentence: '' };
+    try {
+      const v = JSON.parse(localStorage.getItem(KEY));
+      return v && typeof v === 'object' ? Object.assign(blank, v) : blank;
+    } catch (_) { return blank; }
+  })();
+
+  function save() {
+    state.sentence = buildSentence();
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (_) { /* 무시 */ }
+  }
+
+  const body = AI.sim.panel('#sim2', {
+    title: '주제 좁히기 워크시트',
+    tag: '4단계 · 자동 저장',
+    desc: '“환경을 지킨다” 같은 큰 말을 <b>다룰 수 있는 주제 한 문장</b>으로 좁히는 연습입니다. 네 단계를 채우면 아래에서 <b>주제 문장이 자동으로 조립</b>됩니다. 적은 내용은 브라우저에 저장되어 다음 차시로 이어집니다.'
+  });
+
+  /* ---- 단계 표시 ---- */
+  const STEPS = [
+    { n: 1, name: '① 목표 고르기' },
+    { n: 2, name: '② 구체적 문제' },
+    { n: 3, name: '③ 판단 정의' },
+    { n: 4, name: '④ 데이터 계획' }
+  ];
+  let step = 1;
+
+  const stepBar = AI.h('div', { class: 'step-bar' });
+  const dots = STEPS.map(s => {
+    const b = AI.h('button', { class: 'step-dot', type: 'button', onclick: () => { step = s.n; renderStep(); } }, s.name);
+    stepBar.appendChild(b);
+    return b;
+  });
+  body.appendChild(stepBar);
+
+  const panel = AI.h('div', { class: 'step-panel' });
+  body.appendChild(panel);
+
+  const navRow = AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('← 이전 단계', () => { if (step > 1) { step--; renderStep(); } }, 'ghost'),
+    AI.ui.btn('다음 단계 →', () => { if (step < 4) { step++; renderStep(); } }, 'primary')
+  );
+  body.appendChild(navRow);
+
+  /* ---- 결과 상자 ---- */
+  const out = AI.h('div', { class: 'topic-out' });
+  body.appendChild(out);
+
+  const check = AI.h('div', { class: 'box box-info', style: { marginTop: '14px' } });
+  body.appendChild(check);
+
+  /* ---- 목표 선택 상자 만들기 ---- */
+  function interest() {
+    try { const v = JSON.parse(localStorage.getItem(IKEY)); return Array.isArray(v) ? v : []; } catch (_) { return []; }
+  }
+
+  function goalSelect() {
+    const picks = interest();
+    const sel = AI.h('select', {});
+    sel.appendChild(AI.h('option', { value: '' }, '— 목표를 고르세요 —'));
+    if (picks.length) {
+      const gp = AI.h('optgroup', { label: '★ 위 탐색기에서 담은 관심 목록' });
+      picks.forEach(n => gp.appendChild(AI.h('option', { value: String(n) }, '목표 ' + n + ' · ' + TITLES[n])));
+      sel.appendChild(gp);
+    }
+    const gall = AI.h('optgroup', { label: '전체 17개 목표' });
+    for (let n = 1; n <= 17; n++) gall.appendChild(AI.h('option', { value: String(n) }, '목표 ' + n + ' · ' + TITLES[n]));
+    sel.appendChild(gall);
+    sel.value = state.goal || '';
+    sel.addEventListener('change', () => { state.goal = sel.value; save(); refresh(); });
+    return { sel, count: picks.length };
+  }
+
+  /* ---- 각 단계 화면 ---- */
+  function field(label, key, type, placeholder, rows) {
+    const ctrl = type === 'textarea'
+      ? AI.h('textarea', { rows: rows || 3, placeholder: placeholder })
+      : AI.h('input', { type: 'text', placeholder: placeholder });
+    ctrl.value = state[key] || '';
+    ctrl.addEventListener('input', () => { state[key] = ctrl.value; save(); refresh(); });
+    return AI.h('div', { class: 'field', style: { marginTop: '10px' } }, AI.h('label', { text: label }), ctrl);
+  }
+
+  function exPair(badLabel, bad, goodLabel, good) {
+    return AI.h('div', { class: 'ex-grid' },
+      AI.h('div', { class: 'ex-box bad' }, AI.h('span', { class: 'exl', text: '✗ ' + badLabel }), AI.h('span', { html: bad })),
+      AI.h('div', { class: 'ex-box good' }, AI.h('span', { class: 'exl', text: '✓ ' + goodLabel }), AI.h('span', { html: good }))
+    );
+  }
+
+  function renderStep() {
+    dots.forEach((d, i) => {
+      d.setAttribute('aria-current', (i + 1) === step ? 'true' : 'false');
+      d.classList.toggle('done', doneStep(i + 1));
+    });
+    panel.innerHTML = '';
+
+    if (step === 1) {
+      panel.appendChild(AI.h('h5', { text: '① 17개 목표에서 하나를 고른다' }));
+      panel.appendChild(AI.h('p', { class: 'sp-help', html: '위 탐색기에서 ★로 담은 목표가 먼저 보입니다. 아직 담지 않았다면 전체 목록에서 골라도 됩니다.' }));
+      const gs = goalSelect();
+      panel.appendChild(AI.h('div', { class: 'field' }, AI.h('label', { text: '관심 있는 지속가능발전목표' }), gs.sel));
+      panel.appendChild(AI.h('p', {
+        style: { fontSize: '13px', color: 'var(--ink-3)', margin: '8px 0 0' },
+        text: gs.count ? '★ 관심 목록에 ' + gs.count + '개가 담겨 있습니다.' : '★ 관심 목록이 비어 있어요. 위 탐색기에서 담으면 여기에 먼저 나타납니다.'
+      }));
+      panel.appendChild(exPair('너무 큰 선택', '“지구를 지키는 모든 목표를 다 다룬다” — 목표를 여러 개 고르면 무엇을 만들지 정해지지 않습니다.',
+        '좋은 선택', '“목표 12 책임 있는 소비와 생산” 하나만 고른다 — 뒤 단계에서 학교 분리배출로 더 좁힐 수 있습니다.'));
+    }
+
+    if (step === 2) {
+      panel.appendChild(AI.h('h5', { text: '② 우리 지역·학교에서 관찰되는 구체적 문제를 쓴다' }));
+      panel.appendChild(AI.h('p', { class: 'sp-help', html: '<b>누가 · 어디서 · 무엇이 · 왜 문제인가</b>가 모두 들어가야 합니다. 직접 눈으로 본 것을 쓰세요.' }));
+      panel.appendChild(field('관찰한 구체적 문제', 'problem', 'textarea', '예) 우리 학교 3층 분리배출장에서 플라스틱 수거함에 종이컵과 음식물이 섞여 들어가, 수거된 플라스틱이 재활용되지 못하고 그냥 버려진다.', 4));
+      panel.appendChild(exPair('너무 큼 · 관찰이 없음', '“환경을 지킨다”, “사람들이 분리배출을 잘 안 한다” — 누가, 어디서, 무엇이 문제인지 알 수 없습니다.',
+        '구체적이고 관찰된 문제', '“우리 학교 3층 분리배출장의 플라스틱 수거함에 종이·음식물이 섞여, 일주일에 두 통이 재활용되지 못하고 폐기된다.”'));
+    }
+
+    if (step === 3) {
+      panel.appendChild(AI.h('h5', { text: '③ 인공지능이 어떤 판단을 대신할지 한 문장으로 정의한다' }));
+      panel.appendChild(AI.h('p', { class: 'sp-help', html: '<span class="mono">〔무엇을 입력하면〕 → 〔무엇을 내놓는다〕</span> 형태로 씁니다. 내놓는 것이 <b>범주</b>면 분류, <b>수치</b>면 회귀, <b>묶음</b>이면 군집입니다.' }));
+      const seg = AI.ui.seg({
+        label: '판단의 종류',
+        options: ['분류(범주를 고른다)', '회귀(수치를 예측한다)', '군집(비슷한 것끼리 묶는다)', '탐지(이상한 것을 찾는다)'],
+        value: state.judgeType,
+        onChange: v => { state.judgeType = v; save(); refresh(); }
+      });
+      panel.appendChild(AI.h('div', { class: 'field', style: { marginTop: '4px' } }, AI.h('label', { text: '판단의 종류' }), seg.el));
+      panel.appendChild(field('인공지능이 대신할 판단 (한 문장)', 'judge', 'text', '예) 쓰레기 사진을 보고 재활용 가능 / 불가능 중 하나를 판정한다'));
+      panel.appendChild(exPair('판단이 아님', '“인공지능으로 환경 문제를 해결한다” — 무엇을 입력하고 무엇이 나오는지가 없어 모델을 만들 수 없습니다.',
+        '판단이 분명함', '“분리배출함에 넣기 전 찍은 쓰레기 사진을 입력하면 → 재활용 가능 / 불가능 두 범주 중 하나를 내놓는다.”'));
+    }
+
+    if (step === 4) {
+      panel.appendChild(AI.h('h5', { text: '④ 필요한 데이터와 구할 방법을 적는다' }));
+      panel.appendChild(AI.h('p', { class: 'sp-help', html: '데이터를 구할 수 없는 주제는 아무리 좋아도 진행되지 않습니다. <b>몇 개</b>를 <b>어떻게</b> 모을지까지 쓰세요.' }));
+      panel.appendChild(field('필요한 데이터 (종류와 개수)', 'dataKind', 'text', '예) 쓰레기 사진 300장 (재활용 가능 150장 / 불가능 150장)'));
+      panel.appendChild(field('구할 방법', 'how', 'text', '예) 학급별로 일주일간 분리배출장에서 직접 촬영하고, 두 범주로 레이블을 붙인다'));
+      panel.appendChild(exPair('막연한 계획', '“인터넷에서 찾는다”, “전 세계 해양 오염 데이터를 모은다” — 학기 안에 실제로 확보할 수 없습니다.',
+        '실행 가능한 계획', '“학급별로 쓰레기 사진 300장을 직접 촬영하고, 재활용 가능/불가능 두 범주로 레이블을 붙인다. 촬영 시 사람 얼굴이 담기지 않게 한다.”'));
+    }
+  }
+
+  function doneStep(n) {
+    if (n === 1) return !!state.goal;
+    if (n === 2) return (state.problem || '').trim().length >= 15;
+    if (n === 3) return (state.judge || '').trim().length >= 8;
+    if (n === 4) return (state.dataKind || '').trim().length >= 4 && (state.how || '').trim().length >= 4;
+    return false;
+  }
+
+  function buildSentence() {
+    const n = state.goal;
+    const g = n ? ('SDGs 목표 ' + n + ' 「' + TITLES[n] + '」') : '〔① 목표 미선택〕';
+    const p = (state.problem || '').trim() || '〔② 구체적 문제 미작성〕';
+    const j = (state.judge || '').trim() || '〔③ 판단 미작성〕';
+    const d = (state.dataKind || '').trim() || '〔④ 데이터 미작성〕';
+    const h = (state.how || '').trim() || '〔④ 수집 방법 미작성〕';
+    return g + '와(과) 관련해, 「' + p.replace(/\s+/g, ' ') + '」 문제를 해결하기 위해 ' +
+      d + '을(를) ' + h + ' 방법으로 모아, 「' + j + '」을(를) 인공지능이 자동으로 판단하게 한다. (판단의 종류: ' + state.judgeType + ')';
+  }
+
+  function refresh() {
+    dots.forEach((d, i) => d.classList.toggle('done', doneStep(i + 1)));
+    const sentence = buildSentence();
+    out.innerHTML = '';
+    out.appendChild(AI.h('div', { class: 'tol', text: '📌 조립된 주제 한 문장' }));
+    out.appendChild(AI.h('div', { class: 'tot', text: sentence }));
+    out.appendChild(AI.h('div', { class: 'sim-controls' },
+      AI.ui.btn('📋 주제 문장 복사', () => copy(sentence), 'primary'),
+      AI.ui.btn('↺ 워크시트 비우기', () => {
+        if (!confirm('워크시트에 적은 내용을 모두 지울까요?')) return;
+        state.goal = ''; state.problem = ''; state.judge = ''; state.dataKind = ''; state.how = '';
+        save(); renderStep(); refresh(); AI.toast('워크시트를 비웠어요');
+      }, 'ghost')
+    ));
+
+    const done = [1, 2, 3, 4].filter(doneStep).length;
+    check.innerHTML = '<div class="box-label">🧪 주제 점검 (' + done + ' / 4 단계 작성)</div>' +
+      '<ul style="margin:0">' +
+      row('구체성', doneStep(2) && doneStep(3), '누가·어디서·무엇을 판단하는지가 문장에 들어 있다') +
+      row('데이터 확보', doneStep(4), '필요한 데이터의 종류·개수와 구할 방법이 적혀 있다') +
+      row('수준 적합성', doneStep(3), '판단의 종류가 정해져 어떤 알고리즘을 쓸지 가늠할 수 있다') +
+      row('의미', doneStep(1) && doneStep(2), '지속가능발전목표와 연결되어 있어 해결되면 도움이 된다') +
+      '</ul>' +
+      (done === 4
+        ? '<p style="margin-top:9px;color:var(--ok);font-weight:700">네 조건을 모두 채웠습니다. 이 문장이 다음 차시 <b>기획 워크벤치 1단계</b>에 자동으로 불려 옵니다.</p>'
+        : '<p style="margin-top:9px;font-size:14px;color:var(--ink-3)">비어 있는 단계를 채우면 주제 문장이 완성됩니다.</p>');
+  }
+
+  function row(name, ok, why) {
+    return '<li><b style="color:' + (ok ? 'var(--ok)' : 'var(--ink-4)') + '">' + (ok ? '✓' : '○') + ' ' + name + '</b> — ' + why + '</li>';
+  }
+
+  function copy(txt) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(() => AI.toast('주제 문장을 복사했어요'), () => fallback(txt));
+    } else fallback(txt);
+  }
+  function fallback(txt) {
+    const ta = AI.h('textarea', { style: { position: 'fixed', left: '-9999px' } });
+    ta.value = txt;
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); AI.toast('주제 문장을 복사했어요'); } catch (_) { AI.toast('복사를 지원하지 않는 환경이에요'); }
+    ta.remove();
+  }
+
+  window.addEventListener('a4l1:interest', () => { if (step === 1) renderStep(); });
+  window.addEventListener('ai:redraw', refresh);
+
+  renderStep();
+  refresh();
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a4l1-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['17', '169', '2015', '평화', '탐지', '최적화', '기후변화', '데이터'],
+  sents: [
+    { text: '지속가능발전목표는 {0}개의 주요 목표와 {1}개의 세부 목표로 구성된다.', answers: [['17'], ['169']] },
+    { text: '지속가능발전목표는 {0}년 유엔 총회에서 결의되었고, 2030년까지 달성하는 것을 목표로 한다.', answers: [['2015']] },
+    { text: '17개 목표는 사람 · 지구 · 번영 · {0} · 협력의 다섯 묶음으로 나누어 이해할 수 있다.', answers: [['평화']] },
+    { text: '위성 영상의 변화를 비교해 불법 벌목을 찾아내는 것은 인공지능의 {0} 능력을 활용한 것이다.', answers: [['탐지']] },
+    { text: '건물 사용 패턴을 학습해 냉난방 에너지를 줄이는 것은 {0}에 해당한다.', answers: [['최적화']] },
+    { text: '큰 모델을 학습시킬 때 쓰는 많은 전력은 목표 13 {0} 대응과 충돌할 수 있다.', answers: [['기후변화']] },
+    { text: '좋은 프로젝트 주제는 구체적이어야 하고, 필요한 {0}을(를) 실제로 구할 수 있어야 한다.', answers: [['데이터']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '1차시 확인 문제',
+  items: [
+    {
+      type: 'mc',
+      q: '지속가능발전목표(SDGs)의 구성을 옳게 설명한 것은?',
+      choices: [
+        '2015년 유엔 총회에서 결의한, 17개 주요 목표와 169개 세부 목표',
+        '2000년 유엔 총회에서 결의한, 8개 주요 목표와 21개 세부 목표',
+        '2015년 각국 정부가 개별적으로 정한, 나라마다 다른 목표',
+        '2030년까지 새로 만들 예정인, 아직 정해지지 않은 목표'
+      ],
+      answer: 0,
+      why: '지속가능발전목표는 <b>2015년 유엔 총회에서 결의</b>된 것으로 <b>17개의 주요 목표와 169개의 세부 목표</b>로 구성되며, 2030년까지 달성하는 것을 목표로 합니다. ②는 그 이전의 새천년개발목표(MDGs)에 가까운 설명입니다.'
+    },
+    {
+      type: 'short',
+      q: '2015년 유엔 총회에서 결의하여 2030년까지 달성하기로 한, 17개 주요 목표로 이루어진 국제 사회의 공동 목표를 무엇이라 하는가?',
+      answer: ['지속가능발전목표', 'SDGs', '지속 가능 발전 목표', '에스디지에스'],
+      placeholder: '예: ○○○○○○○○',
+      why: '<b>지속가능발전목표(SDGs)</b>입니다. “지속가능”은 지금 세대의 필요를 채우면서 다음 세대가 살아갈 여지를 남긴다는 뜻입니다.'
+    },
+    {
+      type: 'ox',
+      q: '인공지능은 지속가능발전목표에 언제나 도움만 주며, 지속가능성을 해치는 면은 없다.',
+      answer: false,
+      why: '인공지능도 <b>에너지와 물을 소비</b>하고, 장비는 몇 년 뒤 <b>전자 폐기물</b>이 됩니다. 또 기술을 쓸 수 있는 사람만 이익을 누리면 <b>디지털 격차</b>가 벌어져 목표 10(불평등 감소)이 오히려 나빠집니다. 그래서 프로젝트를 기획할 때 “무엇이 나빠지는가”도 함께 적어야 합니다.'
+    },
+    {
+      type: 'match',
+      q: '다음 인공지능 활용 사례를 관련이 가장 깊은 목표와 짝지으시오.',
+      left: [
+        '위성 열적외 영상으로 산불 발생을 조기에 탐지한다',
+        '쓰레기 사진을 분류해 재활용 가능 여부를 판정한다',
+        '선박 위치 신호로 불법 조업을 탐지한다',
+        '학습 이력을 보고 다음에 풀 문제를 맞춤 추천한다'
+      ],
+      right: ['목표 4 양질의 교육', '목표 12 책임 있는 소비와 생산', '목표 13 기후변화 대응', '목표 14 해양 생태계 보전'],
+      answer: [2, 1, 3, 0],
+      why: '산불은 기후 재난이므로 목표 13, 재활용은 소비와 생산 방식이므로 목표 12, 불법 조업은 어족 자원 문제이므로 목표 14, 맞춤 학습은 교육 접근성 문제이므로 목표 4와 이어집니다. 각 사례가 <b>예측·탐지·최적화·접근성 향상</b> 중 무엇인지도 함께 생각해 보세요.'
+    },
+    {
+      type: 'multi',
+      q: '학생 프로젝트 주제로서 <b>좋은 주제의 조건</b>에 해당하는 것을 모두 고르시오.',
+      choices: [
+        '다루는 범위가 구체적이어서 무엇을 판단할지 한 문장으로 쓸 수 있다',
+        '필요한 데이터를 학기 안에 실제로 모을 수 있다',
+        '주제가 크고 거창할수록 좋은 주제다',
+        '우리가 쓸 수 있는 도구와 수준으로 만들 수 있다',
+        '아무도 시도하지 않은 완전히 새로운 문제여야 한다',
+        '해결되면 누군가에게 실제로 도움이 된다'
+      ],
+      answer: [0, 1, 3, 5],
+      why: '좋은 주제의 네 조건은 <b>구체성 · 데이터 확보 · 수준 적합성 · 의미</b>입니다. ③처럼 주제가 커지면 무엇을 만들어야 할지 정해지지 않아 프로젝트가 진행되지 않고, ⑤처럼 “세계 최초”를 요구하면 학생 수준에서 실행 가능한 주제가 거의 남지 않습니다.'
+    },
+    {
+      type: 'order',
+      q: '큰 목표를 다룰 수 있는 프로젝트 주제로 <b>좁혀 가는 순서</b>대로 배열하시오.',
+      items: [
+        '17개 목표 중 관심 있는 목표를 하나 고른다',
+        '그 목표가 우리 지역·학교에서 어떤 모습으로 나타나는지 관찰해 구체적 문제를 찾는다',
+        '인공지능이 대신할 판단을 “무엇을 입력하면 무엇이 나온다”로 정의한다',
+        '그 판단을 배우게 할 데이터의 종류·개수와 구할 방법을 정한다',
+        '위 내용을 합쳐 주제를 한 문장으로 정리한다'
+      ],
+      answer: [0, 1, 2, 3, 4],
+      why: '목표 → 구체적 문제 → 판단 정의 → 데이터 계획 → 주제 문장 순서입니다. 순서를 건너뛰고 바로 “무엇을 만들까”부터 정하면, 나중에 데이터를 구할 수 없어 되돌아오게 됩니다.'
+    },
+    {
+      type: 'mc',
+      q: '다음 중 <b>학생 프로젝트 주제로 가장 적합한</b> 것은?',
+      choices: [
+        '인공지능으로 지구 온난화를 멈춘다',
+        '우리 학교 급식 잔반량을 요일·메뉴·날씨 데이터로 예측해 식재료 주문량을 줄인다',
+        '전 세계 해양 오염 데이터를 모아 모든 바다의 오염도를 실시간으로 관리한다',
+        '기존보다 성능이 뛰어난 새로운 언어 모델을 처음부터 학습시킨다'
+      ],
+      answer: 1,
+      why: '②는 <b>구체적</b>이고(우리 학교 급식), 데이터를 <b>직접 모을 수 있고</b>(잔반 무게·메뉴·날씨), <b>학생 수준의 도구</b>로 회귀 모델을 만들 수 있으며, 성공하면 낭비와 비용을 줄이는 <b>의미</b>가 있습니다. ①③은 범위가 너무 크고, ④는 데이터와 계산 자원이 학생 수준을 크게 넘습니다.'
+    },
+    {
+      type: 'short',
+      q: '17개 목표를 사람 · 지구 · 번영 · 평화 · 협력의 다섯 묶음으로 나눌 때, “목표 13 기후변화 대응”은 어느 묶음에 속하는가?',
+      answer: ['지구', '지구 묶음', 'planet'],
+      placeholder: '두 글자',
+      why: '기후변화 대응은 환경을 지키는 <b>지구</b> 묶음(목표 6·12·13·14·15)에 속합니다. 사람(1~5)은 개인의 기본적인 삶, 번영(7~11)은 경제와 사회기반시설, 평화(16)는 제도, 협력(17)은 이행 수단을 다룹니다.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a4l1-note',
+  title: '프로젝트 주제 탐색 기록',
+  prompt: '위 <b>SDGs 17목표 탐색기</b>와 <b>주제 좁히기 워크시트</b>를 실제로 조작한 뒤 아래를 채워 보세요. 여기에 적은 내용은 다음 차시 계획서의 재료가 됩니다.',
+  fields: [
+    { key: 'picks', label: '관심 목록에 담은 목표 (번호와 이름)', type: 'text', placeholder: '예: 12 책임 있는 소비와 생산, 13 기후변화 대응, 11 지속가능한 도시와 공동체' },
+    { key: 'ind', label: '탐색기에서 본 대표 지표 중 가장 인상적인 것', type: 'text', placeholder: '예: 1인당 폐기물 발생량 (목표 12)' },
+    { key: 'case', label: '탐색기의 인공지능 활용 사례 중 우리도 해 볼 수 있을 것 같은 것과 그 이유', type: 'textarea', rows: 3, placeholder: '예) 쓰레기 사진 분류는 우리가 직접 사진을 찍어 데이터를 만들 수 있어서 …' },
+    { key: 'data', label: '필요한 데이터와 구할 방법 (워크시트 ④단계에 적은 것)', type: 'text', placeholder: '예: 쓰레기 사진 300장 · 학급별 직접 촬영' },
+    { key: 'topic', label: '워크시트가 조립해 준 주제 한 문장 (붙여 넣기)', type: 'textarea', rows: 3, placeholder: '복사 버튼으로 복사한 문장을 그대로 붙여 넣으세요.' },
+    { key: 'risk', label: '이 주제를 인공지능으로 풀 때 오히려 나빠질 수 있는 점', type: 'textarea', rows: 3, placeholder: '예) 사진을 찍는 과정에서 다른 사람이 함께 찍힐 수 있고, 모델 학습에 전력이 들어가서 …' },
+    { key: 'why', label: '이 주제가 좋은 주제의 네 조건(구체성·데이터 확보·수준 적합성·의미)을 만족하는 이유', type: 'textarea', rows: 4, placeholder: '조건별로 한 줄씩 적어 보세요.' }
+  ]
+});
+</script>
+</body>
+</html>

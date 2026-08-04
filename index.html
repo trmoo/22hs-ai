@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>인공지능 기초 — 고등학교 정보과 웹교과서</title>
+<meta name="description" content="2022 개정 교육과정 고등학교 진로 선택 과목 '인공지능 기초' 웹교과서. 4개 영역 20차시, 시뮬레이터와 빈칸 채우기로 배우는 인터랙티브 학습.">
+<link rel="stylesheet" href="assets/css/textbook.css">
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap-wide">
+  <div id="home"></div>
+
+  <section class="section" style="margin-top:44px">
+    <div class="sec-head"><span class="sec-num">✦</span><h2>이 웹교과서 사용법</h2></div>
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">✏️</span>
+        <h4>빈칸 채우기 모드</h4>
+        <p>모든 차시 위쪽의 <b>빈칸 채우기 모드</b> 버튼을 누르면 본문의 핵심 용어가 빈칸으로 바뀝니다. 직접 채우고 바로 채점해 보세요.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🕹️</span>
+        <h4>시뮬레이터</h4>
+        <p>탐색 알고리즘, 기계학습 모델, 데이터 편향까지 <b>브라우저에서 직접 돌려 보는</b> 시뮬레이터로 원리를 눈으로 확인합니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">📝</span>
+        <h4>확인 문제</h4>
+        <p>객관식·O/X·단답형·순서 배열·짝 맞추기 문제를 풀면 <b>즉시 해설</b>이 나옵니다. 몇 번이든 다시 풀 수 있어요.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">✍️</span>
+        <h4>활동 기록</h4>
+        <p>차시마다 활동지 역할을 하는 기록칸이 있습니다. 쓴 내용은 <b>자동 저장</b>되고 <b>내 학습</b>에서 한 번에 모아 인쇄할 수 있어요.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">📊</span>
+        <h4>자가평가</h4>
+        <p>단원 마무리에서 성취기준별로 <b>A~E 다섯 단계</b> 자기 점검을 하고, 부족한 차시로 바로 돌아갈 수 있습니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🎒</span>
+        <h4>학습 도구</h4>
+        <p>오른쪽 아래 가방 버튼에 진도·빈칸 모드·인쇄·기록 초기화가 모여 있습니다. 기록은 이 브라우저에만 저장됩니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">목표</span><h2>과목 목표</h2></div>
+    <div class="box box-concept">
+      <div class="box-label">📘 교육과정 원문</div>
+      <p>‘인공지능 기초’는 인공지능의 발전에 따른 사회의 변화를 파악하고, 인공지능의 원리에 대한 이해를 바탕으로 인공지능을 다양한 분야의 문제를 창의적으로 해결하기 위한 핵심 도구로서 프로그래밍할 수 있으며, 인공지능의 윤리적 쟁점에 관한 올바른 가치관과 태도를 함양하는 데 중점을 둔다.</p>
+    </div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th style="width:60px">번호</th><th>목표</th></tr></thead>
+        <tbody>
+          <tr><td>(1)</td><td>인공지능에 대한 이해를 바탕으로 실생활의 문제를 인공지능의 관점에서 파악하고, 지능적 판단을 구현하기 위해 탐색과 추론 방식을 적용하는 능력과 태도를 기른다.</td></tr>
+          <tr><td>(2)</td><td>기계학습을 활용하여 해결할 수 있는 문제를 정의하고, 문제 해결 과정에서 필요한 데이터와 모델을 활용하여 문제를 효과적으로 해결하는 능력과 태도를 기른다.</td></tr>
+          <tr><td>(3)</td><td>인공지능의 발전에 따른 인간의 삶과 진로의 변화를 탐색하고, 인공지능의 다양한 측면에 대한 비판적인 자세를 바탕으로 인공지능과 관련된 윤리적 문제에 대해 올바른 가치관을 형성할 수 있는 태도를 기른다.</td></tr>
+          <tr><td>(4)</td><td>인공지능이 다양한 분야와 융합하여 새로운 가치를 창출할 수 있다는 점을 인식하고, 인류가 직면해 있는 문제를 인공지능을 활용하여 해결할 수 있는 능력과 태도를 기른다.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">기준</span><h2>성취기준 19개 한눈에 보기</h2>
+      <span class="sec-tag">교육부 고시 제2022-33호 [별책4]</span></div>
+    <div id="allStd"></div>
+  </section>
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/core.js"></script>
+<script>
+AI.page({
+  key: 'home',
+  base: './',
+  crumb: '단원 목록',
+  title: '인공지능 기초',
+  sub: '고등학교 진로 선택 · 2022 개정 교육과정 웹교과서',
+  lead: '탐색과 추론, 기계학습과 딥러닝, 사회적 영향, 그리고 프로젝트까지 — <b>4개 영역 20차시</b>를 시뮬레이터와 빈칸 채우기로 직접 다뤄 보며 배웁니다.',
+  keywords: ['4개 영역', '20차시 + 단원 마무리', '성취기준 19개', '시뮬레이터 30종']
+});
+
+AI.renderHome('#home');
+
+/* 성취기준 전체 표 — 영역별로 묶어서 */
+(function () {
+  const box = document.getElementById('allStd');
+  AI.DATA.AREAS.forEach(function (a) {
+    const rows = a.lessons.flatMap(l => l.std).filter((v, i, arr) => arr.indexOf(v) === i)
+      .map(s => ['<code>' + s + '</code>', AI.DATA.STANDARDS[s]]);
+    box.appendChild(AI.h('h3', { class: 'sub-head', text: a.no + '. ' + a.title }));
+    box.appendChild(AI.ui.table(['코드', '성취기준'], rows));
+  });
+})();
+</script>
+</body>
+</html>

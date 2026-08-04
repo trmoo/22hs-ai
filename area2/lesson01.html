@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1차시 규칙을 짜지 않고 가르치기 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+  /* 이 페이지에서만 쓰는 보조 클래스 */
+  .flow-svg { display: block; width: 100%; max-width: 720px; height: auto; margin: 4px auto 2px; }
+  .rule-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px 4px 11px; border-radius: 999px;
+    background: var(--warn-soft); border: 1px solid var(--warn-line); font-size: 13px; font-weight: 650; color: var(--ink); }
+  .rule-chip button { border: 0; background: transparent; color: var(--ink-3); font: inherit; font-size: 14px;
+    line-height: 1; cursor: pointer; padding: 0 3px; border-radius: 50%; }
+  .rule-chip button:hover { color: var(--no); }
+  .rule-box { display: flex; flex-wrap: wrap; gap: 7px; min-height: 38px; padding: 9px 10px; margin: 10px 0 0;
+    border: 1px dashed var(--line-strong); border-radius: var(--radius-sm); background: var(--surface-2); }
+  .rule-box .empty { font-size: 13px; color: var(--ink-4); }
+  .mail-row { font-size: 13.5px; }
+  .tag { display: inline-block; min-width: 3.2em; text-align: center; padding: 1px 7px; border-radius: 6px;
+    font-size: 12px; font-weight: 750; white-space: nowrap; }
+  .tag-s { background: var(--no-soft); color: var(--no); border: 1px solid var(--no-line); }
+  .tag-h { background: var(--ok-soft); color: var(--ok); border: 1px solid var(--ok-line); }
+  .wrong-cell { background: var(--no-soft); }
+  .wt-table .table-wrap { margin: 0 0 8px; }
+  .wt-table table.tb { min-width: 0; font-size: 13px; }
+  .wt-table table.tb th, .wt-table table.tb td { padding: 6px 9px; }
+  .card-pick { display: flex; padding: 3px; gap: 3px; background: var(--surface-3); border-radius: 9px;
+    border: 1px solid var(--line); margin-top: 10px; }
+  .card-pick button { flex: 1 1 0; border: 0; background: transparent; font: inherit; font-size: 12.5px;
+    font-weight: 650; color: var(--ink-2); padding: 6px 2px; border-radius: 6px; cursor: pointer; }
+  .card-pick button[aria-pressed="true"] { background: var(--surface); color: var(--accent-ink); box-shadow: var(--shadow-sm); }
+  .mini-card.judged-ok { border-color: var(--ok-line); background: var(--ok-soft); }
+  .mini-card.judged-no { border-color: var(--no-line); background: var(--no-soft); }
+  .card-fb { font-size: 12.5px; line-height: 1.6; margin-top: 9px; padding-top: 8px; border-top: 1px dashed var(--line-strong); color: var(--ink-2); }
+  .wt-bar { display: inline-block; height: 9px; border-radius: 3px; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>여러분에게 <b>고양이 사진을 골라내는 프로그램</b>을 만들라는 과제가 주어졌습니다. 조건은 하나 — <b>if 문으로만</b> 만들어야 합니다.</p>
+      <ul>
+        <li>“귀가 삼각형이면 고양이”라고 썼습니다. 그런데 접힌 귀 고양이가 나왔습니다.</li>
+        <li>“수염이 있으면 고양이”라고 고쳤습니다. 그런데 수염이 안 보이게 찍힌 사진이 나왔습니다.</li>
+        <li>“털이 있고 눈이 두 개면 고양이”라고 했습니다. 그런데 강아지가 걸렸습니다.</li>
+      </ul>
+      <p>규칙을 100개, 1000개 써도 <b>다음 사진</b>은 또 예외입니다. 그런데 여섯 살 아이는 고양이 사진 몇 장만 보고도 처음 보는 고양이를 알아맞힙니다. 아이는 규칙을 배운 것이 아니라 <b>예시를 본</b> 것입니다.</p>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 그렇다면 컴퓨터에게도 “예시”를 보여 주면 어떨까?</summary>
+        <div class="more-body">
+          이 차시는 바로 그 발상의 전환을 다룹니다. 사람이 <b>규칙</b>을 쓰는 대신, 컴퓨터에게 <b>데이터와 정답</b>을 주고 규칙을 스스로 찾아내게 하는 방법 — 그것이 기계학습입니다.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 두 가지 프로그래밍 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>규칙을 쓰는 프로그래밍, 규칙을 찾는 프로그래밍</h2></div>
+
+    <p>1단원에서 배운 탐색과 추론은 모두 <b>사람이 규칙을 미리 정해 주는</b> 방식이었습니다. 미로의 이동 규칙, 추론 엔진의 IF-THEN 규칙 — 컴퓨터는 사람이 준 규칙을 빠르고 정확하게 실행했을 뿐입니다. 이것을 <span class="term">전통적 프로그래밍</span>이라고 부릅니다.</p>
+
+    <p>전통적 프로그래밍에서는 <b>규칙과 데이터를 넣으면 답이 나옵니다</b>. 그런데 기계학습은 이 화살표를 뒤집습니다. <b>데이터와 답을 넣으면 규칙이 나옵니다.</b> 이 한 문장이 기계학습의 전부라고 해도 지나치지 않습니다.</p>
+
+    <svg class="flow-svg" viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="전통적 프로그래밍은 규칙과 데이터를 넣어 답을 얻고, 기계학습은 데이터와 답을 넣어 규칙을 얻는다는 대비 그림">
+      <defs>
+        <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,1 L8,4.5 L0,8 z" fill="var(--ink-3)"/>
+        </marker>
+      </defs>
+
+      <!-- 위: 전통적 프로그래밍 -->
+      <text x="12" y="26" font-size="15" font-weight="750" fill="var(--ink)">전통적 프로그래밍</text>
+      <rect x="12" y="42" width="130" height="42" rx="9" fill="var(--warn-soft)" stroke="var(--warn-line)"/>
+      <text x="77" y="68" font-size="14" font-weight="700" text-anchor="middle" fill="var(--ink)">사람이 쓴 규칙</text>
+      <rect x="12" y="94" width="130" height="42" rx="9" fill="var(--surface-2)" stroke="var(--line-strong)"/>
+      <text x="77" y="120" font-size="14" font-weight="700" text-anchor="middle" fill="var(--ink)">데이터</text>
+      <path d="M148,63 L212,80" stroke="var(--ink-3)" stroke-width="1.8" fill="none" marker-end="url(#ah)"/>
+      <path d="M148,115 L212,98" stroke="var(--ink-3)" stroke-width="1.8" fill="none" marker-end="url(#ah)"/>
+      <rect x="220" y="62" width="120" height="54" rx="11" fill="var(--accent-soft)" stroke="var(--accent-line)"/>
+      <text x="280" y="94" font-size="14" font-weight="750" text-anchor="middle" fill="var(--accent-ink)">프로그램 실행</text>
+      <path d="M346,89 L410,89" stroke="var(--ink-3)" stroke-width="1.8" fill="none" marker-end="url(#ah)"/>
+      <rect x="418" y="62" width="120" height="54" rx="11" fill="var(--ok-soft)" stroke="var(--ok-line)"/>
+      <text x="478" y="94" font-size="15" font-weight="800" text-anchor="middle" fill="var(--ok)">답</text>
+      <text x="556" y="84" font-size="12.5" fill="var(--ink-3)">규칙이 명확한</text>
+      <text x="556" y="102" font-size="12.5" fill="var(--ink-3)">문제에 알맞다</text>
+
+      <line x1="12" y1="152" x2="708" y2="152" stroke="var(--line)" stroke-width="1" stroke-dasharray="5 4"/>
+
+      <!-- 아래: 기계학습 -->
+      <text x="12" y="182" font-size="15" font-weight="750" fill="var(--ink)">기계학습</text>
+      <rect x="12" y="198" width="130" height="42" rx="9" fill="var(--surface-2)" stroke="var(--line-strong)"/>
+      <text x="77" y="224" font-size="14" font-weight="700" text-anchor="middle" fill="var(--ink)">데이터(특성)</text>
+      <rect x="12" y="250" width="130" height="42" rx="9" fill="var(--ok-soft)" stroke="var(--ok-line)"/>
+      <text x="77" y="276" font-size="14" font-weight="700" text-anchor="middle" fill="var(--ok)">답(레이블)</text>
+      <path d="M148,219 L212,236" stroke="var(--ink-3)" stroke-width="1.8" fill="none" marker-end="url(#ah)"/>
+      <path d="M148,271 L212,254" stroke="var(--ink-3)" stroke-width="1.8" fill="none" marker-end="url(#ah)"/>
+      <rect x="220" y="218" width="120" height="54" rx="11" fill="var(--accent-soft)" stroke="var(--accent-line)"/>
+      <text x="280" y="250" font-size="14" font-weight="750" text-anchor="middle" fill="var(--accent-ink)">학습(훈련)</text>
+      <path d="M346,245 L410,245" stroke="var(--ink-3)" stroke-width="1.8" fill="none" marker-end="url(#ah)"/>
+      <rect x="418" y="218" width="120" height="54" rx="11" fill="var(--warn-soft)" stroke="var(--warn-line)"/>
+      <text x="478" y="243" font-size="15" font-weight="800" text-anchor="middle" fill="var(--ink)">규칙</text>
+      <text x="478" y="262" font-size="12" font-weight="650" text-anchor="middle" fill="var(--ink-3)">= 모델</text>
+      <text x="556" y="240" font-size="12.5" fill="var(--ink-3)">규칙을 말로 쓰기</text>
+      <text x="556" y="258" font-size="12.5" fill="var(--ink-3)">어려운 문제에 알맞다</text>
+    </svg>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념</div>
+      <p><b class="blank" data-a="기계학습|머신러닝|기계 학습" data-hint="데이터에서 규칙을 스스로 찾아내는 방법">기계학습</b>은 사람이 규칙을 직접 작성하지 않고, <b>데이터와 정답의 관계</b>를 컴퓨터가 스스로 찾아내도록 하는 방법이다. 학습의 결과로 만들어진 규칙 덩어리를 <b class="blank" data-a="모델|model" data-hint="학습 결과로 만들어진 규칙 덩어리, 영어로 model">모델</b>이라고 한다.</p>
+    </div>
+
+    <p>기계학습이라는 말은 1959년 아서 새뮤얼이 <b>“명시적으로 프로그래밍하지 않고도 컴퓨터가 학습하게 하는 연구 분야”</b>라고 설명하면서 널리 쓰이게 되었습니다. 여기서 중요한 것은 “명시적으로 프로그래밍하지 않고도”라는 부분입니다. 프로그래머가 <span class="mono">if 스팸단어 in 메일:</span> 같은 문장을 쓰지 않는다는 뜻입니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>두 방식의 비교 — 무엇을 사람이 하고 무엇을 컴퓨터가 하는가</caption>
+        <thead><tr><th>구분</th><th>전통적 프로그래밍</th><th>기계학습</th></tr></thead>
+        <tbody>
+          <tr><td><b>사람이 하는 일</b></td><td>규칙(알고리즘)을 직접 작성</td><td>데이터를 모으고 정답을 붙이고, 학습 방법을 고름</td></tr>
+          <tr><td><b>컴퓨터가 하는 일</b></td><td>규칙을 그대로 실행</td><td>데이터에서 규칙(모델)을 찾아냄</td></tr>
+          <tr><td><b>입력 → 출력</b></td><td>규칙 + 데이터 → 답</td><td>데이터 + 답 → 규칙</td></tr>
+          <tr><td><b>새로운 예외</b></td><td class="bad">사람이 규칙을 추가해야 함</td><td class="good">데이터를 더 주면 스스로 반영</td></tr>
+          <tr><td><b>잘 맞는 문제</b></td><td>세금 계산, 성적 산출, 신호 제어</td><td>얼굴 인식, 번역, 추천, 이상 거래 탐지</td></tr>
+          <tr><td><b>결과 설명</b></td><td class="good">규칙을 읽으면 이유를 알 수 있음</td><td class="bad">왜 그렇게 판단했는지 설명이 어려울 수 있음</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 오해 주의</div>
+      <p>기계학습이 전통적 프로그래밍보다 <b>언제나 더 좋은 것은 아닙니다</b>. 부가가치세를 계산하는 프로그램에 기계학습을 쓰면 어리석은 일입니다. 규칙이 <b>이미 정확하게 정해져 있는</b> 문제는 그 규칙을 그대로 코드로 쓰는 것이 더 빠르고 정확하며, 틀렸을 때 고치기도 쉽습니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. 특성과 레이블, 훈련과 추론 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>무엇을 보고, 무엇을 맞히는가</h2></div>
+
+    <p>기계학습을 하려면 먼저 데이터를 두 부분으로 나누어 생각해야 합니다. <b>무엇을 보고 판단할지</b>와 <b>무엇을 맞혀야 하는지</b>입니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">🔎</span>
+        <h4>특성 (feature)</h4>
+        <p>판단의 <b>근거</b>로 삼는 값입니다. <b class="blank" data-a="특성|feature|피처" data-hint="영어로 feature, 판단의 근거가 되는 입력 속성">특성</b>은 모델의 <b>입력</b>이 되며, 통계에서 말하는 <b>독립변수</b>에 해당합니다. 예를 들어 집값을 예측할 때 면적·방 개수·지하철 거리가 특성입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🎯</span>
+        <h4>레이블 (label)</h4>
+        <p>맞혀야 하는 <b>정답</b>입니다. <b class="blank" data-a="레이블|라벨|label" data-hint="영어로 label, 맞혀야 하는 정답 값">레이블</b>은 모델의 <b>출력</b>이 되며, 통계의 <b>종속변수</b>에 해당합니다. 집값 예측에서는 실제 거래 가격이 레이블입니다.</p>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>같은 개념을 부르는 여러 이름 — 책이나 도구마다 표현이 다르므로 함께 알아 두면 좋다</caption>
+        <thead><tr><th>역할</th><th>기계학습 용어</th><th>통계 용어</th><th>표에서의 위치</th></tr></thead>
+        <tbody>
+          <tr><td>입력(근거)</td><td>특성, 속성, 입력 변수</td><td>독립변수, 설명변수</td><td>정답을 뺀 나머지 열</td></tr>
+          <tr><td>출력(정답)</td><td>레이블, 목표값, 타깃</td><td>종속변수, 반응변수</td><td>맞히려는 그 한 열</td></tr>
+          <tr><td>한 건의 자료</td><td>샘플, 데이터 하나</td><td>관측값, 개체</td><td>표의 한 행</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub-head">학습은 두 단계로 나뉜다</h3>
+    <p>기계학습 프로그램은 항상 두 단계를 거칩니다. 이 두 단계를 구분하지 못하면 이후 차시의 내용이 뒤엉키므로 확실히 잡아 둡시다.</p>
+    <ol>
+      <li><b class="blank" data-a="훈련|학습|훈련(학습)" data-hint="데이터로 모델을 만드는 단계, 학습이라고도 한다">훈련</b> 단계 — 특성과 레이블이 함께 있는 데이터를 모델에 보여 주며, 예측이 정답에 가까워지도록 모델 내부의 값을 조금씩 고칩니다. 시간과 계산량이 많이 듭니다.</li>
+      <li><b class="blank" data-a="추론|예측|추론(예측)" data-hint="완성된 모델에 새 데이터를 넣어 답을 얻는 단계">추론</b> 단계 — 훈련이 끝난 모델에 <b>레이블이 없는 새 데이터</b>를 넣어 답을 얻습니다. 보통 매우 빠릅니다.</li>
+    </ol>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 왜 두 단계를 나누어야 할까?</div>
+      <p>훈련에 쓴 데이터로 성능을 재면 <b>실력을 부풀려 재게</b> 됩니다. 시험 문제를 미리 알려 주고 시험을 보는 것과 같습니다. 그래서 데이터를 <b>훈련 데이터</b>와 <b>테스트 데이터</b>로 나누고, 성능은 반드시 <b>한 번도 학습에 쓰지 않은</b> 테스트 데이터로 잽니다. 아래 시뮬레이터에서도 훈련 메일 20통과 테스트 메일 10통을 철저히 분리해 둡니다. 이 이야기는 6차시에서 자세히 다룹니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. 기계학습의 세 유형 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>기계학습의 세 갈래</h2></div>
+
+    <p>기계학습은 <b>학습에 쓰는 신호가 무엇인가</b>에 따라 크게 세 유형으로 나뉩니다. 구분하는 방법은 뜻밖에 간단합니다. <b>정답이 주어졌는가?</b> 그리고 <b>보상이 있는가?</b> 이 두 질문만 던지면 됩니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">🧑‍🏫</span>
+        <h4>지도학습</h4>
+        <p><b class="blank" data-a="지도학습|지도 학습|supervised learning" data-hint="정답(레이블)이 붙은 데이터로 배우는 유형">지도학습</b>은 <b>정답이 붙은</b> 데이터로 배웁니다. 결과가 <b>범주</b>면 <b class="blank" data-a="분류|classification" data-hint="합격/불합격처럼 결과가 범주일 때">분류</b>, 결과가 <b>연속된 수</b>면 <b class="blank" data-a="회귀|regression" data-hint="키·가격처럼 결과가 연속된 수일 때">회귀</b>입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🧩</span>
+        <h4>비지도학습</h4>
+        <p><b class="blank" data-a="비지도학습|비지도 학습|unsupervised learning" data-hint="정답 없이 데이터의 숨은 구조를 찾는 유형">비지도학습</b>은 <b>정답이 없는</b> 데이터에서 숨은 구조를 찾습니다. 비슷한 것끼리 묶는 <b class="blank" data-a="군집|군집화|클러스터링" data-hint="비슷한 것끼리 묶어 덩어리를 찾는 일">군집</b>과, 속성 개수를 줄이는 <b class="blank" data-a="차원 축소|차원축소" data-hint="속성 개수를 줄여 데이터를 간단하게 만드는 일">차원 축소</b>가 대표적입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🕹️</span>
+        <h4>강화학습</h4>
+        <p><b class="blank" data-a="강화학습|강화 학습|reinforcement learning" data-hint="보상을 가장 크게 만드는 행동을 배우는 유형">강화학습</b>은 정답 대신 행동의 결과로 받는 <b class="blank" data-a="보상|reward|보상 신호" data-hint="행동이 좋았는지 나빴는지 알려 주는 점수 신호">보상</b>을 씁니다. 보상의 <b>합</b>을 가장 크게 만드는 행동 방식을 시행착오로 익힙니다.</p>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>세 유형 한눈에 비교</caption>
+        <thead><tr><th>구분</th><th>지도학습</th><th>비지도학습</th><th>강화학습</th></tr></thead>
+        <tbody>
+          <tr><td><b>정답(레이블)</b></td><td class="good">있음</td><td class="bad">없음</td><td>없음 (대신 보상)</td></tr>
+          <tr><td><b>학습 신호</b></td><td>정답과의 오차</td><td>데이터 사이의 비슷함</td><td>행동 뒤에 받는 보상</td></tr>
+          <tr><td><b>대표 작업</b></td><td>분류, 회귀</td><td>군집, 차원 축소, 이상 탐지</td><td>제어, 게임 전략, 경로 최적화</td></tr>
+          <tr><td><b>대표 알고리즘</b></td><td>k-NN, 선형 회귀, 결정 트리</td><td>k-평균, 주성분 분석</td><td>Q-학습, 정책 경사</td></tr>
+          <tr><td><b>예시</b></td><td>메일 스팸 판정, 기온 예측</td><td>고객 취향별 묶기, 기사 주제 묶기</td><td>로봇 걷기, 바둑 두기</td></tr>
+          <tr><td><b>어려운 점</b></td><td>정답을 사람이 일일이 붙여야 함</td><td>결과가 맞는지 확인할 기준이 없음</td><td>학습에 시행 횟수가 매우 많이 필요함</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 자주 나오는 혼동</div>
+      <p><b>분류와 군집은 다릅니다.</b> 둘 다 “묶는” 일처럼 보이지만, 분류는 <b>이미 정해진 칸</b>에 넣는 일(지도학습)이고 군집은 <b>칸 자체를 데이터에서 만들어 내는</b> 일(비지도학습)입니다. “스팸/정상으로 나눈다”는 분류이고, “고객들이 몇 개 무리로 나뉘는지 알아본다”는 군집입니다.</p>
+      <p><b>회귀는 “되돌아간다”는 뜻이 아닙니다.</b> 통계 용어에서 유래한 이름일 뿐, 실제로는 <b>연속된 수를 예측하는 일</b>을 가리킵니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4. 어떤 문제에 쓸까 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>기계학습을 쓸 문제 고르기</h2></div>
+
+    <p>성취기준 <code>12인기02-01</code>은 “기계학습을 적용할 문제를 정의하고, 문제 해결에 필요한 데이터를 선정하여 수집한다”입니다. 문제를 정의한다는 것은 곧 <b>이 문제에 기계학습이 맞는지 판단한다</b>는 뜻입니다. 다음 세 가지를 순서대로 따져 보면 됩니다.</p>
+
+    <ol>
+      <li><b>규칙이 명확한가?</b> 규칙을 몇 줄로 정확히 쓸 수 있다면 그냥 코드로 쓰는 편이 낫습니다. 반대로 “어떻게 알아보는지 나도 설명은 못 하겠는데 보면 안다”면 기계학습의 자리입니다.</li>
+      <li><b>데이터가 충분히 있는가?</b> 기계학습은 예시로 배웁니다. 예시가 열 건뿐이라면 배울 것이 없습니다. 특히 <b>정답이 붙은</b> 데이터를 모을 수 있는지가 관건입니다.</li>
+      <li><b>예외가 많고 계속 변하는가?</b> 예외가 끝없이 생기는 문제일수록 규칙을 손으로 관리하기 어렵습니다. 데이터를 다시 모아 학습을 되풀이하는 편이 유리합니다.</li>
+    </ol>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>판단 연습 — 같은 분야에도 알맞은 문제와 알맞지 않은 문제가 섞여 있다</caption>
+        <thead><tr><th>문제</th><th>알맞은 방식</th><th>이유</th></tr></thead>
+        <tbody>
+          <tr><td>주민등록번호가 올바른 형식인지 검사</td><td class="bad">전통적 프로그래밍</td><td>검사 규칙이 법으로 정확히 정해져 있다</td></tr>
+          <tr><td>손으로 쓴 우편번호 읽기</td><td class="good">기계학습</td><td>글씨 모양이 사람마다 달라 규칙으로 쓸 수 없다</td></tr>
+          <tr><td>도서관 대출 기한 계산</td><td class="bad">전통적 프로그래밍</td><td>규정을 그대로 코드로 옮기면 된다</td></tr>
+          <tr><td>학교 급식 잔반량 예측</td><td class="good">기계학습</td><td>메뉴·날씨·요일 등 여러 요인이 복잡하게 얽혀 있다</td></tr>
+          <tr><td>새로 생긴 병의 진단 (환자 자료 12건)</td><td style="color:var(--warn);font-weight:650">둘 다 어렵다</td><td>데이터가 너무 적어 학습이 불가능하다</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-ok">
+      <div class="box-label">✅ 정리</div>
+      <p>기계학습은 <b>규칙을 말로 쓰기 어렵고, 예시 데이터는 많고, 예외가 계속 생기는</b> 문제에서 빛을 냅니다. 세 조건 중 하나라도 크게 어긋나면 다른 방법을 먼저 생각해 보아야 합니다.</p>
+    </div>
+
+    <h3 class="sub-head">데이터가 곧 규칙이다 — 그래서 위험하다</h3>
+    <p>기계학습에서 규칙은 데이터에서 나옵니다. 그러므로 <b>데이터가 한쪽으로 치우쳐 있으면 모델도 똑같이 치우칩니다.</b> 채용 지원서 데이터에 특정 대학 출신이 압도적으로 많았다면, 모델은 “그 대학이면 합격”이라는 규칙을 배워 버립니다. 사람이 그런 규칙을 쓴 적이 없는데도 말입니다.</p>
+    <p>더 곤란한 점은 이 규칙이 <b>코드에 적혀 있지 않아서</b> 눈에 잘 띄지 않는다는 것입니다. 데이터가 어떻게 모였는지 따져 보지 않으면 알아채기 어렵습니다. 이 문제는 2차시(데이터 다듬기)에서 기술적으로, 3단원(인공지능의 사회적 영향)에서 윤리적으로 다시 다룹니다.</p>
+  </section>
+
+  <!-- ============ 5. 시뮬레이터 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>직접 돌려 보기</h2><span class="sec-tag">시뮬레이터 2종</span></div>
+    <div id="sim1"></div>
+    <div id="sim2"></div>
+  </section>
+
+  <!-- ============ 6. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 7. 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 8. 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>활동 기록</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 세 유형 사이의 회색 지대 — 준지도학습과 자기지도학습</summary>
+      <div class="more-body">
+        <p>현실에서는 “정답이 있다/없다”가 딱 나뉘지 않습니다.</p>
+        <ul>
+          <li><b>준지도학습</b> — 정답이 붙은 데이터는 조금(예: 1000장), 정답이 없는 데이터는 아주 많을 때(예: 100만 장) 둘을 함께 씁니다. 정답을 붙이는 데 사람의 시간과 비용이 많이 들기 때문에 실무에서 매우 흔합니다.</li>
+          <li><b>자기지도학습</b> — 데이터 자체에서 정답을 <b>만들어 냅니다</b>. 문장의 한 단어를 가리고 그 단어를 맞히게 하면, 사람이 정답을 붙이지 않았어도 정답이 있는 문제가 됩니다. 오늘날 거대 언어 모델이 바로 이 방법으로 학습합니다.</li>
+        </ul>
+        <p>그래도 처음 배울 때는 <b>정답이 있는가 / 보상이 있는가</b>라는 두 질문으로 세 유형을 구분하는 연습이 가장 도움이 됩니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">코드</span> 훈련과 추론이 코드에서는 어떻게 나뉘는가</summary>
+      <div class="more-body">
+        <p>파이썬의 사이킷런(scikit-learn)에서는 훈련과 추론이 딱 두 줄로 나뉩니다. 어떤 알고리즘을 쓰든 이 모양은 그대로입니다.</p>
+        <pre style="margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;white-space:pre-wrap">from sklearn.naive_bayes import MultinomialNB
+
+model = MultinomialNB()
+
+model.fit(X_train, y_train)      # ← 훈련: 특성 X 와 레이블 y 를 함께 준다
+pred  = model.predict(X_test)    # ← 추론: 특성만 준다 (레이블은 주지 않는다)</pre>
+        <p style="margin-top:12px"><span class="mono">fit</span>에는 <span class="mono">y</span>(레이블)가 들어가지만 <span class="mono">predict</span>에는 들어가지 않습니다. 이 차이가 곧 훈련과 추론의 차이입니다. 비지도학습에서는 <span class="mono">fit(X)</span>처럼 <span class="mono">y</span> 없이 호출한다는 점도 눈여겨보세요.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> 오늘 하루 동안 만난 기계학습</summary>
+      <div class="more-body">
+        <div class="table-wrap" style="margin:0">
+          <table class="tb">
+            <thead><tr><th>상황</th><th>하는 일</th><th>유형</th></tr></thead>
+            <tbody>
+              <tr><td>얼굴로 휴대전화 잠금 해제</td><td>내 얼굴인지 아닌지 판정</td><td>지도학습 (분류)</td></tr>
+              <tr><td>동영상 앱의 추천 목록</td><td>비슷한 취향의 사용자 묶기 + 시청 시간 예측</td><td>비지도 + 지도</td></tr>
+              <tr><td>지도 앱의 도착 시간 안내</td><td>남은 시간을 수로 예측</td><td>지도학습 (회귀)</td></tr>
+              <tr><td>카드사의 이상 거래 알림</td><td>평소 패턴에서 크게 벗어난 거래 찾기</td><td>비지도학습 (이상 탐지)</td></tr>
+              <tr><td>번역 앱</td><td>문장을 다른 언어 문장으로 바꾸기</td><td>지도 · 자기지도학습</td></tr>
+              <tr><td>로봇 청소기의 경로 개선</td><td>덜 부딪히고 더 많이 청소하도록 조정</td><td>강화학습</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 다음 차시로 — 데이터가 지저분하면 어떻게 될까?</summary>
+      <div class="more-body">
+        시뮬레이터의 훈련 메일 20통은 깔끔하게 정리되어 있었습니다. 하지만 실제로 모은 데이터에는 <b>빈칸</b>이 있고, <b>말도 안 되는 값</b>이 섞여 있고, 단위가 서로 다른 열이 나란히 놓여 있습니다. 그런 데이터를 그대로 학습시키면 모델은 엉뚱한 규칙을 배웁니다. 2차시에서는 결측치와 이상치를 직접 찾아 처리하며, <b>전처리 방법 하나가 모델 성능을 얼마나 크게 바꾸는지</b> 숫자로 확인합니다.
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 2, lesson: 1,
+  title: '규칙을 짜지 않고 가르치기',
+  sub: '기계학습의 개념과 유형',
+  lead: '전통적 프로그래밍은 <b>규칙 + 데이터 → 답</b>이고, 기계학습은 <b>데이터 + 답 → 규칙</b>입니다. 이 화살표를 뒤집는 발상에서 출발해, 기계학습의 세 유형과 “이 문제에 기계학습을 써야 하는가”를 판단하는 기준까지 배웁니다.',
+  standards: ['12인기02-01'],
+  keywords: ['기계학습', '지도학습', '비지도학습', '강화학습', '특성', '레이블'],
+  goals: [
+    '전통적 프로그래밍과 기계학습의 차이를 <b>입력과 출력의 관계</b>로 설명할 수 있다.',
+    '특성과 레이블, 훈련 단계와 추론 단계를 구분하여 설명할 수 있다.',
+    '지도학습·비지도학습·강화학습을 정답과 보상의 유무로 구분하고 사례를 분류할 수 있다.',
+    '주어진 문제에 기계학습이 적합한지 세 가지 기준으로 판단할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 시뮬레이터 1: 스팸 분류 — 규칙 대 학습 ===================== -->
+<script>
+(function () {
+  /* ---------------------------------------------------------------
+   * 훈련 메일 20통 (스팸 10 / 정상 10) — 레이블 1=스팸, 0=정상
+   * 테스트 메일 10통은 학습에 절대 쓰지 않는다.
+   * ------------------------------------------------------------- */
+  const TRAIN = [
+    ['무료 이벤트 당첨 지금 클릭 하십시오', 1],
+    ['축하 합니다 당첨 되셨습니다 계좌 알려주세요', 1],
+    ['긴급 대출 무료 상담 지금 전화 주세요', 1],
+    ['지금 클릭 하면 무료 상품권 증정', 1],
+    ['광고 이벤트 당첨 확률 100% 지금 확인', 1],
+    ['대출 승인 계좌 입력 지금 확인 요청', 1],
+    ['무료 체험 이벤트 참여 신청 클릭', 1],
+    ['당첨 축하 상품권 지금 수령 계좌 확인', 1],
+    ['광고 무료 쿠폰 대량 발송 클릭', 1],
+    ['긴급 계좌 정지 안내 지금 확인 클릭', 1],
+    ['안녕하세요 내일 수업 자료 첨부 합니다', 0],
+    ['과제 제출 기한 내일 까지 입니다', 0],
+    ['회의 시간 변경 안내 자료 확인 부탁드립니다', 0],
+    ['선생님 과제 파일 첨부 했습니다', 0],
+    ['동아리 발표 자료 준비 부탁드립니다', 0],
+    ['내일 체육 대회 안내 입니다', 0],
+    ['안녕하세요 진로 상담 신청 합니다', 0],
+    ['수업 시간표 변경 되었으니 확인 하세요', 0],
+    ['과제 관련 질문 있습니다 답장 부탁드립니다', 0],
+    ['회의 자료 파일 보내 드립니다', 0]
+  ];
+
+  /* 테스트 메일 10통 — 3번은 글자를 비틀어 쓴 변형 스팸 */
+  const TEST = [
+    ['무료 상품권 당첨 지금 클릭 하세요', 1, ''],
+    ['긴급 대출 무료 상담 지금 전화 주세요', 1, ''],
+    ['f-r-e-e 쿠폰 이벤트 지금 확인 하세요', 1, '변형'],
+    ['축하 합니다 당첨 되셨습니다 계좌 번호 알려주세요', 1, ''],
+    ['무료 이벤트 지금 신청 하세요', 1, '까다로움'],
+    ['안녕하세요 내일 과제 제출 합니다', 0, ''],
+    ['무료 급식 신청 안내 자료 첨부 합니다', 0, '함정'],
+    ['회의 지금 시작 합니다 자료 확인 부탁드립니다', 0, '함정'],
+    ['선생님 발표 자료 파일 첨부 했습니다', 0, ''],
+    ['동아리 이벤트 안내 자료 확인 하세요', 0, '함정']
+  ];
+
+  const body = AI.sim.panel('#sim1', {
+    title: '스팸 분류 — 규칙 대 학습',
+    tag: '나란히 대결',
+    desc: '같은 문제를 <b>왼쪽은 사람이 쓴 규칙</b>으로, <b>오른쪽은 데이터로 학습한 모델</b>로 풉니다. 왼쪽에서 금지 단어를 넣고 빼며 정확도가 어떻게 움직이는지 보세요. 두 방식 모두 <b>테스트 메일 10통</b>으로만 채점합니다.'
+  });
+
+  /* =============== 기계학습 쪽: 나이브 베이즈 =============== */
+  const tok = s => s.split(/\s+/).filter(Boolean);
+  let M = null;                       // 학습된 모델 (null 이면 아직 훈련 전)
+
+  function trainNB() {
+    const cnt = { 0: {}, 1: {} }, tot = { 0: 0, 1: 0 }, docs = { 0: 0, 1: 0 };
+    const vocab = new Set();
+    TRAIN.forEach(function (row) {
+      const y = row[1];
+      docs[y]++;
+      tok(row[0]).forEach(function (w) {
+        vocab.add(w);
+        cnt[y][w] = (cnt[y][w] || 0) + 1;
+        tot[y]++;
+      });
+    });
+    return { cnt: cnt, tot: tot, docs: docs, vocab: vocab, V: vocab.size };
+  }
+
+  /* 단어 하나의 증거 크기 = log( P(단어|스팸) / P(단어|정상) ), 라플라스 보정 */
+  function wordWeight(w) {
+    const ps = ((M.cnt[1][w] || 0) + 1) / (M.tot[1] + M.V);
+    const ph = ((M.cnt[0][w] || 0) + 1) / (M.tot[0] + M.V);
+    return Math.log(ps / ph);
+  }
+
+  /* 메일 점수 = log(사전확률비) + 단어 증거의 합.  0보다 크면 스팸 */
+  function nbScore(text) {
+    let s = Math.log(M.docs[1] / M.docs[0]);
+    const used = [];
+    tok(text).forEach(function (w) {
+      if (!M.vocab.has(w)) { used.push([w, null]); return; }
+      const g = wordWeight(w);
+      s += g;
+      used.push([w, g]);
+    });
+    return { score: s, spam: s > 0, used: used };
+  }
+
+  /* =============== 규칙 쪽 =============== */
+  let rules = ['무료'];
+  const ruleSpam = text => rules.some(r => r && text.indexOf(r) >= 0);
+
+  /* =============== 화면 만들기 =============== */
+  const C = () => AI.sim.colors();
+
+  /* --- 왼쪽: 규칙 --- */
+  const ruleBox = AI.h('div', { class: 'rule-box' });
+  const ruleInput = AI.h('input', {
+    type: 'text', placeholder: '금지 단어 (예: 당첨)', autocomplete: 'off',
+    style: { width: '180px', flex: '0 1 180px' }
+  });
+  const ruleStats = AI.ui.stats([
+    { key: 'acc', label: '정확도' }, { key: 'miss', label: '놓친 스팸' }, { key: 'fp', label: '잘못 막은 정상' }
+  ]);
+
+  function addRule() {
+    const v = ruleInput.value.trim();
+    if (!v) { AI.toast('금지 단어를 입력해 주세요'); return; }
+    if (rules.indexOf(v) >= 0) { AI.toast('이미 있는 규칙이에요'); return; }
+    rules.push(v);
+    ruleInput.value = '';
+    log.add('규칙 추가 — <b>' + AI.esc(v) + '</b> (총 ' + rules.length + '개)', true);
+    render();
+  }
+  ruleInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addRule(); } });
+
+  const leftWrap = AI.h('div', {},
+    AI.h('h4', { class: 'mini-head', style: { marginTop: 0 }, text: '① 규칙 기반 — 사람이 규칙을 직접 쓴다' }),
+    AI.h('p', { style: { fontSize: '13px', color: 'var(--ink-3)', margin: '0 0 9px' },
+      text: '금지 단어가 하나라도 들어 있으면 스팸으로 판정합니다.' }),
+    AI.h('div', { class: 'sim-controls', style: { marginTop: 0 } },
+      ruleInput,
+      AI.ui.btn('＋ 새 규칙 추가', addRule, 'small'),
+      AI.ui.btn('규칙 비우기', () => { rules = []; log.add('규칙을 모두 지웠습니다.'); render(); }, 'small ghost')
+    ),
+    ruleBox,
+    ruleStats.el
+  );
+
+  /* --- 오른쪽: 기계학습 --- */
+  const wtBox = AI.h('div', { class: 'wt-table', style: { marginTop: '10px' } });
+  const mlStats = AI.ui.stats([
+    { key: 'acc', label: '정확도' }, { key: 'miss', label: '놓친 스팸' }, { key: 'fp', label: '잘못 막은 정상' }
+  ]);
+  const trainBtn = AI.ui.btn('▶ 훈련 메일 20통으로 학습', () => {
+    M = trainNB();
+    log.add('학습 완료 — 서로 다른 단어 <b>' + M.V + '개</b>의 증거 크기를 계산했습니다. 사람이 쓴 규칙은 <b>0개</b>입니다.', true);
+    render();
+  }, 'primary small');
+
+  const rightWrap = AI.h('div', {},
+    AI.h('h4', { class: 'mini-head', style: { marginTop: 0 }, text: '② 기계학습 — 데이터에서 스스로 배운다' }),
+    AI.h('p', { style: { fontSize: '13px', color: 'var(--ink-3)', margin: '0 0 9px' },
+      text: '훈련 메일에서 단어마다 스팸다움을 세어 두고, 메일에 든 단어의 증거를 모두 더해 판정합니다(나이브 베이즈).' }),
+    AI.h('div', { class: 'sim-controls', style: { marginTop: 0 } },
+      trainBtn,
+      AI.ui.btn('↺ 학습 취소', () => { M = null; log.add('모델을 지웠습니다. 훈련 전 상태입니다.'); render(); }, 'small ghost')
+    ),
+    wtBox,
+    mlStats.el
+  );
+
+  body.appendChild(AI.h('div', { class: 'sim-grid' }, leftWrap, rightWrap));
+
+  /* --- 아래: 테스트 결과 표 --- */
+  const tableHost = AI.h('div', { style: { marginTop: '18px' } });
+  body.appendChild(AI.h('h4', { class: 'mini-head', text: '테스트 메일 10통 — 두 방식의 판정 비교' }));
+  body.appendChild(AI.h('p', { style: { fontSize: '13px', color: 'var(--ink-3)', margin: '0 0 6px' },
+    html: '이 10통은 <b>학습에 쓰지 않은</b> 메일입니다. 빨간 칸이 <b>틀린 판정</b>입니다.' }));
+  body.appendChild(tableHost);
+
+  const verdict = AI.h('div', { class: 'box box-info', style: { marginTop: '14px' } });
+  body.appendChild(verdict);
+
+  const log = AI.ui.log();
+  body.appendChild(log.el);
+
+  /* 훈련 데이터 열어 보기 */
+  const trainList = AI.ui.table(['#', '훈련 메일 본문', '레이블'],
+    TRAIN.map((r, i) => [String(i + 1), AI.esc(r[0]),
+      r[1] ? '<span class="tag tag-s">스팸</span>' : '<span class="tag tag-h">정상</span>']));
+  trainList.style.margin = '0';
+  body.appendChild(AI.h('details', { class: 'more-box', style: { margin: '14px 0 0' } },
+    AI.h('summary', {}, AI.h('span', { class: 'plus-tag', text: '데이터' }), ' 훈련 메일 20통 살펴보기 (스팸 10 · 정상 10)'),
+    AI.h('div', { class: 'more-body' }, trainList)));
+
+  /* =============== 그리기 =============== */
+  function renderRules() {
+    ruleBox.innerHTML = '';
+    if (!rules.length) {
+      ruleBox.appendChild(AI.h('span', { class: 'empty', text: '규칙이 없습니다 — 모든 메일을 정상으로 봅니다.' }));
+      return;
+    }
+    rules.forEach(function (r, i) {
+      ruleBox.appendChild(AI.h('span', { class: 'rule-chip' },
+        AI.h('span', { text: r }),
+        AI.h('button', {
+          type: 'button', title: '이 규칙 삭제', 'aria-label': r + ' 규칙 삭제',
+          onclick: () => { rules.splice(i, 1); log.add('규칙 삭제 — ' + AI.esc(r)); render(); }
+        }, '×')
+      ));
+    });
+  }
+
+  function renderWeights() {
+    wtBox.innerHTML = '';
+    if (!M) {
+      wtBox.appendChild(AI.h('div', {
+        class: 'box box-warn', style: { margin: 0, padding: '11px 13px', fontSize: '13.5px' },
+        html: '아직 <b>훈련 전</b>입니다. 모델이 없으니 아무것도 판정할 수 없습니다. 위의 <b>학습</b> 단추를 눌러 보세요.'
+      }));
+      return;
+    }
+    const co = C();
+    const ws = [];
+    M.vocab.forEach(w => ws.push([w, wordWeight(w), M.cnt[1][w] || 0, M.cnt[0][w] || 0]));
+    ws.sort((a, b) => b[1] - a[1]);
+    const top = ws.slice(0, 5), bot = ws.slice(-5).reverse();
+    const max = Math.max(Math.abs(top[0][1]), Math.abs(bot[0][1])) || 1;
+
+    function cellRows(arr, col) {
+      return arr.map(function (r) {
+        const w = Math.max(4, Math.round(Math.abs(r[1]) / max * 62));
+        return [AI.esc(r[0]),
+          '<span class="wt-bar" style="width:' + w + 'px;background:' + col + '"></span> ' +
+          '<span class="mono">' + (r[1] > 0 ? '+' : '') + AI.fmt(r[1], 2) + '</span>',
+          '<span style="color:var(--ink-3)">스팸 ' + r[2] + ' · 정상 ' + r[3] + '</span>'];
+      });
+    }
+    wtBox.appendChild(AI.h('p', {
+      style: { fontSize: '12.5px', color: 'var(--ink-3)', margin: '0 0 6px' },
+      html: '학습이 찾아낸 <b>증거 크기</b> 상위·하위 5개 — 사람이 알려 준 적 없습니다.'
+    }));
+    wtBox.appendChild(AI.ui.table(['스팸다운 단어', '증거', '훈련 등장 횟수'], cellRows(top, co.no)));
+    wtBox.appendChild(AI.ui.table(['정상다운 단어', '증거', '훈련 등장 횟수'], cellRows(bot, co.ok)));
+  }
+
+  function renderTable() {
+    tableHost.innerHTML = '';
+    const rows = TEST.map(function (t, i) {
+      const truth = t[1];
+      const rs = ruleSpam(t[0]) ? 1 : 0;
+      const ml = M ? nbScore(t[0]) : null;
+      const mlv = ml ? (ml.spam ? 1 : 0) : null;
+      const note = t[2] ? ' <span class="tag" style="background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line)">' + t[2] + '</span>' : '';
+      return [
+        String(i + 1),
+        '<span class="mail-row">' + AI.esc(t[0]) + note + '</span>',
+        truth ? '<span class="tag tag-s">스팸</span>' : '<span class="tag tag-h">정상</span>',
+        { cls: rs === truth ? '' : 'wrong-cell',
+          html: (rs ? '<span class="tag tag-s">스팸</span>' : '<span class="tag tag-h">정상</span>') + (rs === truth ? ' ✓' : ' ✗') },
+        { cls: mlv === null ? '' : (mlv === truth ? '' : 'wrong-cell'),
+          html: mlv === null ? '<span style="color:var(--ink-4)">훈련 전</span>'
+            : (mlv ? '<span class="tag tag-s">스팸</span>' : '<span class="tag tag-h">정상</span>') + ' ' + (mlv === truth ? '✓' : '✗') +
+              '<br><span class="mono" style="font-size:11.5px;color:var(--ink-3)">점수 ' + (ml.score > 0 ? '+' : '') + AI.fmt(ml.score, 2) + '</span>' }
+      ];
+    });
+    tableHost.appendChild(AI.ui.table(['#', '테스트 메일', '실제', '① 규칙 판정', '② 학습 판정'], rows));
+  }
+
+  function accOf(fn) {
+    let ok = 0, miss = 0, fp = 0;
+    TEST.forEach(function (t) {
+      const p = fn(t[0]) ? 1 : 0;
+      if (p === t[1]) ok++;
+      else if (t[1] === 1) miss++;
+      else fp++;
+    });
+    return { ok: ok, miss: miss, fp: fp };
+  }
+
+  function render() {
+    renderRules();
+    renderWeights();
+    renderTable();
+
+    const ra = accOf(ruleSpam);
+    ruleStats.set('acc', ra.ok + '/10');
+    ruleStats.set('miss', ra.miss);
+    ruleStats.set('fp', ra.fp);
+
+    if (M) {
+      const ma = accOf(t => nbScore(t).spam);
+      mlStats.set('acc', ma.ok + '/10');
+      mlStats.set('miss', ma.miss);
+      mlStats.set('fp', ma.fp);
+      verdict.innerHTML =
+        '<div class="box-label">📊 지금 상황</div>' +
+        '<p><b>규칙 기반</b> — 사람이 쓴 규칙 ' + rules.length + '개로 <b>' + ra.ok + '/10</b>. ' +
+        (ra.miss ? '변형된 스팸 ' + ra.miss + '통을 놓쳤고 ' : '놓친 스팸은 없고 ') +
+        (ra.fp ? '정상 메일 ' + ra.fp + '통을 스팸으로 잘못 막았습니다.' : '잘못 막은 정상 메일도 없습니다.') + '</p>' +
+        '<p><b>기계학습</b> — 사람이 쓴 규칙 <b>0개</b>로 <b>' + ma.ok + '/10</b>. 단어 하나로 결정하지 않고 <b>여러 단어의 증거를 더해</b> 판정하기 때문에, 한 단어가 비틀려 있어도 나머지 단어로 버틸 수 있습니다.</p>' +
+        (ra.ok < ma.ok
+          ? '<p style="color:var(--ink-3);font-size:14px">💡 5번 메일 <b>무료 이벤트 지금 신청 하세요</b>를 보세요. 여기 쓰인 <b>모든</b> 단어(무료·이벤트·지금·신청·하세요)가 테스트의 <b>정상 메일에도 들어 있습니다</b>. 그래서 이 메일을 잡는 규칙을 만들면 반드시 정상 메일 하나를 잘못 막게 됩니다. 규칙만으로는 10/10이 <b>원리적으로 불가능</b>합니다.</p>'
+          : '<p style="color:var(--ink-3);font-size:14px">💡 규칙을 더 넣거나 빼면서 <b>놓친 스팸</b>과 <b>잘못 막은 정상</b>이 어떻게 맞바뀌는지 관찰해 보세요.</p>');
+    } else {
+      mlStats.set('acc', '–');
+      mlStats.set('miss', '–');
+      mlStats.set('fp', '–');
+      verdict.innerHTML =
+        '<div class="box-label">📊 지금 상황</div>' +
+        '<p><b>규칙 기반</b>은 규칙 ' + rules.length + '개로 <b>' + ra.ok + '/10</b>을 맞혔습니다. ' +
+        '<b>기계학습</b>은 아직 <b>훈련 전</b>이라 판정할 수 없습니다.</p>' +
+        '<p style="color:var(--ink-3);font-size:14px">💡 여기서 <b>훈련 단계</b>와 <b>추론 단계</b>의 차이가 드러납니다. 모델은 훈련을 마쳐야 비로소 새 메일을 판정할 수 있습니다. 오른쪽 <b>학습</b> 단추를 눌러 보세요.</p>';
+    }
+  }
+
+  window.addEventListener('ai:redraw', render);
+  render();
+  log.add('규칙 <b>무료</b> 하나로 시작합니다. 오른쪽은 아직 훈련하지 않았습니다.', true);
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 학습 유형 분류 게임 ===================== -->
+<script>
+(function () {
+  const TYPES = [
+    { k: 'sup', label: '지도학습' },
+    { k: 'uns', label: '비지도학습' },
+    { k: 'rl', label: '강화학습' }
+  ];
+  const NAME = { sup: '지도학습', uns: '비지도학습', rl: '강화학습' };
+
+  /* 12개 문제 상황 — ans: 정답 유형, why: 정답이 주어졌는가 / 보상이 있는가 기준의 해설 */
+  const CARDS = [
+    { icon: '✏️', t: '사람이 손으로 쓴 숫자 이미지 6만 장에 <b>0~9 정답이 붙어</b> 있다. 새 이미지가 어떤 숫자인지 알아맞히게 한다.', ans: 'sup',
+      why: '이미지마다 <b>정답(0~9)이 주어져</b> 있고, 결과가 열 개 범주 중 하나이므로 <b>지도학습의 분류</b>입니다.' },
+    { icon: '🛍️', t: '온라인 상점 고객 5만 명의 구매 기록만 있다. 비슷한 취향끼리 <b>몇 개 무리로 나뉘는지</b> 알아본다.', ans: 'uns',
+      why: '“이 사람은 A 유형”이라는 <b>정답이 없습니다</b>. 무리 자체를 데이터에서 만들어 내므로 <b>비지도학습의 군집</b>입니다.' },
+    { icon: '🎮', t: '벽돌깨기 게임에서 점수가 오르면 <b>+1</b>, 공을 놓치면 <b>-1</b>을 받으며 조작 방법을 스스로 익힌다.', ans: 'rl',
+      why: '정답 조작법은 알려 주지 않고 <b>보상</b>만 줍니다. 보상의 합을 크게 만드는 행동을 배우므로 <b>강화학습</b>입니다.' },
+    { icon: '🌡️', t: '지난 10년간의 기온·습도·기압 기록과 <b>그날의 실제 기온</b>이 있다. 내일의 기온을 예측한다.', ans: 'sup',
+      why: '과거 자료에 <b>실제 기온이라는 정답</b>이 붙어 있고, 예측 결과가 <b>연속된 수</b>이므로 <b>지도학습의 회귀</b>입니다.' },
+    { icon: '📰', t: '주제 표시가 전혀 없는 뉴스 기사 2만 건을 <b>비슷한 내용끼리</b> 모아 묶음을 만든다.', ans: 'uns',
+      why: '기사에 <b>주제 정답이 붙어 있지 않습니다</b>. 단어 사용이 비슷한 기사끼리 모으는 <b>비지도학습의 군집</b>입니다.' },
+    { icon: '🤖', t: '두 발 로봇이 넘어지지 않고 걷도록, <b>앞으로 나아간 거리만큼 점수</b>를 주며 수천 번 반복시킨다.', ans: 'rl',
+      why: '관절을 어떤 각도로 움직여야 하는지 <b>정답이 없습니다</b>. 나아간 거리라는 <b>보상</b>으로 배우므로 <b>강화학습</b>입니다.' },
+    { icon: '🏥', t: '의사가 <b>양성·악성으로 판정해 둔</b> 종양 영상 3천 장으로, 새 영상의 양성·악성을 판정하게 한다.', ans: 'sup',
+      why: '의사가 붙인 <b>정답 레이블</b>이 있고 결과가 두 범주이므로 <b>지도학습의 분류</b>입니다.' },
+    { icon: '📉', t: '학생마다 <b>100개</b>의 속성이 있어 그림으로 나타낼 수 없다. 정보를 최대한 살리면서 속성을 <b>2개</b>로 줄인다.', ans: 'uns',
+      why: '맞혀야 할 <b>정답이 없고</b> 데이터 자체의 구조를 간추리는 일입니다. <b>비지도학습의 차원 축소</b>입니다.' },
+    { icon: '⚫', t: '바둑에서 <b>이기면 +1, 지면 -1</b>을 받으며 스스로 수천만 판을 두어 두는 방법을 개선한다.', ans: 'rl',
+      why: '매 수의 정답을 알려 주지 않고 <b>승패라는 보상</b>만 줍니다. 게임이 끝난 뒤 보상이 오는 전형적인 <b>강화학습</b>입니다.' },
+    { icon: '📧', t: '사용자가 <b>스팸이라고 표시한</b> 메일 5천 통과 정상 메일 5천 통으로 스팸 분류기를 만든다.', ans: 'sup',
+      why: '사용자의 신고가 곧 <b>정답 레이블</b>입니다. 스팸/정상 두 범주로 나누므로 <b>지도학습의 분류</b>입니다.' },
+    { icon: '💳', t: '카드 거래 기록에 <b>사기 여부 표시가 없다</b>. 평소 패턴에서 크게 벗어난 거래를 따로 골라낸다.', ans: 'uns',
+      why: '사기 여부라는 <b>정답이 없는</b> 상태에서 다수와 다른 것을 찾습니다. <b>비지도학습의 이상 탐지</b>입니다.' },
+    { icon: '🚗', t: '자율주행 시뮬레이터에서 차선을 벗어나면 <b>감점</b>, 목적지에 가까워지면 <b>가점</b>을 주며 운전을 익히게 한다.', ans: 'rl',
+      why: '순간마다의 정답 조작이 아니라 <b>가점과 감점</b>으로 배웁니다. <b>강화학습</b>입니다.' }
+  ];
+
+  const body = AI.sim.panel('#sim2', {
+    title: '학습 유형 분류 게임',
+    tag: '12문항',
+    desc: '각 상황을 세 유형 중 하나로 골라 보세요. 판단 기준은 두 가지입니다 — <b>정답(레이블)이 주어졌는가?</b> 주어지지 않았다면 <b>보상이 있는가?</b>'
+  });
+
+  const picks = new Array(CARDS.length).fill(null);
+  let graded = false;
+
+  const grid = AI.h('div', { class: 'card-grid' });
+  const nodes = CARDS.map(function (c, i) {
+    const fb = AI.h('div', { class: 'card-fb', style: { display: 'none' } });
+    const pick = AI.h('div', { class: 'card-pick' });
+    const btns = TYPES.map(function (ty) {
+      const b = AI.h('button', { type: 'button', 'aria-pressed': 'false', text: ty.label });
+      b.addEventListener('click', function () {
+        if (graded) return;
+        picks[i] = ty.k;
+        btns.forEach(x => x.setAttribute('aria-pressed', 'false'));
+        b.setAttribute('aria-pressed', 'true');
+        updateFoot();
+      });
+      pick.appendChild(b);
+      return b;
+    });
+    const card = AI.h('div', { class: 'mini-card' },
+      AI.h('span', { class: 'icon', text: c.icon }),
+      AI.h('p', { html: '<b>' + (i + 1) + '.</b> ' + c.t }),
+      pick, fb
+    );
+    grid.appendChild(card);
+    return { card: card, btns: btns, fb: fb };
+  });
+  body.appendChild(grid);
+
+  const foot = AI.h('div', { class: 'box box-info', style: { marginTop: '14px' } });
+
+  function updateFoot() {
+    const done = picks.filter(p => p !== null).length;
+    if (!graded) {
+      foot.innerHTML = '<div class="box-label">📊 진행 상황</div><p>' + done + ' / ' + CARDS.length +
+        ' 문항 선택 완료' + (done === CARDS.length ? ' — 이제 <b>채점하기</b>를 눌러 보세요.' : '') + '</p>';
+    }
+  }
+
+  function grade() {
+    if (picks.some(p => p === null)) { AI.toast('아직 고르지 않은 카드가 있어요'); return; }
+    graded = true;
+    const byType = { sup: [0, 0], uns: [0, 0], rl: [0, 0] };   // [맞힘, 전체]
+    let ok = 0;
+    CARDS.forEach(function (c, i) {
+      const good = picks[i] === c.ans;
+      if (good) ok++;
+      byType[c.ans][1]++;
+      if (good) byType[c.ans][0]++;
+      const n = nodes[i];
+      n.card.classList.remove('judged-ok', 'judged-no');
+      n.card.classList.add(good ? 'judged-ok' : 'judged-no');
+      n.btns.forEach(function (b, bi) {
+        b.disabled = true;
+        if (TYPES[bi].k === c.ans) b.setAttribute('aria-pressed', 'true');
+        else b.setAttribute('aria-pressed', 'false');
+      });
+      n.fb.style.display = '';
+      n.fb.innerHTML = (good ? '<b style="color:var(--ok)">✓ 정답 · ' + NAME[c.ans] + '</b>'
+        : '<b style="color:var(--no)">✗ ' + NAME[picks[i]] + '(이)라고 골랐지만 정답은 ' + NAME[c.ans] + '</b>') +
+        '<br>' + c.why;
+    });
+    foot.innerHTML = '<div class="box-label">📊 채점 결과</div>' +
+      '<p><b>' + ok + ' / ' + CARDS.length + ' 정답</b> (' + Math.round(ok / CARDS.length * 100) + '점)</p>' +
+      '<p>유형별 정답 — 지도학습 <b>' + byType.sup[0] + '/' + byType.sup[1] + '</b> · ' +
+      '비지도학습 <b>' + byType.uns[0] + '/' + byType.uns[1] + '</b> · ' +
+      '강화학습 <b>' + byType.rl[0] + '/' + byType.rl[1] + '</b></p>' +
+      (ok === CARDS.length
+        ? '<p style="color:var(--ok)">모두 맞혔습니다! 세 유형의 기준이 확실히 잡혔네요. 🎉</p>'
+        : '<p style="color:var(--ink-3);font-size:14px">💡 <b>틀린 것만 다시</b>를 눌러 헷갈린 카드만 다시 풀어 보세요. 틀린 카드마다 <b>정답이 주어졌는가 / 보상이 있는가</b>를 소리 내어 물어보면 잘 정리됩니다.</p>');
+  }
+
+  function resetCards(indices) {
+    graded = false;
+    indices.forEach(function (i) {
+      picks[i] = null;
+      const n = nodes[i];
+      n.card.classList.remove('judged-ok', 'judged-no');
+      n.fb.style.display = 'none';
+      n.fb.innerHTML = '';
+      n.btns.forEach(b => { b.disabled = false; b.setAttribute('aria-pressed', 'false'); });
+    });
+    updateFoot();
+  }
+
+  function retryWrong() {
+    const wrong = [];
+    CARDS.forEach((c, i) => { if (picks[i] !== c.ans) wrong.push(i); });
+    if (!wrong.length) { AI.toast('틀린 카드가 없어요!'); return; }
+    // 맞힌 카드는 접어 두고 틀린 카드만 남긴다
+    nodes.forEach((n, i) => { n.card.style.display = wrong.indexOf(i) >= 0 ? '' : 'none'; });
+    resetCards(wrong);
+    // 맞힌 카드의 선택은 정답으로 되돌려 둔다
+    CARDS.forEach((c, i) => { if (wrong.indexOf(i) < 0) picks[i] = c.ans; });
+    foot.innerHTML = '<div class="box-label">🔁 틀린 카드만 다시</div><p>틀린 <b>' + wrong.length +
+      '개</b>만 남겼습니다. 다시 골라 <b>채점하기</b>를 눌러 보세요.</p>';
+    showAllBtn.style.display = '';
+    AI.toast('틀린 카드 ' + wrong.length + '개만 남겼어요');
+  }
+
+  const showAllBtn = AI.ui.btn('전체 카드 보기', () => {
+    nodes.forEach(n => { n.card.style.display = ''; });
+    showAllBtn.style.display = 'none';
+  }, 'ghost small');
+  showAllBtn.style.display = 'none';
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('채점하기', grade, 'primary'),
+    AI.ui.btn('🔁 틀린 것만 다시', retryWrong),
+    AI.ui.btn('↺ 처음부터', () => {
+      nodes.forEach(n => { n.card.style.display = ''; });
+      showAllBtn.style.display = 'none';
+      resetCards(CARDS.map((_, i) => i));
+    }, 'ghost'),
+    showAllBtn
+  ));
+  body.appendChild(foot);
+  updateFoot();
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a2l1-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['특성', '레이블', '모델', '지도학습', '비지도학습', '강화학습', '보상', '군집', '회귀', '추론'],
+  sents: [
+    { text: '기계학습에서 판단의 근거가 되는 입력 속성을 {0}(이)라 하고, 맞혀야 하는 정답을 {1}(이)라 한다.', answers: [['특성'], ['레이블']] },
+    { text: '훈련 단계의 결과로 만들어진 규칙 덩어리를 {0}(이)라고 부르며, 여기에 새 데이터를 넣어 답을 얻는 단계를 {1}(이)라 한다.', answers: [['모델'], ['추론']] },
+    { text: '정답이 붙은 데이터로 배우는 유형은 {0}이고, 정답 없이 데이터의 구조를 찾는 유형은 {1}이다.', answers: [['지도학습'], ['비지도학습']] },
+    { text: '{0}은(는) 정답 대신 행동의 결과로 받는 {1}을(를) 학습 신호로 쓴다.', answers: [['강화학습'], ['보상']] },
+    { text: '비지도학습에서 비슷한 데이터끼리 묶어 덩어리를 찾는 일을 {0}(이)라고 한다.', answers: [['군집']] },
+    { text: '지도학습에서 결과가 연속된 수인 경우를 {0}(이)라고 한다.', answers: [['회귀']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '1차시 확인 문제',
+  items: [
+    {
+      type: 'mc',
+      q: '전통적 프로그래밍과 기계학습의 <b>입력·출력 관계</b>를 옳게 나타낸 것은?',
+      choices: [
+        '전통적: 데이터 + 답 → 규칙 &nbsp;/&nbsp; 기계학습: 규칙 + 데이터 → 답',
+        '전통적: 규칙 + 데이터 → 답 &nbsp;/&nbsp; 기계학습: 데이터 + 답 → 규칙',
+        '두 방식 모두 규칙 + 데이터 → 답이며, 속도만 다르다',
+        '두 방식 모두 데이터 + 답 → 규칙이며, 데이터 양만 다르다'
+      ],
+      answer: 1,
+      why: '전통적 프로그래밍은 <b>사람이 쓴 규칙</b>에 데이터를 넣어 답을 얻습니다. 기계학습은 <b>데이터와 답을 함께</b> 주고 그 관계, 즉 규칙(모델)을 컴퓨터가 찾아냅니다. 화살표의 방향이 뒤집힌 것이 핵심입니다.'
+    },
+    {
+      type: 'ox',
+      q: '규칙이 이미 명확하게 정해진 문제일수록 기계학습을 쓰는 것이 유리하다.',
+      answer: false,
+      why: '반대입니다. 규칙이 <b>명확한 문제는 그 규칙을 그대로 코드로 쓰는 편</b>이 더 빠르고 정확하며, 틀렸을 때 고치기도 쉽습니다. 부가가치세 계산에 기계학습을 쓸 이유는 없습니다. 기계학습은 <b>규칙을 말로 쓰기 어려운</b> 문제에 씁니다.'
+    },
+    {
+      type: 'match',
+      q: '다음 사례를 알맞은 기계학습 유형과 짝지으시오.',
+      left: [
+        '정답 표시가 없는 뉴스 기사를 비슷한 내용끼리 묶는다',
+        '의사가 양성·악성을 판정해 둔 영상으로 새 영상을 판정한다',
+        '이기면 +1, 지면 -1을 받으며 바둑 두는 법을 개선한다',
+        '지난 기온 기록으로 내일의 기온을 수로 예측한다',
+        '속성 100개를 정보를 살리며 2개로 줄인다'
+      ],
+      right: ['지도학습', '비지도학습', '강화학습'],
+      answer: [1, 0, 2, 0, 1],
+      why: '<b>정답이 주어졌는가</b>를 먼저 묻습니다. 판정 결과와 실제 기온은 정답이 있으니 지도학습, 기사 묶기와 차원 축소는 정답이 없으니 비지도학습입니다. 정답이 없는데 <b>보상</b>이 있으면 강화학습입니다.'
+    },
+    {
+      type: 'multi',
+      q: '어떤 문제에 기계학습을 적용하기에 <b>알맞은 상황</b>을 모두 고르시오.',
+      choices: [
+        '규칙을 몇 줄로 정확히 적을 수 있다',
+        '정답이 붙은 데이터를 수만 건 모을 수 있다',
+        '예외 상황이 계속 새로 생겨 규칙 관리가 어렵다',
+        '사람은 보면 바로 아는데 그 이유를 말로 설명하기 어렵다',
+        '데이터가 열 건뿐이지만 매우 중요한 문제다'
+      ],
+      answer: [1, 2, 3],
+      why: '①은 <b>전통적 프로그래밍</b>이 더 나은 경우입니다. ⑤는 문제의 중요도와 무관하게 <b>학습할 예시가 없어</b> 기계학습이 불가능합니다. 중요한 문제일수록 데이터가 부족하다는 이유만으로 억지로 학습시키면 위험합니다.'
+    },
+    {
+      type: 'order',
+      q: '기계학습으로 문제를 해결하는 일반적인 절차를 <b>올바른 순서</b>로 배열하시오.',
+      items: [
+        '해결할 문제를 정의하고 기계학습이 적합한지 판단한다',
+        '문제에 필요한 데이터를 선정하여 수집한다',
+        '결측치·이상치를 처리하고 핵심 속성을 추출한다',
+        '유형과 알고리즘을 고르고 훈련 데이터로 학습한다',
+        '테스트 데이터로 성능을 평가한다',
+        '완성된 모델에 새 데이터를 넣어 예측(추론)한다'
+      ],
+      answer: [0, 1, 2, 3, 4, 5],
+      why: '문제 정의 → 데이터 수집 → 전처리 → 학습 → 평가 → 적용 순서입니다. 특히 <b>평가는 학습에 쓰지 않은 테스트 데이터로</b> 해야 하며, 평가 결과가 나쁘면 앞 단계로 되돌아가 되풀이합니다.'
+    },
+    {
+      type: 'short',
+      q: '훈련이 끝난 모델에 <b>레이블이 없는 새 데이터</b>를 넣어 답을 얻는 단계를 무엇이라고 하는가?',
+      answer: ['추론', '예측', '추론 단계', '예측 단계', 'inference'],
+      placeholder: '예: ○○',
+      why: '<b>추론(예측)</b> 단계입니다. 훈련 단계에서는 특성과 레이블을 <b>함께</b> 주지만, 추론 단계에서는 특성만 주고 레이블을 모델이 내놓습니다. 사이킷런의 <span class="mono">fit</span>과 <span class="mono">predict</span>가 각각 이 두 단계에 해당합니다.'
+    },
+    {
+      type: 'mc',
+      q: '분류와 군집의 차이를 옳게 설명한 것은?',
+      choices: [
+        '분류는 데이터가 많을 때, 군집은 데이터가 적을 때 쓴다',
+        '분류는 이미 정해진 칸에 넣는 지도학습, 군집은 칸 자체를 데이터에서 만드는 비지도학습이다',
+        '분류는 결과가 수이고, 군집은 결과가 범주다',
+        '분류는 비지도학습, 군집은 지도학습이다'
+      ],
+      answer: 1,
+      why: '둘 다 “묶는” 일처럼 보이지만 결정적으로 다릅니다. <b>분류</b>는 스팸/정상처럼 <b>사람이 미리 정한 칸</b>에 넣는 일이라 정답이 필요합니다(지도학습). <b>군집</b>은 몇 개 무리로 나뉘는지조차 모른 채 <b>무리 자체를 찾아내는</b> 일입니다(비지도학습). 참고로 결과가 수인 것은 회귀입니다.'
+    },
+    {
+      type: 'ox',
+      q: '데이터가 한쪽으로 치우쳐 있어도, 학습 알고리즘이 뛰어나면 모델은 공정한 규칙을 배운다.',
+      answer: false,
+      why: '기계학습에서 <b>규칙은 데이터에서 나옵니다</b>. 데이터가 치우쳐 있으면 모델도 그 치우침을 그대로 규칙으로 배웁니다. 더 곤란한 점은 그 규칙이 <b>코드에 적혀 있지 않아</b> 눈에 잘 띄지 않는다는 것입니다. 알고리즘의 성능으로 해결할 문제가 아니라 <b>데이터를 어떻게 모았는지</b> 따져야 하는 문제입니다.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a2l1-note',
+  title: '두 시뮬레이터 관찰 기록',
+  prompt: '<b>시뮬레이터 1</b>에서 규칙을 여러 번 넣고 빼 본 뒤, <b>시뮬레이터 2</b>를 채점하고 아래를 채워 보세요. 시뮬레이터에서 본 <b>실제 숫자</b>를 적는 것이 중요합니다.',
+  fields: [
+    { key: 'r1', label: '규칙 기반이 얻은 가장 높은 정확도 (규칙 몇 개로?)', type: 'text', placeholder: '예: 9/10 (규칙 3개)' },
+    { key: 'r2', label: '그때 사용한 금지 단어 목록', type: 'text', placeholder: '예: 당첨, 대출, 쿠폰' },
+    { key: 'm1', label: '기계학습의 정확도 (사람이 쓴 규칙 수)', type: 'text', placeholder: '예: 10/10 (규칙 0개)' },
+    { key: 'm2', label: '학습이 찾아낸 가장 스팸다운 단어 3개와 증거 값', type: 'text', placeholder: '예: 지금 +2.01, 무료 +1.72, 클릭 +1.72' },
+    { key: 'g1', label: '유형 분류 게임 점수 / 가장 헷갈린 카드 번호', type: 'text', placeholder: '예: 10/12, 8번과 11번' },
+    {
+      key: 'find', label: '규칙을 추가했을 때 정확도가 어떻게 움직였나요? 예상과 달랐던 순간을 적어 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) “무료”를 규칙에 넣으니 스팸은 더 잡혔는데, 무료 급식 안내 메일이 스팸으로 막혔다. 놓친 스팸이 줄어든 만큼 잘못 막은 정상이 늘어서 …'
+    },
+    {
+      key: 'why', label: '5번 테스트 메일을 규칙으로는 잡을 수 없는 이유를 자기 말로 설명해 보세요.',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 그 메일에 들어 있는 단어가 모두 정상 메일에도 나오기 때문에 …'
+    },
+    {
+      key: 'apply', label: '내 주변에서 기계학습으로 풀면 좋을 문제 하나를 고르고, 특성·레이블·유형을 정해 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 문제: 급식 잔반량 줄이기 / 특성: 메뉴, 요일, 날씨, 급식 인원 / 레이블: 그날 잔반 무게(kg) / 유형: 지도학습(회귀) / 이유: …'
+    },
+    {
+      key: 'risk', label: '그 문제에서 데이터가 치우치면 어떤 잘못된 규칙을 배울 수 있을까요?',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 겨울에만 데이터를 모으면 여름 메뉴에 대해서는 …'
+    }
+  ]
+});
+</script>
+</body>
+</html>

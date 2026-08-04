@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4차시 고쳐야 완성된다 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+/* 이 차시 전용 */
+.up-card { display: flex; flex-direction: column; gap: 6px; }
+.up-card .up-meta { font-size: 12px; color: var(--ink-3); font-weight: 650; display: flex; flex-wrap: wrap; gap: 8px; }
+.up-card .up-meta b { color: var(--accent-ink); }
+.up-card .btn { width: 100%; margin-top: 4px; }
+.up-card.used { opacity: .55; }
+.chk-q { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); margin-bottom: 7px; }
+.chk-q .qt { font-size: 14.3px; }
+.chk-area-head { display: flex; align-items: center; gap: 7px; font-size: 14.5px; font-weight: 750; margin: 16px 0 8px; color: var(--accent-ink); }
+.chk-bar { height: 9px; border-radius: 999px; background: var(--surface-3); overflow: hidden; min-width: 90px; }
+.chk-bar i { display: block; height: 100%; border-radius: 999px; background: var(--accent); }
+.rub-tb td { font-size: 13.5px; }
+.rub-tb td:first-child { font-weight: 700; white-space: nowrap; }
+@media (max-width: 560px) { .chk-q { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>세 팀이 같은 문제를 풀었습니다. 발표 시간에 이렇게 말했습니다.</p>
+      <ul>
+        <li><b>가온 팀</b> — “정확도 0.68이 나왔습니다. 시간이 없어서 여기까지 했습니다.”</li>
+        <li><b>나리 팀</b> — “정확도 0.94입니다! 데이터 전체로 정규화하고 테스트 데이터로도 학습시켰습니다.”</li>
+        <li><b>다온 팀</b> — “처음 0.68에서 시작했는데, 틀린 사례 30개를 모아 보니 <b>한 학년의 데이터만 유독 적었습니다</b>. 그 학년 데이터를 더 모아 0.86이 되었습니다.”</li>
+      </ul>
+      <p>여러분이 심사위원이라면 어느 팀에 가장 높은 점수를 주고 싶은가요? 그리고 그 이유는 무엇인가요?</p>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 점수보다 중요한 것</summary>
+        <div class="more-body">
+          나리 팀의 0.94는 <b>데이터 누출</b>로 부풀려진 점수입니다. 다온 팀은 점수가 더 낮지만 <b>왜 틀렸는지 찾아내고 그것을 고쳤습니다</b>. 이 차시는 다온 팀이 한 일 — 평가 결과를 읽고 원인을 찾아 고치는 일 — 을 연습합니다.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 평가는 끝이 아니다 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>평가는 끝이 아니라 개선의 시작</h2></div>
+
+    <p>모델을 학습시키고 정확도를 재면 프로젝트가 끝난 것 같습니다. 하지만 성능 평가의 진짜 목적은 <b>점수를 매기는 것</b>이 아니라 <b>무엇을 고쳐야 할지 알아내는 것</b>입니다. 그래서 인공지능 개발은 한 줄로 끝나지 않고 <span class="term">개선 사이클</span>을 돕니다.</p>
+
+    <div class="box" style="padding:18px 12px">
+      <svg viewBox="0 0 880 158" width="100%" role="img" aria-label="개선 사이클 — 성능 평가, 오류 분석, 개선 적용, 재평가와 기록을 반복하는 흐름도" style="max-width:880px;display:block;margin:0 auto">
+        <defs>
+          <marker id="cy-arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="var(--accent)"></path>
+          </marker>
+        </defs>
+        <g fill="var(--accent-soft)" stroke="var(--accent-line)" stroke-width="1.5">
+          <rect x="6" y="12" width="190" height="60" rx="11"></rect>
+          <rect x="226" y="12" width="190" height="60" rx="11"></rect>
+          <rect x="446" y="12" width="190" height="60" rx="11"></rect>
+          <rect x="666" y="12" width="190" height="60" rx="11"></rect>
+        </g>
+        <g stroke="var(--accent)" stroke-width="2" fill="none" marker-end="url(#cy-arw)">
+          <line x1="200" y1="42" x2="220" y2="42"></line>
+          <line x1="420" y1="42" x2="440" y2="42"></line>
+          <line x1="640" y1="42" x2="660" y2="42"></line>
+          <path d="M 761 76 L 761 112 L 101 112 L 101 78"></path>
+        </g>
+        <g fill="var(--ink)" font-size="14.5" font-weight="700" text-anchor="middle">
+          <text x="101" y="38">① 성능 평가</text>
+          <text x="321" y="38">② 오류 분석</text>
+          <text x="541" y="38">③ 개선 적용</text>
+          <text x="761" y="38">④ 재평가 · 기록</text>
+        </g>
+        <g fill="var(--ink-3)" font-size="11.5" text-anchor="middle">
+          <text x="101" y="58">정확도·혼동 행렬</text>
+          <text x="321" y="58">무엇을 왜 틀렸나</text>
+          <text x="541" y="58">한 번에 한 가지만</text>
+          <text x="761" y="58">올랐나? 왜 올랐나?</text>
+        </g>
+        <text x="431" y="132" fill="var(--accent-ink)" font-size="12.5" font-weight="700" text-anchor="middle">목표 성능에 닿거나 시간이 다할 때까지 반복한다</text>
+      </svg>
+    </div>
+
+    <p>이 사이클에서 가장 자주 건너뛰는 칸이 ②번입니다. 성능이 낮으면 곧바로 알고리즘을 바꾸거나 값을 조정하고 싶어집니다. 하지만 원인을 모르고 손을 대면 <b>운에 맡기는 일</b>이 됩니다. 시간은 한정되어 있으므로, 먼저 <b class="blank" data-hint="틀린 사례를 모아 유형별로 살펴보며 원인을 찾는 일">오류 분석</b>을 해야 합니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념</div>
+      <p><b>개선 사이클</b>은 평가 → 원인 분석 → 개선 → 재평가를 <b>반복</b>하는 과정이다. 한 바퀴에서는 <b>한 가지만</b> 바꾼다. 두 가지를 동시에 바꾸면 성능이 변했을 때 무엇 덕분인지 알 수 없어, 다음 바퀴에서 무엇을 해야 할지 판단할 근거가 사라진다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. 오류 분석 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>무엇을 어떻게 틀렸나</h2></div>
+
+    <p>정확도 0.68은 “100개 중 68개를 맞혔다”는 뜻일 뿐, <b>어떤 32개를 틀렸는지</b>는 알려 주지 않습니다. 오류 분석의 첫걸음은 틀린 사례를 <b>전부 꺼내어 눈으로 보는 것</b>입니다. 30개 정도면 사람이 직접 훑어볼 수 있고, 대개 몇 가지 유형으로 뭉쳐 있습니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>오류 목록을 유형별로 모아 본 예 — “진로 추천 모델”의 틀린 사례 32건</caption>
+        <thead><tr><th>오류 유형</th><th>건수</th><th>추측되는 원인</th><th>가장 알맞은 개선</th></tr></thead>
+        <tbody>
+          <tr><td>2학년 학생을 계속 틀림</td><td class="num">14</td><td>2학년 데이터가 전체의 8%뿐</td><td>2학년 데이터 더 수집</td></tr>
+          <tr><td>‘예술’ 계열을 ‘인문’으로 예측</td><td class="num">9</td><td>두 계열을 구분할 속성이 없음</td><td>새 속성 추가(특성 공학)</td></tr>
+          <tr><td>결측치가 많은 행에서 틀림</td><td class="num">6</td><td>결측치를 0으로 채워 왜곡</td><td>전처리 방법 개선</td></tr>
+          <tr><td>원인을 알 수 없음</td><td class="num">3</td><td>–</td><td>잠시 보류</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>이 표를 만들면 <b>무엇부터 해야 할지가 저절로 드러납니다</b>. 32건 중 14건이 한 학년에서 나왔으니, 알고리즘을 바꾸는 것보다 그 학년 데이터를 모으는 편이 훨씬 효과적입니다. 오류 분석은 시간이 드는 일이지만, <b>헛된 개선에 쓸 시간을 아껴 줍니다</b>.</p>
+
+    <h3 class="sub-head">혼동 행렬을 다시 보기</h3>
+    <p>분류 문제라면 <b class="blank" data-hint="실제 값과 예측 값을 교차해 정리한 표">혼동 행렬</b>이 오류 분석의 가장 좋은 출발점입니다. 어느 칸에 오류가 몰려 있는지가 한눈에 보입니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>혼동 행렬 — 감염병 자가진단 모델(테스트 200건). 가로가 예측, 세로가 실제이다.</caption>
+        <thead><tr><th></th><th>예측: 양성</th><th>예측: 음성</th><th>합계</th></tr></thead>
+        <tbody>
+          <tr><td><b>실제: 양성</b></td><td class="good">참양성 24</td><td class="bad">거짓음성 16</td><td class="num">40</td></tr>
+          <tr><td><b>실제: 음성</b></td><td class="bad">거짓양성 8</td><td class="good">참음성 152</td><td class="num">160</td></tr>
+          <tr><td><b>합계</b></td><td class="num">32</td><td class="num">168</td><td class="num">200</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>정확도는 (24+152)÷200 = <b>0.88</b>로 꽤 좋아 보입니다. 그런데 양성이라 예측한 것 중 실제 양성의 비율인 <b class="blank" data-hint="양성이라 예측한 것 중 실제로 양성인 비율">정밀도</b>는 24÷32 = 0.75, 실제 양성 중 찾아낸 비율인 <b class="blank" data-a="재현율|민감도" data-hint="실제 양성 중 맞게 찾아낸 비율">재현율</b>은 24÷40 = <b>0.60</b>입니다. 감염자 10명 중 4명을 놓치고 있다는 뜻이니, 이 모델은 <b>정확도만 보면 놓치는 문제</b>를 안고 있습니다.</p>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 정확도 한 숫자만 보면 안 되는 이유</div>
+      <p>전체의 80%가 음성인 데이터에서 <b>무조건 “음성”이라고만 답하는 모델</b>도 정확도 0.80을 얻습니다. 아무것도 학습하지 않았는데도 말입니다. 그래서 개선 방향을 정할 때는 정확도 옆에 <b>정밀도·재현율과 혼동 행렬</b>을 반드시 함께 놓고 봅니다. 놓치면 큰 피해가 생기는 문제(질병, 사고)에서는 재현율을, 잘못 지목하면 피해가 큰 문제(스팸 차단, 부정 적발)에서는 정밀도를 더 중요하게 봅니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. 성능을 올리는 다섯 가지 길 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>성능을 올리는 다섯 가지 길</h2></div>
+
+    <p>원인을 찾았다면 이제 고칩니다. 성능을 올리는 방법은 크게 다섯 가지이고, 각각 <b>드는 비용</b>과 <b>기대할 수 있는 효과</b>가 다릅니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>다섯 가지 개선 방법의 비용과 효과 — 효과는 “문제의 원인이 그것일 때”의 값이다.</caption>
+        <thead><tr><th>방법</th><th>구체적으로</th><th>비용</th><th>효과</th><th>이럴 때 효과적</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>① 데이터를 더 모으기</b></td>
+            <td>표본 수를 늘리거나, 부족한 집단의 데이터를 집중해 모은다</td>
+            <td>매우 큼 (시간·사람)</td>
+            <td class="good">보통 가장 큼</td>
+            <td>훈련·테스트 성능이 <b>둘 다 낮을 때</b>, 특정 집단에서만 오류가 몰릴 때</td>
+          </tr>
+          <tr>
+            <td><b>② 전처리를 개선하기</b></td>
+            <td>결측치 처리 방법을 바꾸고, 이상치를 걸러 내고, <b class="blank" data-hint="값의 범위를 비슷하게 맞추는 전처리">정규화</b>를 적용한다</td>
+            <td class="good">작음</td>
+            <td>작음 ~ 큼</td>
+            <td>데이터가 지저분할 때, 거리 기반 모델에서 열마다 값의 범위가 크게 다를 때</td>
+          </tr>
+          <tr>
+            <td><b>③ 좋은 속성을 만들기</b></td>
+            <td>기존 열을 조합해 새 속성을 만든다 — <b class="blank" data-a="특성 공학|속성 공학|feature engineering" data-hint="기존 속성을 조합·변형해 더 좋은 속성을 만드는 일">특성 공학</b></td>
+            <td>보통</td>
+            <td class="good">큼</td>
+            <td>서로 다른 두 부류가 지금 속성으로는 겹쳐 보일 때</td>
+          </tr>
+          <tr>
+            <td><b>④ 알고리즘을 바꾸기</b></td>
+            <td>k-NN → 결정 트리 → 랜덤 포레스트 → 신경망 등으로 교체한다</td>
+            <td>보통</td>
+            <td>보통</td>
+            <td>데이터와 속성은 괜찮은데 모델이 관계를 표현하기에 너무 단순할 때</td>
+          </tr>
+          <tr>
+            <td><b>⑤ 하이퍼파라미터 조정</b></td>
+            <td><b class="blank" data-a="하이퍼파라미터|초매개변수" data-hint="k나 최대 깊이처럼 학습으로 정해지지 않고 사람이 미리 정하는 값">하이퍼파라미터</b>인 k, 최대 깊이, 학습률 등을 여러 조합으로 시도한다</td>
+            <td class="good">작음 (컴퓨터가 함)</td>
+            <td class="bad">보통 가장 작음</td>
+            <td>다른 것을 다 손본 뒤 마지막에 짜낼 때</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-ok">
+      <div class="box-label">✅ 기억할 순서</div>
+      <p>연구와 현장의 경험이 한결같이 가리키는 것은 <b class="blank" data-hint="성능을 올리는 데 보통 효과가 가장 큰 것 — 양과 질이 중요하다">데이터</b>의 양과 질입니다. 같은 시간을 쓴다면 <b>데이터 → 전처리 → 속성 → 알고리즘 → 하이퍼파라미터</b> 순서로 손보는 것이 대체로 효율적입니다. 하이퍼파라미터 조정은 가장 손이 쉽게 가는 일이지만, 대개 마지막 몇 퍼센트를 짜내는 역할에 그칩니다.</p>
+    </div>
+
+    <h3 class="sub-head">훈련 성능과 테스트 성능을 따로 보기</h3>
+    <p>어떤 길을 고를지는 <b>두 성능의 관계</b>가 알려 줍니다. 훈련 성능도 낮고 테스트 성능도 낮다면 모델이 아직 <b>충분히 배우지 못한 것</b>이므로, 속성을 늘리거나 더 유연한 알고리즘으로 바꿉니다. 반대로 훈련 성능은 높은데 테스트 성능이 낮다면 훈련 데이터를 외워 버린 <b class="blank" data-a="과대적합|과적합|오버피팅" data-hint="훈련 성능만 높고 테스트 성능은 낮은 상태">과대적합</b>이므로, 데이터를 늘리거나 모델을 단순하게 만들어야 합니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th>훈련 성능</th><th>테스트 성능</th><th>진단</th><th>해야 할 일</th></tr></thead>
+        <tbody>
+          <tr><td class="num">0.71</td><td class="num">0.68</td><td>과소적합 — 아직 못 배웠다</td><td>속성 추가, 더 유연한 알고리즘, 전처리 개선</td></tr>
+          <tr><td class="num">0.98</td><td class="num">0.69</td><td><b>과대적합</b> — 외워 버렸다</td><td>데이터 늘리기, 모델 단순화, 속성 줄이기</td></tr>
+          <tr><td class="num">0.89</td><td class="num">0.86</td><td>건강한 상태</td><td>미세 조정으로 마무리, 사회적 영향 점검</td></tr>
+          <tr><td class="num">0.72</td><td class="num">0.94</td><td>의심스러움 — 데이터 누출이나 테스트 표본이 너무 쉬움</td><td>분할 과정을 다시 확인</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>여러 모델의 예측을 모아 다수결이나 평균으로 결정하는 <b class="blank" data-a="앙상블|앙상블 학습|ensemble" data-hint="여러 모델의 예측을 모아 결정하는 방법">앙상블</b>은 성능을 올리는 강력한 방법입니다. 다만 모델이 복잡해지므로, 데이터가 적을 때 쓰면 훈련 성능만 오르고 테스트 성능은 오히려 떨어질 수 있습니다.</p>
+  </section>
+
+  <!-- ============ 4. 사회적 영향 점검 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>성능만 좋으면 좋은 인공지능일까</h2></div>
+
+    <p>정확도 0.92를 달성했다고 해서 좋은 인공지능 소프트웨어라고 할 수는 없습니다. 그 0.92가 <b>누구에게</b> 0.92인지, 틀린 8%가 <b>누구에게</b> 몰려 있는지, 그 예측이 <b>어떻게 쓰일지</b>를 함께 물어야 합니다. 개발을 마치기 전에 다섯 영역을 점검합니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">⚖️</span>
+        <h4>편향과 공정성</h4>
+        <p>학습 데이터에 어떤 집단이 지나치게 적지 않은가? 집단별로 정확도를 나눠 보면 차이가 크지 않은가? 데이터에 담긴 과거의 차별을 모델이 <b class="blank" data-hint="특정 집단에 치우쳐 불리한 결과를 내는 문제">편향</b>으로 되풀이하고 있지 않은가?</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🔒</span>
+        <h4>프라이버시</h4>
+        <p>이름·연락처·학번처럼 개인을 알아볼 수 있는 정보를 지웠는가? 데이터를 준 사람에게 목적을 알리고 동의를 받았는가? 필요 이상으로 많이 모으지 않았는가?</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🔎</span>
+        <h4>투명성과 설명</h4>
+        <p>왜 그렇게 예측했는지 사람이 이해할 수 있는 성질을 <b class="blank" data-a="설명 가능성|설명가능성|해석 가능성" data-hint="왜 그렇게 예측했는지 사람이 이해할 수 있는 성질">설명 가능성</b>이라 한다. 어떤 데이터로 배웠고 어디까지 믿을 수 있는지 문서로 남겼는가?</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🛡️</span>
+        <h4>안전과 오용</h4>
+        <p>틀렸을 때 생길 피해를 적어 보았는가? 사람이 최종 판단을 검토하고 되돌릴 수 있는가? 원래 목적과 다르게 악용될 길은 없는가?</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🌱</span>
+        <h4>지속가능성</h4>
+        <p>필요한 만큼만 학습했는가? 큰 모델을 여러 번 학습시키는 데 드는 전력과 탄소 배출도 프로젝트의 비용이다. 작은 모델로 충분한지 먼저 확인한다.</p>
+      </div>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 왜 개발이 끝난 뒤가 아니라 개발 중에 점검할까</div>
+      <p>편향은 대부분 <b>데이터를 모으는 단계</b>에서 들어옵니다. 완성한 뒤에 발견하면 데이터를 다시 모아야 하므로 프로젝트를 거의 처음부터 다시 해야 합니다. 개선 사이클을 한 바퀴 돌 때마다 성능과 함께 이 다섯 영역을 짧게 점검하면, 되돌릴 수 없는 실수를 막을 수 있습니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 5. 시뮬레이터 1 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>모델 개선 사이클 게임</h2><span class="sec-tag">시뮬레이터 1</span></div>
+    <div id="sim1"></div>
+  </section>
+
+  <!-- ============ 6. 시뮬레이터 2 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>사회적 영향 점검표</h2><span class="sec-tag">시뮬레이터 2</span></div>
+    <div id="sim2"></div>
+  </section>
+
+  <!-- ============ 7. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 8. 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 9. 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">9</span><h2>활동 기록 — 개선 실험</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 10. 프로젝트 평가 루브릭 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">10</span><h2>프로젝트 평가 루브릭</h2></div>
+
+    <p>인공지능 프로젝트는 <b>완성된 소프트웨어 하나</b>로만 평가하지 않습니다. 주제를 잘 골랐는지, 해결 방식이 창의적인지, 팀원과 어떻게 협력했는지, 윤리적 문제를 살폈는지를 <b class="blank" data-hint="평가 항목과 수준별 기준을 표로 정리한 채점 기준표">루브릭</b>으로 함께 봅니다. 아래 표를 읽고 <b>지금 우리 팀이 어느 칸에 있는지</b> 표시해 보세요.</p>
+
+    <div class="table-wrap">
+      <table class="tb rub-tb">
+        <caption>인공지능 프로젝트 평가 루브릭 — 다섯 항목을 골고루 반영한다.</caption>
+        <thead><tr><th>평가 항목</th><th>A 매우 우수</th><th>B 우수</th><th>C 보통</th><th>D 노력 필요</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>주제의 적절성</td>
+            <td>지속가능발전목표와의 연결이 분명하고, 인공지능으로 풀기에 알맞은 크기로 문제를 좁혔다</td>
+            <td>목표와의 연결이 분명하고 문제가 대체로 구체적이다</td>
+            <td>주제를 정했으나 인공지능으로 풀 수 있는 형태로 좁히지 못했다</td>
+            <td>주제가 막연하고 목표와의 연결을 설명하지 못했다</td>
+          </tr>
+          <tr>
+            <td>문제 해결 방식의 창의성</td>
+            <td>데이터·속성·접근 방법에서 남과 다른 시도를 하고 그 이유를 설명했다</td>
+            <td>배운 방법을 문제 상황에 맞게 응용했다</td>
+            <td>수업의 예시를 거의 그대로 따라 했다</td>
+            <td>해결 방법을 스스로 정하지 못했다</td>
+          </tr>
+          <tr>
+            <td>협업</td>
+            <td>역할을 나누고 중간에 서로 바꿔 보았으며, 변경 이유를 기록으로 남겼다</td>
+            <td>역할을 나누어 맡은 일을 끝내고 회의에 꾸준히 참여했다</td>
+            <td>맡은 일은 했으나 다른 역할의 진행 상황은 알지 못했다</td>
+            <td>참여가 드물어 팀 결과물에 기여하지 못했다</td>
+          </tr>
+          <tr>
+            <td>완성도</td>
+            <td>파이프라인이 처음부터 끝까지 오류 없이 동작하고, 성능을 수치와 근거로 제시했다</td>
+            <td>대체로 동작하며 성능을 수치로 제시했다</td>
+            <td>일부 단계가 동작하지 않아 결과를 얻지 못했다</td>
+            <td>코드가 실행되지 않는다</td>
+          </tr>
+          <tr>
+            <td>윤리적 고려</td>
+            <td>편향·프라이버시·오용 가능성을 점검하고 실제 조치를 취해 기록했다</td>
+            <td>점검표로 확인하고 개선할 점을 적었다</td>
+            <td>언급은 했으나 실제 점검은 하지 않았다</td>
+            <td>사회적 영향을 고려하지 않았다</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="note2"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 검증 데이터 — 테스트 데이터를 아껴 써야 하는 이유</summary>
+      <div class="more-body">
+        <p>개선 사이클을 돌 때마다 테스트 데이터로 성능을 재면, 조금씩 <b>테스트 데이터에 맞춰</b> 결정을 내리게 됩니다. 열 번쯤 반복하면 테스트 점수도 더 이상 “처음 보는 데이터”의 점수가 아닙니다.</p>
+        <p>그래서 실제로는 데이터를 <b>훈련 · 검증 · 테스트</b> 셋으로 나눕니다. 개선 방향은 <b>검증 데이터</b>로 판단하고, 테스트 데이터는 <b>마지막에 딱 한 번</b>만 씁니다. 데이터가 적으면 훈련 데이터를 다시 여러 겹으로 나눠 돌려 쓰는 <b>교차 검증</b>을 씁니다.</p>
+        <pre style="margin:12px 0 0;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;white-space:pre-wrap">from sklearn.model_selection import cross_val_score
+
+점수 = cross_val_score(model, X_train, y_train, cv=5)
+print(점수.mean(), 점수.std())   # 평균과 흔들림을 함께 본다</pre>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">코드</span> 하이퍼파라미터를 자동으로 탐색하기</summary>
+      <div class="more-body">
+        <p>사람이 k를 1, 3, 5, 7 바꿔 보는 일은 컴퓨터에 맡길 수 있습니다.</p>
+        <pre style="margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;white-space:pre-wrap">from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+
+격자 = {'n_neighbors': [1, 3, 5, 7, 9], 'weights': ['uniform', 'distance']}
+탐색 = GridSearchCV(KNeighborsClassifier(), 격자, cv=5)
+탐색.fit(X_train_s, y_train)
+
+print(탐색.best_params_)     # 가장 좋았던 조합
+print(탐색.best_score_)      # 그때의 검증 점수</pre>
+        <p style="margin-top:12px">다만 이 방법으로 오르는 폭은 보통 몇 퍼센트에 그칩니다. 데이터가 부족한 상황이라면 같은 시간을 <b>데이터 수집</b>에 쓰는 것이 훨씬 낫습니다. 시뮬레이터 1에서 직접 확인해 보세요.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> 편향이 실제로 문제가 된 방식</summary>
+      <div class="more-body">
+        <p>과거에 여러 나라에서 보고된 사례들은 공통된 구조를 가집니다.</p>
+        <ul style="margin:0">
+          <li><b>채용 심사 모델</b> — 과거 합격자 데이터로 학습하니 과거의 성별 편중을 그대로 재현했습니다. 데이터가 과거의 관행을 담고 있었기 때문입니다.</li>
+          <li><b>얼굴 인식</b> — 학습 데이터에 특정 피부색·성별의 사진이 적어, 그 집단에서 오류율이 몇 배 높게 나타났습니다.</li>
+          <li><b>의료 자원 배분 모델</b> — “의료비 지출”을 건강 상태의 대리 지표로 썼더니, 병원에 덜 갈 수밖에 없던 집단이 건강하다고 판정되었습니다.</li>
+        </ul>
+        <p style="margin-top:10px">세 사례 모두 <b>알고리즘의 결함이 아니라 데이터와 지표 선택의 문제</b>였습니다. 그래서 점검은 코드가 아니라 <b>데이터와 목표 설정</b>에서 시작해야 합니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 단원을 마무리하며</summary>
+      <div class="more-body">
+        1차시에서 지속가능발전목표에서 주제를 찾고, 2차시에서 계획을 세우고, 3차시에서 파이프라인을 조립해 소프트웨어를 만들고, 이번 차시에서 평가 결과로 성능을 개선했습니다. 이 네 차시를 한 문장으로 줄이면 이렇습니다 — <b>인공지능은 한 번에 완성되지 않고, 고치는 과정을 통해 완성된다.</b> 단원 마무리에서 전체 과정을 하나의 개념 지도로 정리하고, 프로젝트 결과를 스스로 점검해 봅니다.
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 4, lesson: 4,
+  title: '고쳐야 완성된다',
+  sub: '평가 결과 반영과 성능 개선',
+  lead: '정확도 0.68이 나왔습니다. 데이터를 더 모을까요, 알고리즘을 바꿀까요, 값을 조정할까요? 남은 시간은 열흘뿐입니다. 이 차시에서는 <b>평가 결과를 읽어 원인을 찾고</b> 무엇부터 고칠지 결정하는 방법과, 성능만이 아니라 <b>사회적 영향</b>까지 점검하는 방법을 배웁니다.',
+  standards: ['12인기04-04'],
+  keywords: ['오류 분석', '성능 개선', '반복 개선', '사회적 영향', '루브릭'],
+  goals: [
+    '평가 결과를 오류 분석과 혼동 행렬로 해석하여 성능이 낮은 원인을 진단할 수 있다.',
+    '성능을 올리는 다섯 가지 방법의 비용과 효과를 비교하여 상황에 맞는 개선을 선택할 수 있다.',
+    '편향·프라이버시·투명성·안전·지속가능성의 관점에서 자신이 만든 소프트웨어를 점검하고 개선 조치를 제안할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 시뮬레이터 1: 모델 개선 사이클 게임 ===================== -->
+<script>
+(function () {
+  var TARGET = 0.85, BUDGET = 10, START = 0.68;
+
+  /* cost: 드는 일수 / cap: 모델 복잡도 증가 / dat: 데이터 양 변화 / once: 한 번만 효과 */
+  var CARDS = [
+    { k: 'collect', n: '데이터 2배 수집', icon: '📥', cost: 3, cap: 0, dat: 0.30, exp: '보통 매우 큼', how: '표본 수를 늘려 모델이 배울 수 있는 패턴을 넓힌다' },
+    { k: 'miss', n: '결측치 정교하게 처리', icon: '🩹', cost: 1, cap: 0, dat: 0.02, exp: '작음 ~ 큼', how: '0으로 채우던 것을 열별 중앙값·집단별 평균으로 바꾼다' },
+    { k: 'out', n: '이상치 제거', icon: '🚫', cost: 1, cap: 0, dat: -0.01, exp: '작음 ~ 큼', how: '입력 실수나 극단값을 찾아 걸러 낸다 (데이터는 조금 줄어든다)' },
+    { k: 'feat', n: '새 속성 추가 (특성 공학)', icon: '🧩', cost: 2, cap: 0.06, dat: 0, exp: '보통 큼', how: '기존 열을 조합해 더 잘 구분되는 속성을 만든다' },
+    { k: 'norm', n: '정규화 적용', icon: '📏', cost: 1, cap: 0, dat: 0, exp: '알고리즘에 따라 다름', how: '열마다 다른 값의 범위를 비슷하게 맞춘다', once: true },
+    { k: 'algo', n: '알고리즘 교체', icon: '🔁', cost: 2, cap: 0.12, dat: 0, exp: '보통', how: 'k-NN에서 결정 트리·랜덤 포레스트 등으로 바꾼다' },
+    { k: 'tune', n: '하이퍼파라미터 탐색', icon: '🎛️', cost: 2, cap: 0.10, dat: 0, exp: '작음 ~ 보통', how: 'k, 최대 깊이 등을 여러 조합으로 시도한다' },
+    { k: 'ens', n: '앙상블 구성', icon: '🎭', cost: 3, cap: 0.25, dat: 0, exp: '보통 (과대적합 주의)', how: '여러 모델의 예측을 다수결·평균으로 모은다', once: true }
+  ];
+
+  var SCEN = [
+    {
+      title: '학생 진로 추천 모델',
+      story: '설문에 응답한 학생이 <b>90명</b>뿐입니다. 훈련 정확도 0.71, 테스트 정확도 0.68로 <b>둘 다 낮습니다</b>.',
+      data: 0.05,
+      diag: '틀린 사례를 모아 보니 <b>매번 다른 곳</b>에서 오답이 나오고, 훈련 데이터를 조금만 바꿔도 성능이 크게 흔들립니다. 훈련 성능마저 0.71로 낮습니다 → <b>표본이 절대적으로 부족합니다</b>.',
+      diag2: '혼동 행렬을 보니 어느 한 칸에 오류가 몰려 있지 않고 골고루 퍼져 있습니다. 속성이나 알고리즘의 문제라면 특정 칸에 몰리는데, 그렇지 않다는 것은 <b>데이터의 양</b>이 병목이라는 신호입니다.',
+      lesson: '훈련 성능과 테스트 성능이 <b>둘 다 낮을 때</b>는 모델을 복잡하게 만들어도 소용이 없습니다. 배울 재료 자체가 부족한 상황이므로 데이터를 모으는 것이 가장 빠른 길입니다.',
+      gains: { collect: 0.110, miss: 0.012, out: 0.010, feat: 0.020, norm: 0.008, algo: 0.012, tune: 0.006, ens: 0.010 },
+      notes: {
+        collect: '표본이 늘어나자 모델이 볼 수 있는 패턴이 넓어졌습니다. <b>이번 병목이 바로 데이터의 양</b>이었습니다.',
+        miss: '결측치 처리를 다듬어도, 데이터 자체가 적으면 얻을 것이 많지 않습니다.',
+        out: '이상치를 지우면 적은 데이터가 더 줄어듭니다. 표본이 적을 때는 오히려 조심해야 합니다.',
+        feat: '속성을 늘리면 모델이 배워야 할 것도 늘어납니다. 데이터가 적을 때 속성만 늘리면 과대적합 위험이 커집니다.',
+        norm: '스케일 문제는 원래 크지 않았습니다. 조금 올랐지만 병목은 그대로입니다.',
+        algo: '알고리즘을 바꿔도 배울 데이터가 없으면 도달할 수 있는 한계가 비슷합니다.',
+        tune: '하이퍼파라미터 조정은 <b>이미 있는 데이터를 짜내는 일</b>입니다. 짜낼 것이 적으면 효과도 작습니다.',
+        ens: '모델을 여러 개 겹치자 훈련 성능은 올랐는데 테스트 성능은 떨어졌습니다. 데이터가 뒷받침하지 못하는 복잡한 모델의 전형적인 결과입니다.'
+      }
+    },
+    {
+      title: '중고 자전거 가격 분류 모델',
+      story: '데이터는 <b>2,400건</b>으로 넉넉합니다. 그런데 훈련 정확도 0.70, 테스트 정확도 0.68에서 더 오르지 않습니다.',
+      data: 0.55,
+      diag: '오류 32건 중 <b>21건이 같은 혼동</b>입니다 — “상태 좋음”과 “보통”을 계속 뒤바꿉니다. 두 부류를 지금 속성만으로는 갈라낼 수 없다는 뜻입니다 → <b>속성이 부실합니다</b>.',
+      diag2: '데이터를 그림으로 그려 보니 두 부류의 점이 완전히 겹쳐 있습니다. 겹친 점을 어떤 알고리즘으로도 나눌 수는 없습니다. <b>새로운 축(속성)</b>이 필요합니다.',
+      lesson: '데이터가 충분한데도 훈련 성능이 낮다면 <b>속성이 문제를 표현하지 못하는 것</b>입니다. “주행거리 ÷ 사용연수”처럼 열을 조합해 만든 새 속성 하나가 알고리즘 교체보다 큰 효과를 냅니다.',
+      gains: { collect: 0.012, miss: 0.015, out: 0.018, feat: 0.095, norm: 0.010, algo: 0.030, tune: 0.012, ens: 0.020 },
+      notes: {
+        collect: '데이터는 이미 충분했습니다. 같은 속성을 더 모아도 새로 배울 것이 적습니다.',
+        miss: '결측치를 다듬어 조금 개선되었습니다. 값싼 개선이라 손해는 아닙니다.',
+        out: '극단값 몇 개가 경계를 흔들고 있었습니다. 하루치고는 괜찮은 성과입니다.',
+        feat: '<b>이번 병목이 바로 속성</b>이었습니다. 두 열을 나눈 비율 같은 새 속성이 겹쳐 있던 부류를 갈라 줍니다.',
+        norm: '거리 기반 모델이 아니어서 스케일의 영향은 작았습니다.',
+        algo: '더 유연한 알고리즘으로 바꾸니 어느 정도 올랐습니다. 다만 속성이 부실하면 한계가 있습니다.',
+        tune: '좋은 속성이 없으면 값을 아무리 잘 골라도 오를 여지가 없습니다.',
+        ens: '여러 모델을 모아도 모두 <b>같은 부실한 속성</b>을 보고 있으니 결과가 크게 다르지 않습니다.'
+      }
+    },
+    {
+      title: '교실 공기질 등급 예측 모델',
+      story: '데이터는 <b>1,800건</b>이고 속성도 여덟 개나 있습니다. 그런데 테스트 정확도가 0.68에서 멈춰 있습니다. 모델은 <b>k-NN</b>입니다.',
+      data: 0.50,
+      diag: '열별 값의 범위를 보니 이산화탄소는 400~2000, 습도는 0.3~0.8입니다. <b>범위가 수천 배 차이</b>납니다. 게다가 결측치를 모두 0으로 채워 두었습니다 → <b>전처리가 어긋나 있습니다</b>.',
+      diag2: 'k-NN은 거리로 이웃을 찾습니다. 범위가 큰 열 하나가 거리 계산을 독차지하면 나머지 일곱 속성은 사실상 무시됩니다. 0으로 채운 결측치는 존재하지 않는 “아주 깨끗한 공기”를 만들어 냈습니다.',
+      lesson: '가장 값싼 개선이 가장 큰 효과를 낼 때가 있습니다. <b>거리 기반 모델에서는 정규화가 필수</b>이고, 결측치를 0으로 채우는 것은 “값이 0이다”라는 <b>잘못된 정보를 넣는 일</b>입니다. 진단이 정확하면 사흘로 목표에 닿습니다.',
+      gains: { collect: 0.015, miss: 0.055, out: 0.045, feat: 0.025, norm: 0.080, algo: 0.020, tune: 0.015, ens: 0.018 },
+      notes: {
+        collect: '데이터는 충분합니다. 문제는 양이 아니라 지금 데이터가 지저분하다는 점입니다.',
+        miss: '결측치를 0으로 채워 둔 것이 문제였습니다. 열별 중앙값으로 바꾸자 크게 올랐습니다.',
+        out: '단위를 잘못 입력한 몇 행이 거리 계산을 망가뜨리고 있었습니다.',
+        feat: '속성은 이미 여덟 개로 충분했습니다. 새로 만든 속성의 기여는 작습니다.',
+        norm: '<b>거리 기반 모델인데 열마다 범위가 수천 배 달랐습니다.</b> 정규화 한 번으로 가장 크게 올랐습니다 — 하루 만에 말입니다.',
+        algo: '스케일에 덜 민감한 모델(결정 트리 계열)로 바꾸어 조금 올랐습니다. 원인을 우회한 셈입니다.',
+        tune: '전처리가 어긋난 상태에서 값만 조정하는 것은 효과가 작습니다.',
+        ens: '지저분한 입력을 여러 모델에 똑같이 넣어도 결과는 비슷합니다.'
+      }
+    }
+  ];
+
+  var body = AI.sim.panel('#sim1', {
+    title: '모델 개선 사이클 게임 — 예산 10일로 목표 0.85 달성하기',
+    tag: '전략 선택',
+    desc: '테스트 정확도 <b>0.68</b>에서 시작해 <b>0.85</b>에 닿는 것이 목표입니다. 예산은 <b>10일</b>. 같은 카드도 같은 효과를 내지 않습니다 — 이번 모델의 <b>진짜 병목</b>이 무엇인지 찾아내는 것이 이 게임의 핵심입니다. 막히면 <b>오류 분석</b>에 하루를 쓰세요.'
+  });
+
+  var si = 0, S = null;
+
+  var storyBox = AI.h('div', { class: 'box box-think' });
+  var stats = AI.ui.stats([
+    { key: 'r', label: '라운드' },
+    { key: 'd', label: '남은 예산(일)' },
+    { key: 'tr', label: '훈련 정확도' },
+    { key: 'te', label: '테스트 정확도' }
+  ]);
+  var cv = AI.sim.canvas(620, 216);
+  var grid = AI.h('div', { class: 'card-grid' });
+  var log = AI.ui.log();
+  var result = AI.h('div', { style: { display: 'none' } });
+
+  function calc() {
+    var support = 0.30 + 0.70 * S.data;
+    var excess = Math.max(0, S.cap - support);
+    var test = S.raw - 0.25 * excess;
+    var gap = 0.015 + 0.50 * excess + 0.05 * S.cap * (1 - S.data);
+    return { test: test, train: Math.min(0.995, test + gap), excess: excess };
+  }
+
+  function reset() {
+    var sc = SCEN[si];
+    S = { sc: sc, used: {}, days: BUDGET, cap: 0.30, data: sc.data, raw: START, round: 0, over: false, diag: 0, hist: [] };
+    var m = calc();
+    S.hist.push({ train: m.train, test: m.test, label: '시작' });
+    result.style.display = 'none';
+    log.clear();
+    storyBox.innerHTML = '<div class="box-label">📋 시나리오 ' + (si + 1) + ' · ' + sc.title + '</div><p>' + sc.story + '</p>' +
+      '<p style="font-size:14px;color:var(--ink-3);margin-top:6px">무엇이 병목인지는 아직 알 수 없습니다. 카드를 고르거나, 먼저 <b>오류 분석</b>을 해 보세요.</p>';
+    log.add('🎬 시나리오 ' + (si + 1) + ' 시작 — 목표 테스트 정확도 ' + TARGET.toFixed(2) + ', 예산 ' + BUDGET + '일');
+    renderCards();
+    refresh();
+  }
+
+  function refresh() {
+    var m = calc();
+    stats.set('r', S.round);
+    stats.set('d', S.days);
+    stats.set('tr', AI.sim.fmt(m.train, 3));
+    stats.set('te', AI.sim.fmt(m.test, 3));
+    draw();
+    renderCards();
+  }
+
+  function finish(win) {
+    S.over = true;
+    var m = calc();
+    var over = m.train - m.test;
+    result.style.display = '';
+    result.className = 'box ' + (win ? 'box-ok' : 'box-warn');
+    result.innerHTML = '<div class="box-label">' + (win ? '🎉 목표 달성' : '⏳ 예산 소진') + '</div>' +
+      '<p><b>' + S.round + '라운드 · ' + (BUDGET - S.days) + '일 사용</b> — 훈련 ' + AI.sim.fmt(m.train, 3) + ' / 테스트 ' + AI.sim.fmt(m.test, 3) +
+      ' (차이 ' + AI.sim.fmt(over, 3) + ')</p>' +
+      (over > 0.10
+        ? '<p>⚠️ 훈련과 테스트의 차이가 <b>' + AI.sim.fmt(over, 3) + '</b>까지 벌어졌습니다. <b>과대적합</b> 상태입니다. 모델을 복잡하게 만드는 개선(앙상블·알고리즘 교체·하이퍼파라미터)을 데이터가 뒷받침하지 못했습니다.</p>'
+        : '<p>훈련과 테스트의 차이가 작아 <b>건강한 상태</b>입니다.</p>') +
+      '<p><b>📌 이번 시나리오의 교훈</b><br>' + S.sc.lesson + '</p>' +
+      '<p><b>🔍 실제 병목</b><br>' + S.sc.diag + '</p>' +
+      '<p style="font-size:14px;color:var(--ink-3)">‘다른 시나리오’를 눌러 병목이 다른 상황도 겪어 보세요. 같은 카드가 전혀 다른 결과를 냅니다.</p>';
+    log.add(win ? '🏁 목표 달성! 테스트 정확도 ' + AI.sim.fmt(m.test, 3) : '🏁 예산이 다했습니다. 테스트 정확도 ' + AI.sim.fmt(m.test, 3), true);
+    renderCards();
+  }
+
+  function apply(card) {
+    if (S.over) { AI.toast('먼저 다시 시작하거나 다른 시나리오를 선택해 주세요'); return; }
+    var n = S.used[card.k] || 0;
+    if (card.once && n > 0) { AI.toast('이 개선은 한 번만 효과가 있어요'); return; }
+    if (S.days < card.cost) { AI.toast('남은 예산이 부족해요 (' + card.cost + '일 필요)'); return; }
+
+    var before = calc();
+    var gain = S.sc.gains[card.k] * Math.pow(0.5, n);
+    S.raw += gain;
+    S.cap += card.cap;
+    S.data = AI.sim.clamp(S.data + card.dat, 0, 1);
+    S.used[card.k] = n + 1;
+    S.days -= card.cost;
+    S.round++;
+    var after = calc();
+    S.hist.push({ train: after.train, test: after.test, label: card.n });
+
+    var dTe = after.test - before.test, dTr = after.train - before.train;
+    var lvl = dTe >= 0.05 ? '<b>큰 효과</b>' : dTe >= 0.02 ? '보통 효과' : dTe > 0.002 ? '작은 효과' : dTe > -0.002 ? '효과 없음' : '<b>성능 하락</b>';
+    var msg = card.icon + ' <b>' + card.n + '</b> (' + card.cost + '일' + (n ? ' · ' + (n + 1) + '번째' : '') + ') → ' + lvl +
+      ' · 테스트 ' + AI.sim.fmt(before.test, 3) + ' → <b>' + AI.sim.fmt(after.test, 3) + '</b>' +
+      ' (' + (dTe >= 0 ? '+' : '') + AI.sim.fmt(dTe, 3) + ')' +
+      ' · 훈련 ' + AI.sim.fmt(after.train, 3) + ' (' + (dTr >= 0 ? '+' : '') + AI.sim.fmt(dTr, 3) + ')';
+    log.add(msg, dTe >= 0.05 || dTe < -0.002);
+    log.add('　↳ ' + S.sc.notes[card.k]);
+    if (n > 0) log.add('　↳ 같은 개선을 반복하면 효과가 절반으로 줄어듭니다(수확 체감).');
+    if (after.excess > before.excess + 0.0001) {
+      log.add('　↳ ⚠️ 모델이 데이터가 뒷받침하는 수준보다 복잡해졌습니다. <b>훈련과 테스트의 차이</b>를 확인해 보세요.', true);
+    }
+
+    refresh();
+    if (after.test >= TARGET) { finish(true); return; }
+    if (S.days < 1) { finish(false); return; }
+  }
+
+  function analyze() {
+    if (S.over) { AI.toast('이미 끝난 라운드예요'); return; }
+    if (S.days < 1) { finish(false); return; }
+    S.days -= 1;
+    S.diag++;
+    var txt = S.diag === 1 ? S.sc.diag : S.diag === 2 ? S.sc.diag2 : '더 분석해도 새로운 사실은 나오지 않습니다. 이제 개선을 적용할 때입니다.';
+    log.add('🔍 <b>오류 분석</b> (1일) → ' + txt, true);
+    storyBox.innerHTML = '<div class="box-label">🔍 시나리오 ' + (si + 1) + ' · ' + S.sc.title + ' — 오류 분석 결과</div><p>' + S.sc.story + '</p>' +
+      '<p style="margin-top:8px">' + S.sc.diag + '</p>' + (S.diag >= 2 ? '<p>' + S.sc.diag2 + '</p>' : '');
+    refresh();
+    if (S.days < 1) finish(false);
+  }
+
+  function renderCards() {
+    grid.innerHTML = '';
+    CARDS.forEach(function (c) {
+      var n = S.used[c.k] || 0;
+      var spent = (c.once && n > 0);
+      var poor = S.days < c.cost;
+      var card = AI.h('div', { class: 'mini-card up-card' + (spent ? ' used' : '') },
+        AI.h('span', { class: 'icon', text: c.icon }),
+        AI.h('h4', { text: c.n }),
+        AI.h('p', { text: c.how }),
+        AI.h('div', { class: 'up-meta' },
+          AI.h('span', {}, '비용 ', AI.h('b', { text: c.cost + '일' })),
+          AI.h('span', {}, '예상 효과 ', AI.h('b', { text: c.exp })),
+          n ? AI.h('span', { text: '적용 ' + n + '회' }) : null
+        )
+      );
+      var b = AI.ui.btn(spent ? '이미 적용함' : '적용하기 (' + c.cost + '일)', function () { apply(c); }, spent || poor ? 'ghost' : 'primary');
+      b.disabled = spent || poor || S.over;
+      card.appendChild(b);
+      grid.appendChild(card);
+    });
+  }
+
+  /* ---- 성능 변화 그래프 ---- */
+  function draw() {
+    var C = AI.sim.colors(), ctx = cv.ctx;
+    cv.clear(C.bg);
+    var padL = 46, padR = 14, padT = 16, padB = 30;
+    var x0 = padL, x1 = cv.w - padR, y0 = padT, y1 = cv.h - padB;
+    var yMin = 0.5, yMax = 1.0;
+    var maxR = Math.max(8, S.hist.length - 1);
+    var fam = getComputedStyle(document.body).fontFamily;
+
+    function px(i) { return x0 + (x1 - x0) * (i / maxR); }
+    function py(v) { return y1 - (y1 - y0) * ((AI.sim.clamp(v, yMin, yMax) - yMin) / (yMax - yMin)); }
+
+    // 격자와 y축 라벨
+    ctx.font = '600 10.5px ' + fam;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (var v = 0.5; v <= 1.0001; v += 0.1) {
+      var yy = py(v);
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x0, yy); ctx.lineTo(x1, yy); ctx.stroke();
+      ctx.fillStyle = C.ink3;
+      ctx.fillText(v.toFixed(1), x0 - 7, yy);
+    }
+    // 목표선
+    ctx.save();
+    ctx.setLineDash([6, 5]);
+    ctx.strokeStyle = C.ok; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(x0, py(TARGET)); ctx.lineTo(x1, py(TARGET)); ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = C.ok; ctx.textAlign = 'left';
+    ctx.fillText('목표 ' + TARGET.toFixed(2), x0 + 5, py(TARGET) - 9);
+
+    // x축
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(x0, y1); ctx.lineTo(x1, y1); ctx.stroke();
+    ctx.fillStyle = C.ink3; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (var i = 0; i <= maxR; i++) ctx.fillText(String(i), px(i), y1 + 7);
+    ctx.fillText('라운드', (x0 + x1) / 2, y1 + 19);
+
+    // 선 그리기
+    function line(key, col) {
+      ctx.strokeStyle = col; ctx.lineWidth = 2.6;
+      ctx.beginPath();
+      S.hist.forEach(function (p, i) {
+        var X = px(i), Y = py(p[key]);
+        i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y);
+      });
+      ctx.stroke();
+      S.hist.forEach(function (p, i) {
+        ctx.fillStyle = col;
+        ctx.beginPath(); ctx.arc(px(i), py(p[key]), 3.4, 0, Math.PI * 2); ctx.fill();
+      });
+    }
+    line('train', C.c);
+    line('test', C.a);
+
+    // 마지막 값 표시
+    if (S.hist.length) {
+      var last = S.hist[S.hist.length - 1], lx = px(S.hist.length - 1);
+      ctx.font = '800 11.5px ' + fam;
+      ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+      ctx.fillStyle = C.c; ctx.fillText(AI.sim.fmt(last.train, 3), Math.min(lx + 26, x1), py(last.train) - 6);
+      ctx.fillStyle = C.a; ctx.fillText(AI.sim.fmt(last.test, 3), Math.min(lx + 26, x1), py(last.test) + 20);
+    }
+  }
+
+  body.appendChild(storyBox);
+  body.appendChild(stats.el);
+  body.appendChild(cv.wrap);
+  body.appendChild(AI.ui.legend([
+    { color: 'var(--warn)', label: '훈련 정확도' },
+    { color: 'var(--accent)', label: '테스트 정확도' },
+    { color: 'var(--ok)', label: '목표 0.85' }
+  ]));
+  body.appendChild(AI.h('h4', { class: 'mini-head', text: '개선 카드 — 하나를 골라 적용해 보세요' }));
+  body.appendChild(grid);
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('🔍 오류 분석 (1일)', analyze, 'primary'),
+    AI.ui.btn('↺ 같은 시나리오 다시', reset, 'ghost'),
+    AI.ui.btn('🎲 다른 시나리오', function () { si = (si + 1) % SCEN.length; reset(); }, 'ghost')
+  ));
+  body.appendChild(result);
+  body.appendChild(log.el);
+
+  window.addEventListener('ai:redraw', function () { if (S) draw(); });
+  reset();
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 사회적 영향 점검표 ===================== -->
+<script>
+(function () {
+  var AREAS = [
+    {
+      n: '편향과 공정성', icon: '⚖️',
+      qs: [
+        '학습 데이터에 특정 집단(학년·성별·지역 등)이 지나치게 많거나 적지 않은지 세어 보았다.',
+        '집단별로 정확도(또는 오류율)를 나누어 비교해 보았다.',
+        '모델이 특정 집단에 불리한 예측을 하는 사례를 직접 찾아보았다.'
+      ],
+      acts: [
+        '데이터를 집단별로 세어 표를 만들고, 비율이 5% 미만인 집단을 표시한다.',
+        '집단별 정확도를 따로 계산해 차이가 0.10을 넘는 집단을 찾는다.',
+        '부족한 집단의 데이터를 추가로 모으거나, 그 집단에서는 예측을 보류하도록 만든다.'
+      ]
+    },
+    {
+      n: '프라이버시', icon: '🔒',
+      qs: [
+        '이름·연락처·학번처럼 개인을 식별할 수 있는 정보를 지우거나 가렸다.',
+        '데이터를 모을 때 제공한 사람에게 목적을 알리고 동의를 받았다.'
+      ],
+      acts: [
+        '식별 정보 열을 삭제하거나 무작위 번호로 바꾼다(가명 처리).',
+        '수집 목적·보관 기간·삭제 방법을 한 장으로 적어 응답자에게 알린다.',
+        '문제 해결에 꼭 필요한 열만 남기고 나머지는 아예 모으지 않는다.'
+      ]
+    },
+    {
+      n: '투명성과 설명', icon: '🔎',
+      qs: [
+        '모델이 왜 그렇게 예측했는지 사용자에게 설명할 방법을 마련했다.',
+        '어떤 데이터로 학습했고 어떤 한계가 있는지 문서로 남겼다.'
+      ],
+      acts: [
+        '어떤 속성이 예측에 크게 기여했는지(속성 중요도) 함께 보여 준다.',
+        '데이터 출처·기간·건수·전처리 방법을 적은 한 장의 설명서를 만든다.',
+        '“이 모델은 ○○ 상황에서는 믿을 수 없다”는 한계를 명시한다.'
+      ]
+    },
+    {
+      n: '안전과 오용', icon: '🛡️',
+      qs: [
+        '모델이 틀렸을 때 생길 수 있는 피해를 구체적으로 적어 보았다.',
+        '사람이 최종 판단을 검토하거나 되돌릴 수 있는 절차가 있다.',
+        '원래 목적과 다르게 악용될 수 있는 방법을 검토했다.'
+      ],
+      acts: [
+        '오답이 만드는 최악의 상황을 세 가지 적고, 각각의 대응을 정한다.',
+        '모델의 출력은 <b>참고 자료</b>로만 쓰고 최종 결정은 사람이 하도록 절차를 만든다.',
+        '민감한 판단(선발·징계 등)에는 쓰지 않겠다는 사용 범위를 문서로 정한다.'
+      ]
+    },
+    {
+      n: '지속가능성', icon: '🌱',
+      qs: [
+        '필요한 만큼만 학습하도록 데이터·모델 크기를 줄여 보았다.',
+        '학습에 든 시간과 전력 등 자원 사용을 기록했다.'
+      ],
+      acts: [
+        '작은 모델로 먼저 성능을 재고, 큰 모델이 정말 필요한지 비교한다.',
+        '학습 횟수와 소요 시간을 기록해 불필요한 반복 학습을 줄인다.',
+        '이미 공개된 모델을 활용해 처음부터 학습하는 일을 피한다.'
+      ]
+    }
+  ];
+
+  var body = AI.sim.panel('#sim2', {
+    title: '사회적 영향 점검표 — 12개 문항',
+    tag: '자기 점검',
+    desc: '우리가 만든(또는 만들려는) 인공지능 소프트웨어를 두고 12개 문항에 답해 보세요. <b>예 / 아니오 / 해당 없음</b> 중 하나를 고른 뒤 <b>결과 보기</b>를 누르면, 영역별 점수와 <b>가장 취약한 영역에서 지금 해야 할 조치</b>를 알려 줍니다.'
+  });
+
+  var ans = [];
+  var idx = 0;
+  AREAS.forEach(function (a, ai2) {
+    body.appendChild(AI.h('div', { class: 'chk-area-head' }, a.icon + ' ' + a.n));
+    a.qs.forEach(function (q, qi) {
+      var myIdx = idx++;
+      ans[myIdx] = '';
+      var seg = AI.ui.seg({
+        label: '응답',
+        options: [{ value: 'y', label: '예' }, { value: 'n', label: '아니오' }, { value: 'na', label: '해당 없음' }],
+        value: '',
+        onChange: function (v) { ans[myIdx] = v; }
+      });
+      body.appendChild(AI.h('div', { class: 'chk-q' },
+        AI.h('span', { class: 'qt' }, AI.h('b', { text: (myIdx + 1) + '. ' }), q),
+        seg.el
+      ));
+    });
+  });
+
+  var out = AI.h('div', { style: { display: 'none' } });
+  var summary = '';
+
+  function score() {
+    var i = 0, rows = [], worst = null, blanks = 0, totalY = 0, totalA = 0;
+    var per = [];
+    AREAS.forEach(function (a) {
+      var y = 0, app = 0, na = 0;
+      a.qs.forEach(function () {
+        var v = ans[i++];
+        if (!v) { blanks++; return; }
+        if (v === 'na') { na++; return; }
+        app++;
+        if (v === 'y') y++;
+      });
+      var pct = app ? Math.round(y / app * 100) : null;
+      per.push({ a: a, y: y, app: app, na: na, pct: pct });
+      totalY += y; totalA += app;
+      if (pct !== null && (worst === null || pct < worst.pct)) worst = { a: a, pct: pct, y: y, app: app };
+    });
+
+    if (blanks) { AI.toast('아직 답하지 않은 문항이 ' + blanks + '개 있어요'); }
+
+    per.forEach(function (p) {
+      rows.push([
+        p.a.icon + ' <b>' + p.a.n + '</b>',
+        p.pct === null ? '–' : p.y + ' / ' + p.app,
+        p.na ? p.na + '건' : '–',
+        p.pct === null ? '<span style="color:var(--ink-4)">평가 불가</span>'
+          : '<div class="chk-bar" style="display:inline-block;width:80px;vertical-align:middle"><i style="width:' + p.pct + '%;background:' +
+          (p.pct >= 80 ? 'var(--ok)' : p.pct >= 50 ? 'var(--warn)' : 'var(--no)') + '"></i></div> <b>' + p.pct + '%</b>'
+      ]);
+    });
+
+    var overall = totalA ? Math.round(totalY / totalA * 100) : 0;
+    out.style.display = '';
+    out.innerHTML = '';
+    out.appendChild(AI.h('div', { class: 'box box-info' },
+      AI.h('div', { class: 'box-label' }, '📊 점검 결과'),
+      AI.h('p', { html: '답한 문항 <b>' + totalA + '</b>개 중 <b>' + totalY + '</b>개가 “예” — 전체 점검률 <b>' + overall + '%</b>' + (blanks ? ' (미응답 ' + blanks + '개는 제외)' : '') })
+    ));
+    out.appendChild(AI.ui.table(['영역', '예 / 해당 문항', '해당 없음', '점검률'], rows));
+
+    if (worst) {
+      var box = AI.h('div', { class: 'box ' + (worst.pct >= 80 ? 'box-ok' : 'box-warn') });
+      box.innerHTML = '<div class="box-label">' + (worst.pct >= 80 ? '✅ 고르게 점검했습니다' : '⚠️ 가장 취약한 영역: ' + worst.a.icon + ' ' + worst.a.n + ' (' + worst.pct + '%)') + '</div>' +
+        (worst.pct >= 80
+          ? '<p>모든 영역이 80% 이상입니다. 가장 낮은 <b>' + worst.a.n + '</b>(' + worst.pct + '%)부터 한 번 더 살펴보고, 점검 내용을 프로젝트 보고서에 기록하세요.</p>'
+          : '<p><b>' + worst.a.n + '</b> 영역에서 지금 할 수 있는 조치입니다.</p>') +
+        '<ul style="margin:0">' + worst.a.acts.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>';
+      out.appendChild(box);
+    }
+
+    /* 복사용 요약 만들기 */
+    i = 0;
+    var lines = ['■ 인공지능 소프트웨어 사회적 영향 점검 결과', '전체 점검률: ' + overall + '% (예 ' + totalY + ' / 해당 문항 ' + totalA + ')', ''];
+    var LB = { y: '예', n: '아니오', na: '해당 없음', '': '미응답' };
+    AREAS.forEach(function (a, k) {
+      var p = per[k];
+      lines.push('[' + a.n + '] ' + (p.pct === null ? '평가 불가' : p.pct + '%'));
+      a.qs.forEach(function (q) { lines.push('  - (' + LB[ans[i++]] + ') ' + q); });
+      lines.push('');
+    });
+    if (worst && worst.pct < 80) {
+      lines.push('▶ 가장 취약한 영역: ' + worst.a.n + ' (' + worst.pct + '%)');
+      lines.push('▶ 해야 할 조치:');
+      worst.a.acts.forEach(function (x, k) { lines.push('  ' + (k + 1) + ') ' + x.replace(/<[^>]+>/g, '')); });
+    }
+    summary = lines.join('\n');
+  }
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('📊 결과 보기', score, 'primary'),
+    AI.ui.btn('📋 결과 요약 복사', function () {
+      if (!summary) { AI.toast('먼저 결과 보기를 눌러 주세요'); return; }
+      if (navigator.clipboard) navigator.clipboard.writeText(summary).then(function () { AI.toast('점검 결과를 복사했어요'); });
+      else AI.toast('이 환경에서는 복사를 지원하지 않아요');
+    }, 'ghost')
+  ));
+  body.appendChild(out);
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a4l4-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['오류 분석', '혼동 행렬', '재현율', '특성 공학', '하이퍼파라미터', '과대적합', '앙상블', '데이터', '편향', '설명 가능성', '루브릭'],
+  sents: [
+    { text: '평가 결과에서 무엇을 어떻게 틀렸는지 유형별로 모아 보는 일을 {0}(이)라고 한다.', answers: [['오류 분석']] },
+    { text: '실제 값과 예측 값을 교차해 정리한 표를 {0}(이)라고 하며, 여기서 정밀도와 {1}을(를) 계산할 수 있다.', answers: [['혼동 행렬'], ['재현율']] },
+    { text: '기존 속성을 조합해 더 잘 구분되는 새 속성을 만드는 일을 {0}(이)라고 하고, k나 최대 깊이처럼 사람이 미리 정해 주는 값을 {1}(이)라고 한다.', answers: [['특성 공학'], ['하이퍼파라미터']] },
+    { text: '훈련 성능은 높은데 테스트 성능이 낮은 상태를 {0}(이)라고 하며, 여러 모델의 예측을 모으는 {1}은(는) 데이터가 적을 때 이 문제를 키울 수 있다.', answers: [['과대적합'], ['앙상블']] },
+    { text: '성능을 올리는 여러 길 가운데 보통 효과가 가장 큰 것은 {0}의 양과 질이다.', answers: [['데이터']] },
+    { text: '특정 집단에 치우쳐 불리한 결과를 내는 문제를 {0}(이)라고 하고, 왜 그렇게 예측했는지 사람이 이해할 수 있는 성질을 {1}(이)라고 한다.', answers: [['편향'], ['설명 가능성']] },
+    { text: '평가 항목과 수준별 기준을 표로 정리한 채점 기준표를 {0}(이)라고 한다.', answers: [['루브릭']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '4차시 확인 문제',
+  items: [
+    {
+      type: 'order',
+      q: '개선 사이클의 한 바퀴를 <b>올바른 순서</b>로 배열하시오.',
+      items: [
+        '테스트 데이터로 성능을 평가한다',
+        '틀린 사례를 모아 오류의 유형과 원인을 분석한다',
+        '원인에 맞는 개선을 한 가지만 적용한다',
+        '다시 평가하고, 무엇을 왜 바꿨는지 기록한다'
+      ],
+      answer: [0, 1, 2, 3],
+      why: '평가 → 원인 분석 → 개선 → 재평가·기록의 순환입니다. ②를 건너뛰고 곧바로 ③으로 가면 <b>운에 맡기는 개선</b>이 되어, 성능이 변해도 왜 변했는지 알 수 없습니다.'
+    },
+    {
+      type: 'mc',
+      q: '훈련 정확도 0.98, 테스트 정확도 0.69가 나왔다. 지금 가장 알맞은 조치는?',
+      choices: [
+        '더 복잡한 알고리즘으로 바꾸고 앙상블을 추가한다',
+        '데이터를 더 모으거나 모델을 단순하게 만든다',
+        '테스트 데이터로 다시 학습시켜 성능을 올린다',
+        '정확도가 높은 훈련 성능을 최종 성능으로 보고한다'
+      ],
+      answer: 1,
+      why: '훈련만 높고 테스트가 낮은 것은 훈련 데이터를 외워 버린 <b>과대적합</b>입니다. 모델을 더 복잡하게 만들면 상태가 더 나빠집니다. 데이터를 늘리거나 속성을 줄여 모델을 단순하게 만들어야 합니다. ③은 데이터 누출이고, ④는 성능을 속이는 일입니다.'
+    },
+    {
+      type: 'ox',
+      q: '성능을 올리는 여러 방법 가운데 하이퍼파라미터 조정이 보통 가장 큰 효과를 낸다.',
+      answer: false,
+      why: '보통 가장 큰 효과를 내는 것은 <b>데이터의 양과 질</b>입니다. 하이퍼파라미터 조정은 컴퓨터가 대신 해 주므로 비용은 작지만, 대개 마지막 몇 퍼센트를 짜내는 역할에 그칩니다. 그래서 <b>데이터 → 전처리 → 속성 → 알고리즘 → 하이퍼파라미터</b> 순서로 손보는 것이 효율적입니다.'
+    },
+    {
+      type: 'match',
+      q: '다음 상황에 가장 알맞은 개선 방법을 짝지으시오.',
+      left: [
+        '훈련·테스트 성능이 모두 0.68로 낮고, 표본이 90건뿐이다',
+        '거리로 이웃을 찾는 k-NN인데 열마다 값의 범위가 1000배 다르다',
+        '두 부류의 점이 그림에서 완전히 겹쳐 어떤 모델로도 갈라지지 않는다',
+        '데이터·속성·모델을 모두 손봤고 마지막 1~2%를 더 올리고 싶다'
+      ],
+      right: ['데이터 더 모으기', '정규화 적용', '새 속성 추가(특성 공학)', '하이퍼파라미터 조정'],
+      answer: [0, 1, 2, 3],
+      why: '원인이 다르면 처방도 다릅니다. 표본 부족 → 데이터 수집, 스케일 차이 → 정규화, 부류가 겹침 → 새 속성, 마지막 미세 조정 → 하이퍼파라미터. 같은 카드가 상황에 따라 큰 효과를 내거나 아무 효과가 없는 이유입니다.'
+    },
+    {
+      type: 'short',
+      q: '혼동 행렬에서 실제 양성 40건 중 24건을 양성으로 맞혔다면, 이때 계산되는 지표의 이름은 무엇인가?',
+      answer: ['재현율', '민감도', 'recall'],
+      placeholder: '예: ○○○',
+      why: '<b>재현율 = 참양성 ÷ 실제 양성</b> = 24 ÷ 40 = 0.60입니다. 반면 <b>정밀도</b>는 양성이라 예측한 것을 분모로 씁니다. 감염병이나 사고처럼 <b>놓치면 큰 피해</b>가 생기는 문제에서는 재현율을 특히 중요하게 봅니다.'
+    },
+    {
+      type: 'multi',
+      q: '인공지능 소프트웨어의 <b>사회적 영향</b>을 점검할 때 확인해야 할 것을 <b>모두</b> 고르시오.',
+      choices: [
+        '학습 데이터에 특정 집단이 지나치게 적지 않은지',
+        '개인을 식별할 수 있는 정보를 지웠는지',
+        '모델이 왜 그렇게 예측했는지 설명할 수 있는지',
+        '테스트 정확도가 다른 팀보다 높은지',
+        '원래 목적과 다르게 악용될 수 있는지'
+      ],
+      answer: [0, 1, 2, 4],
+      why: '④는 성능 비교일 뿐 사회적 영향 점검이 아닙니다. 점검은 편향과 공정성, 프라이버시, 투명성과 설명, 안전과 오용, 지속가능성의 다섯 영역으로 봅니다. 정확도가 높아도 특정 집단에서만 틀린다면 좋은 소프트웨어가 아닙니다.'
+    },
+    {
+      type: 'mc',
+      q: '데이터가 90건뿐인 모델에 앙상블을 적용했더니 훈련 정확도는 0.89로 올랐는데 테스트 정확도는 0.62로 떨어졌다. 그 까닭으로 가장 알맞은 것은?',
+      choices: [
+        '앙상블은 원래 성능을 떨어뜨리는 방법이기 때문이다',
+        '데이터가 뒷받침하지 못하는 복잡한 모델을 만들어 훈련 데이터를 외워 버렸기 때문이다',
+        '앙상블을 쓰면 정규화가 자동으로 풀리기 때문이다',
+        '테스트 데이터의 개수가 줄어들었기 때문이다'
+      ],
+      answer: 1,
+      why: '앙상블 자체는 강력한 방법입니다. 다만 모델이 복잡해지므로 <b>데이터의 양이 그 복잡도를 뒷받침해야</b> 합니다. 90건으로 여러 모델을 겹치면 훈련 데이터의 잡음까지 외워 훈련 성능만 오르고, 처음 보는 데이터에서는 오히려 나빠집니다. 전형적인 <b>과대적합</b>입니다.'
+    },
+    {
+      type: 'ox',
+      q: '프로젝트 평가 루브릭은 완성된 소프트웨어의 정확도만으로 구성하는 것이 공정하다.',
+      answer: false,
+      why: '루브릭에는 완성도뿐 아니라 <b>주제의 적절성, 문제 해결 방식의 창의성, 협업, 윤리적 고려</b>를 골고루 담습니다. 데이터를 구하기 어려운 주제를 고른 팀이 정확도만으로 낮게 평가받는다면, 오히려 도전적인 주제를 피하게 되기 때문입니다.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a4l4-note',
+  title: '개선 실험 기록',
+  prompt: '시뮬레이터 1을 <b>시나리오 3개 모두</b> 해 본 뒤 아래를 채워 보세요. 같은 카드가 시나리오마다 다른 결과를 낸 까닭을 설명하는 것이 이 활동의 핵심입니다.',
+  fields: [
+    { key: 'sc', label: '가장 인상적이었던 시나리오', type: 'select', options: ['① 학생 진로 추천 (데이터 부족)', '② 중고 자전거 가격 분류 (속성 부실)', '③ 교실 공기질 등급 예측 (전처리 문제)'] },
+    { key: 'acc', label: '그 시나리오의 최종 훈련 / 테스트 정확도', type: 'text', placeholder: '예: 0.888 / 0.873' },
+    { key: 'cost', label: '사용한 예산(일)과 목표 달성 여부', type: 'text', placeholder: '예: 9일 사용 · 목표 달성' },
+    {
+      key: 'bottle', label: '그 시나리오의 병목은 무엇이었고, 어떻게 알아냈나요?',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 훈련 성능마저 낮고 오답이 골고루 퍼져 있어서 데이터가 부족하다고 판단했다. 오류 분석에 하루를 썼는데 …'
+    },
+    {
+      key: 'fail', label: '기대와 달리 <b>효과가 없었던(또는 성능이 떨어진)</b> 개선과 그 이유',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 앙상블을 적용했더니 훈련은 0.89까지 올랐는데 테스트는 0.62로 떨어졌다. 데이터가 …'
+    },
+    {
+      key: 'plan', label: '우리 프로젝트에 적용할 개선 계획 — 우선순위 3가지와 예상 비용',
+      type: 'textarea', rows: 4,
+      placeholder: '1) 2학년 응답 데이터 50건 추가 수집 (3일)\n2) 결측치를 학년별 중앙값으로 대체 (1일)\n3) 등하교 시간을 조합한 새 속성 추가 (2일)'
+    }
+  ]
+});
+
+AI.note('#note2', {
+  id: 'a4l4-rubric',
+  title: '루브릭 자기평가 · 동료평가',
+  prompt: '위 루브릭 표를 보며 <b>지금 우리 팀의 수준</b>을 항목별로 골라 보세요. 그리고 팀원 한 명에게 <b>근거를 갖춘 구체적인 피드백</b>을 적어 봅니다. “잘했다”는 말만으로는 도움이 되지 않습니다.',
+  fields: [
+    { key: 'r1', label: '자기평가 — 주제의 적절성', type: 'select', options: ['A 매우 우수', 'B 우수', 'C 보통', 'D 노력 필요'] },
+    { key: 'r2', label: '자기평가 — 문제 해결 방식의 창의성', type: 'select', options: ['A 매우 우수', 'B 우수', 'C 보통', 'D 노력 필요'] },
+    { key: 'r3', label: '자기평가 — 협업', type: 'select', options: ['A 매우 우수', 'B 우수', 'C 보통', 'D 노력 필요'] },
+    { key: 'r4', label: '자기평가 — 완성도', type: 'select', options: ['A 매우 우수', 'B 우수', 'C 보통', 'D 노력 필요'] },
+    { key: 'r5', label: '자기평가 — 윤리적 고려', type: 'select', options: ['A 매우 우수', 'B 우수', 'C 보통', 'D 노력 필요'] },
+    {
+      key: 'why', label: '가장 낮게 매긴 항목은 무엇이고, 한 단계 올리기 위해 무엇을 하겠습니까?',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 윤리적 고려를 C로 매겼다. 점검표에서 가장 취약했던 영역은 투명성과 설명이었으므로 …'
+    },
+    {
+      key: 'peer', label: '동료평가 — 팀원 한 명에게, 잘한 점과 함께 개선하면 좋을 점을 근거와 함께',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 나리는 오류 목록을 유형별로 표로 만들어 무엇부터 고칠지 팀 전체가 알 수 있게 했다. 다음에는 코드를 바꿀 때 왜 바꿨는지 한 줄 기록을 …'
+    }
+  ]
+});
+</script>
+</body>
+</html>

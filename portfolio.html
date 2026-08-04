@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>내 학습 포트폴리오 · 인공지능 기초</title>
+<link rel="stylesheet" href="assets/css/textbook.css">
+<style>
+  .pf-name { display:grid; gap:11px; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); margin:0 0 20px; }
+  .pf-empty { padding:26px; text-align:center; color:var(--ink-4); font-size:14.5px;
+              border:1px dashed var(--line-strong); border-radius:var(--radius); background:var(--surface-2); }
+  .pf-note { padding:15px 17px; border:1px solid var(--line); border-radius:var(--radius);
+             background:var(--surface); margin:0 0 13px; }
+  .pf-note h4 { font-size:15px; margin:0 0 3px; }
+  .pf-note .src { font-size:12px; color:var(--ink-4); font-weight:650; margin-bottom:10px; }
+  .pf-field { margin:0 0 11px; }
+  .pf-field:last-child { margin-bottom:0; }
+  .pf-field .fl { font-size:12.5px; font-weight:700; color:var(--ink-3); margin-bottom:3px; }
+  .pf-field .fv { font-size:14.5px; color:var(--ink); white-space:pre-wrap;
+                  padding:8px 11px; background:var(--surface-2); border-radius:8px; border:1px solid var(--line); }
+  .pf-field .fv.none { color:var(--ink-4); font-style:italic; }
+  .lvtag { display:inline-flex; align-items:center; justify-content:center; min-width:24px; height:24px;
+           padding:0 7px; border-radius:7px; font-size:12.5px; font-weight:800;
+           background:var(--accent); color:#fff; }
+  :root[data-theme="dark"] .lvtag, :root:not([data-theme="light"]) .lvtag { color:#10131a; }
+  .lvtag.none { background:var(--surface-3); color:var(--ink-4); }
+  @media print { .pf-name input { border:0; border-bottom:1px solid #999; border-radius:0; } }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+  <div class="pf-name">
+    <div class="field"><label for="pfSchool">학교</label><input type="text" id="pfSchool" placeholder="○○고등학교"></div>
+    <div class="field"><label for="pfClass">학년 · 반 · 번호</label><input type="text" id="pfClass" placeholder="1학년 3반 12번"></div>
+    <div class="field"><label for="pfWho">이름</label><input type="text" id="pfWho" placeholder="이름"></div>
+    <div class="field"><label for="pfDate">작성일</label><input type="text" id="pfDate" placeholder="2026-08-04"></div>
+  </div>
+
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>학습 진도</h2>
+      <span class="sec-tag">기록은 이 브라우저에만 저장됩니다</span></div>
+    <div id="pfStats"></div>
+    <div id="pfProgress"></div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>활동 기록 모음</h2></div>
+    <p style="font-size:14.5px;color:var(--ink-3)">각 차시에서 작성한 활동 기록을 한곳에 모았습니다. 아래 <b>인쇄</b> 버튼으로 그대로 제출용 활동지를 만들 수 있습니다.</p>
+    <div id="pfNotes"></div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>성취기준 자가평가</h2></div>
+    <div id="pfRubric"></div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>기록 관리</h2></div>
+    <div class="box box-info">
+      <div class="box-label">💾 기록 내보내기 · 가져오기</div>
+      <p>학습 기록은 <b>이 브라우저에만</b> 저장됩니다. 다른 컴퓨터에서 이어서 학습하거나 선생님께 제출할 때는 아래 <b>내보내기</b>로 파일을 저장한 뒤, 다른 컴퓨터에서 <b>가져오기</b>로 불러오세요.</p>
+      <div class="sim-controls" id="pfTools"></div>
+    </div>
+  </section>
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/core.js"></script>
+<script>
+AI.page({
+  key: 'portfolio',
+  base: './',
+  crumb: '내 학습',
+  title: '내 학습 포트폴리오',
+  sub: '진도 · 활동 기록 · 자가평가 모아 보기',
+  lead: '지금까지 학습한 내용과 직접 작성한 활동 기록을 한 화면에 모았습니다. 그대로 인쇄하면 제출용 학습 결과물이 됩니다.',
+  blankBar: false
+});
+
+(function () {
+  const D = AI.DATA, P = AI.progress;
+  const st = P.all();
+
+  /* ---------- 페이지 키 → 사람이 읽는 이름 ---------- */
+  function label(key) {
+    const m = /^a(\d)(?:l(\d+)|c)$/.exec(key || '');
+    if (!m) return key === 'portfolio' ? '내 학습' : (key || '알 수 없음');
+    const a = D.area(Number(m[1]));
+    if (!a) return key;
+    if (m[2] === undefined) return a.no + '단원 마무리';
+    const l = a.lessons.find(x => x.n === Number(m[2]));
+    return a.no + '단원 ' + m[2] + '차시' + (l ? ' · ' + l.title : '');
+  }
+  function href(key) {
+    const m = /^a(\d)(?:l(\d+)|c)$/.exec(key || '');
+    if (!m) return null;
+    const a = D.area(Number(m[1]));
+    if (!a) return null;
+    return a.dir + '/' + (m[2] === undefined ? 'closing.html' : 'lesson' + String(m[2]).padStart(2, '0') + '.html');
+  }
+
+  /* ---------- 이름·학교 저장 ---------- */
+  ['pfSchool', 'pfClass', 'pfWho', 'pfDate'].forEach(id => {
+    const inp = document.getElementById(id);
+    inp.value = P.note('pf-' + id) || '';
+    if (id === 'pfDate' && !inp.value) {
+      const d = new Date();
+      inp.value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      P.note('pf-' + id, inp.value);
+    }
+    inp.addEventListener('input', () => P.note('pf-' + id, inp.value));
+  });
+
+  /* ---------- 1. 진도 ---------- */
+  const totalLessons = D.totalLessons();
+  let visited = 0, quizC = 0, quizT = 0, blankC = 0, blankT = 0;
+  D.AREAS.forEach(a => {
+    a.lessons.concat([{ n: 'closing' }]).forEach(l => {
+      const p = P.page(D.lessonKey(a.no, l.n));
+      if (p.visited) visited++;
+      if (p.quiz) { quizC += p.quiz.c; quizT += p.quiz.t; }
+      if (p.blank) { blankC += p.blank.c; blankT += p.blank.t; }
+    });
+  });
+
+  document.getElementById('pfStats').appendChild(AI.h('div', { class: 'stat-strip' },
+    AI.h('div', { class: 'stat-box' }, AI.h('span', { class: 'sl', text: '전체 진도' }),
+      AI.h('span', { class: 'sv' }, P.totalPct(), AI.h('small', { text: '%' }))),
+    AI.h('div', { class: 'stat-box' }, AI.h('span', { class: 'sl', text: '학습한 쪽' }),
+      AI.h('span', { class: 'sv' }, visited, AI.h('small', { text: ' / ' + (totalLessons + D.AREAS.length) }))),
+    AI.h('div', { class: 'stat-box' }, AI.h('span', { class: 'sl', text: '확인 문제 정답' }),
+      AI.h('span', { class: 'sv' }, quizC, AI.h('small', { text: ' / ' + quizT }))),
+    AI.h('div', { class: 'stat-box' }, AI.h('span', { class: 'sl', text: '빈칸 정답' }),
+      AI.h('span', { class: 'sv' }, blankC, AI.h('small', { text: ' / ' + blankT })))
+  ));
+
+  const pbox = document.getElementById('pfProgress');
+  D.AREAS.forEach(a => {
+    const rows = a.lessons.concat([{ n: 'closing', title: '단원 마무리', std: [] }]).map(l => {
+      const key = D.lessonKey(a.no, l.n);
+      const p = P.page(key);
+      const link = href(key);
+      const name = l.n === 'closing' ? '단원 마무리' : l.n + '차시 · ' + l.title;
+      return [
+        link ? '<a href="' + link + '">' + AI.esc(name) + '</a>' : AI.esc(name),
+        p.visited ? '<span class="good">✓ 학습</span>' : '<span style="color:var(--ink-4)">–</span>',
+        p.blank ? p.blank.c + ' / ' + p.blank.t : '–',
+        p.quiz ? p.quiz.c + ' / ' + p.quiz.t : '–',
+        p.at || '–'
+      ];
+    });
+    pbox.appendChild(AI.h('h3', { class: 'sub-head' }, a.no + '단원 · ' + a.title,
+      AI.h('span', { style: { float: 'right', fontSize: '13px', color: 'var(--ink-3)', fontWeight: '650' }, text: P.areaPct(a.no) + '%' })));
+    pbox.appendChild(AI.ui.table(['차시', '학습', '빈칸', '확인 문제', '학습일'], rows));
+  });
+
+  /* ---------- 2. 활동 기록 ---------- */
+  const nbox = document.getElementById('pfNotes');
+  const metaN = (st.meta && st.meta.notes) || {};
+  const noteIds = Object.keys(st.notes || {}).filter(id => !id.startsWith('pf-'));
+
+  // 페이지 순서대로 정렬
+  const order = [];
+  D.AREAS.forEach(a => { a.lessons.forEach(l => order.push(D.lessonKey(a.no, l.n))); order.push(D.lessonKey(a.no, 'closing')); });
+  noteIds.sort((x, y) => {
+    const px = (metaN[x] && metaN[x].page) || '', py = (metaN[y] && metaN[y].page) || '';
+    const ix = order.indexOf(px), iy = order.indexOf(py);
+    return (ix < 0 ? 999 : ix) - (iy < 0 ? 999 : iy) || x.localeCompare(y);
+  });
+
+  let written = 0;
+  noteIds.forEach(id => {
+    let val = {};
+    try { val = JSON.parse(st.notes[id] || '{}'); } catch (_) { val = {}; }
+    const hasAny = Object.values(val).some(v => String(v || '').trim());
+    if (!hasAny) return;
+    written++;
+    const m = metaN[id] || {};
+    const link = href(m.page);
+    const card = AI.h('div', { class: 'pf-note' });
+    card.appendChild(AI.h('h4', { text: m.title || '활동 기록' }));
+    card.appendChild(AI.h('div', { class: 'src', html: link ? '<a href="' + link + '">' + AI.esc(label(m.page)) + '</a>' : AI.esc(label(m.page)) }));
+    const fields = (m.fields && m.fields.length) ? m.fields : Object.keys(val).map(k => ({ key: k, label: k }));
+    fields.forEach(f => {
+      const v = String(val[f.key] || '').trim();
+      card.appendChild(AI.h('div', { class: 'pf-field' },
+        f.label ? AI.h('div', { class: 'fl', text: f.label }) : null,
+        AI.h('div', { class: 'fv' + (v ? '' : ' none'), text: v || '작성하지 않음' })));
+    });
+    nbox.appendChild(card);
+  });
+  if (!written) {
+    nbox.appendChild(AI.h('div', { class: 'pf-empty' },
+      '아직 작성한 활동 기록이 없습니다. 각 차시의 ', AI.h('b', { text: '활동 기록' }), ' 칸을 채우면 여기에 모입니다.'));
+  }
+
+  /* ---------- 3. 자가평가 ---------- */
+  const rbox = document.getElementById('pfRubric');
+  const metaR = (st.meta && st.meta.rubric) || {};
+  const rIds = Object.keys(metaR);
+  if (!rIds.length) {
+    rbox.appendChild(AI.h('div', { class: 'pf-empty' },
+      '아직 자가평가 기록이 없습니다. 각 단원의 ', AI.h('b', { text: '단원 마무리' }), ' 쪽에서 성취기준별로 스스로 점검해 보세요.'));
+  } else {
+    const rows = rIds.map(id => {
+      const m = metaR[id], g = P.rubric(id);
+      const lv = D.LEVELS.find(L => L.g === g);
+      return [
+        m.std ? '<code>' + m.std + '</code>' : '–',
+        AI.esc(m.text || ''),
+        '<span class="lvtag' + (g ? '' : ' none') + '">' + (g || '–') + '</span>' + (lv ? ' ' + lv.label : ''),
+        (function () { const l = href(m.page); return l ? '<a href="' + l + '">돌아가기</a>' : '–'; })()
+      ];
+    });
+    rbox.appendChild(AI.ui.table(['성취기준', '자기 점검 문항', '내 수준', '해당 쪽'], rows));
+
+    const counts = {};
+    rIds.forEach(id => { const g = P.rubric(id) || '미평가'; counts[g] = (counts[g] || 0) + 1; });
+    rbox.appendChild(AI.h('div', { class: 'box box-info', style: { marginTop: '14px' } },
+      AI.h('div', { class: 'box-label', text: '📊 자가평가 요약' }),
+      AI.h('p', {
+        html: D.LEVELS.map(L => L.g + '(' + L.label + ') ' + (counts[L.g] || 0) + '개').join(' · ') +
+          (counts['미평가'] ? ' · 미평가 ' + counts['미평가'] + '개' : '')
+      }),
+      AI.h('p', { style: { fontSize: '14px', color: 'var(--ink-3)' }, text: 'D 또는 E로 평가한 성취기준이 있다면 해당 차시로 돌아가 시뮬레이터와 확인 문제를 다시 해 보세요.' })
+    ));
+  }
+
+  /* ---------- 4. 기록 관리 ---------- */
+  const tools = document.getElementById('pfTools');
+  tools.appendChild(AI.ui.btn('🖨 포트폴리오 인쇄', () => window.print(), 'primary'));
+
+  tools.appendChild(AI.ui.btn('⬇ 기록 내보내기', () => {
+    const blob = new Blob([JSON.stringify(P.all(), null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const who = (document.getElementById('pfWho').value || '학습기록').replace(/[\\/:*?"<>|]/g, '');
+    const a = AI.h('a', { href: url, download: '인공지능기초_' + who + '.json' });
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    AI.toast('기록 파일을 저장했어요');
+  }));
+
+  const file = AI.h('input', { type: 'file', accept: '.json,application/json', style: { display: 'none' } });
+  file.addEventListener('change', () => {
+    const f = file.files && file.files[0];
+    if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      try {
+        const inc = JSON.parse(rd.result);
+        if (!inc || typeof inc !== 'object' || !inc.pages) throw new Error('형식이 올바르지 않습니다');
+        if (!confirm('현재 브라우저의 학습 기록을 불러온 파일로 덮어씁니다. 계속할까요?')) return;
+        localStorage.setItem('aibasics.v1', JSON.stringify(inc));
+        AI.toast('기록을 불러왔어요');
+        setTimeout(() => location.reload(), 700);
+      } catch (e) {
+        alert('불러오지 못했습니다: ' + e.message);
+      }
+    };
+    rd.readAsText(f);
+  });
+  tools.appendChild(file);
+  tools.appendChild(AI.ui.btn('⬆ 기록 가져오기', () => file.click()));
+
+  tools.appendChild(AI.ui.btn('🗑 기록 초기화', () => {
+    if (confirm('진도 · 활동 기록 · 자가평가를 모두 지웁니다. 되돌릴 수 없습니다. 계속할까요?')) {
+      P.reset(); AI.toast('초기화했어요'); setTimeout(() => location.reload(), 700);
+    }
+  }, 'ghost'));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><meta charset="utf-8"><title>self test</title>
+<link rel="stylesheet" href="assets/css/textbook.css"></head>
+<body>
+<main class="wrap-wide" style="padding:24px 0">
+<h1>웹교과서 자체 점검</h1>
+<pre id="out" style="font-family:var(--font-mono);font-size:12px;white-space:pre-wrap"></pre>
+</main>
+<script src="assets/js/data.js"></script>
+<script>
+/* 모든 페이지를 iframe 으로 실제 로드해서, JS 가 만들어야 하는 DOM 표지가 나왔는지 확인한다.
+   페이지 크롬·시뮬레이터·퀴즈가 전부 JS 생성물이므로, 치명적 오류는 표지 누락으로 드러난다.
+   주의: iframe 을 DOM 에서 떼면 캔버스 백킹스토어가 사라진다. 반드시 검사 후에 제거할 것. */
+const D = window.AIDATA;
+const PAGES = [];
+PAGES.push({ url: 'index.html', kind: 'home' });
+PAGES.push({ url: 'portfolio.html', kind: 'portfolio' });
+D.AREAS.forEach(a => {
+  PAGES.push({ url: a.dir + '/index.html', kind: 'areaIndex', area: a.no });
+  a.lessons.forEach(l => PAGES.push({ url: a.dir + '/' + l.file, kind: 'lesson', area: a.no, n: l.n }));
+  PAGES.push({ url: a.dir + '/closing.html', kind: 'closing', area: a.no });
+});
+
+const EXPECT = {
+  home:      { '.area-card': [4, 4], '.stat-box': [4, 99] },
+  portfolio: { '.stat-box': [4, 99], '.tb-header': [1, 1] },
+  areaIndex: { '.lesson-card': [5, 99], '.tb-header': [1, 1], '.hero h1': [1, 1] },
+  lesson:    { '.tb-header': [1, 1], '.hero h1': [1, 1], '.goals li': [2, 9], '.blank': [8, 16],
+               '.sim-panel': [1, 6], '.cloze': [1, 3], '.q-item': [6, 14], '.note': [1, 4],
+               '.nav-foot a': [2, 2], '.dock-fab': [1, 1], '.tb-footer': [1, 1] },
+  closing:   { '.tb-header': [1, 1], '.hero h1': [1, 1], '.blank': [8, 20], '.q-item': [9, 16],
+               '.rubric-row': [3, 8], '.note': [1, 5], '.tb-footer': [1, 1] }
+};
+
+const CACHEBUST = String(Date.now());
+const out = document.getElementById('out');
+const lines = [];
+function say(s) { lines.push(s); out.textContent = lines.join('\n'); }
+
+/** iframe 을 띄우고 로드가 끝나면 iframe 자체를 넘긴다(제거하지 않는다) */
+function openPage(url) {
+  return new Promise(res => {
+    const f = document.createElement('iframe');
+    f.style.cssText = 'width:1200px;height:900px;position:absolute;left:-20000px;top:0;border:0';
+    let done = false;
+    const go = v => { if (!done) { done = true; res(v); } };
+    f.onload = () => setTimeout(() => go({ f }), 700);
+    f.onerror = () => go({ f, err: 'iframe 로드 실패' });
+    setTimeout(() => go({ f, err: '시간 초과(9초)' }), 9000);
+    // 캐시된 옛 파일을 읽지 않도록 매번 다른 질의문자열을 붙인다
+    f.src = url + (url.indexOf('?') < 0 ? '?' : '&') + '_t=' + CACHEBUST;
+
+    document.body.appendChild(f);
+  });
+}
+
+/** 캔버스에 실제로 뭔가 그려졌는지 — 표본 색의 종류 수로 판단 */
+function canvasInfo(c) {
+  try {
+    const cx = c.getContext('2d');
+    const w = c.width, h = c.height;
+    if (!w || !h) return { drawn: false, colors: 0 };
+    const dt = cx.getImageData(0, 0, w, h).data;
+    const seen = new Set();
+    const stepX = Math.max(1, Math.floor(w / 40)), stepY = Math.max(1, Math.floor(h / 40));
+    let opaque = 0;
+    for (let y = 0; y < h; y += stepY) {
+      for (let x = 0; x < w; x += stepX) {
+        const i = (y * w + x) * 4;
+        if (dt[i + 3] !== 0) opaque++;
+        seen.add(dt[i] + ',' + dt[i + 1] + ',' + dt[i + 2] + ',' + dt[i + 3]);
+        if (seen.size > 12) return { drawn: true, colors: seen.size, opaque };
+      }
+    }
+    return { drawn: seen.size > 1 || opaque > 0, colors: seen.size, opaque };
+  } catch (e) { return { drawn: null, colors: 0, err: e.name }; }
+}
+
+(async function () {
+  let fail = 0, warn = 0, ok = 0;
+  const problems = [], notes = [];
+  for (const p of PAGES) {
+    const r = await openPage(p.url);
+    const f = r.f;
+    if (r.err) {
+      say('❌ ' + p.url + ' — ' + r.err); fail++; problems.push(p.url + ': ' + r.err);
+      f.remove(); continue;
+    }
+    let msgs = [], soft = [];
+    try {
+      const d = f.contentDocument, w = f.contentWindow;
+      if (!w || !w.AI) msgs.push('AI 전역 없음(core.js 실행 실패)');
+      const exp = EXPECT[p.kind] || {};
+      for (const sel in exp) {
+        const n = d.querySelectorAll(sel).length;
+        const [lo, hi] = exp[sel];
+        if (n < lo || n > hi) msgs.push(sel + '=' + n + ' (기대 ' + lo + '~' + hi + ')');
+      }
+      const bl = [...d.querySelectorAll('.blank')];
+      const noHint = bl.filter(b => !b.getAttribute('data-hint')).length;
+      if (noHint) msgs.push('data-hint 없는 빈칸 ' + noHint + '개');
+      const ids = [...d.querySelectorAll('[id]')].map(e => e.id);
+      const dup = [...new Set(ids.filter((v, i) => ids.indexOf(v) !== i))];
+      if (dup.length) msgs.push('id 중복: ' + dup.join(','));
+      const ext = [...d.querySelectorAll('[src],[href]')]
+        .map(e => e.getAttribute('src') || e.getAttribute('href'))
+        .filter(u => u && /^(https?:)?\/\//.test(u));
+      if (ext.length) msgs.push('외부 리소스: ' + ext.slice(0, 3).join(' '));
+      // 캔버스 — iframe 이 아직 DOM 에 붙어 있는 상태에서 검사
+      const cvs = [...d.querySelectorAll('canvas')];
+      if (cvs.length) {
+        const info = cvs.map(canvasInfo);
+        const blank = info.filter(i => i.drawn === false).length;
+        const flat = info.filter(i => i.drawn && i.colors <= 2).length;
+        if (blank) msgs.push('빈 캔버스 ' + blank + '/' + cvs.length);
+        else if (flat) soft.push('단색 캔버스 ' + flat + '/' + cvs.length + '(상호작용 전일 수 있음)');
+        else soft.push('캔버스 ' + cvs.length + '개 정상');
+      }
+      // 시뮬레이터 컨트롤이 실제로 있는지
+      if (p.kind === 'lesson') {
+        const ctl = d.querySelectorAll('.sim-panel .btn, .sim-panel input, .sim-panel select, .sim-panel .seg button').length;
+        if (ctl < 2) msgs.push('시뮬레이터 컨트롤 ' + ctl + '개 (너무 적음)');
+        const whyMissing = 0;
+        const qi = d.querySelectorAll('.q-item').length;
+        const fb = d.querySelectorAll('.q-item .q-feedback').length;
+        if (qi && fb < qi) msgs.push('해설 없는 문항 ' + (qi - fb) + '개');
+      }
+    } catch (e) {
+      msgs.push('검사 중 예외: ' + e.message);
+    }
+    f.remove();
+
+    if (msgs.length) {
+      say('❌ ' + p.url + ' — ' + msgs.join(' | ') + (soft.length ? '  [' + soft.join(' ') + ']' : ''));
+      fail++; problems.push(p.url + ': ' + msgs.join(' | '));
+    } else {
+      say('✅ ' + p.url + (soft.length ? '  — ' + soft.join(' · ') : ''));
+      ok++;
+      if (soft.some(s => s.includes('단색'))) { warn++; notes.push(p.url + ': ' + soft.join(' ')); }
+    }
+  }
+  say('\n=== 합계: 정상 ' + ok + ' / 실패 ' + fail + ' / 참고 ' + warn + ' (총 ' + PAGES.length + ') ===');
+  window.__RESULT = { ok, fail, warn, total: PAGES.length, problems, notes };
+  window.__DONE = true;
+})();
+</script>
+</body>
+</html>

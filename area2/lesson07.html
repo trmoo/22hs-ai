@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7차시 층을 쌓아 깊어지다 — 인공신경망과 딥러닝 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+/* 이 차시에서만 쓰는 보조 클래스 */
+.nn-fig { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(178px, 1fr)); margin: 0 0 18px; }
+.nn-fig figure { margin: 0; padding: 12px 10px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); text-align: center; }
+.nn-fig figcaption { font-size: 12.5px; color: var(--ink-3); margin-top: 8px; line-height: 1.6; text-align: left; }
+.nn-fig figcaption b { display: block; color: var(--ink); font-size: 14.5px; margin-bottom: 3px; }
+.svg-fig { display: block; width: 100%; max-width: 660px; margin: 0 auto 6px; height: auto; }
+.fig-cap { text-align: center; font-size: 13px; color: var(--ink-3); margin: 0 0 18px; }
+.kernel-grid { display: grid; grid-template-columns: repeat(3, 66px); gap: 6px; }
+.kernel-grid input { width: 66px; text-align: center; font-family: var(--font-mono); font-size: 13px; padding: 6px 3px; }
+.calc-box { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.8; background: var(--surface-3); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 11px 13px; margin: 13px 0 0; color: var(--ink-2); white-space: pre-wrap; min-height: 104px; }
+.calc-box .em { color: var(--accent-ink); font-weight: 700; }
+.mini-lab { font-size: 12.5px; font-weight: 750; color: var(--ink-3); margin: 0 0 6px; letter-spacing: .01em; }
+.code-pre { margin: 0; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.8; white-space: pre-wrap; color: var(--ink-2); }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>사진 한 장을 보고 <b>고양이인지 아닌지</b> 판단하는 규칙을 직접 코드로 적어 보려 합니다. “귀가 삼각형이면”, “수염이 있으면”, “털이 있으면”… 규칙을 몇 개나 적어야 할까요?</p>
+      <ul>
+        <li>고양이가 <b>뒤돌아 앉아</b> 있으면 귀도 수염도 보이지 않습니다.</li>
+        <li>인형 고양이, 그림 고양이, 어두운 사진 속 고양이는 어떻게 할까요?</li>
+      </ul>
+      <p>사람은 이 일을 <b>0.1초</b>도 안 걸려 해냅니다. 그런데 사람의 머릿속에도 “고양이 판별 규칙”이 적혀 있지는 않습니다. 대신 약 <b>860억 개의 뉴런</b>이 서로 신호를 주고받을 뿐입니다. 그렇다면 <b>규칙을 적는 대신, 뉴런의 연결을 흉내 내면</b> 어떨까요?</p>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 4차시에서 배운 것과 이어 보기</summary>
+        <div class="more-body">
+          4차시에서 선 하나(<span class="mono">y = ax + b</span>)의 기울기와 절편을 <b>경사 하강</b>으로 조금씩 고쳐 데이터에 맞췄습니다. 이 차시에서는 그 “선”을 수백·수만 개 쌓아 올립니다. 고치는 방법은 놀랍게도 <b>똑같이 경사 하강</b>입니다.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 인공 뉴런 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>뉴런을 흉내 낸 계산 한 칸</h2></div>
+
+    <p>생물의 뉴런은 여러 가지에서 신호를 받아들여(가지돌기), 그 신호를 모두 합친 뒤, 합이 어떤 <b>임곗값</b>을 넘으면 다음 뉴런으로 전기 신호를 내보냅니다. 넘지 않으면 아무 일도 일어나지 않습니다. 1943년 매컬러와 피츠는 이 “모아서 넘으면 발사”라는 구조를 수식으로 옮겼고, 1957년 로젠블랫이 이를 학습이 가능한 형태로 만들어 <b class="blank" data-a="퍼셉트론|perceptron" data-hint="인공신경망의 가장 기본이 되는 인공 뉴런 하나">퍼셉트론</b>이라 이름 붙였습니다.</p>
+
+    <div id="neuronfig"></div>
+
+    <p>인공 뉴런은 딱 세 가지 부품으로 이루어집니다.</p>
+    <ul>
+      <li>입력 <span class="mono">x₁, x₂, …, xₙ</span> — 이 뉴런이 받아들이는 값(속성)</li>
+      <li><b class="blank" data-a="가중치|weight" data-hint="입력이 출력에 주는 중요도를 정하는 값, 기호는 w">가중치</b> <span class="mono">w₁, w₂, …, wₙ</span> — 각 입력이 <b>얼마나 중요한지</b>를 정하는 수</li>
+      <li><b class="blank" data-a="편향|바이어스|bias" data-hint="가중합에 더해져 임곗값을 옮기는 값, 기호는 b">편향</b> <span class="mono">b</span> — 전체를 위아래로 밀어 <b>임곗값을 옮기는</b> 수</li>
+    </ul>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 — 인공 뉴런의 계산</div>
+      <p>인공 뉴런은 먼저 입력에 가중치를 곱해 모두 더하고 편향을 더해 <span class="term">가중합</span> <span class="mono">z</span>를 만든다.</p>
+      <p class="mono" style="display:block;padding:10px 13px;font-size:15px">z = w₁x₁ + w₂x₂ + ⋯ + wₙxₙ + b</p>
+      <p>그리고 이 <span class="mono">z</span>를 <b>활성화 함수</b> <span class="mono">f</span>에 넣어 최종 출력을 만든다.</p>
+      <p class="mono" style="display:block;padding:10px 13px;font-size:15px">y = f(z)</p>
+      <p>학습이란 데이터를 보고 <b>가중치와 편향을 고쳐 나가는 일</b>이다. 사람이 정해 주는 것은 구조뿐이고, 값은 데이터가 정한다.</p>
+    </div>
+
+    <p>가중합을 받아 “켤지 끌지”를 정하는 함수를 <b class="blank" data-a="활성화 함수|활성화함수|activation function" data-hint="가중합을 받아 출력을 정하는 함수. 계단·시그모이드·ReLU 등">활성화 함수</b>라고 합니다. 초기 퍼셉트론은 <span class="mono">z &gt; 0</span>이면 1, 아니면 0을 내보내는 <b>계단 함수</b>를 썼습니다. 이렇게 하면 인공 뉴런 하나가 “예/아니오”를 판단하는 <b>가장 작은 분류기</b>가 됩니다.</p>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 편향은 왜 필요할까?</div>
+      <p>편향이 없다면 <span class="mono">z = w₁x₁ + w₂x₂</span>이므로 <b>입력이 모두 0일 때 출력이 언제나 0</b>이 되고, 판단 기준선이 항상 원점을 지나야 합니다. 편향 <span class="mono">b</span>는 이 기준선을 자유롭게 옮겨 주는 역할을 합니다. 4차시의 <span class="mono">y = ax + b</span>에서 <span class="mono">b</span>가 절편이었던 것과 정확히 같은 역할입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. 퍼셉트론과 논리 게이트 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>퍼셉트론과 논리 게이트 — 직선 하나의 한계</h2></div>
+
+    <p>퍼셉트론이 정말 “판단”을 하는지 확인하는 가장 쉬운 방법은 <b>논리 게이트</b>를 만들어 보는 것입니다. 입력이 0과 1뿐이니 경우가 네 가지밖에 없어 손으로도 검산할 수 있습니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>네 가지 논리 게이트의 진리표 — 입력 두 개, 출력 하나</caption>
+        <thead><tr><th>x₁</th><th>x₂</th><th>AND</th><th>OR</th><th>NAND</th><th>XOR</th></tr></thead>
+        <tbody>
+          <tr><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">1</td><td class="num">0</td></tr>
+          <tr><td class="num">0</td><td class="num">1</td><td class="num">0</td><td class="num">1</td><td class="num">1</td><td class="num">1</td></tr>
+          <tr><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num">1</td><td class="num">1</td><td class="num">1</td></tr>
+          <tr><td class="num">1</td><td class="num">1</td><td class="num">1</td><td class="num">1</td><td class="num">0</td><td class="num">0</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>예를 들어 <span class="mono">w₁ = 1, w₂ = 1, b = −1.5</span>로 두면 <span class="mono">(1, 1)</span>에서만 <span class="mono">z = 0.5 &gt; 0</span>이 되어 <b>AND</b>가 완성됩니다. 편향만 <span class="mono">−0.5</span>로 바꾸면 하나만 1이어도 통과하는 <b>OR</b>가 됩니다. 가중치를 모두 음수로 뒤집으면 <b>NAND</b>가 됩니다. 즉 <b>같은 구조에 값만 바꿔</b> 서로 다른 판단기를 만들 수 있습니다.</p>
+
+    <h3 class="sub-head">그런데 XOR에서 막힌다</h3>
+
+    <p>XOR는 “두 입력이 서로 <b>다를 때만</b> 1”인 게이트입니다. 아무리 <span class="mono">w₁, w₂, b</span>를 바꿔도 퍼셉트론 하나로는 만들 수 없습니다. 이유는 기하로 보면 분명합니다. <span class="mono">z = w₁x₁ + w₂x₂ + b = 0</span>은 입력 평면 위의 <b>직선 하나</b>이고, 퍼셉트론은 이 직선을 기준으로 위쪽은 1, 아래쪽은 0으로 나눌 뿐입니다. 그런데 XOR의 정답 1인 두 점 <span class="mono">(0,1), (1,0)</span>과 정답 0인 두 점 <span class="mono">(0,0), (1,1)</span>은 <b>대각선으로 엇갈려</b> 놓여 있어 직선 하나로는 절대 갈라지지 않습니다.</p>
+
+    <p>직선(또는 고차원의 평면) 하나로 두 부류를 완전히 나눌 수 있는 성질을 <b class="blank" data-a="선형 분리|선형분리|선형 분리 가능|선형분리가능" data-hint="직선이나 평면 하나로 두 부류를 나눌 수 있는 성질">선형 분리</b> 가능성이라고 합니다. AND, OR, NAND는 선형 분리가 가능하고 XOR는 불가능합니다. <b>퍼셉트론 하나는 선형 분리가 가능한 문제만 풀 수 있습니다.</b></p>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 첫 번째 인공지능 겨울</div>
+      <p>1969년 민스키와 페퍼트는 저서 『퍼셉트론』에서 이 한계를 수학적으로 증명해 보였습니다. “고작 XOR도 못 푼다”는 지적은 큰 충격을 주었고, 인공지능 연구에 대한 투자가 급격히 줄어드는 이른바 <b>첫 번째 인공지능 겨울</b>로 이어졌습니다. 하지만 같은 책에는 <b>층을 여러 개 쌓으면 풀린다</b>는 사실도 이미 적혀 있었습니다. 문제는 “쌓은 망을 어떻게 학습시킬지”를 아직 몰랐다는 점이었습니다.</p>
+    </div>
+
+    <h3 class="sub-head">해결책 — 층을 쌓는다</h3>
+
+    <p>XOR는 <span class="mono">NAND</span>와 <span class="mono">OR</span>의 결과를 다시 <span class="mono">AND</span>로 묶으면 만들어집니다. 즉 <b>퍼셉트론의 출력을 다시 다른 퍼셉트론의 입력으로</b> 넣으면 됩니다. 이렇게 층을 여러 겹으로 쌓은 구조를 <b class="blank" data-a="다층 퍼셉트론|MLP|다층퍼셉트론" data-hint="영어 약자로 MLP. 층을 여러 겹 쌓은 퍼셉트론">다층 퍼셉트론</b>이라 하고, 입력층과 출력층 사이에 새로 생긴 층을 <b class="blank" data-a="은닉층|hidden layer|히든 레이어" data-hint="입력층과 출력층 사이에 숨어 있는 층">은닉층</b>이라 합니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">➖</span>
+        <h4>퍼셉트론 하나</h4>
+        <p>결정 경계가 <b>직선 하나</b>. AND · OR · NAND처럼 선형 분리가 가능한 문제만 해결한다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🔀</span>
+        <h4>은닉층 1개</h4>
+        <p>여러 개의 직선을 <b>조합</b>해 꺾인 경계나 닫힌 영역을 만든다. XOR가 풀린다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🌀</span>
+        <h4>은닉층 여러 개</h4>
+        <p>앞 층이 뽑은 특징을 다시 조합해 <b>곡선·나선</b>처럼 복잡한 경계까지 만든다.</p>
+      </div>
+    </div>
+
+    <p>“층을 쌓으면 은닉층이 대체 무엇을 하는가?”는 말로만 설명하기 어렵습니다. 다음 시뮬레이터에서 <b>직접 가중치를 돌려 보며</b> 퍼셉트론 하나의 한계를 몸으로 겪어 봅시다.</p>
+  </section>
+
+  <!-- ============ 3. 시뮬레이터 1 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>직접 돌려 보기 ①</h2><span class="sec-tag">퍼셉트론 · 논리 게이트</span></div>
+    <div id="sim1"></div>
+  </section>
+
+  <!-- ============ 4. 활성화 함수 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>활성화 함수 — 어떤 모양으로 켜고 끌까</h2></div>
+
+    <p>계단 함수는 뉴런을 흉내 내기엔 좋지만 <b>학습에는 쓸 수 없습니다</b>. 4차시에서 배웠듯 학습은 “오차를 줄이는 방향으로 조금 움직이기”, 즉 <b>기울기</b>를 이용합니다. 그런데 계단 함수의 기울기는 <span class="mono">z = 0</span>을 뺀 모든 곳에서 <b>0</b>이라, “어느 쪽으로 얼마나 고쳐야 하는지”를 전혀 알려 주지 못합니다. 그래서 계단을 <b>매끄럽게 다듬은</b> 함수들이 등장했습니다.</p>
+
+    <div id="actfig" class="nn-fig"></div>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>대표적인 활성화 함수 — 요즘 은닉층에는 ReLU, 이진 분류 출력층에는 시그모이드를 주로 쓴다</caption>
+        <thead><tr><th>함수</th><th>식</th><th>출력 범위</th><th>장점</th><th>단점</th></tr></thead>
+        <tbody>
+          <tr><td><b>계단 함수</b></td><td class="num">z &gt; 0 ? 1 : 0</td><td class="num">0 또는 1</td><td>초기 퍼셉트론의 원형, 뜻이 명확</td><td class="bad">기울기가 0이라 학습 불가</td></tr>
+          <tr><td><b>시그모이드</b></td><td class="num">1 / (1 + e⁻ᶻ)</td><td class="num">0 ~ 1</td><td class="good">확률처럼 해석 가능, 매끄럽다</td><td class="bad">양 끝에서 기울기가 0에 가까워 기울기 소실</td></tr>
+          <tr><td><b>하이퍼볼릭 탄젠트</b></td><td class="num">tanh z</td><td class="num">−1 ~ 1</td><td class="good">0을 중심으로 대칭이라 학습이 빠르다</td><td class="bad">여전히 양 끝에서 기울기 소실</td></tr>
+          <tr><td><b>ReLU</b></td><td class="num">max(0, z)</td><td class="num">0 ~ ∞</td><td class="good">계산이 매우 빠르고 깊은 망에서 기울기가 잘 흐른다</td><td class="bad">음수 구간이 계속 0이면 뉴런이 죽는다</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>0 이하는 0, 양수는 그대로 내보내는 아주 단순한 함수인 <b class="blank" data-a="ReLU|렐루|relu" data-hint="0보다 작으면 0, 크면 그대로 내보내는 활성화 함수의 영어 이름">ReLU</b>는 오늘날 딥러닝 은닉층의 사실상 기본값입니다. 모양이 단순해서 계산이 빠르고, 양수 구간에서 기울기가 정확히 1이라 층이 아무리 깊어도 신호가 잘 전달됩니다.</p>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 자주 하는 오해</div>
+      <p>“활성화 함수는 그냥 값을 예쁘게 다듬는 장식”이라고 생각하기 쉽습니다. 그러나 활성화 함수가 <b>없으면(또는 직선이면)</b> 층을 100개 쌓아도 전체가 하나의 1차식으로 합쳐져 <b>퍼셉트론 하나와 완전히 같아집니다</b>. 층을 쌓는 일이 의미를 갖는 것은 활성화 함수가 <b>비선형</b>이기 때문입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 5. 순전파 · 손실 · 역전파 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>층을 쌓고 오차를 되돌리다</h2></div>
+
+    <p>층을 쌓았으니 이제 <b>학습시키는 방법</b>이 필요합니다. 은닉층의 가중치는 정답과 직접 맞닿아 있지 않아서, “이 은닉 뉴런의 가중치가 얼마나 잘못되었는지”를 바로 알 수 없습니다. 이 문제를 푸는 열쇠가 1986년에 널리 알려진 <b>오차 역전파</b>입니다.</p>
+
+    <div id="mlpfig"></div>
+
+    <h3 class="sub-head">한 번 학습하는 과정 — 네 걸음</h3>
+    <ol>
+      <li><b class="blank" data-a="순전파|전방 전파|forward" data-hint="입력에서 출력 방향으로 차례차례 계산해 나가는 과정">순전파</b> — 입력을 입력층에 넣고, 층마다 가중합과 활성화 함수를 계산해 출력층까지 값을 밀어 보낸다. 그 결과가 <b>예측값</b>이다.</li>
+      <li><b class="blank" data-a="손실 함수|손실함수|비용 함수|오차 함수" data-hint="예측값과 실젯값의 차이를 하나의 수로 나타내는 함수">손실 함수</b>로 예측값과 실젯값의 차이를 하나의 수(<b>손실</b>)로 계산한다. 회귀에는 평균 제곱 오차, 이진 분류에는 이진 교차 엔트로피를 주로 쓴다.</li>
+      <li><b class="blank" data-a="역전파|오차 역전파|backpropagation" data-hint="출력의 오차를 뒤에서 앞으로 되돌려 각 가중치의 기울기를 구하는 방법">역전파</b> — 출력층에서 구한 오차를 <b>거꾸로</b> 앞 층으로 되돌리며, 각 가중치가 손실에 얼마나 기여했는지(기울기)를 구한다.</li>
+      <li><b>경사 하강</b> — 구한 기울기의 반대 방향으로 모든 가중치와 편향을 <span class="mono">학습률 × 기울기</span>만큼 조금 움직인다.</li>
+    </ol>
+
+    <p>이 네 걸음을 데이터 전체에 대해 한 번 돌린 것을 <span class="term">1 에포크</span>라고 합니다. 에포크를 수백~수만 번 반복하면 손실이 점점 내려가고, 결정 경계가 데이터 모양에 맞게 휘어집니다.</p>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 역전파의 정체는 연쇄 법칙</div>
+      <p>역전파는 새로운 마법이 아니라 미분의 <b>연쇄 법칙</b>을 효율적으로 적용한 것입니다. 출력층의 오차를 <span class="mono">δ</span>라 하면, 앞 층의 오차는 <span class="mono">δ</span>에 <b>연결 가중치를 곱해 모은 값</b>에 그 층 활성화 함수의 기울기를 곱해 구합니다. 그래서 층이 깊어질수록 기울기가 계속 곱해지는데, 시그모이드처럼 기울기가 1보다 작은 함수를 쓰면 값이 자꾸 작아져 앞쪽 층이 거의 학습되지 않습니다. 이것이 <b>기울기 소실</b> 문제이고, ReLU가 널리 쓰이는 이유입니다.</p>
+    </div>
+
+    <h3 class="sub-head">딥러닝 — 왜 층을 쌓으면 좋은가</h3>
+
+    <p>은닉층이 여러 개인 인공신경망을 <b>심층 신경망</b>(DNN)이라 하고, 이를 이용한 기계학습을 <b class="blank" data-a="딥러닝|심층 학습|deep learning" data-hint="은닉층이 여러 개인 인공신경망으로 학습하는 것">딥러닝</b>이라 합니다. 층을 쌓는 것이 왜 그렇게 강력할까요? 핵심은 <b>특징의 계층</b>입니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>얼굴 사진을 학습한 심층 신경망에서 층별로 뽑히는 특징 — 앞 층의 특징을 재료로 뒤 층이 더 큰 특징을 만든다</caption>
+        <thead><tr><th>층</th><th>뽑아내는 특징</th><th>비유</th></tr></thead>
+        <tbody>
+          <tr><td><b>1층</b></td><td>밝기가 갑자기 바뀌는 짧은 선분, 점, 색 얼룩</td><td>글자의 획</td></tr>
+          <tr><td><b>2층</b></td><td>선분이 모여 만드는 모서리, 곡선, 무늬</td><td>낱글자</td></tr>
+          <tr><td><b>3층</b></td><td>눈, 코, 입 같은 부분 모양</td><td>낱말</td></tr>
+          <tr><td><b>4층 이상</b></td><td>부분들의 배치 = 얼굴 전체, 사람의 신원</td><td>문장</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>기존 기계학습에서는 “어떤 속성을 넣을지”를 사람이 정해 주어야 했습니다(2차시의 속성 추출). 딥러닝은 이 <b>특징 추출까지 스스로 학습</b>합니다. 대신 값을 정해야 할 가중치가 수백만~수천억 개로 늘어나므로, 아주 많은 데이터와 강력한 계산 장치(GPU)가 필요합니다. 딥러닝이 2010년대에 갑자기 꽃핀 이유가 바로 <b>데이터·계산력·알고리즘</b> 세 가지가 동시에 갖춰졌기 때문입니다.</p>
+
+    <div class="box box-ok">
+      <div class="box-label">✅ 정리</div>
+      <p>인공신경망은 <b>가중치와 편향</b>을 가진 인공 뉴런을 층으로 연결한 모델이고, 학습은 <b>순전파 → 손실 계산 → 역전파 → 경사 하강</b>의 반복이다. 은닉층을 여러 개 쌓아 특징을 계층적으로 뽑는 것이 <b>딥러닝</b>이다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 6. 시뮬레이터 2 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>직접 돌려 보기 ②</h2><span class="sec-tag">신경망 학습 플레이그라운드</span></div>
+    <div id="sim2"></div>
+  </section>
+
+  <!-- ============ 7. 합성곱 신경망 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>이미지를 보는 눈 — 합성곱 신경망</h2></div>
+
+    <p>가로세로 100픽셀짜리 컬러 사진 한 장은 값이 <span class="mono">100 × 100 × 3 = 30,000</span>개입니다. 이것을 한 줄로 펴서 다층 퍼셉트론에 넣으면 첫 은닉층 뉴런 하나마다 가중치가 3만 개씩 필요합니다. 게다가 한 줄로 펴는 순간 <b>“옆 픽셀과 붙어 있다”는 정보가 사라집니다</b>. 고양이가 사진 왼쪽에 있을 때와 오른쪽에 있을 때를 완전히 다른 입력으로 보게 되는 것도 문제입니다.</p>
+
+    <p>이를 해결한 구조가 <b>합성곱 신경망</b>(CNN)입니다. 핵심 아이디어는 “작은 <b>필터</b>(커널) 하나를 이미지 전체에 돌려쓰기”입니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념 — 합성곱 연산</div>
+      <p>3×3 크기의 <b>필터(커널)</b>를 이미지 왼쪽 위에 겹쳐 놓고, 겹친 <b>9개 픽셀값과 필터의 9개 가중치를 각각 곱해 모두 더한다</b>. 이 값 하나가 결과 이미지의 픽셀 하나가 된다. 필터를 한 칸 옆으로 옮겨 같은 계산을 반복하며 이미지 전체를 훑으면 결과 이미지가 완성되는데, 이것을 <span class="term">특성 맵</span>(feature map, 특징 지도)이라 한다. 이 연산이 <b class="blank" data-a="합성곱|convolution|컨볼루션" data-hint="필터를 겹쳐 놓고 곱해서 더하는 연산">합성곱</b>이다.</p>
+    </div>
+
+    <p>중요한 것은 <b>필터의 9개 값을 사람이 정하지 않는다</b>는 점입니다. CNN은 이 값들을 <b>가중치로 보고 역전파로 학습</b>합니다. 학습이 끝나면 1층 필터들은 대체로 “세로 경계”, “가로 경계”, “대각선”처럼 <b>단순한 무늬 검출기</b>가 되고, 뒤쪽 층의 필터는 그 결과를 다시 조합해 “바퀴”, “눈”처럼 더 큰 부품을 찾아냅니다. 앞서 본 <b>특징의 계층</b>이 그림으로 확인되는 셈입니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">🔎</span>
+        <h4>합성곱 층</h4>
+        <p>필터로 이미지를 훑어 <b>특성 맵</b>을 만든다. 같은 필터를 전체에 돌려쓰므로 가중치 수가 크게 줄고, 대상이 어디에 있어도 찾아낸다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🪣</span>
+        <h4>풀링 층</h4>
+        <p>2×2 칸에서 <b>최댓값</b>(최대 풀링)이나 평균만 남겨 크기를 절반으로 줄인다. 계산이 줄고, 위치가 조금 달라도 같은 특징으로 본다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🧮</span>
+        <h4>완전 연결 층</h4>
+        <p>합성곱·풀링을 여러 번 거쳐 남은 특징들을 한 줄로 펴서 넣는다. 여기서 실제 <b>분류</b>가 이루어진다.</p>
+      </div>
+    </div>
+
+    <p>여러 칸 중 대푯값만 남겨 특성 맵의 크기를 줄이는 층을 <b class="blank" data-a="풀링|pooling|풀링층|풀링 층" data-hint="2×2 칸에서 최댓값이나 평균만 남겨 크기를 줄이는 층">풀링</b> 층이라 합니다. 전형적인 CNN은 <span class="mono">합성곱 → 풀링 → 합성곱 → 풀링 → ⋯ → 완전 연결</span> 순서로 구성됩니다.</p>
+
+    <p>이제 필터의 9개 값을 <b>직접 바꿔 가며</b> 어떤 무늬가 뽑히는지 눈으로 확인해 봅시다.</p>
+  </section>
+
+  <!-- ============ 8. 시뮬레이터 3 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>직접 돌려 보기 ③</h2><span class="sec-tag">합성곱 필터 체험</span></div>
+    <div id="sim3"></div>
+  </section>
+
+  <!-- ============ 9. RNN · 트랜스포머 · 활용 분야 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">9</span><h2>순서가 있는 데이터, 그리고 활용 분야</h2></div>
+
+    <p>이미지에는 “옆에 붙어 있다”는 구조가 있었습니다. 그런데 말·글·주가·기온처럼 <b>순서</b>가 중요한 데이터도 있습니다. “나는 밥을 먹었다”와 “밥을 나는 먹었다”는 낱말이 같아도 뜻이 다릅니다. <b>순환 신경망</b>(RNN)은 이런 데이터를 위해, 출력의 일부를 <b>다시 자기 입력으로 되돌려</b> 앞에서 본 내용을 기억합니다. 하지만 문장이 길어지면 앞부분의 기억이 흐려지는 약점이 있었습니다.</p>
+
+    <p>2017년에 발표된 <b>트랜스포머</b>는 순환 구조를 버리고 <span class="term">어텐션</span>이라는 방법을 씁니다. 어텐션은 어떤 낱말을 해석할 때 문장 안의 <b>모든 낱말과의 관련도를 한꺼번에 계산</b>해, 관련이 큰 낱말에 더 큰 비중을 둡니다. “그 <b>사과</b>는 맛있었다”에서 ‘사과’를 과일로 볼지 용서로 볼지는 ‘맛있었다’와의 관련도가 알려 줍니다. 순서대로 처리하지 않으니 병렬 계산이 쉬워 아주 큰 모델을 훈련할 수 있게 되었고, 이것이 오늘날 <b>거대 언어 모델</b>과 생성형 인공지능의 바탕이 되었습니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>딥러닝의 대표적 활용 분야 — 어떤 구조가 어떤 과제에 쓰이는가</caption>
+        <thead><tr><th>분야</th><th>대표 과제</th><th>주로 쓰는 구조</th><th>사례</th></tr></thead>
+        <tbody>
+          <tr><td><b>컴퓨터 비전</b></td><td>이미지 분류, 물체 검출, 영역 분할, 화질 개선</td><td>CNN, 비전 트랜스포머</td><td>자율 주행차의 보행자·신호등 인식, 흉부 X선 사진의 병변 표시, 무인 편의점의 상품 인식</td></tr>
+          <tr><td><b>음성 인식</b></td><td>말을 글로 옮기기, 화자 구분, 음성 합성</td><td>RNN, 트랜스포머</td><td>회의 자동 속기, 자동 자막 생성, 목소리 안내 서비스</td></tr>
+          <tr><td><b>자연어 처리</b></td><td>번역, 요약, 감정 분석, 질의응답</td><td>트랜스포머</td><td>기계 번역기, 상담 챗봇, 상품 후기 감정 분석</td></tr>
+          <tr><td><b>생성형 인공지능</b></td><td>글·그림·음악·코드 생성</td><td>거대 언어 모델, 확산 모델</td><td>글쓰기 보조, 글 설명으로 그림 그리기, 코드 자동 완성</td></tr>
+          <tr><td><b>과학·의료</b></td><td>구조 예측, 신약 후보 탐색, 기상 예측</td><td>CNN, 트랜스포머, 그래프 신경망</td><td>단백질 구조 예측, 태풍 진로 예측, 신약 후보 물질 선별</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 딥러닝은 만능이 아니다</div>
+      <p>딥러닝은 데이터가 적으면 오히려 단순한 모델보다 못합니다. 또 <b>왜 그렇게 판단했는지 설명하기 어렵고</b>(설명 가능성 문제), 학습 데이터에 담긴 편향을 그대로 배우며, 훈련에 많은 전력을 씁니다. 3단원에서는 바로 이 문제들을 다룹니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 10. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">10</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 11. 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">11</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 12. 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">12</span><h2>활동 기록</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 왜 은닉 뉴런이 2개면 XOR가 되는가</summary>
+      <div class="more-body">
+        <p>은닉 뉴런 두 개가 각각 <b>직선 하나</b>를 담당한다고 생각해 봅시다. 첫 번째 뉴런은 <span class="mono">x₁ + x₂ − 0.5 &gt; 0</span>(= OR), 두 번째 뉴런은 <span class="mono">−x₁ − x₂ + 1.5 &gt; 0</span>(= NAND)을 계산합니다. 네 점의 은닉층 출력은 이렇게 바뀝니다.</p>
+        <div class="table-wrap">
+          <table class="tb">
+            <thead><tr><th>입력</th><th>h₁ (OR)</th><th>h₂ (NAND)</th><th>XOR 정답</th></tr></thead>
+            <tbody>
+              <tr><td class="num">(0, 0)</td><td class="num">0</td><td class="num">1</td><td class="num">0</td></tr>
+              <tr><td class="num">(0, 1)</td><td class="num">1</td><td class="num">1</td><td class="num">1</td></tr>
+              <tr><td class="num">(1, 0)</td><td class="num">1</td><td class="num">1</td><td class="num">1</td></tr>
+              <tr><td class="num">(1, 1)</td><td class="num">1</td><td class="num">0</td><td class="num">0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>새로운 좌표 <span class="mono">(h₁, h₂)</span>에서 보면 정답 1인 두 점은 <span class="mono">(1, 1)</span> 한 곳으로 <b>겹쳐 버리고</b>, 정답 0인 두 점은 <span class="mono">(0, 1)</span>과 <span class="mono">(1, 0)</span>에 놓입니다. 이제 <span class="mono">h₁ + h₂ − 1.5 &gt; 0</span>(= AND)이라는 <b>직선 하나</b>로 깔끔하게 나뉩니다.</p>
+        <p>즉 은닉층은 <b>입력 공간을 접어서(변형해서) 선형 분리가 가능한 새 공간으로 옮겨 주는 일</b>을 합니다. “층을 쌓으면 복잡한 경계를 만든다”는 말의 정확한 뜻이 바로 이것입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">코드</span> 파이썬으로 쓴 다층 퍼셉트론과 CNN</summary>
+      <div class="more-body">
+        <p>텐서플로·케라스에서는 층을 순서대로 쌓기만 하면 순전파와 역전파를 자동으로 처리해 줍니다. 우리가 정하는 것은 <b>구조·활성화 함수·손실 함수·학습률</b>입니다.</p>
+        <div class="table-wrap">
+          <table class="tb">
+            <thead><tr><th>다층 퍼셉트론 (표 데이터 분류)</th><th>합성곱 신경망 (이미지 분류)</th></tr></thead>
+            <tbody><tr>
+              <td><pre class="code-pre">model = Sequential([
+  # 은닉층 32개, 활성화 함수 ReLU
+  Dense(32, activation='relu',
+        input_shape=(2,)),
+  Dense(16, activation='relu'),
+  # 출력층: 이진 분류 → 시그모이드
+  Dense(1, activation='sigmoid')
+])
+model.compile(
+  optimizer='adam',
+  loss='binary_crossentropy',
+  metrics=['accuracy'])
+model.fit(X, y, epochs=300)</pre></td>
+              <td><pre class="code-pre">model = Sequential([
+  # 3x3 필터 32개를 학습한다
+  Conv2D(32, (3, 3), activation='relu',
+         input_shape=(32, 32, 1)),
+  MaxPooling2D((2, 2)),   # 풀링
+  Conv2D(64, (3, 3), activation='relu'),
+  MaxPooling2D((2, 2)),
+  Flatten(),              # 한 줄로 펴기
+  Dense(64, activation='relu'),
+  # 10개 분류 → 소프트맥스
+  Dense(10, activation='softmax')
+])</pre></td>
+            </tr></tbody>
+          </table>
+        </div>
+        <p style="margin-top:12px"><span class="mono">Conv2D(32, (3, 3))</span>은 “3×3 필터 <b>32종류</b>를 학습하겠다”는 뜻입니다. 시뮬레이터 ③에서 우리가 손으로 넣은 9개 값이, 실제로는 이렇게 32벌씩 <b>학습되는 가중치</b>인 셈입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> 필터 하나가 만든 실생활의 변화</summary>
+      <div class="more-body">
+        <ul>
+          <li><b>의료 영상</b> — 안저 사진에서 당뇨망막병증을 찾아내는 CNN 모델이 안과 전문의와 비슷한 수준의 판별력을 보였습니다. 다만 최종 진단은 사람이 합니다.</li>
+          <li><b>농업</b> — 스마트폰으로 잎을 찍으면 병해충을 알려 주는 앱은 잎맥과 반점의 무늬를 필터가 찾아내는 원리입니다.</li>
+          <li><b>문화유산</b> — 훼손된 벽화나 오래된 필름을 복원할 때, 주변 무늬를 학습한 모델이 빈 부분을 채워 넣습니다.</li>
+          <li><b>접근성</b> — 사진의 내용을 문장으로 설명해 주는 기능은 CNN(보기)과 트랜스포머(말하기)를 이어 붙여 만듭니다.</li>
+        </ul>
+        <p>공통점은 모두 <b>사람이 규칙을 적지 않았다</b>는 것입니다. 규칙 대신 데이터를 주었을 뿐입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 2단원을 마무리하며</summary>
+      <div class="more-body">
+        <p>1차시에서 “규칙을 짜지 않고 가르친다”로 출발해, 데이터를 다듬고(2차시), 분류와 회귀와 군집을 배우고(3~5차시), 성능을 평가하는 법을 익힌 뒤(6차시), 이번 차시에서 <b>층을 쌓아 특징까지 스스로 배우는</b> 딥러닝에 이르렀습니다.</p>
+        <p>여기서 배운 <b>과대적합</b>과 <b>혼동 행렬</b>은 딥러닝에서도 그대로 쓰입니다. 시뮬레이터 ②에서 은닉층을 2층, 뉴런을 8개로 두고 나선 데이터를 아주 오래 학습시키면, 결정 경계가 점 하나하나를 감싸듯 구불구불해지는 것을 볼 수 있습니다. 훈련 데이터는 100% 맞히지만 새 점은 틀릴 가능성이 커진 상태 — 바로 딥러닝에서의 과대적합입니다. 단원 마무리에서 이 개념들을 한 장의 지도로 묶어 정리합니다.</p>
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 2, lesson: 7,
+  title: '층을 쌓아 깊어지다',
+  sub: '인공신경망과 딥러닝',
+  lead: '뉴런 하나를 흉내 낸 <b>퍼셉트론</b>에서 출발해, 직선 하나의 한계를 겪고, 층을 쌓아 그 한계를 넘습니다. 순전파와 역전파를 실제로 돌려 신경망을 <b>직접 학습시켜 보고</b>, 합성곱 필터가 이미지에서 무엇을 찾아내는지 눈으로 확인합니다.',
+  standards: ['12인기02-05', '12인기02-06'],
+  keywords: ['퍼셉트론', '가중치', '활성화 함수', '다층 퍼셉트론', '은닉층', '딥러닝', '합성곱'],
+  goals: [
+    '인공 뉴런의 구조를 <b>입력·가중치·편향·활성화 함수</b>로 나누어 설명할 수 있다.',
+    '퍼셉트론의 한계(XOR 문제)를 <b>선형 분리 가능성</b>으로 설명하고, 다층 퍼셉트론이 이를 해결하는 원리를 말할 수 있다.',
+    '순전파·손실 함수·역전파의 관계를 이해하고, 은닉층 수와 은닉 뉴런 수가 학습 결과에 주는 영향을 <b>실험으로</b> 확인할 수 있다.',
+    '합성곱 신경망이 필터로 특징을 추출하는 원리를 설명하고, 딥러닝의 활용 분야와 한계를 탐색할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 그림: 인공 뉴런 구조 ===================== -->
+<script>
+(function () {
+  const host = document.getElementById('neuronfig');
+  if (!host) return;
+  const NS = 'http://www.w3.org/2000/svg';
+  function e(t, a, txt) {
+    const n = document.createElementNS(NS, t);
+    for (const k in a) n.setAttribute(k, a[k]);
+    if (txt !== undefined) n.textContent = txt;
+    return n;
+  }
+  const S_NODE = 'fill:var(--surface-2);stroke:var(--line-strong);stroke-width:2';
+  const S_SUM = 'fill:var(--accent-soft);stroke:var(--accent);stroke-width:2.5';
+  const S_LINE = 'stroke:var(--ink-4);stroke-width:2';
+  const S_TXT = 'fill:var(--ink);font-size:16px;font-weight:700';
+  const S_SM = 'fill:var(--ink-3);font-size:13px;font-weight:700';
+
+  const svg = e('svg', {
+    viewBox: '0 0 660 270', class: 'svg-fig',
+    role: 'img', 'aria-label': '인공 뉴런의 구조: 입력에 가중치를 곱해 더하고 편향을 더한 뒤 활성화 함수를 거쳐 출력한다'
+  });
+
+  const ins = [{ y: 50, l: 'x₁', w: 'w₁' }, { y: 125, l: 'x₂', w: 'w₂' }, { y: 200, l: 'x₃', w: 'w₃' }];
+  const NX = 300, NY = 125, NR = 46;
+
+  // 입력 → 가중합 연결선
+  ins.forEach(o => {
+    svg.appendChild(e('line', { x1: 78, y1: o.y, x2: NX - NR - 4, y2: NY, style: S_LINE }));
+    const mx = (78 + NX - NR) / 2, my = (o.y + NY) / 2;
+    svg.appendChild(e('rect', { x: mx - 20, y: my - 15, width: 40, height: 22, rx: 6, style: 'fill:var(--warn-soft);stroke:var(--warn-line);stroke-width:1.5' }));
+    svg.appendChild(e('text', { x: mx, y: my + 1, 'text-anchor': 'middle', style: 'fill:var(--warn);font-size:13.5px;font-weight:800' }, o.w));
+  });
+
+  // 편향
+  svg.appendChild(e('line', { x1: 168, y1: 244, x2: NX - 22, y2: NY + NR - 6, style: 'stroke:var(--ink-4);stroke-width:2;stroke-dasharray:5 4' }));
+  svg.appendChild(e('circle', { cx: 148, cy: 244, r: 19, style: 'fill:var(--warn-soft);stroke:var(--warn-line);stroke-width:2' }));
+  svg.appendChild(e('text', { x: 148, y: 250, 'text-anchor': 'middle', style: 'fill:var(--warn);font-size:16px;font-weight:800' }, 'b'));
+  svg.appendChild(e('text', { x: 148, y: 218, 'text-anchor': 'middle', style: S_SM }, '편향'));
+
+  // 입력 노드
+  ins.forEach(o => {
+    svg.appendChild(e('circle', { cx: 56, cy: o.y, r: 22, style: S_NODE }));
+    svg.appendChild(e('text', { x: 56, y: o.y + 6, 'text-anchor': 'middle', style: S_TXT }, o.l));
+  });
+  svg.appendChild(e('text', { x: 56, y: 245, 'text-anchor': 'middle', style: S_SM }, '입력'));
+
+  // 가중합 노드
+  svg.appendChild(e('circle', { cx: NX, cy: NY, r: NR, style: S_SUM }));
+  svg.appendChild(e('text', { x: NX, y: NY - 2, 'text-anchor': 'middle', style: 'fill:var(--accent-ink);font-size:26px;font-weight:800' }, 'Σ'));
+  svg.appendChild(e('text', { x: NX, y: NY + 22, 'text-anchor': 'middle', style: 'fill:var(--accent-ink);font-size:12.5px;font-weight:700' }, '가중합 z'));
+
+  // 가중합 → 활성화 함수
+  svg.appendChild(e('line', { x1: NX + NR, y1: NY, x2: 424, y2: NY, style: S_LINE }));
+  svg.appendChild(e('polygon', { points: '424,125 412,119 412,131', style: 'fill:var(--ink-4)' }));
+  svg.appendChild(e('rect', { x: 426, y: 88, width: 104, height: 74, rx: 12, style: 'fill:var(--surface-2);stroke:var(--accent);stroke-width:2.5' }));
+  // 상자 안 계단 모양
+  svg.appendChild(e('path', { d: 'M440 148 L474 148 L474 104 L516 104', style: 'fill:none;stroke:var(--accent);stroke-width:3;stroke-linejoin:round' }));
+  svg.appendChild(e('text', { x: 478, y: 178, 'text-anchor': 'middle', style: S_SM }, '활성화 함수 f'));
+
+  // 활성화 함수 → 출력
+  svg.appendChild(e('line', { x1: 530, y1: NY, x2: 584, y2: NY, style: S_LINE }));
+  svg.appendChild(e('polygon', { points: '584,125 572,119 572,131', style: 'fill:var(--ink-4)' }));
+  svg.appendChild(e('circle', { cx: 610, cy: NY, r: 24, style: 'fill:var(--ok-soft);stroke:var(--ok-line);stroke-width:2.5' }));
+  svg.appendChild(e('text', { x: 610, y: NY + 6, 'text-anchor': 'middle', style: 'fill:var(--ok);font-size:17px;font-weight:800' }, 'y'));
+  svg.appendChild(e('text', { x: 610, y: 175, 'text-anchor': 'middle', style: S_SM }, '출력'));
+
+  host.appendChild(svg);
+  host.appendChild(AI.h('p', { class: 'fig-cap', html: '▲ 인공 뉴런(퍼셉트론) 하나의 구조 — 입력 × 가중치의 합 + 편향 → 활성화 함수 → 출력' }));
+})();
+</script>
+
+<!-- ===================== 그림: 활성화 함수 4종 ===================== -->
+<script>
+(function () {
+  const host = document.getElementById('actfig');
+  if (!host) return;
+
+  const FS = [
+    { name: '계단 함수', en: 'step', f: z => (z > 0 ? 1 : 0), lo: -0.25, hi: 1.25, desc: '0 또는 1만 내보낸다. 기울기가 어디서나 0이라 경사 하강으로 학습할 수 없다.' },
+    { name: '시그모이드', en: 'sigmoid', f: z => 1 / (1 + Math.exp(-z)), lo: -0.25, hi: 1.25, desc: '0~1 사이의 매끄러운 S 곡선. 확률처럼 해석해 이진 분류 출력층에 쓴다.' },
+    { name: '하이퍼볼릭 탄젠트', en: 'tanh', f: z => Math.tanh(z), lo: -1.25, hi: 1.25, desc: '−1~1 사이. 0을 중심으로 대칭이라 시그모이드보다 학습이 빠른 편이다.' },
+    { name: 'ReLU', en: 'relu', f: z => (z > 0 ? z : 0), lo: -0.7, hi: 3.1, desc: '음수는 0, 양수는 그대로. 계산이 빠르고 깊은 망에서 기울기가 잘 흐른다.' }
+  ];
+
+  const W = 186, H = 132, PAD = 16;
+  const items = [];
+
+  FS.forEach(fn => {
+    const cv = AI.sim.canvas(W, H);
+    const fig = AI.h('figure', {}, cv.wrap,
+      AI.h('figcaption', {}, AI.h('b', { text: fn.name + ' · ' + fn.en }), fn.desc));
+    host.appendChild(fig);
+    items.push({ cv, fn });
+  });
+
+  function drawOne(it) {
+    const C = AI.sim.colors(), ctx = it.cv.ctx, fn = it.fn;
+    it.cv.clear(C.bg);
+    const zx = z => PAD + (z + 3.4) / 6.8 * (W - PAD * 2);
+    const vy = v => (H - PAD) - (v - fn.lo) / (fn.hi - fn.lo) * (H - PAD * 2);
+
+    // 격자
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+    for (let z = -3; z <= 3; z++) { ctx.beginPath(); ctx.moveTo(zx(z), PAD - 6); ctx.lineTo(zx(z), H - PAD + 6); ctx.stroke(); }
+
+    // 축
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(PAD - 6, vy(0)); ctx.lineTo(W - PAD + 6, vy(0)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(zx(0), PAD - 6); ctx.lineTo(zx(0), H - PAD + 6); ctx.stroke();
+
+    // 함수 곡선
+    ctx.strokeStyle = C.a; ctx.lineWidth = 2.6; ctx.lineJoin = 'round';
+    ctx.beginPath();
+    let started = false, prevV = null;
+    for (let px = 0; px <= 240; px++) {
+      const z = -3.4 + px / 240 * 6.8;
+      const v = fn.f(z);
+      if (started && fn.en === 'step' && prevV !== null && Math.abs(v - prevV) > 0.5) {
+        ctx.stroke();                       // 계단은 끊어 그린다
+        ctx.beginPath(); started = false;
+      }
+      if (!started) { ctx.moveTo(zx(z), vy(v)); started = true; }
+      else ctx.lineTo(zx(z), vy(v));
+      prevV = v;
+    }
+    ctx.stroke();
+
+    // 눈금 값
+    ctx.fillStyle = C.ink3;
+    ctx.font = '600 10px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText('0', zx(0) + 4, vy(0) + 8);
+    ctx.textAlign = 'right';
+    ctx.fillText(fn.en === 'relu' ? '3' : '1', zx(0) - 4, vy(fn.en === 'relu' ? 3 : 1));
+    if (fn.lo < -0.5) ctx.fillText('-1', zx(0) - 4, vy(-1));
+  }
+
+  function drawAll() { items.forEach(drawOne); }
+  window.addEventListener('ai:redraw', drawAll);
+  drawAll();
+})();
+</script>
+
+<!-- ===================== 그림: 순전파와 역전파 ===================== -->
+<script>
+(function () {
+  const host = document.getElementById('mlpfig');
+  if (!host) return;
+  const NS = 'http://www.w3.org/2000/svg';
+  function e(t, a, txt) {
+    const n = document.createElementNS(NS, t);
+    for (const k in a) n.setAttribute(k, a[k]);
+    if (txt !== undefined) n.textContent = txt;
+    return n;
+  }
+  const svg = e('svg', {
+    viewBox: '0 0 660 320', class: 'svg-fig',
+    role: 'img', 'aria-label': '다층 퍼셉트론에서 순전파는 입력에서 출력으로, 역전파는 출력에서 입력으로 진행된다'
+  });
+
+  const cols = [
+    { x: 78, ys: [128, 186], label: '입력층', n: 2 },
+    { x: 250, ys: [70, 128, 186, 244], label: '은닉층 1', n: 4 },
+    { x: 424, ys: [70, 128, 186, 244], label: '은닉층 2', n: 4 },
+    { x: 582, ys: [157], label: '출력층', n: 1 }
+  ];
+
+  // 연결선 (모두 연결)
+  for (let c = 0; c < cols.length - 1; c++) {
+    cols[c].ys.forEach(y1 => cols[c + 1].ys.forEach(y2 => {
+      svg.appendChild(e('line', {
+        x1: cols[c].x + 18, y1: y1, x2: cols[c + 1].x - 18, y2: y2,
+        style: 'stroke:var(--line-strong);stroke-width:1.1'
+      }));
+    }));
+  }
+
+  // 노드 · 층 이름
+  cols.forEach((c, ci) => {
+    const fill = ci === 0 ? 'var(--surface-2)' : (ci === cols.length - 1 ? 'var(--ok-soft)' : 'var(--accent-soft)');
+    const line = ci === 0 ? 'var(--line-strong)' : (ci === cols.length - 1 ? 'var(--ok-line)' : 'var(--accent)');
+    c.ys.forEach(y => svg.appendChild(e('circle', { cx: c.x, cy: y, r: 18, style: 'fill:' + fill + ';stroke:' + line + ';stroke-width:2' })));
+    svg.appendChild(e('text', { x: c.x, y: 288, 'text-anchor': 'middle', style: 'fill:var(--ink-3);font-size:13px;font-weight:750' },
+      c.label + ' (' + c.n + ')'));
+  });
+
+  // 순전파 화살표 (위)
+  svg.appendChild(e('text', { x: 330, y: 18, 'text-anchor': 'middle', style: 'fill:var(--accent-ink);font-size:14px;font-weight:800' },
+    '순전파 — 입력에서 출력으로 계산해 예측값을 만든다'));
+  svg.appendChild(e('line', { x1: 78, y1: 36, x2: 574, y2: 36, style: 'stroke:var(--accent);stroke-width:2.5' }));
+  svg.appendChild(e('polygon', { points: '584,36 570,29 570,43', style: 'fill:var(--accent)' }));
+
+  // 역전파 화살표 (아래)
+  svg.appendChild(e('line', { x1: 582, y1: 308, x2: 88, y2: 308, style: 'stroke:var(--warn);stroke-width:2.5;stroke-dasharray:7 5' }));
+  svg.appendChild(e('polygon', { points: '78,308 92,301 92,315', style: 'fill:var(--warn)' }));
+  svg.appendChild(e('text', { x: 340, y: 306, 'text-anchor': 'middle', style: 'fill:var(--warn);font-size:14px;font-weight:800' },
+    '역전파 — 오차를 되돌려 가중치를 고친다'));
+
+  host.appendChild(svg);
+  host.appendChild(AI.h('p', { class: 'fig-cap', html: '▲ 은닉층이 2개인 다층 퍼셉트론 — 예측은 왼쪽에서 오른쪽으로, 학습은 오른쪽에서 왼쪽으로 흐른다' }));
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 1: 퍼셉트론 논리 게이트 ===================== -->
+<script>
+(function () {
+  const body = AI.sim.panel('#sim1', {
+    title: '퍼셉트론으로 논리 게이트 만들기',
+    tag: '선형 분리 체험',
+    desc: '입력이 2개인 퍼셉트론입니다. <b>w₁ · w₂ · b</b> 를 움직여 목표 게이트의 진리표 <b>네 줄을 모두 맞혀</b> 보세요. 오른쪽 그림의 직선이 바로 결정 경계 <span class="mono">w₁x₁ + w₂x₂ + b = 0</span> 입니다. AND · OR · NAND 를 성공한 다음, <b>XOR도 되는지</b> 꼭 시도해 보세요.'
+  });
+
+  const IN = [[0, 0], [0, 1], [1, 0], [1, 1]];
+  const GATES = { AND: [0, 0, 0, 1], OR: [0, 1, 1, 1], NAND: [1, 1, 1, 0], XOR: [0, 1, 1, 0] };
+  const SOLVE = { AND: [1, 1, -1.5], OR: [1, 1, -0.5], NAND: [-1, -1, 1.5] };
+
+  let gate = 'AND', w1 = 0.5, w2 = 0.5, b = -0.2;
+  let tries = 0, revealed = false, cleared = {};
+
+  const cv = AI.sim.canvas(300, 300);
+  const tbl = AI.h('div');
+  const verdict = AI.h('div', { class: 'box box-info', style: { margin: '13px 0 0' } });
+  const why = AI.h('div', { class: 'box box-warn', style: { display: 'none', margin: '13px 0 0' } });
+
+  const gateSeg = AI.ui.seg({
+    label: '목표 게이트',
+    options: [{ value: 'AND', label: 'AND' }, { value: 'OR', label: 'OR' }, { value: 'NAND', label: 'NAND' }, { value: 'XOR', label: 'XOR' }],
+    value: 'AND',
+    onChange(v) { gate = v; tries = 0; revealed = false; why.style.display = 'none'; render(); }
+  });
+
+  const sw1 = AI.ui.slider({ label: 'w₁ (x₁의 가중치)', min: -2, max: 2, step: 0.1, value: 0.5, format: v => AI.fmt(v, 1), onInput(v) { w1 = v; tries++; render(); } });
+  const sw2 = AI.ui.slider({ label: 'w₂ (x₂의 가중치)', min: -2, max: 2, step: 0.1, value: 0.5, format: v => AI.fmt(v, 1), onInput(v) { w2 = v; tries++; render(); } });
+  const sb = AI.ui.slider({ label: 'b (편향)', min: -2, max: 2, step: 0.1, value: -0.2, format: v => AI.fmt(v, 1), onInput(v) { b = v; tries++; render(); } });
+
+  const stats = AI.ui.stats([{ key: 'm', label: '맞힌 줄' }, { key: 'g', label: '목표 게이트' }]);
+
+  const left = AI.h('div', {},
+    AI.h('p', { class: 'mini-lab', text: '입력 공간과 결정 경계' }),
+    cv.wrap,
+    AI.ui.legend([
+      { color: 'var(--ok)', label: '목표가 1인 점' },
+      { color: 'var(--surface)', label: '목표가 0인 점' },
+      { color: 'var(--accent-soft)', label: '퍼셉트론이 1이라 판단하는 영역' }
+    ])
+  );
+  const right = AI.h('div', {},
+    AI.h('p', { class: 'mini-lab', text: '진리표 검산 — z = w₁x₁ + w₂x₂ + b, y = (z > 0 ? 1 : 0)' }),
+    tbl, stats.el
+  );
+  body.appendChild(AI.h('div', { class: 'sim-grid' }, left, right));
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    gateSeg.el, sw1.el, sw2.el, sb.el,
+    AI.ui.btn('💡 정답 가중치 보기', () => {
+      if (gate === 'XOR') {
+        revealed = true;
+        AI.toast('XOR에는 정답 가중치가 없습니다');
+        render();
+        return;
+      }
+      const s = SOLVE[gate];
+      sw1.set(s[0]); sw2.set(s[1]); sb.set(s[2]);
+    }, 'ghost'),
+    AI.ui.btn('↺ 초기값으로', () => { sw1.set(0.5); sw2.set(0.5); sb.set(-0.2); tries = 0; }, 'ghost')
+  ));
+  body.appendChild(verdict);
+  body.appendChild(why);
+
+  /* ---------- 진리표 ---------- */
+  function calc() {
+    const t = GATES[gate], rows = [];
+    let match = 0;
+    for (let i = 0; i < 4; i++) {
+      const z = w1 * IN[i][0] + w2 * IN[i][1] + b;
+      const y = z > 0 ? 1 : 0;
+      const ok = y === t[i];
+      if (ok) match++;
+      rows.push({ x1: IN[i][0], x2: IN[i][1], z: z, y: y, t: t[i], ok: ok });
+    }
+    return { rows, match };
+  }
+
+  function render() {
+    const r = calc();
+    let html = '<div class="table-wrap" style="margin:0"><table class="tb" style="min-width:0">' +
+      '<thead><tr><th>x₁</th><th>x₂</th><th>z</th><th>y</th><th>목표</th><th>판정</th></tr></thead><tbody>';
+    r.rows.forEach(o => {
+      html += '<tr><td class="num">' + o.x1 + '</td><td class="num">' + o.x2 + '</td>' +
+        '<td class="num">' + AI.fmt(o.z, 2) + '</td><td class="num"><b>' + o.y + '</b></td>' +
+        '<td class="num">' + o.t + '</td><td class="' + (o.ok ? 'good' : 'bad') + '">' + (o.ok ? '○ 일치' : '✕ 불일치') + '</td></tr>';
+    });
+    html += '</tbody></table></div>';
+    tbl.innerHTML = html;
+
+    stats.set('m', r.match + ' / 4');
+    stats.set('g', gate);
+
+    if (r.match === 4) {
+      cleared[gate] = true;
+      verdict.className = 'box box-ok';
+      verdict.innerHTML = '<div class="box-label">🎉 성공!</div><p><b>' + gate + '</b> 게이트를 퍼셉트론 하나로 완성했습니다. ' +
+        '가중치 <span class="mono">w₁ = ' + AI.fmt(w1, 1) + ', w₂ = ' + AI.fmt(w2, 1) + ', b = ' + AI.fmt(b, 1) + '</span> ' +
+        '— 직선 하나가 목표가 1인 점과 0인 점을 깔끔히 갈라 놓았습니다. 이런 문제를 <b>선형 분리가 가능하다</b>고 합니다.</p>';
+    } else {
+      verdict.className = 'box box-info';
+      let msg = '<div class="box-label">📊 현재 상태</div><p><b>' + r.match + ' / 4</b> 줄이 목표와 일치합니다. ';
+      if (gate === 'XOR') {
+        msg += '오른쪽 그림에서 <b>목표가 1인 두 점(초록)</b>과 <b>0인 두 점(흰색)</b>이 어떻게 놓여 있는지 보세요.</p>';
+        if (r.match >= 3) msg += '<p>3줄까지는 쉽게 되는데, 마지막 한 줄이 계속 어긋나지 않나요?</p>';
+      } else {
+        msg += '판정이 ✕인 줄의 <span class="mono">z</span> 값을 보고, 그 값의 부호를 바꾸려면 어느 슬라이더를 어느 쪽으로 움직여야 할지 생각해 보세요.</p>';
+      }
+      verdict.innerHTML = msg;
+    }
+
+    // XOR 해설 공개 조건
+    if (gate === 'XOR' && (revealed || tries >= 14)) {
+      why.style.display = '';
+      why.innerHTML = '<div class="box-label">⚠️ XOR는 왜 불가능한가</div>' +
+        '<p>퍼셉트론이 만들 수 있는 것은 <b>직선 하나</b>뿐입니다. 그리고 그 직선을 기준으로 한쪽은 모두 1, 다른 쪽은 모두 0이 됩니다.</p>' +
+        '<p>그런데 XOR에서 목표가 1인 점은 <span class="mono">(0,1)</span>과 <span class="mono">(1,0)</span>, 0인 점은 <span class="mono">(0,0)</span>과 <span class="mono">(1,1)</span>로 <b>대각선끼리 짝</b>을 이룹니다. 종이에 네 점을 찍고 직선을 그어 보면, 어떻게 그어도 같은 짝을 같은 편에 둘 수 없습니다. 그래서 최대 <b>3줄</b>까지만 맞습니다.</p>' +
+        '<p>해결책은 직선을 <b>두 개 이상</b> 쓰는 것, 즉 <b>은닉층을 두는 것</b>입니다. 다음 시뮬레이터에서 은닉 뉴런을 1개와 4개로 바꿔 가며 이 차이를 직접 확인해 봅시다.</p>';
+    } else if (gate !== 'XOR') {
+      why.style.display = 'none';
+    }
+
+    draw(r);
+  }
+
+  /* ---------- 그리기 ---------- */
+  const LO = -0.45, HI = 1.45;
+  const px = v => (v - LO) / (HI - LO) * 300;
+  const py = v => 300 - (v - LO) / (HI - LO) * 300;
+
+  function draw(r) {
+    const C = AI.sim.colors(), ctx = cv.ctx;
+    cv.clear(C.bg);
+
+    // 1이라 판단하는 영역 칠하기 (블록 단위로 실제 z를 계산)
+    const B = 5;
+    const onCol = C.dark ? '#1e2540' : '#e8ecfd';
+    for (let sy = 0; sy < 300; sy += B) {
+      for (let sx = 0; sx < 300; sx += B) {
+        const vx = LO + (sx + B / 2) / 300 * (HI - LO);
+        const vy = LO + (1 - (sy + B / 2) / 300) * (HI - LO);
+        if (w1 * vx + w2 * vy + b > 0) { ctx.fillStyle = onCol; ctx.fillRect(sx, sy, B, B); }
+      }
+    }
+
+    // 격자 · 축
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+    [0, 0.5, 1].forEach(v => {
+      ctx.beginPath(); ctx.moveTo(px(v), 0); ctx.lineTo(px(v), 300); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, py(v)); ctx.lineTo(300, py(v)); ctx.stroke();
+    });
+    ctx.strokeStyle = C.axis; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(0, py(0)); ctx.lineTo(300, py(0)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px(0), 0); ctx.lineTo(px(0), 300); ctx.stroke();
+
+    // 결정 경계 직선
+    if (Math.abs(w1) > 1e-9 || Math.abs(w2) > 1e-9) {
+      ctx.strokeStyle = C.d; ctx.lineWidth = 3;
+      ctx.beginPath();
+      if (Math.abs(w2) >= Math.abs(w1)) {
+        ctx.moveTo(px(LO), py(-(w1 * LO + b) / w2));
+        ctx.lineTo(px(HI), py(-(w1 * HI + b) / w2));
+      } else {
+        ctx.moveTo(px(-(w2 * LO + b) / w1), py(LO));
+        ctx.lineTo(px(-(w2 * HI + b) / w1), py(HI));
+      }
+      ctx.stroke();
+    }
+
+    // 네 점
+    const fam = getComputedStyle(document.body).fontFamily;
+    r.rows.forEach(o => {
+      const X = px(o.x1), Y = py(o.x2);
+      ctx.beginPath(); ctx.arc(X, Y, 16, 0, Math.PI * 2);
+      ctx.strokeStyle = o.ok ? C.ok : C.no; ctx.lineWidth = 3; ctx.stroke();
+
+      ctx.beginPath(); ctx.arc(X, Y, 11.5, 0, Math.PI * 2);
+      ctx.fillStyle = o.t === 1 ? C.ok : C.bg; ctx.fill();
+      ctx.strokeStyle = o.t === 1 ? C.ok : C.ink3; ctx.lineWidth = 2; ctx.stroke();
+
+      ctx.fillStyle = o.t === 1 ? (C.dark ? '#12151c' : '#ffffff') : C.ink;
+      ctx.font = '800 12px ' + fam;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(String(o.t), X, Y + 1);
+
+      ctx.fillStyle = C.ink3;
+      ctx.font = '650 11px ' + fam;
+      ctx.fillText('(' + o.x1 + ',' + o.x2 + ')', X, Y + (o.x2 === 1 ? 32 : -30));
+    });
+
+    // 축 이름
+    ctx.fillStyle = C.ink3; ctx.font = '700 12px ' + fam;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+    ctx.fillText('x₁', 294, py(0) - 5);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillText('x₂', px(0) + 6, 6);
+  }
+
+  window.addEventListener('ai:redraw', () => render());
+  render();
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 신경망 학습 플레이그라운드 ===================== -->
+<script>
+(function () {
+  const body = AI.sim.panel('#sim2', {
+    title: '신경망 학습 플레이그라운드',
+    tag: '순전파 · 역전파 직접 구현',
+    desc: '2입력 → 은닉층 → 1출력 다층 퍼셉트론을 <b>브라우저에서 실제로 학습</b>시킵니다. 순전파, 이진 교차 엔트로피 손실, 역전파, 경사 하강을 모두 직접 계산합니다. 왼쪽 배경색은 모델이 각 지점을 어느 쪽으로 판단하는지(결정 경계), 오른쪽은 에포크에 따른 손실과 정확도입니다.'
+  });
+
+  /* ---------------- 데이터 ---------------- */
+  function gauss(r) {
+    let u = 0, v = 0;
+    while (u === 0) u = r();
+    while (v === 0) v = r();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  function makeData(kind) {
+    const r = AI.sim.rng(20260807);
+    const pts = [];
+    const cl = v => AI.clamp(v, -1, 1);
+    if (kind === 'xor') {
+      let guard = 0;
+      while (pts.length < 120 && guard++ < 4000) {
+        const x = r() * 2 - 1, y = r() * 2 - 1;
+        if (Math.abs(x) < 0.1 || Math.abs(y) < 0.1) continue;
+        pts.push({ x: x, y: y, t: x * y > 0 ? 1 : 0 });
+      }
+    } else if (kind === 'circle') {
+      for (let i = 0; i < 120; i++) {
+        const inner = i % 2 === 0;
+        const rad = inner ? Math.sqrt(r()) * 0.44 : 0.64 + r() * 0.32;
+        const th = r() * Math.PI * 2;
+        pts.push({ x: cl(rad * Math.cos(th)), y: cl(rad * Math.sin(th)), t: inner ? 1 : 0 });
+      }
+    } else if (kind === 'blobs') {
+      for (let i = 0; i < 120; i++) {
+        const a = i % 2 === 0;
+        const cx = a ? -0.45 : 0.45, cy = a ? -0.42 : 0.45;
+        pts.push({ x: cl(cx + gauss(r) * 0.2), y: cl(cy + gauss(r) * 0.2), t: a ? 1 : 0 });
+      }
+    } else { // spiral
+      for (let i = 0; i < 60; i++) {
+        const u = i / 59;
+        const rad = 0.1 + u * 0.88;
+        for (let s = 0; s < 2; s++) {
+          const th = u * 12 + s * Math.PI + (r() - 0.5) * 0.24;
+          pts.push({ x: cl(rad * Math.cos(th)), y: cl(rad * Math.sin(th)), t: s });
+        }
+      }
+    }
+    return pts;
+  }
+
+  /* ---------------- 신경망 ---------------- */
+  function act(a, z) {
+    if (a === 'sigmoid') return 1 / (1 + Math.exp(-z));
+    if (a === 'tanh') return Math.tanh(z);
+    return z > 0 ? z : 0;               // relu
+  }
+  function dact(a, z, y) {
+    if (a === 'sigmoid') return y * (1 - y);
+    if (a === 'tanh') return 1 - y * y;
+    return z > 0 ? 1 : 0;
+  }
+
+  function makeNet(sizes, hidAct, seed) {
+    const r = AI.sim.rng(seed);
+    const layers = [];
+    for (let i = 1; i < sizes.length; i++) {
+      const m = sizes[i - 1], n = sizes[i];
+      const a = (i === sizes.length - 1) ? 'sigmoid' : hidAct;
+      const sc = (a === 'relu' ? Math.sqrt(2 / m) : Math.sqrt(1 / m)) * 1.7;
+      const W = [], bb = [];
+      for (let o = 0; o < n; o++) {
+        const row = [];
+        for (let j = 0; j < m; j++) row.push((r() * 2 - 1) * sc);
+        W.push(row);
+        bb.push(a === 'relu' ? 0.01 : 0);
+      }
+      layers.push({ m: m, n: n, W: W, b: bb, act: a });
+    }
+    return { layers: layers };
+  }
+
+  function predict(net, x, y) {
+    let a = [x, y];
+    for (const L of net.layers) {
+      const o = new Array(L.n);
+      for (let i = 0; i < L.n; i++) {
+        let s = L.b[i];
+        for (let j = 0; j < L.m; j++) s += L.W[i][j] * a[j];
+        o[i] = act(L.act, s);
+      }
+      a = o;
+    }
+    return a[0];
+  }
+
+  /** 전체 데이터로 1 에포크 학습 (배치 경사 하강 + 역전파) */
+  function trainEpoch(net, data, lr) {
+    const nL = net.layers.length;
+    const gW = net.layers.map(L => L.W.map(row => row.map(() => 0)));
+    const gb = net.layers.map(L => L.b.map(() => 0));
+    let loss = 0, correct = 0;
+
+    for (const p of data) {
+      /* --- 순전파 --- */
+      const acts = [[p.x, p.y]], zs = [];
+      for (let li = 0; li < nL; li++) {
+        const L = net.layers[li], prev = acts[li];
+        const z = new Array(L.n), o = new Array(L.n);
+        for (let i = 0; i < L.n; i++) {
+          let s = L.b[i];
+          for (let j = 0; j < L.m; j++) s += L.W[i][j] * prev[j];
+          z[i] = s; o[i] = act(L.act, s);
+        }
+        zs.push(z); acts.push(o);
+      }
+      const yh = AI.clamp(acts[nL][0], 1e-7, 1 - 1e-7);
+      loss += -(p.t * Math.log(yh) + (1 - p.t) * Math.log(1 - yh));
+      if ((yh >= 0.5 ? 1 : 0) === p.t) correct++;
+
+      /* --- 역전파 --- */
+      let delta = [yh - p.t];            // 시그모이드 + 이진 교차 엔트로피
+      for (let li = nL - 1; li >= 0; li--) {
+        const L = net.layers[li], prev = acts[li];
+        for (let i = 0; i < L.n; i++) {
+          gb[li][i] += delta[i];
+          for (let j = 0; j < L.m; j++) gW[li][i][j] += delta[i] * prev[j];
+        }
+        if (li > 0) {
+          const PL = net.layers[li - 1];
+          const nd = new Array(PL.n);
+          for (let j = 0; j < PL.n; j++) {
+            let s = 0;
+            for (let i = 0; i < L.n; i++) s += L.W[i][j] * delta[i];
+            nd[j] = s * dact(PL.act, zs[li - 1][j], acts[li][j]);
+          }
+          delta = nd;
+        }
+      }
+    }
+
+    /* --- 경사 하강 --- */
+    const N = data.length;
+    for (let li = 0; li < nL; li++) {
+      const L = net.layers[li];
+      for (let i = 0; i < L.n; i++) {
+        L.b[i] -= lr * gb[li][i] / N;
+        for (let j = 0; j < L.m; j++) L.W[i][j] -= lr * gW[li][i][j] / N;
+      }
+    }
+    return { loss: loss / N, acc: correct / N };
+  }
+
+  /* ---------------- 상태 ---------------- */
+  let dataset = 'xor', hid = 4, depth = 1, hidAct = 'tanh', lr = 0.6;
+  let data = makeData(dataset);
+  let seed = 12345;
+  let net = null, epoch = 0, hist = [], last = { loss: 0.7, acc: 0.5 };
+  const EP_PER_TICK = 25, MAX_EPOCH = 30000;
+
+  const cvL = AI.sim.canvas(300, 300);
+  const cvR = AI.sim.canvas(300, 300);
+  const stats = AI.ui.stats([{ key: 'e', label: '에포크' }, { key: 'l', label: '손실' }, { key: 'a', label: '정확도' }]);
+  const arch = AI.h('p', { class: 'mini-lab' });
+
+  function rebuild(keepData) {
+    if (!keepData) data = makeData(dataset);
+    const sizes = [2];
+    for (let i = 0; i < depth; i++) sizes.push(hid);
+    sizes.push(1);
+    net = makeNet(sizes, hidAct, seed);
+    epoch = 0; hist = []; last = { loss: 0.7, acc: 0.5 };
+    arch.textContent = '구조 ' + sizes.join(' → ') + ' · 은닉층 활성화 함수 ' + (hidAct === 'tanh' ? '하이퍼볼릭 탄젠트' : hidAct === 'relu' ? 'ReLU' : '시그모이드') +
+      ' · 출력층 시그모이드 · 학습률 ' + AI.fmt(lr, 2);
+    render();
+  }
+
+  /* ---------------- 그리기 ---------------- */
+  function hex2rgb(h) { return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; }
+  function mix(a, b, t) { return [Math.round(a[0] + (b[0] - a[0]) * t), Math.round(a[1] + (b[1] - a[1]) * t), Math.round(a[2] + (b[2] - a[2]) * t)]; }
+  const rgb = c => 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
+
+  const mx = v => (v + 1.12) / 2.24 * 300;
+  const my = v => 300 - (v + 1.12) / 2.24 * 300;
+
+  function drawBoundary() {
+    const C = AI.sim.colors(), ctx = cvL.ctx;
+    cvL.clear(C.bg);
+    const cBg = hex2rgb(C.bg), c1 = hex2rgb(C.a), c0 = hex2rgb(C.c);
+    const B = 6;
+    for (let sy = 0; sy < 300; sy += B) {
+      for (let sx = 0; sx < 300; sx += B) {
+        const vx = (sx + B / 2) / 300 * 2.24 - 1.12;
+        const vy = (1 - (sy + B / 2) / 300) * 2.24 - 1.12;
+        const p = predict(net, vx, vy);
+        const t = isFinite(p) ? p : 0.5;
+        const col = t >= 0.5 ? mix(cBg, c1, (t - 0.5) * 2 * 0.62) : mix(cBg, c0, (0.5 - t) * 2 * 0.62);
+        ctx.fillStyle = rgb(col);
+        ctx.fillRect(sx, sy, B, B);
+      }
+    }
+    // 축
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(mx(0), 0); ctx.lineTo(mx(0), 300); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, my(0)); ctx.lineTo(300, my(0)); ctx.stroke();
+    // 데이터 점
+    data.forEach(p => {
+      ctx.beginPath(); ctx.arc(mx(p.x), my(p.y), 4.6, 0, Math.PI * 2);
+      ctx.fillStyle = p.t === 1 ? C.a : C.c; ctx.fill();
+      ctx.strokeStyle = C.bg; ctx.lineWidth = 1.4; ctx.stroke();
+    });
+  }
+
+  function drawCurves() {
+    const C = AI.sim.colors(), ctx = cvR.ctx, fam = getComputedStyle(document.body).fontFamily;
+    cvR.clear(C.bg);
+
+    function plot(title, y0, y1, vals, vmax, col) {
+      ctx.fillStyle = C.ink3; ctx.font = '700 11.5px ' + fam;
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.fillText(title, 8, y0 - 6);
+      ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
+      for (let k = 0; k <= 4; k++) {
+        const yy = y0 + (y1 - y0) * k / 4;
+        ctx.beginPath(); ctx.moveTo(34, yy); ctx.lineTo(292, yy); ctx.stroke();
+      }
+      ctx.fillStyle = C.ink3; ctx.font = '600 10px ' + fam;
+      ctx.textAlign = 'right';
+      ctx.fillText(AI.fmt(vmax, 2), 30, y0 + 4);
+      ctx.fillText('0', 30, y1 + 4);
+      if (vals.length < 2) {
+        ctx.textAlign = 'center'; ctx.fillStyle = C.ink3; ctx.font = '600 11px ' + fam;
+        ctx.fillText('학습을 시작하면 곡선이 그려집니다', 163, (y0 + y1) / 2);
+        return;
+      }
+      ctx.strokeStyle = col; ctx.lineWidth = 2.2; ctx.lineJoin = 'round';
+      ctx.beginPath();
+      vals.forEach((v, i) => {
+        const X = 34 + i / (vals.length - 1) * 258;
+        const Y = y1 - AI.clamp(v / vmax, 0, 1) * (y1 - y0);
+        i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y);
+      });
+      ctx.stroke();
+    }
+
+    const losses = hist.map(o => o.loss);
+    const lmax = Math.max(0.8, losses.length ? Math.max.apply(null, losses) : 0.8);
+    plot('손실 (이진 교차 엔트로피) — 낮을수록 좋다', 30, 150, losses, lmax, C.no);
+    plot('정확도 — 높을수록 좋다', 196, 286, hist.map(o => o.acc), 1, C.ok);
+
+    ctx.fillStyle = C.ink3; ctx.font = '600 10px ' + fam;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+    ctx.fillText(epoch + ' 에포크', 292, 288);
+  }
+
+  function render() {
+    drawBoundary(); drawCurves();
+    stats.set('e', epoch);
+    stats.set('l', isFinite(last.loss) ? AI.fmt(last.loss, 4) : '발산');
+    stats.set('a', Math.round(last.acc * 100) + '%');
+  }
+
+  /* ---------------- 루프 ---------------- */
+  const loop = AI.sim.loop({
+    fps: 20,
+    step() {
+      for (let k = 0; k < EP_PER_TICK; k++) {
+        last = trainEpoch(net, data, lr);
+        epoch++;
+        if (!isFinite(last.loss)) break;
+      }
+      hist.push({ loss: isFinite(last.loss) ? last.loss : 0, acc: last.acc });
+      if (hist.length > 700) hist.shift();
+      render();
+      if (!isFinite(last.loss)) {
+        AI.toast('손실이 발산했습니다 — 학습률을 낮추고 초기화해 보세요');
+        return false;
+      }
+      if (epoch >= MAX_EPOCH) { AI.toast('최대 ' + MAX_EPOCH + ' 에포크에 도달했습니다'); return false; }
+      return true;
+    },
+    onState(playing) { playBtn.textContent = playing ? '⏸ 학습 멈춤' : '▶ 학습 시작'; }
+  });
+
+  const playBtn = AI.ui.btn('▶ 학습 시작', () => loop.toggle(), 'primary');
+
+  const dsSeg = AI.ui.seg({
+    label: '데이터셋',
+    options: [{ value: 'xor', label: 'XOR' }, { value: 'circle', label: '원형' }, { value: 'blobs', label: '두 덩어리' }, { value: 'spiral', label: '나선' }],
+    value: 'xor',
+    onChange(v) { loop.pause(); dataset = v; rebuild(false); }
+  });
+  const actSeg = AI.ui.seg({
+    label: '은닉층 활성화 함수',
+    options: [{ value: 'sigmoid', label: '시그모이드' }, { value: 'tanh', label: 'tanh' }, { value: 'relu', label: 'ReLU' }],
+    value: 'tanh',
+    onChange(v) { loop.pause(); hidAct = v; rebuild(true); }
+  });
+  const hidS = AI.ui.slider({
+    label: '은닉 뉴런 수', min: 1, max: 8, step: 1, value: 4, unit: '개',
+    onInput(v) { loop.pause(); hid = v; rebuild(true); }
+  });
+  const depS = AI.ui.slider({
+    label: '은닉층 수', min: 1, max: 2, step: 1, value: 1, unit: '층',
+    onInput(v) { loop.pause(); depth = v; rebuild(true); }
+  });
+  const lrS = AI.ui.slider({
+    label: '학습률', min: 0.05, max: 2, step: 0.05, value: 0.6, format: v => AI.fmt(v, 2),
+    onInput(v) { lr = v; arch.textContent = arch.textContent.replace(/학습률 [\d.]+$/, '학습률 ' + AI.fmt(v, 2)); }
+  });
+
+  body.appendChild(arch);
+  body.appendChild(AI.h('div', { class: 'sim-grid' },
+    AI.h('div', {}, AI.h('p', { class: 'mini-lab', text: '결정 경계와 데이터' }), cvL.wrap,
+      AI.ui.legend([
+        { color: 'var(--accent)', label: '정답이 1인 점' },
+        { color: 'var(--warn)', label: '정답이 0인 점' },
+        { color: 'var(--accent-soft)', label: '모델이 1이라 판단' }
+      ])),
+    AI.h('div', {}, AI.h('p', { class: 'mini-lab', text: '학습 곡선' }), cvR.wrap)
+  ));
+  body.appendChild(stats.el);
+  body.appendChild(AI.h('div', { class: 'sim-controls' }, dsSeg.el, actSeg.el));
+  body.appendChild(AI.h('div', { class: 'sim-controls' }, hidS.el, depS.el, lrS.el));
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    playBtn,
+    AI.ui.btn('⏭ ' + EP_PER_TICK + ' 에포크', () => loop.step()),
+    AI.ui.btn('↺ 초기화', () => { loop.pause(); seed = (seed * 1103515245 + 12345) % 2147483647; rebuild(true); }, 'ghost')
+  ));
+
+  body.appendChild(AI.el(
+    '<div class="box box-think" style="margin:16px 0 0">' +
+    '<div class="box-label">🔬 이 두 실험은 꼭 해 보세요</div>' +
+    '<p><b>실험 1 — XOR와 은닉 뉴런 수.</b> 데이터셋 <b>XOR</b>, 은닉층 1층으로 두고 <b>은닉 뉴런 1개</b>로 학습해 보세요. 손실이 어느 값 아래로 내려가지 않고, 결정 경계가 <b>직선 하나</b>에 머무릅니다(정확도 약 50~75%). 이제 뉴런을 <b>3~4개</b>로 올리고 초기화한 뒤 다시 학습하면 경계가 <b>십자 모양</b>으로 꺾이며 정확도가 100%에 가까워집니다. 은닉 뉴런 하나가 직선 하나를 담당한다는 것을 눈으로 확인할 수 있습니다.</p>' +
+    '<p><b>실험 2 — 나선과 층의 깊이.</b> 데이터셋을 <b>나선</b>으로 바꾸면 은닉층 1층에 뉴런을 8개까지 늘려도 정확도가 <b>50%대</b>에 머무릅니다. 이제 은닉층을 <b>2층</b>으로 늘려 보세요(구조 2 → 8 → 8 → 1). 같은 뉴런 수인데도 경계가 안쪽까지 감겨 들어가며 정확도가 크게 오릅니다. <b>뉴런을 늘리는 것</b>과 <b>층을 늘리는 것</b>의 효과가 어떻게 다른지 비교해 기록해 봅시다.</p>' +
+    '<p style="color:var(--ink-3);font-size:14px">💡 나선은 어려운 문제라서, 같은 설정이어도 <b>가중치 초기값에 따라</b> 결과가 달라집니다. 한 번 실패했다고 결론 내리지 말고 <b>초기화</b>를 눌러 두세 번 다시 학습시켜 보세요. 실제 딥러닝 연구도 이렇게 여러 번 돌려 봅니다.</p>' +
+    '<p style="color:var(--ink-3);font-size:14px">💡 학습률을 1.5 이상으로 크게 올리면 손실 곡선이 크게 튀거나 학습이 오히려 실패합니다. 4차시에서 배운 “보폭이 너무 크면 골짜기를 뛰어넘는다”가 그대로 나타납니다.</p>' +
+    '</div>'
+  ));
+
+  window.addEventListener('ai:redraw', render);
+  rebuild(false);
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 3: 합성곱 필터 체험 ===================== -->
+<script>
+(function () {
+  const body = AI.sim.panel('#sim3', {
+    title: '합성곱 필터 체험 — 필터는 무엇을 찾아내는가',
+    tag: '3×3 커널 · 실제 계산',
+    desc: '왼쪽 32×32 흑백 이미지에 <b>마우스로 직접 그려</b> 보세요(픽셀값 0 = 검정, 1 = 흰색). 아래 3×3 커널의 9개 값을 바꾸면 <b>실제로 합성곱을 계산</b>해 오른쪽에 결과(특성 맵)를 그립니다. 이미지 위에 마우스를 올리면 그 자리의 계산 과정이 숫자로 나타납니다.'
+  });
+
+  const N = 32, CELL = 8, SZ = N * CELL;
+  const img = new Float64Array(N * N);
+  const out = new Float64Array(N * N);
+  let kernel = [0, 0, 0, 0, 1, 0, 0, 0, 0];
+  let show = 'abs', tool = 'draw', brush = 1;
+  let hover = null, painting = false;
+
+  const PRESETS = [
+    { key: 'id', label: '원본(항등)', show: 'raw', k: [0, 0, 0, 0, 1, 0, 0, 0, 0], why: '가운데 값만 1이므로 자기 픽셀만 그대로 통과합니다. <b>아무 특징도 뽑지 않는 필터</b>이며, 다른 필터의 결과를 비교하는 기준이 됩니다. 결과가 입력과 완전히 같은지 확인해 보세요.' },
+    { key: 'sx', label: '세로 경계 검출', show: 'abs', k: [-1, 0, 1, -2, 0, 2, -1, 0, 1], why: '왼쪽 열은 음수, 오른쪽 열은 양수입니다. 좌우의 밝기가 <b>다를 때만</b> 큰 값이 나오므로 <b>세로로 뻗은 경계</b>가 밝게 드러납니다. 가로로 뻗은 경계에서는 좌우 밝기가 같아 합이 0이 되어 사라집니다. (소벨 필터)' },
+    { key: 'sy', label: '가로 경계 검출', show: 'abs', k: [-1, -2, -1, 0, 0, 0, 1, 2, 1], why: '위쪽 행은 음수, 아래쪽 행은 양수입니다. 위아래 밝기가 다른 곳, 즉 <b>가로로 뻗은 경계</b>를 찾아냅니다. 세로 경계 필터와 짝을 이루어 쓰면 모든 방향의 윤곽을 얻을 수 있습니다.' },
+    { key: 'bl', label: '블러(평균)', show: 'raw', k: [1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9], why: '9개 픽셀의 <b>평균</b>을 냅니다. 9개 값의 합이 1이라 전체 밝기는 그대로이고, 경계만 흐려집니다. 특징을 뽑는 필터가 아니라 <b>잡음을 줄이는</b> 필터입니다.' },
+    { key: 'sh', label: '샤픈(선명하게)', show: 'raw', k: [0, -1, 0, -1, 5, -1, 0, -1, 0], why: '자기 픽셀은 5배로 키우고 이웃 4개를 깎아냅니다. 주변보다 밝은 곳은 더 밝게, 어두운 곳은 더 어둡게 되어 <b>경계가 강조</b>됩니다. 9개 값의 합이 1이라 평평한 부분의 밝기는 유지됩니다.' },
+    { key: 'lp', label: '윤곽(라플라시안)', show: 'abs', k: [0, 1, 0, 1, -4, 1, 0, 1, 0], why: '이웃 4개의 합에서 자기 값의 4배를 뺍니다. 주변과 밝기가 같은 평평한 곳은 합이 0이 되고, <b>밝기가 급히 변하는 곳(윤곽)만</b> 남습니다. 방향에 관계없이 윤곽을 찾아냅니다.' }
+  ];
+
+  const inCv = AI.sim.canvas(SZ, SZ);
+  const outCv = AI.sim.canvas(SZ, SZ);
+  const calc = AI.h('div', { class: 'calc-box', text: '왼쪽 이미지 위에 마우스를 올려 보세요. 그 자리의 3×3 이웃과 커널을 곱해 더하는 과정을 보여 줍니다.' });
+  const explain = AI.h('div', { class: 'box box-info', style: { margin: '13px 0 0' } });
+
+  /* ---------- 그림 예시 ---------- */
+  function clearImg() { for (let i = 0; i < N * N; i++) img[i] = 0; }
+  function set(x, y, v) { if (x >= 0 && y >= 0 && x < N && y < N) img[y * N + x] = v; }
+
+  function presetSquare() {
+    clearImg();
+    for (let y = 7; y <= 24; y++) for (let x = 5; x <= 15; x++) set(x, y, 1);
+    for (let k = 0; k <= 17; k++) { set(19 + Math.round(k * 0.45), 7 + k, 1); set(20 + Math.round(k * 0.45), 7 + k, 1); }
+  }
+  function presetCircle() {
+    clearImg();
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      const d = Math.sqrt((x - 15.5) * (x - 15.5) + (y - 15.5) * (y - 15.5));
+      if (d < 10.5) set(x, y, 1);
+    }
+  }
+  function presetLetter() {
+    clearImg();
+    // 'ㄱ' 모양 + 점 — 가로선, 세로선, 작은 덩어리가 함께 있다
+    for (let x = 6; x <= 25; x++) { set(x, 6, 1); set(x, 7, 1); }
+    for (let y = 6; y <= 25; y++) { set(24, y, 1); set(25, y, 1); }
+    for (let y = 18; y <= 23; y++) for (let x = 7; x <= 13; x++) set(x, y, 1);
+  }
+
+  /* ---------- 합성곱 ---------- */
+  function convolve() {
+    for (let y = 0; y < N; y++) {
+      for (let x = 0; x < N; x++) {
+        let s = 0;
+        for (let ky = -1; ky <= 1; ky++) {
+          for (let kx = -1; kx <= 1; kx++) {
+            const nx = x + kx, ny = y + ky;
+            const v = (nx < 0 || ny < 0 || nx >= N || ny >= N) ? 0 : img[ny * N + nx];
+            s += v * kernel[(ky + 1) * 3 + (kx + 1)];
+          }
+        }
+        out[y * N + x] = s;
+      }
+    }
+  }
+
+  /* ---------- 그리기 ---------- */
+  function drawGrid(cv, data, isOut) {
+    const C = AI.sim.colors(), ctx = cv.ctx;
+    cv.clear('#0d0f14');
+    for (let y = 0; y < N; y++) {
+      for (let x = 0; x < N; x++) {
+        let v = data[y * N + x];
+        if (isOut && show === 'abs') v = Math.abs(v);
+        const g = Math.round(AI.clamp(v, 0, 1) * 255);
+        ctx.fillStyle = 'rgb(' + g + ',' + g + ',' + g + ')';
+        ctx.fillRect(x * CELL, y * CELL, CELL, CELL);
+      }
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,.08)'; ctx.lineWidth = 1;
+    for (let i = 0; i <= N; i++) {
+      ctx.beginPath(); ctx.moveTo(i * CELL + .5, 0); ctx.lineTo(i * CELL + .5, SZ); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i * CELL + .5); ctx.lineTo(SZ, i * CELL + .5); ctx.stroke();
+    }
+    if (hover) {
+      ctx.strokeStyle = C.warn; ctx.lineWidth = 2.5;
+      if (isOut) ctx.strokeRect(hover.x * CELL - 1, hover.y * CELL - 1, CELL + 2, CELL + 2);
+      else ctx.strokeRect((hover.x - 1) * CELL - 1, (hover.y - 1) * CELL - 1, CELL * 3 + 2, CELL * 3 + 2);
+    }
+  }
+
+  function pad(v) { return (v >= 0 ? ' ' : '') + AI.fmt(v, 2); }
+
+  function updateCalc() {
+    if (!hover) {
+      calc.textContent = '왼쪽 이미지 위에 마우스를 올려 보세요. 그 자리의 3×3 이웃과 커널을 곱해 더하는 과정을 보여 줍니다.';
+      return;
+    }
+    const x = hover.x, y = hover.y;
+    const nb = [], pr = [];
+    let sum = 0;
+    for (let ky = -1; ky <= 1; ky++) {
+      for (let kx = -1; kx <= 1; kx++) {
+        const nx = x + kx, ny = y + ky;
+        const v = (nx < 0 || ny < 0 || nx >= N || ny >= N) ? 0 : img[ny * N + nx];
+        const k = kernel[(ky + 1) * 3 + (kx + 1)];
+        nb.push(v); pr.push(v * k); sum += v * k;
+      }
+    }
+    function row3(arr, i) { return pad(arr[i * 3]) + '  ' + pad(arr[i * 3 + 1]) + '  ' + pad(arr[i * 3 + 2]); }
+    let s = '위치 (' + x + ', ' + y + ')\n';
+    s += '  입력 3×3            커널 3×3            곱한 값\n';
+    for (let i = 0; i < 3; i++) {
+      s += '  ' + row3(nb, i) + '     ' + row3(kernel, i) + '     ' + row3(pr, i) + '\n';
+    }
+    const shown = show === 'abs' ? Math.abs(sum) : sum;
+    s += '\n합 = ' + AI.fmt(sum, 3) + '  →  출력 픽셀 밝기 ' + AI.fmt(AI.clamp(shown, 0, 1), 2) +
+      (shown > 1 ? '  (1을 넘어 흰색으로 자름)' : (sum < 0 && show === 'raw' ? '  (음수라 검정)' : ''));
+    calc.textContent = s;
+  }
+
+  function renderAll() {
+    convolve();
+    drawGrid(inCv, img, false);
+    drawGrid(outCv, out, true);
+    updateCalc();
+  }
+
+  /* ---------- 커널 입력칸 ---------- */
+  const kInputs = [];
+  const kGrid = AI.h('div', { class: 'kernel-grid' });
+  for (let i = 0; i < 9; i++) {
+    const inp = AI.h('input', { type: 'number', step: '0.1', value: String(kernel[i]), 'aria-label': '커널 ' + (i + 1) + '번 값' });
+    inp.addEventListener('input', () => {
+      const v = parseFloat(inp.value);
+      kernel[i] = isFinite(v) ? v : 0;
+      renderAll();
+    });
+    kInputs.push(inp);
+    kGrid.appendChild(inp);
+  }
+  function setKernel(k, label, whyHtml) {
+    kernel = k.slice();
+    kInputs.forEach((inp, i) => { inp.value = String(Math.round(kernel[i] * 1000) / 1000); });
+    if (label) {
+      explain.innerHTML = '<div class="box-label">🔎 ' + label + ' — 이 필터가 찾아내는 것</div><p>' + whyHtml + '</p>' +
+        '<p style="color:var(--ink-3);font-size:14px">CNN에서는 이 9개 값을 사람이 정하지 않고 <b>역전파로 학습</b>합니다. 학습이 끝난 1층 필터들은 실제로 이런 모양의 검출기가 됩니다.</p>';
+    }
+    renderAll();
+  }
+
+  const presetBtns = AI.h('div', { class: 'sim-controls', style: { margin: '10px 0 0' } });
+  PRESETS.forEach(p => presetBtns.appendChild(AI.ui.btn(p.label, () => setKernel(p.k, p.label, p.why), 'small')));
+
+  const showSeg = AI.ui.seg({
+    label: '결과 표시 방식',
+    options: [{ value: 'abs', label: '절댓값' }, { value: 'raw', label: '원본값' }],
+    value: 'abs',
+    onChange(v) { show = v; renderAll(); }
+  });
+  const toolSeg = AI.ui.seg({
+    label: '붓',
+    options: [{ value: 'draw', label: '✏️ 그리기' }, { value: 'erase', label: '🧽 지우기' }],
+    value: 'draw',
+    onChange(v) { tool = v; }
+  });
+  const brushS = AI.ui.slider({ label: '붓 굵기', min: 0, max: 2, step: 1, value: 1, format: v => (v * 2 + 1) + '칸', onInput(v) { brush = v; } });
+
+  /* ---------- 레이아웃 ---------- */
+  body.appendChild(AI.h('div', { class: 'sim-grid' },
+    AI.h('div', {}, AI.h('p', { class: 'mini-lab', text: '① 입력 이미지 (32 × 32, 마우스로 그리기)' }), inCv.wrap),
+    AI.h('div', {}, AI.h('p', { class: 'mini-lab', text: '③ 출력 특성 맵 (합성곱 결과)' }), outCv.wrap)
+  ));
+
+  body.appendChild(AI.h('div', { style: { marginTop: '14px' } },
+    AI.h('p', { class: 'mini-lab', text: '② 3 × 3 커널 — 값을 직접 바꿔 보세요' }),
+    AI.h('div', { style: { display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-start' } },
+      kGrid,
+      AI.h('div', { style: { flex: '1 1 240px', minWidth: '220px' } },
+        AI.h('p', { style: { fontSize: '13.5px', color: 'var(--ink-3)', margin: '0 0 8px', lineHeight: '1.65' }, html: '아래 <b>프리셋</b>을 눌러 잘 알려진 필터를 불러올 수 있습니다. 필터를 바꾸면 즉시 다시 계산됩니다.' }),
+        showSeg.el
+      )
+    )
+  ));
+  body.appendChild(presetBtns);
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    toolSeg.el, brushS.el,
+    AI.ui.btn('⬛ 예시 ①', presetSquareGo, 'ghost'),
+    AI.ui.btn('⚪ 예시 ②', presetCircleGo, 'ghost'),
+    AI.ui.btn('ㄱ 예시 ③', presetLetterGo, 'ghost'),
+    AI.ui.btn('🗑 모두 지우기', () => { clearImg(); renderAll(); }, 'ghost'),
+    AI.ui.btn('⟳ 다시 계산(적용)', renderAll)
+  ));
+  function presetSquareGo() { presetSquare(); renderAll(); }
+  function presetCircleGo() { presetCircle(); renderAll(); }
+  function presetLetterGo() { presetLetter(); renderAll(); }
+
+  body.appendChild(calc);
+  body.appendChild(explain);
+  body.appendChild(AI.el(
+    '<div class="box box-think" style="margin:13px 0 0">' +
+    '<div class="box-label">🔬 이렇게 관찰해 보세요</div>' +
+    '<p><b>①</b> 예시 ③(ㄱ 모양)을 불러온 뒤 <b>세로 경계 검출</b>과 <b>가로 경계 검출</b>을 번갈아 눌러 보세요. 같은 그림인데 <b>서로 다른 선만</b> 남는 것을 확인할 수 있습니다.</p>' +
+    '<p><b>②</b> 표시 방식을 <b>원본값</b>으로 바꾸면 음수가 검정으로 잘려 경계의 <b>한쪽만</b> 보입니다. 절댓값으로 바꾸면 양쪽이 모두 보입니다. 실제 CNN은 여기에 ReLU를 붙여 <b>음수를 0으로 만듭니다</b>.</p>' +
+    '<p><b>③</b> 이미지의 평평한 부분(전부 흰색이거나 전부 검정인 곳)에 마우스를 올려 계산 과정을 보세요. 경계 검출 필터에서는 <b>합이 0</b>이 됩니다. 필터가 “변화”에만 반응한다는 뜻입니다.</p>' +
+    '</div>'
+  ));
+
+  /* ---------- 마우스 입력 ---------- */
+  function cellOf(ev) {
+    const p = inCv.pos(ev);
+    return { x: Math.floor(p.x / CELL), y: Math.floor(p.y / CELL) };
+  }
+  function paint(c) {
+    const v = tool === 'draw' ? 1 : 0;
+    for (let dy = -brush; dy <= brush; dy++) for (let dx = -brush; dx <= brush; dx++) set(c.x + dx, c.y + dy, v);
+  }
+  function onMove(ev) {
+    const c = cellOf(ev);
+    if (c.x < 0 || c.y < 0 || c.x >= N || c.y >= N) { hover = null; renderAll(); return; }
+    hover = c;
+    if (painting) paint(c);
+    renderAll();
+  }
+  inCv.canvas.style.cursor = 'crosshair';
+  inCv.canvas.addEventListener('mousedown', ev => { painting = true; const c = cellOf(ev); hover = c; paint(c); renderAll(); });
+  inCv.canvas.addEventListener('mousemove', onMove);
+  inCv.canvas.addEventListener('mouseleave', () => { hover = null; renderAll(); });
+  window.addEventListener('mouseup', () => { painting = false; });
+  inCv.canvas.addEventListener('touchstart', ev => { ev.preventDefault(); painting = true; const c = cellOf(ev); hover = c; paint(c); renderAll(); });
+  inCv.canvas.addEventListener('touchmove', ev => { ev.preventDefault(); onMove(ev); });
+  inCv.canvas.addEventListener('touchend', () => { painting = false; });
+
+  window.addEventListener('ai:redraw', renderAll);
+
+  presetLetter();
+  setKernel(PRESETS[1].k, PRESETS[1].label, PRESETS[1].why);
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a2l7-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['가중합', '활성화 함수', 'XOR', '은닉층', '역전파', 'ReLU', '합성곱', '풀링'],
+  sents: [
+    { text: '인공 뉴런은 입력에 가중치를 곱해 더하고 편향을 더한 {0}을(를) 구한 뒤, 그 값을 {1}에 넣어 출력을 만든다.', answers: [['가중합'], ['활성화 함수']] },
+    { text: '퍼셉트론 하나로는 두 입력이 서로 다를 때만 1이 되는 {0} 문제를 해결할 수 없다.', answers: [['XOR']] },
+    { text: '입력층과 출력층 사이에 {0}을(를) 두면 여러 직선을 조합할 수 있어 비선형 분류가 가능해진다.', answers: [['은닉층']] },
+    { text: '출력에서 구한 오차를 뒤에서 앞으로 되돌려 각 가중치의 기울기를 구하는 방법을 {0}(이)라고 한다.', answers: [['역전파']] },
+    { text: '0보다 작으면 0, 크면 그대로 내보내 오늘날 은닉층에 가장 널리 쓰이는 활성화 함수는 {0}이다.', answers: [['ReLU']] },
+    { text: '합성곱 신경망은 {0} 층에서 필터로 특징을 뽑고, {1} 층에서 대푯값만 남겨 크기를 줄인다.', answers: [['합성곱'], ['풀링']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '7차시 확인 문제',
+  items: [
+    {
+      type: 'mc',
+      q: '인공 뉴런(퍼셉트론)이 출력을 만드는 과정을 <b>옳게</b> 설명한 것은?',
+      choices: [
+        '입력에 편향을 곱한 뒤 가중치를 더해 활성화 함수에 넣는다',
+        '입력에 가중치를 곱해 모두 더하고 편향을 더한 뒤, 그 값을 활성화 함수에 넣는다',
+        '입력을 먼저 활성화 함수에 넣고, 그 결과에 가중치를 곱한다',
+        '입력들의 평균을 구해 그대로 출력한다'
+      ],
+      answer: 1,
+      why: '순서가 핵심입니다. <b>가중합</b> <span class="mono">z = w₁x₁ + w₂x₂ + ⋯ + b</span>를 먼저 구하고, 그 <span class="mono">z</span>를 활성화 함수에 넣어 <span class="mono">y = f(z)</span>를 얻습니다. 가중치는 <b>곱하는</b> 값(중요도)이고 편향은 <b>더하는</b> 값(기준선 이동)이라는 점도 구별해야 합니다.'
+    },
+    {
+      type: 'ox',
+      q: '가중치와 편향을 잘 조절하면 퍼셉트론 하나로도 XOR 게이트를 만들 수 있다.',
+      answer: false,
+      why: '만들 수 없습니다. 퍼셉트론 하나가 만드는 결정 경계는 <b>직선(평면) 하나</b>입니다. XOR에서 정답 1인 점 <span class="mono">(0,1), (1,0)</span>과 0인 점 <span class="mono">(0,0), (1,1)</span>은 대각선끼리 짝을 이루어 놓여 있어, 어떤 직선으로도 갈라낼 수 없습니다(선형 분리 불가능). 최대 3줄까지만 맞습니다. 은닉층을 두어 직선을 여러 개 조합해야 해결됩니다.'
+    },
+    {
+      type: 'mc',
+      q: '인공신경망에서 <b>비선형</b> 활성화 함수를 쓰는 가장 중요한 이유는?',
+      choices: [
+        '계산 속도를 빠르게 하기 위해',
+        '가중치의 개수를 줄이기 위해',
+        '층을 여러 개 쌓는 것이 의미를 갖게 하기 위해',
+        '데이터의 결측치를 채우기 위해'
+      ],
+      answer: 2,
+      why: '활성화 함수가 없거나 직선이면, 층을 여러 개 거쳐도 결국 <b>1차식과 1차식의 합성 = 또 하나의 1차식</b>이 되어 전체가 퍼셉트론 하나와 똑같아집니다. 비선형 함수가 끼어 있어야 층마다 새로운 표현이 생기고, 깊이가 힘이 됩니다.'
+    },
+    {
+      type: 'order',
+      q: '신경망이 <b>한 번 학습(1 에포크)</b>하는 과정을 올바른 순서로 배열하시오.',
+      items: [
+        '입력을 층마다 계산해 출력층까지 밀어 보내 예측값을 얻는다 (순전파)',
+        '손실 함수로 예측값과 실젯값의 차이를 하나의 수로 구한다',
+        '오차를 출력층에서 입력층 방향으로 되돌려 기울기를 구한다 (역전파)',
+        '기울기의 반대 방향으로 가중치와 편향을 학습률만큼 수정한다 (경사 하강)'
+      ],
+      answer: [0, 1, 2, 3],
+      why: '예측 → 채점 → 책임 추궁 → 수정의 순서입니다. 역전파는 “각 가중치가 손실에 얼마나 기여했는지”를 계산하는 단계이고, 실제로 값을 바꾸는 것은 그다음의 경사 하강입니다. 이 둘을 한 단계로 뭉쳐 생각하지 않도록 주의합니다.'
+    },
+    {
+      type: 'short',
+      q: '입력층과 출력층 사이에 놓여, 앞 층이 뽑은 특징을 조합해 새로운 특징을 만들어 내는 층을 무엇이라고 하는가?',
+      answer: ['은닉층', 'hidden layer', '히든 레이어', '숨은층', '숨은 층'],
+      placeholder: '예: ○○○',
+      why: '<b>은닉층</b>입니다. 입력도 출력도 아니어서 겉으로 값이 드러나지 않아 “숨어 있다(hidden)”고 부릅니다. 은닉층이 여러 개인 인공신경망을 심층 신경망이라 하고, 이를 이용한 학습이 딥러닝입니다.'
+    },
+    {
+      type: 'match',
+      q: '다음 설명에 해당하는 활성화 함수를 짝지으시오.',
+      left: [
+        '0 또는 1만 내보내고, 기울기가 어디서나 0이라 학습에 쓸 수 없다',
+        '0~1 사이의 값을 내보내 확률처럼 해석할 수 있다',
+        '−1~1 사이의 값을 내보내 0을 중심으로 대칭이다',
+        '음수는 0, 양수는 그대로 내보내 계산이 매우 빠르다'
+      ],
+      right: ['계단 함수', '시그모이드', '하이퍼볼릭 탄젠트', 'ReLU'],
+      answer: [0, 1, 2, 3],
+      why: '계단 함수는 퍼셉트론의 원형이지만 미분값이 0이라 경사 하강을 쓸 수 없습니다. 시그모이드와 하이퍼볼릭 탄젠트는 매끄럽지만 양 끝에서 기울기가 0에 가까워져 <b>기울기 소실</b>이 생깁니다. ReLU는 양수 구간의 기울기가 1이라 깊은 망에서도 신호가 잘 흐릅니다.'
+    },
+    {
+      type: 'multi',
+      q: '딥러닝에 대한 설명으로 <b>옳은 것을 모두</b> 고르시오.',
+      choices: [
+        '은닉층이 여러 개인 인공신경망을 이용한다',
+        '층이 깊어질수록 단순한 특징을 조합해 더 복잡한 특징을 만든다',
+        '사람이 속성(특징)을 일일이 정해 주어야만 학습할 수 있다',
+        '많은 데이터와 강력한 계산 자원이 필요하다'
+      ],
+      answer: [0, 1, 3],
+      why: '③이 틀렸습니다. 기존 기계학습은 사람이 속성을 뽑아 주어야 했지만, 딥러닝은 <b>특징 추출까지 스스로 학습</b>하는 것이 가장 큰 특징입니다. 그 대가로 정해야 할 가중치가 폭발적으로 늘어나 많은 데이터와 GPU 같은 계산 자원이 필요해집니다.'
+    },
+    {
+      type: 'mc',
+      q: '합성곱 신경망(CNN)의 <b>풀링 층</b>이 하는 일로 가장 알맞은 것은?',
+      choices: [
+        '필터의 9개 값을 학습해 이미지에서 특징을 뽑아낸다',
+        '특성 맵의 크기를 줄이고, 대상의 위치가 조금 달라도 같은 특징으로 보게 한다',
+        '흑백 이미지를 컬러 이미지로 바꾼다',
+        '예측값과 실젯값의 차이를 계산해 손실을 구한다'
+      ],
+      answer: 1,
+      why: '①은 <b>합성곱 층</b>의 일입니다. 풀링 층은 2×2 칸에서 최댓값(최대 풀링)이나 평균만 남겨 크기를 절반으로 줄입니다. 그 결과 계산량이 줄고, 대상이 몇 픽셀 움직여도 같은 대푯값이 나와 <b>위치 변화에 덜 민감</b>해집니다. ④는 손실 함수의 역할입니다.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a2l7-note',
+  title: '신경망 실험 기록',
+  prompt: '세 시뮬레이터를 모두 돌려 본 뒤 아래를 채워 보세요. <b>숫자를 직접 적는 칸</b>은 시뮬레이터에서 읽은 값을 그대로 옮겨 적습니다.',
+  fields: [
+    { key: 'and', label: '시뮬레이터 ① — AND를 성공시킨 w₁, w₂, b', type: 'text', placeholder: '예: 1.0, 1.0, -1.5' },
+    { key: 'xor', label: '시뮬레이터 ① — XOR에서 최대 몇 줄까지 맞았나요?', type: 'select', options: ['1 / 4', '2 / 4', '3 / 4', '4 / 4 (성공)'] },
+    { key: 'h1', label: '시뮬레이터 ② — XOR · 은닉 뉴런 1개 (에포크 / 손실 / 정확도)', type: 'text', placeholder: '예: 3000 / 0.5821 / 75%' },
+    { key: 'h4', label: '시뮬레이터 ② — XOR · 은닉 뉴런 4개 (에포크 / 손실 / 정확도)', type: 'text', placeholder: '예: 3000 / 0.0412 / 100%' },
+    { key: 'spiral', label: '시뮬레이터 ② — 나선 데이터에서 가장 좋았던 설정', type: 'text', placeholder: '예: 은닉층 2층, 뉴런 8개, ReLU, 학습률 0.8 → 정확도 96%' },
+    {
+      key: 'filter', label: '시뮬레이터 ③ — 세로 경계 · 가로 경계 · 윤곽 필터는 각각 무엇을 찾아냈나요? 같은 그림이 어떻게 달라졌는지 적어 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) ㄱ 모양에서 세로 경계 필터는 오른쪽 세로선만 밝게 남기고 위쪽 가로선은 사라졌다. 가로 경계 필터는 그 반대였다. …'
+    },
+    {
+      key: 'why', label: '층을 쌓으면 왜 좋아지는지, 실험에서 본 것을 근거로 설명해 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 은닉 뉴런 1개일 때는 결정 경계가 직선 하나뿐이어서 XOR의 네 점을 나눌 수 없었다. 뉴런을 4개로 늘리자 …'
+    }
+  ]
+});
+</script>
+</body>
+</html>

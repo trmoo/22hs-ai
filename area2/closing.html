@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>단원 마무리 · 인공지능과 학습 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+  .cmap-wrap { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); padding: 14px 16px 10px; margin: 0 0 16px; overflow-x: auto; }
+  .cmap { width: 100%; min-width: 660px; height: auto; display: block; color: var(--line-strong); }
+  .cmap .ed { fill: none; stroke: currentColor; stroke-width: 1.8; marker-end: url(#a2arw); }
+  .cmap .ed.back { stroke: var(--warn); stroke-dasharray: 6 4; }
+  .cmap .ed2 { fill: none; stroke: currentColor; stroke-width: 1.8; }
+  .cmap .nb { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1.6; }
+  .cmap .nb.acc { fill: var(--accent-soft); stroke: var(--accent-line); }
+  .cmap .nb.fin { fill: var(--ok-soft); stroke: var(--ok-line); }
+  .cmap .nb.deep { fill: var(--warn-soft); stroke: var(--warn-line); }
+  .cmap .nt { fill: var(--ink); font-weight: 750; font-size: 14px; text-anchor: middle; }
+  .cmap .nl { fill: var(--ink); font-weight: 700; font-size: 13px; text-anchor: middle; }
+  .cmap .ns { fill: var(--ink-3); font-weight: 600; font-size: 11.5px; text-anchor: middle; }
+  .cmap .bd { fill: var(--accent-soft); stroke: var(--accent-line); stroke-width: 1; }
+  .cmap .bt { fill: var(--accent-ink); font-weight: 800; font-size: 9.5px; text-anchor: middle; }
+  .cmap .el { fill: var(--accent-ink); font-weight: 700; font-size: 11px; text-anchor: middle; }
+  .cmap .el.wr { fill: var(--warn); }
+  .lesson-card .lc-title, .lesson-card .lc-sub { display: block; }
+  .essay-q { padding: 14px 16px; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--radius); background: var(--surface); margin: 0 0 12px; }
+  .essay-q .eq-no { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; color: var(--accent-ink); margin-bottom: 6px; }
+  .essay-q p:last-child { margin-bottom: 0; }
+  .cm-tbl { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 돌아보며 열기</div>
+      <p>2단원에서 우리는 일곱 차시 동안 데이터를 만지고, 선을 긋고, 점을 묶고, 층을 쌓았습니다. 그런데 이 모든 활동에서 <b>딱 한 문장</b>만 남긴다면 무엇일까요?</p>
+      <p style="font-size:18px;font-weight:750;color:var(--accent-ink);text-align:center;margin:14px 0">“규칙을 짜지 않고, 데이터로 규칙을 <u>찾아내게</u> 한다.”</p>
+      <p>이 문장이 전부입니다. 그리고 이 한 문장에서 나머지 모든 개념이 따라 나옵니다. 데이터가 지저분하면 규칙도 엉망이 되니 <b>전처리</b>가 필요하고, 찾아낸 규칙이 정말 쓸 만한지 확인해야 하니 <b>평가</b>가 필요하고, 규칙이 너무 복잡한 문제라면 <b>층을 깊게 쌓는 딥러닝</b>이 필요해집니다.</p>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 일곱 차시를 순서로 이어 보기</summary>
+        <div class="more-body">
+          기계학습으로 풀 문제를 정하고 데이터를 모은다(1차시) → 데이터를 다듬고 속성을 뽑는다(2차시) → 문제에 맞는 알고리즘을 고른다(3·4·5차시) → 훈련 데이터로 학습하고 테스트 데이터로 평가한다(6차시) → 더 복잡한 문제는 층을 깊게 쌓아 푼다(7차시). 이 흐름이 곧 아래의 개념 지도입니다.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 개념 지도 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>한 장으로 보는 2단원 개념 지도</h2><span class="sec-tag">1~7차시</span></div>
+
+    <p>2단원의 개념 지도는 <b>파이프라인</b> 모양입니다. 데이터가 왼쪽에서 들어와 여러 단계를 거쳐 모델이 되고, 평가 결과가 나쁘면 <b>주황색 점선</b>을 따라 앞 단계로 되돌아갑니다. 이 되돌아가는 화살표가 2단원의 진짜 주인공입니다.</p>
+
+    <div class="cmap-wrap">
+      <svg class="cmap" viewBox="0 0 920 606" role="img" aria-label="2단원 인공지능과 학습 개념 지도. 문제 정의와 데이터 수집, 데이터 가공, 속성 추출을 지나 알고리즘을 선정하고, 분류·회귀·군집으로 나뉘며, 학습과 평가를 거쳐 성능이 낮으면 데이터 가공으로 되돌아간다. 아래쪽에는 퍼셉트론에서 딥러닝으로 이어지는 흐름이 있다.">
+        <defs>
+          <marker id="a2arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="currentColor"></path>
+          </marker>
+        </defs>
+
+        <!-- 파이프라인 간선 -->
+        <path class="ed" d="M270,51 H335"></path>
+        <path class="ed" d="M585,51 H650"></path>
+        <path class="ed" d="M775,88 V124 H460 V150"></path>
+        <text class="el" x="645" y="118">속성이 준비되면</text>
+
+        <path class="ed" d="M460,224 V244 H160 V262"></path>
+        <path class="ed" d="M460,224 V262"></path>
+        <path class="ed" d="M460,224 V244 H760 V262"></path>
+        <text class="el" x="248" y="239">정답이 있는 데이터</text>
+        <text class="el" x="672" y="239">정답이 없는 데이터</text>
+
+        <path class="ed" d="M160,346 V362 H460 V380"></path>
+        <path class="ed" d="M460,346 V380"></path>
+        <path class="ed" d="M760,346 V362 H460 V380"></path>
+
+        <!-- 되돌아가는 화살표 -->
+        <path class="ed back" d="M170,422 H100 V110 H460 V92"></path>
+        <text class="el wr" x="262" y="104">성능이 낮으면 데이터와 속성을 다시 다듬는다</text>
+
+        <!-- 딥러닝 줄 -->
+        <path class="ed" d="M300,464 V482 H120 V500"></path>
+        <text class="el" x="215" y="477">더 복잡한 문제는</text>
+        <path class="ed" d="M220,542 H250"></path>
+        <path class="ed" d="M450,542 H480"></path>
+        <path class="ed" d="M680,542 H710"></path>
+        <path class="ed back" d="M805,500 V482 H700 V466"></path>
+        <text class="el wr" x="768" y="477">평가 방법은 같다</text>
+
+        <!-- 노드: 파이프라인 -->
+        <g>
+          <rect class="nb acc" x="20" y="14" width="250" height="74" rx="12"></rect>
+          <rect class="bd" x="30" y="23" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="51" y="35.5">1차시</text>
+          <text class="nt" x="145" y="58">문제 정의와 데이터 수집</text>
+          <text class="ns" x="145" y="76">기계학습으로 풀 문제 · 데이터 선정</text>
+        </g>
+        <g>
+          <rect class="nb" x="335" y="14" width="250" height="74" rx="12"></rect>
+          <rect class="bd" x="345" y="23" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="366" y="35.5">2차시</text>
+          <text class="nt" x="460" y="58">데이터 가공</text>
+          <text class="ns" x="460" y="76">결측치 · 이상치 · 정규화</text>
+        </g>
+        <g>
+          <rect class="nb" x="650" y="14" width="250" height="74" rx="12"></rect>
+          <rect class="bd" x="660" y="23" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="681" y="35.5">2차시</text>
+          <text class="nt" x="775" y="58">핵심 속성 추출</text>
+          <text class="ns" x="775" y="76">쓸모 있는 특징만 골라낸다</text>
+        </g>
+        <g>
+          <rect class="nb acc" x="310" y="150" width="300" height="74" rx="12"></rect>
+          <rect class="bd" x="320" y="159" width="60" height="17" rx="5"></rect>
+          <text class="bt" x="350" y="171.5">3~5차시</text>
+          <text class="nt" x="460" y="194">기계학습 유형과 알고리즘 선정</text>
+          <text class="ns" x="460" y="212">지도학습 · 비지도학습 · 강화학습</text>
+        </g>
+
+        <!-- 노드: 알고리즘 -->
+        <g>
+          <rect class="nb" x="20" y="262" width="280" height="84" rx="12"></rect>
+          <rect class="bd" x="30" y="271" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="51" y="283.5">3차시</text>
+          <text class="nt" x="160" y="308">지도학습 · 분류</text>
+          <text class="ns" x="160" y="326">k-NN — 가까운 이웃에게 물어본다</text>
+          <text class="ns" x="160" y="340">결정 경계 · k 값</text>
+        </g>
+        <g>
+          <rect class="nb" x="320" y="262" width="280" height="84" rx="12"></rect>
+          <rect class="bd" x="330" y="271" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="351" y="283.5">4차시</text>
+          <text class="nt" x="460" y="308">지도학습 · 회귀</text>
+          <text class="ns" x="460" y="326">선형 회귀 — 선 하나로 예측한다</text>
+          <text class="ns" x="460" y="340">오차 제곱 · 경사 하강법</text>
+        </g>
+        <g>
+          <rect class="nb" x="620" y="262" width="280" height="84" rx="12"></rect>
+          <rect class="bd" x="630" y="271" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="651" y="283.5">5차시</text>
+          <text class="nt" x="760" y="308">비지도학습 · 군집</text>
+          <text class="ns" x="760" y="326">k-평균 — 정답 없이 묶는다</text>
+          <text class="ns" x="760" y="340">중심 이동 반복</text>
+        </g>
+
+        <!-- 노드: 학습과 평가 -->
+        <g>
+          <rect class="nb fin" x="170" y="380" width="580" height="86" rx="12"></rect>
+          <rect class="bd" x="180" y="389" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="201" y="401.5">6차시</text>
+          <text class="nt" x="460" y="426">훈련 데이터로 학습 → 테스트 데이터로 평가</text>
+          <text class="ns" x="460" y="445">혼동 행렬 · 정확도 · 정밀도 · 재현율</text>
+          <text class="ns" x="460" y="459">과대적합과 과소적합 판단</text>
+        </g>
+
+        <!-- 노드: 딥러닝 -->
+        <g>
+          <rect class="nb deep" x="20" y="500" width="200" height="84" rx="12"></rect>
+          <rect class="bd" x="30" y="509" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="51" y="521.5">7차시</text>
+          <text class="nl" x="120" y="546">퍼셉트론</text>
+          <text class="ns" x="120" y="564">가중치 · 활성화 함수</text>
+        </g>
+        <g>
+          <rect class="nb deep" x="250" y="500" width="200" height="84" rx="12"></rect>
+          <rect class="bd" x="260" y="509" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="281" y="521.5">7차시</text>
+          <text class="nl" x="350" y="546">인공신경망</text>
+          <text class="ns" x="350" y="564">입력층 · 은닉층 · 출력층</text>
+        </g>
+        <g>
+          <rect class="nb deep" x="480" y="500" width="200" height="84" rx="12"></rect>
+          <rect class="bd" x="490" y="509" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="511" y="521.5">7차시</text>
+          <text class="nl" x="580" y="546">딥러닝</text>
+          <text class="ns" x="580" y="564">은닉층을 여러 층으로</text>
+        </g>
+        <g>
+          <rect class="nb deep" x="710" y="500" width="190" height="84" rx="12"></rect>
+          <rect class="bd" x="720" y="509" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="741" y="521.5">7차시</text>
+          <text class="nl" x="805" y="546">활용 분야</text>
+          <text class="ns" x="805" y="564">영상 · 음성 · 언어</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">🧭 지도를 읽는 세 가지 방법</div>
+      <ul style="margin:0">
+        <li><b>왼쪽에서 오른쪽으로</b> — 데이터가 모델이 되는 순서입니다. 어느 한 단계를 건너뛰면 뒤의 모든 단계가 흔들립니다. 특히 <b>데이터 가공</b>을 건너뛰면 뒤에서 어떤 알고리즘을 써도 성능이 나오지 않습니다.</li>
+        <li><b>가운데 세 갈래를 비교</b> — 갈림길의 기준은 딱 하나, <b>정답(라벨)이 데이터에 붙어 있는가</b>입니다. 붙어 있으면 지도학습(분류·회귀), 없으면 비지도학습(군집)입니다.</li>
+        <li><b>주황색 점선을 따라 거꾸로</b> — 기계학습은 한 번에 끝나지 않습니다. 평가해 보고 되돌아가서 데이터와 속성을 고치는 <b>반복</b>이 정상입니다. 4단원의 프로젝트가 이 점선을 그대로 실행합니다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 2. 차시별 핵심 정리 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>차시별 핵심 정리</h2></div>
+
+    <p>마지막 열은 실제로 학생들이 <b>가장 많이 틀리는 지점</b>만 모은 것입니다. 이 열부터 읽어도 좋습니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>2단원 인공지능과 학습 — 차시별 정리</caption>
+        <thead><tr><th>차시</th><th>꼭 알아야 할 개념</th><th>한 줄 요약</th><th>자주 나오는 오해</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>1차시</b><br>규칙을 짜지 않고 가르치기</td>
+            <td>기계학습, 지도학습·비지도학습·강화학습, 문제 정의, 데이터 선정</td>
+            <td>사람이 규칙을 적는 대신, 데이터에서 규칙을 찾아내게 하는 것이 기계학습이다.</td>
+            <td class="bad">“데이터가 많으면 무조건 잘된다” → <b>문제와 관련 있는</b> 데이터여야 합니다. 관련 없는 데이터를 아무리 쌓아도 성능은 오르지 않습니다.</td>
+          </tr>
+          <tr>
+            <td><b>2차시</b><br>데이터를 다듬다</td>
+            <td>결측치, 이상치, 정규화, 핵심 속성 추출</td>
+            <td>모델의 성능은 알고리즘보다 <b>데이터의 상태</b>에서 먼저 갈린다.</td>
+            <td class="bad">“이상치는 무조건 지운다” → 이상치가 <b>중요한 신호</b>일 수 있습니다(불량, 사기, 이상 징후). 지울지 살릴지는 문제에 따라 판단합니다.</td>
+          </tr>
+          <tr>
+            <td><b>3차시</b><br>이웃에게 물어보기</td>
+            <td>분류, k-NN, 결정 경계, k 값의 영향, 거리 계산</td>
+            <td>k-NN 은 학습이라기보다 <b>기억</b>이다. 새 점이 오면 가장 가까운 k 개의 이웃에게 투표를 맡긴다.</td>
+            <td class="bad">“k 는 클수록 정확하다” → k 가 너무 작으면 잡음에 흔들리고, 너무 크면 경계가 뭉개져 소수 집단을 놓칩니다. 적절한 k 는 실험으로 찾습니다.</td>
+          </tr>
+          <tr>
+            <td><b>4차시</b><br>선 하나로 예측하기</td>
+            <td>회귀, 오차 제곱의 합, 경사 하강법, 학습률</td>
+            <td>오차를 가장 작게 만드는 방향으로 조금씩 내려가며 선의 기울기와 절편을 고쳐 나간다.</td>
+            <td class="bad">“학습률은 클수록 빨리 배운다” → 너무 크면 최솟값을 <b>지나쳐 튕겨 나가</b> 오차가 오히려 커집니다. 너무 작으면 너무 느립니다.</td>
+          </tr>
+          <tr>
+            <td><b>5차시</b><br>정답 없이 묶기</td>
+            <td>비지도학습, 군집, k-평균, 중심 이동 반복</td>
+            <td>중심을 정하고 → 가까운 점을 모으고 → 중심을 다시 계산하는 일을 중심이 움직이지 않을 때까지 반복한다.</td>
+            <td class="bad">“군집도 정답을 맞히는 것이다” → 군집에는 <b>정답이 없습니다</b>. 나온 군집의 의미는 사람이 해석해서 붙입니다. 시작 중심에 따라 결과가 달라질 수도 있습니다.</td>
+          </tr>
+          <tr>
+            <td><b>6차시</b><br>얼마나 잘 맞혔나</td>
+            <td>훈련·테스트 데이터 분리, 혼동 행렬, 정확도, 정밀도, 재현율, 과대적합</td>
+            <td>훈련 데이터 점수는 성적표가 아니다. <b>본 적 없는 데이터</b>에서의 점수만이 성능이다.</td>
+            <td class="bad">“정확도가 높으면 좋은 모델이다” → 100명 중 환자가 1명뿐인 데이터에서 전부 정상이라고 답해도 정확도는 99%입니다. 이럴 때는 <b>정밀도와 재현율</b>을 봐야 합니다.</td>
+          </tr>
+          <tr>
+            <td><b>7차시</b><br>층을 쌓아 깊어지다</td>
+            <td>퍼셉트론, 가중치, 활성화 함수, 은닉층, 인공신경망, 딥러닝</td>
+            <td>퍼셉트론 하나로는 직선 하나밖에 못 긋지만, 층을 쌓으면 휘어진 경계도 만들 수 있다.</td>
+            <td class="bad">“딥러닝은 인공신경망과 다른 기술이다” → 딥러닝은 <b>은닉층이 여러 층인 인공신경망</b>을 학습시키는 것입니다. 다른 기술이 아니라 같은 계열의 깊어진 형태입니다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">🧮</span>
+        <h4>혼동 행렬 네 칸 읽기</h4>
+        <p>앞자리는 <b>맞혔는가</b>(T/F), 뒷자리는 <b>무엇이라고 예측했는가</b>(P/N)입니다. 그래서 FN 은 “양성인데 음성이라고 잘못 답한 것”입니다. 놓친 환자가 여기에 들어갑니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🎚️</span>
+        <h4>정밀도와 재현율의 맞바꿈</h4>
+        <p>판정 임계값을 낮추면 양성이라고 더 많이 외치므로 <b>재현율은 오르고 정밀도는 내려갑니다</b>. 둘을 동시에 올리기는 어려워서, 무엇이 더 중요한 상황인지 정해야 합니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">📉</span>
+        <h4>과대적합의 신호</h4>
+        <p>훈련 오차는 계속 줄어드는데 <b>테스트 오차가 어느 지점부터 다시 커지면</b> 과대적합입니다. 모델을 단순하게 만들거나 데이터를 늘리는 것이 대처법입니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. 핵심 용어 빈칸 점검 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>핵심 용어 빈칸 점검</h2><span class="sec-tag">본문 빈칸 14개</span></div>
+
+    <p>아래 다섯 문단은 2단원 전체를 압축한 요약입니다. 위쪽의 <b>빈칸 채우기 모드</b>를 켜고 채워 보세요. 용어를 눈으로만 읽는 것과 손으로 쓰는 것은 전혀 다릅니다.</p>
+
+    <h3 class="sub-head">① 규칙 대신 데이터</h3>
+    <p>사람이 조건을 하나하나 적어 주는 대신, 데이터에서 규칙(모델)을 스스로 찾아내게 하는 방법을 <b class="blank" data-a="기계학습|머신러닝|기계 학습" data-hint="영어로 machine learning">기계학습</b>이라고 합니다. 정답(라벨)이 붙은 데이터로 학습하는 유형을 <b class="blank" data-a="지도학습|지도 학습" data-hint="정답을 알려 주며 가르친다">지도학습</b>, 정답 없이 데이터의 구조를 찾아내는 유형을 <b class="blank" data-a="비지도학습|비지도 학습" data-hint="정답을 알려 주지 않는다">비지도학습</b>이라고 하며, 보상을 통해 행동을 개선해 가는 유형은 강화학습입니다.</p>
+
+    <h3 class="sub-head">② 데이터를 다듬는 일</h3>
+    <p>현실의 데이터는 비어 있거나 잘못된 값이 섞여 있습니다. 값이 아예 비어 있는 칸을 <b class="blank" data-a="결측치|결측값|누락값" data-hint="빠져 있는 값">결측치</b>라고 하며, 평균이나 중앙값으로 채우거나 해당 행을 지웁니다. 다른 값들과 크게 동떨어진 값은 <b class="blank" data-a="이상치|이상값|특이값" data-hint="사분위수 범위(IQR)로 찾아낸다">이상치</b>라고 하는데, 잡음일 수도 있지만 오히려 찾아야 할 신호일 수도 있으므로 문제에 따라 판단합니다. 또 키(cm)와 몸무게(kg)처럼 단위와 범위가 다른 속성을 함께 쓸 때는 값의 범위를 일정하게 맞추는 <b class="blank" data-a="정규화|스케일링|정규화(스케일링)" data-hint="0~1 사이로 맞추는 것이 대표적">정규화</b>가 필요합니다.</p>
+
+    <h3 class="sub-head">③ 문제에 맞는 알고리즘 고르기</h3>
+    <p>지도학습은 예측하려는 값이 <b>어떤 종류인가</b>에 따라 둘로 나뉩니다. 합격과 불합격처럼 정해진 몇 가지 중 하나를 고르는 문제는 분류이고, 키에 따른 몸무게처럼 연속적인 수를 예측하는 문제는 <b class="blank" data-a="회귀|회귀 분석" data-hint="선 하나로 값을 예측하는 문제">회귀</b>입니다. 회귀에서는 예측값과 실제값의 오차 제곱의 합을 가장 작게 만들어야 하는데, 오차가 줄어드는 방향으로 조금씩 내려가며 기울기와 절편을 고치는 방법을 <b class="blank" data-a="경사 하강법|경사하강법|기울기 하강법" data-hint="산에서 가장 가파른 아래쪽으로 한 걸음씩">경사 하강법</b>이라고 합니다. 한편 정답이 없는 데이터를 비슷한 것끼리 묶는 일은 <b class="blank" data-a="군집|군집화|클러스터링" data-hint="k-평균이 대표 알고리즘">군집</b>이라고 하며, k-평균 알고리즘이 대표적입니다.</p>
+
+    <h3 class="sub-head">④ 성능을 정직하게 재기</h3>
+    <p>모델을 평가할 때는 데이터를 나누어, 학습에는 훈련 데이터만 쓰고 성능 측정에는 학습에 쓰지 않은 <b class="blank" data-a="테스트 데이터|시험 데이터|검증 데이터" data-hint="모델이 한 번도 보지 못한 데이터">테스트 데이터</b>를 씁니다. 분류 모델의 예측 결과를 실제 값과 맞대어 네 칸으로 정리한 표를 <b class="blank" data-a="혼동 행렬|혼동행렬|confusion matrix" data-hint="TP · FP · FN · TN 네 칸으로 이루어진 표">혼동 행렬</b>이라고 합니다. 이 표에서 모델이 양성이라고 예측한 것 중 실제로 양성인 비율이 정밀도이고, 실제 양성 중에서 모델이 양성이라고 찾아낸 비율이 <b class="blank" data-a="재현율|민감도|recall" data-hint="놓치지 않고 찾아낸 비율">재현율</b>입니다. 훈련 데이터에는 잘 맞지만 새로운 데이터에서 성능이 떨어지는 현상은 <b class="blank" data-a="과대적합|과적합|오버피팅" data-hint="시험 범위를 통째로 외운 것과 같은 상태">과대적합</b>입니다.</p>
+
+    <h3 class="sub-head">⑤ 층을 쌓아 깊어지기</h3>
+    <p>사람의 신경세포를 본떠 여러 입력에 가중치를 곱해 더한 뒤 <b>활성화 함수</b>를 통과시켜 출력을 내는 가장 단순한 모형을 퍼셉트론이라고 합니다. 퍼셉트론 하나는 직선 하나만 그을 수 있어 XOR 같은 문제를 풀지 못하는데, 입력층과 출력층 사이에 <b>은닉층</b>을 넣으면 휘어진 경계도 만들 수 있습니다. 이렇게 은닉층이 여러 층인 인공신경망을 학습시키는 것을 <b class="blank" data-a="딥러닝|심층학습|심층 학습" data-hint="깊은 학습이라는 뜻">딥러닝</b>이라고 하며, 영상·음성·언어처럼 사람이 규칙을 적기 어려운 분야에서 특히 뛰어난 성능을 보입니다.</p>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 여기서 헷갈리면 반드시 다시 보기</div>
+      <p><b>분류와 군집</b>은 겉모습이 비슷해 보이지만 완전히 다릅니다. 분류는 <b>정답이 있는</b> 데이터로 배워 새 데이터의 정답을 맞히는 지도학습이고, 군집은 <b>정답이 없는</b> 데이터를 비슷한 것끼리 모으는 비지도학습입니다. “미리 정해진 이름표가 있는가”를 물어보면 바로 구별됩니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>단원 용어 낱말 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 5. 단원 평가 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>단원 평가</h2><span class="sec-tag">11문항 · 기본 4 · 적용 4 · 통합 3</span></div>
+
+    <div class="box box-info">
+      <div class="box-label">📋 5·6번 문항에서 함께 볼 혼동 행렬</div>
+      <div class="table-wrap" style="margin:0">
+        <table class="tb cm-tbl">
+          <caption>어떤 불량 검사 모델의 혼동 행렬 — 전체 200개, 실제 불량(양성) 60개</caption>
+          <thead><tr><th></th><th>모델 예측: 불량(양성)</th><th>모델 예측: 정상(음성)</th></tr></thead>
+          <tbody>
+            <tr><td><b>실제 불량(양성)</b></td><td class="num">TP = 40</td><td class="num">FN = 20</td></tr>
+            <tr><td><b>실제 정상(음성)</b></td><td class="num">FP = 10</td><td class="num">TN = 130</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 6. 서·논술형 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>서·논술형 문항</h2></div>
+
+    <p>정답이 하나가 아닌 문항입니다. 각 문항의 <b>평가 기준</b>을 먼저 펼쳐 보고, 그 요소들이 내 글에 들어 있는지 확인하며 쓰세요.</p>
+
+    <div class="essay-q">
+      <div class="eq-no">문항 1 · 서술형</div>
+      <p>어떤 학생이 만든 모델은 <b>훈련 데이터에서 정확도 99%</b>인데 <b>테스트 데이터에서는 62%</b>였습니다. 이 현상의 이름과 원인을 밝히고, 이 학생이 시도해 볼 수 있는 개선 방법을 <b>두 가지 이상</b> 제안하시오.</p>
+      <details class="more-box" style="margin:10px 0 0">
+        <summary><span class="plus-tag">평가 기준</span> 좋은 답에 반드시 들어가야 할 요소</summary>
+        <div class="more-body">
+          <ul style="margin:0">
+            <li>현상의 이름을 정확히 썼는가 — <b>과대적합</b>.</li>
+            <li>원인을 <b>모델이 데이터의 규칙이 아니라 훈련 데이터 자체를 외운 것</b>으로 설명했는가.</li>
+            <li>훈련 오차와 테스트 오차의 <b>움직임 차이</b>로 근거를 댔는가.</li>
+            <li>개선 방법을 두 가지 이상 구체적으로 제시했는가 — 모델을 단순하게(속성 수 줄이기, 신경망 층·노드 줄이기), 데이터를 늘리기, 데이터 분할 방식 점검, 학습을 일찍 멈추기 등.</li>
+            <li>“테스트 데이터를 학습에 절대 쓰지 않는다”는 원칙을 언급하면 매우 우수한 답입니다.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="essay-q">
+      <div class="eq-no">문항 2 · 설계형</div>
+      <p>우리 학교나 일상에서 <b>기계학습으로 풀고 싶은 문제</b>를 하나 정하시오. 그 문제에 필요한 데이터와 속성, 학습 유형(지도학습·비지도학습), 알고리즘, 성능 평가 방법을 순서대로 설계하시오.</p>
+      <details class="more-box" style="margin:10px 0 0">
+        <summary><span class="plus-tag">평가 기준</span> 좋은 답에 반드시 들어가야 할 요소</summary>
+        <div class="more-body">
+          <ul style="margin:0">
+            <li>문제가 <b>예측·분류·군집 중 무엇</b>인지 분명한가(“도서관을 개선하겠다”는 문제 정의가 아닙니다).</li>
+            <li>필요한 데이터의 <b>출처와 개수</b>, 그리고 속성 목록을 적었는가.</li>
+            <li>정답(라벨)이 있는지 여부를 근거로 <b>학습 유형을 선택</b>했는가.</li>
+            <li>선택한 알고리즘이 문제 유형과 <b>맞는가</b>(분류에 선형 회귀를 쓰는 식의 불일치가 없는가).</li>
+            <li>평가 지표를 정하고 <b>왜 그 지표인지</b> 밝혔는가. 데이터가 한쪽으로 치우쳤다면 정확도만 쓰지 않았는가.</li>
+            <li>전처리 계획(결측치·이상치·정규화)을 한 줄이라도 포함했는가.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="essay-q">
+      <div class="eq-no">문항 3 · 논술형</div>
+      <p>다음 두 상황에서 <b>정밀도와 재현율 중 무엇을 더 중요하게 볼 것인지</b> 각각 정하고, 그 이유를 잘못된 판정이 만드는 <b>실제 피해</b>와 연결해 논술하시오.<br>
+      (가) 학교 급식실의 식중독 위험 식재료 판별 &nbsp;·&nbsp; (나) 학생 휴대전화의 스팸 문자 자동 차단</p>
+      <details class="more-box" style="margin:10px 0 0">
+        <summary><span class="plus-tag">평가 기준</span> 좋은 답에 반드시 들어가야 할 요소</summary>
+        <div class="more-body">
+          <ul style="margin:0">
+            <li>두 지표의 정의를 <b>혼동 행렬의 칸</b>과 연결해 정확히 썼는가(정밀도는 FP 를 줄이는 데, 재현율은 FN 을 줄이는 데 중점).</li>
+            <li>(가)에서 <b>FN(위험한데 안전하다고 판정)</b>의 피해가 훨씬 크므로 재현율을 중시한다고 판단했는가.</li>
+            <li>(나)에서 <b>FP(중요한 문자를 스팸으로 차단)</b>의 피해를 근거로 정밀도를 중시한다고 판단했는가.</li>
+            <li>두 지표가 <b>서로 맞바뀌는 관계</b>임을 언급했는가(임계값을 낮추면 재현율↑ 정밀도↓).</li>
+            <li>정확도만으로 판단하면 안 되는 이유를 데이터 불균형과 연결했다면 매우 우수한 답입니다.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 7. 자가평가 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>성취기준 자가평가</h2></div>
+    <p>성취기준마다 지금 내 상태를 솔직하게 고릅니다. <b>D 나 E 를 고른 성취기준</b>은 아래에서 해당 차시로 돌아가 다시 확인하세요.</p>
+    <div id="self1"></div>
+  </section>
+
+  <!-- ============ 8. 돌아가기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>부족한 곳으로 돌아가기</h2></div>
+
+    <div class="lesson-list">
+      <a class="lesson-card" href="lesson01.html">
+        <span class="lc-no"><b>1</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">규칙을 짜지 않고 가르치기</span>
+          <span class="lc-sub">지도·비지도·강화학습을 예시로 구분하기 어렵다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기02-01</span><span class="lc-sim">🎯 단원 평가 1·9번이 어려웠다면</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card" href="lesson02.html">
+        <span class="lc-no"><b>2</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">데이터를 다듬다</span>
+          <span class="lc-sub">결측치·이상치 처리와 정규화의 이유가 흐릿하다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기02-01</span><span class="lc-std">12인기02-02</span><span class="lc-sim">🎯 단원 평가 2·3번, 서·논술형 2번이 막혔다면</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card" href="lesson03.html">
+        <span class="lc-no"><b>3</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">이웃에게 물어보기</span>
+          <span class="lc-sub">k 값이 결정 경계를 어떻게 바꾸는지 설명이 안 된다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기02-03</span><span class="lc-sim">🎯 단원 평가 4·11번이 어려웠다면</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card" href="lesson04.html">
+        <span class="lc-no"><b>4</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">선 하나로 예측하기</span>
+          <span class="lc-sub">오차 제곱과 경사 하강법, 학습률의 역할이 헷갈린다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기02-03</span><span class="lc-sim">🎯 단원 평가 8번이 어려웠다면</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card" href="lesson05.html">
+        <span class="lc-no"><b>5</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">정답 없이 묶기</span>
+          <span class="lc-sub">k-평균의 반복 절차를 손으로 못 따라간다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기02-03</span><span class="lc-sim">🎯 단원 평가 6·9번이 어려웠다면</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card" href="lesson06.html">
+        <span class="lc-no"><b>6</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">얼마나 잘 맞혔나</span>
+          <span class="lc-sub">혼동 행렬 계산과 과대적합 판단이 자신 없다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기02-04</span><span class="lc-sim">🎯 단원 평가 5·7·10번, 서·논술형 1·3번이 막혔다면</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card" href="lesson07.html">
+        <span class="lc-no"><b>7</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">층을 쌓아 깊어지다</span>
+          <span class="lc-sub">퍼셉트론·은닉층·딥러닝의 관계를 정리하지 못했다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기02-05</span><span class="lc-std">12인기02-06</span><span class="lc-sim">🎯 단원 평가 11번이 어려웠다면</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card closing" href="index.html">
+        <span class="lc-no"><b>★</b></span>
+        <span class="lc-body">
+          <span class="lc-title">2단원 목차로</span>
+          <span class="lc-sub">내용 요소와 성취기준 전체를 다시 훑어보기</span>
+          <span class="lc-meta"><span class="lc-sim">📋 무엇을 배웠는지 한눈에 확인</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ 9. 다음 단원 예고 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>다음 단원 예고</h2></div>
+
+    <div class="box box-concept">
+      <div class="box-label">🚪 3단원으로 가는 문</div>
+      <p>2단원에서 우리는 성능을 올리는 방법을 배웠습니다. 그런데 여기서 한 가지 질문이 남습니다. <b>“성능이 높으면 좋은 인공지능인가?”</b></p>
+      <p>합격자를 예측하는 모델을 과거 합격 데이터로 학습시켰다고 해 봅시다. 과거에 특정 집단이 불리했다면, 모델은 그 불리함까지 함께 배워 정확도 높게 재현합니다. <b>데이터가 편향되면 모델도 편향됩니다.</b> 성능 지표는 이 문제를 잡아내지 못합니다.</p>
+      <p>3단원 <b>인공지능의 사회적 영향</b>에서는 인공지능이 바꾸는 사회와 직업, 그리고 편향·프라이버시·책임의 문제를 다룹니다. 2단원이 “어떻게 만드는가”였다면, 3단원은 <b>“만들어도 되는가, 어떻게 써야 하는가”</b>입니다.</p>
+    </div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> 정확도의 함정을 숫자로 확인하기</summary>
+      <div class="more-body">
+        <p>어떤 희귀병의 유병률이 1%라고 합시다. 검사를 아무것도 하지 않고 <b>모든 사람에게 “정상”이라고만 답하는 모델</b>을 만들면 정확도는 얼마일까요?</p>
+        <p>1000명 중 환자 10명, 정상 990명입니다. 전부 정상이라고 답하면 990명을 맞히므로 정확도는 <b>99%</b>입니다. 그런데 이 모델의 재현율은 0/10 = <b>0%</b>이고 정밀도는 계산조차 되지 않습니다(양성 예측이 하나도 없음).</p>
+        <p>그래서 데이터가 한쪽으로 치우친 문제에서는 <b>정확도를 성능 지표로 쓰면 안 됩니다</b>. 혼동 행렬을 그려 네 칸을 직접 보는 습관이 이 함정을 막아 줍니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">코드</span> 파이프라인 전체를 열 줄로 쓰기</summary>
+      <div class="more-body">
+        <p>개념 지도의 흐름을 그대로 코드로 옮기면 이렇게 됩니다. 각 줄이 어느 차시에 해당하는지 확인해 보세요.</p>
+        <pre style="margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.75;white-space:pre-wrap">df = load('students.csv')                     # 1차시 데이터 수집
+df = df.dropna()                              # 2차시 결측치 처리
+df = remove_outliers(df, 'study_hours')       # 2차시 이상치 처리
+X = normalize(df[['study_hours', 'sleep']])   # 2차시 정규화 · 속성 추출
+y = df['pass']                                # 정답(라벨)
+
+X_train, X_test, y_train, y_test = split(X, y, test_ratio=0.2)   # 6차시 데이터 분리
+
+model = KNN(k=5)                              # 3차시 알고리즘 선정
+model.fit(X_train, y_train)                   # 학습은 훈련 데이터로만
+
+pred = model.predict(X_test)                  # 6차시 평가는 테스트 데이터로
+print(confusion_matrix(y_test, pred))         # 혼동 행렬 확인</pre>
+        <p style="margin-top:12px">주목할 점은 <span class="mono">split</span> 이 <span class="mono">fit</span> 보다 <b>먼저</b> 나온다는 것입니다. 순서를 바꾸면 테스트 데이터가 학습에 섞여 들어가 성능이 부풀려집니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> 이 단원의 개념이 실제로 쓰이는 곳</summary>
+      <div class="more-body">
+        <ul style="margin:0">
+          <li><b>병원의 영상 판독 보조</b> — 딥러닝으로 사진에서 이상 부위를 찾습니다. 놓치면 위험하므로 <b>재현율</b>을 특히 중요하게 봅니다.</li>
+          <li><b>공장 불량 검사</b> — 정상 제품이 압도적으로 많은 불균형 데이터입니다. 그래서 정확도보다 <b>혼동 행렬</b> 전체를 봅니다.</li>
+          <li><b>온라인 상점의 고객 묶음</b> — 정답이 없는 구매 기록을 k-평균으로 묶어 비슷한 취향의 집단을 찾고, 사람이 그 집단의 의미를 해석합니다.</li>
+          <li><b>기상 예측 보정</b> — 관측값과 예측값의 오차를 줄이는 회귀 모델을 학습시켜 예보를 보정합니다.</li>
+          <li><b>음성 비서</b> — 소리 파형을 문자로 바꾸는 일은 규칙으로 적기 불가능해, 대량의 음성 데이터로 학습한 딥러닝 모델이 담당합니다.</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 2, lesson: 'closing',
+  title: '단원 마무리',
+  sub: '인공지능과 학습 — 핵심 정리와 단원 평가',
+  lead: '일곱 차시를 <b>하나의 파이프라인</b>으로 잇습니다. 데이터가 들어와 모델이 되고, 평가 결과가 나쁘면 되돌아가 다시 다듬는 이 순환이 2단원의 전부입니다. 단원 평가와 서·논술형으로 스스로 점검해 봅시다.',
+  standards: ['12인기02-01', '12인기02-02', '12인기02-03', '12인기02-04', '12인기02-05', '12인기02-06'],
+  keywords: ['기계학습', '결측치와 이상치', '정규화', 'k-NN', '선형 회귀', 'k-평균 군집', '혼동 행렬', '과대적합', '인공신경망', '딥러닝'],
+  goals: [
+    '데이터 수집부터 성능 평가까지의 기계학습 과정을 <b>순서와 이유</b>를 들어 설명할 수 있다.',
+    '문제의 성격에 맞는 기계학습 유형과 알고리즘을 선정하고 그 근거를 밝힐 수 있다.',
+    '혼동 행렬로 정밀도와 재현율을 계산하고, 상황에 따라 어떤 지표가 중요한지 판단할 수 있다.',
+    '인공신경망과 딥러닝의 관계를 은닉층 개념으로 설명하고 활용 분야를 들 수 있다.'
+  ]
+});
+</script>
+
+<script>
+AI.cloze('#cloze1', {
+  id: 'a2c-cloze',
+  title: '2단원 핵심 용어 8개',
+  sub: '낱말을 누른 뒤 빈칸을 눌러 채웁니다. 낱말은 한 번씩만 쓰입니다.',
+  bank: ['지도학습', '비지도학습', '이상치', '정규화', 'k-평균', '혼동 행렬', '정밀도', '과대적합'],
+  sents: [
+    { text: '정답(라벨)이 붙은 데이터로 학습하는 기계학습 유형을 {0}(이)라고 한다.', answers: [['지도학습']] },
+    { text: '정답 없이 데이터 안의 구조나 규칙을 찾아내는 유형을 {0}(이)라고 한다.', answers: [['비지도학습']] },
+    { text: '다른 값들과 크게 동떨어져 있어 사분위수 범위 등으로 찾아내는 값을 {0}(이)라고 한다.', answers: [['이상치']] },
+    { text: '속성마다 단위와 범위가 달라 생기는 문제를 줄이려고 값의 범위를 일정하게 맞추는 것을 {0}(이)라고 한다.', answers: [['정규화']] },
+    { text: '중심을 정하고 가까운 점을 모으고 중심을 다시 계산하는 일을 반복하는 군집 알고리즘을 {0} 군집이라고 한다.', answers: [['k-평균']] },
+    { text: '분류 모델의 예측을 실제 값과 맞대어 네 칸으로 정리한 표를 {0}(이)라고 하며, 양성이라고 예측한 것 중 실제 양성의 비율을 {1}(이)라고 한다.', answers: [['혼동 행렬'], ['정밀도']] },
+    { text: '훈련 데이터에는 잘 맞지만 새로운 데이터에서는 성능이 떨어지는 현상을 {0}(이)라고 한다.', answers: [['과대적합']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '2단원 단원 평가',
+  sub: '11문항입니다. 5·6번은 위의 혼동 행렬 표를 보고 푸세요. 해설에 관련 차시를 적어 두었습니다.',
+  items: [
+    {
+      type: 'mc',
+      q: '전통적인 프로그래밍과 기계학습의 가장 큰 차이는 무엇인가?',
+      choices: [
+        '전통적 프로그래밍은 컴퓨터가 필요하지만 기계학습은 필요하지 않다',
+        '전통적 프로그래밍은 사람이 규칙을 적고, 기계학습은 데이터에서 규칙을 찾아낸다',
+        '전통적 프로그래밍은 정답이 필요하고, 기계학습은 정답이 전혀 필요 없다',
+        '기계학습은 항상 전통적 프로그래밍보다 정확하다'
+      ],
+      answer: 1,
+      why: '기계학습의 정의가 바로 이것입니다. 규칙(모델)을 <b>사람이 적는지, 데이터에서 찾는지</b>가 갈림길입니다. ③은 틀렸습니다 — 지도학습은 정답(라벨)이 반드시 필요합니다. <b>1차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'short',
+      q: '데이터 표에서 값이 아예 비어 있는 칸을 무엇이라고 하는가?',
+      answer: ['결측치', '결측값', '누락값', '결손값'],
+      placeholder: '예: ○○○',
+      why: '<b>결측치</b>입니다. 평균이나 중앙값으로 채우거나 그 행을 지우는 방법으로 처리합니다. 어떤 방법을 쓰든 <b>왜 그렇게 했는지 기록</b>해 두어야 합니다. <b>2차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'ox',
+      q: '이상치는 데이터의 품질을 떨어뜨리므로 발견하면 <b>항상 제거</b>해야 한다.',
+      answer: false,
+      why: '그렇지 않습니다. 이상치가 오히려 <b>찾아야 할 신호</b>인 경우가 많습니다. 불량 제품 검사, 카드 사기 탐지, 기계 고장 예측에서는 이상치가 바로 목표입니다. 잡음인지 신호인지 <b>문제의 목적에 따라 판단</b>해야 합니다. <b>2차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'match',
+      q: '다음 알고리즘을 알맞은 학습 유형·문제 유형과 짝지으시오.',
+      left: [
+        'k-NN',
+        '선형 회귀',
+        'k-평균',
+        '다층 인공신경망(딥러닝)'
+      ],
+      right: ['지도학습 · 분류', '지도학습 · 회귀', '비지도학습 · 군집', '분류와 회귀 모두 가능'],
+      answer: [0, 1, 2, 3],
+      why: 'k-NN 은 가까운 이웃의 라벨로 투표하는 분류, 선형 회귀는 연속값 예측, k-평균은 정답 없이 묶는 군집입니다. 다층 인공신경망은 출력층 구성에 따라 분류에도 회귀에도 쓸 수 있습니다. <b>3·4·5·7차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'mc',
+      q: '위 혼동 행렬에서 이 모델의 <b>재현율</b>은 얼마인가? (소수 둘째 자리까지)',
+      choices: ['약 0.67', '약 0.80', '약 0.85', '약 0.31'],
+      answer: 0,
+      why: '재현율 = TP / (TP + FN) = 40 / (40 + 20) = 40/60 ≈ <b>0.67</b> 입니다. 실제 불량 60개 중 40개만 찾아냈고 <b>20개를 놓쳤다(FN)</b>는 뜻입니다. 참고로 정밀도는 40/(40+10) = 0.80 입니다. <b>6차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'mc',
+      q: '위 혼동 행렬에서 이 모델의 정확도는 (40+130)/200 = 0.85 입니다. 그런데도 이 모델을 “좋은 검사 모델”이라고 말하기 어려운 이유로 <b>가장 적절한</b> 것은?',
+      choices: [
+        '전체 데이터 개수가 200개로 너무 적기 때문',
+        '실제 불량 60개 중 20개를 놓쳤고, 불량을 놓치는 것이 더 큰 피해를 주기 때문',
+        '정상 제품을 130개나 맞혔기 때문',
+        '정확도는 계산 방법이 잘못된 지표이기 때문'
+      ],
+      answer: 1,
+      why: '이 문제에서 진짜 위험은 <b>FN(불량을 정상이라고 판정)</b>입니다. 20개를 놓쳤으니 재현율이 0.67 에 그칩니다. 정확도 0.85 는 정상 제품이 많아서 높게 나온 숫자일 뿐입니다. 지표는 <b>잘못된 판정이 만드는 피해</b>를 기준으로 골라야 합니다. <b>6차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'order',
+      q: 'k-평균 군집 알고리즘의 실행 순서를 올바르게 배열하시오.',
+      items: [
+        '군집의 개수 k 를 정한다',
+        'k 개의 중심을 무작위로 잡는다',
+        '각 데이터를 가장 가까운 중심의 군집에 넣는다',
+        '각 군집에 속한 데이터의 평균으로 중심을 다시 계산한다',
+        '중심이 거의 움직이지 않으면 멈추고, 아니면 다시 데이터를 배정한다'
+      ],
+      answer: [0, 1, 2, 3, 4],
+      why: 'k 결정 → 중심 초기화 → 배정 → 중심 재계산 → 수렴 판정(반복)입니다. <b>배정과 재계산을 번갈아 반복</b>하는 것이 핵심이며, 시작 중심에 따라 결과가 달라질 수 있어 여러 번 돌려 보는 것이 좋습니다. <b>5차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'multi',
+      q: '경사 하강법과 학습률에 대한 설명으로 <b>옳은 것을 모두</b> 고르시오.',
+      choices: [
+        '오차가 작아지는 방향으로 기울기와 절편을 조금씩 고쳐 나간다',
+        '학습률이 너무 크면 최솟값을 지나쳐 오차가 오히려 커질 수 있다',
+        '학습률이 작으면 항상 더 좋은 모델이 된다',
+        '오차는 예측값과 실제값의 차이를 제곱해 더한 값으로 재는 것이 대표적이다'
+      ],
+      answer: [0, 1, 3],
+      why: '③이 틀렸습니다. 학습률이 너무 작으면 최솟값에 <b>도달하기까지 지나치게 오래 걸리고</b>, 중간에 멈추면 오차가 큰 상태로 남습니다. 학습률은 크지도 작지도 않게 실험으로 찾는 값입니다. <b>4차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'mc',
+      q: '“우리 학교 도서관 대출 기록만 있고 어떤 이름표도 붙어 있지 않다. 비슷한 독서 취향의 학생 집단이 몇 개나 있는지 알아보고 싶다.” 가장 적절한 접근은?',
+      choices: [
+        '지도학습 · 분류 — k-NN 으로 취향을 분류한다',
+        '지도학습 · 회귀 — 선형 회귀로 대출 권수를 예측한다',
+        '비지도학습 · 군집 — k-평균으로 비슷한 기록끼리 묶는다',
+        '강화학습 — 보상을 주며 학생의 행동을 바꾼다'
+      ],
+      answer: 2,
+      why: '핵심 단서는 <b>“어떤 이름표도 붙어 있지 않다”</b>입니다. 정답(라벨)이 없으므로 지도학습은 쓸 수 없고, 비슷한 것끼리 묶는 <b>군집</b>이 맞습니다. 묶고 난 뒤 각 군집의 의미는 사람이 해석해 이름을 붙입니다. <b>1·5차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'ox',
+      q: '테스트 데이터에서 성능이 잘 나오지 않아, 테스트 데이터까지 학습에 넣어 다시 훈련시킨 뒤 같은 테스트 데이터로 성능을 측정했다. 이 평가 결과는 신뢰할 수 있다.',
+      answer: false,
+      why: '신뢰할 수 없습니다. 테스트 데이터는 모델이 <b>한 번도 보지 않은 데이터</b>여야 의미가 있습니다. 학습에 쓴 데이터로 평가하면 시험 문제를 미리 보고 시험을 치른 것과 같아 성능이 부풀려집니다. 설정을 여러 번 바꿔 볼 때는 <b>검증 데이터</b>를 따로 두는 것이 원칙입니다. <b>6차시</b>를 확인해 보세요.'
+    },
+    {
+      type: 'mc',
+      q: '퍼셉트론 하나로는 XOR 문제를 풀 수 없지만, 은닉층을 넣은 인공신경망은 풀 수 있다. 그 이유로 <b>가장 적절한</b> 것은?',
+      choices: [
+        '은닉층이 데이터의 개수를 늘려 주기 때문',
+        '퍼셉트론 하나는 직선 하나만 그을 수 있는데, 은닉층을 거치면 여러 직선을 조합한 복잡한 경계를 만들 수 있기 때문',
+        '은닉층이 있으면 학습률을 쓰지 않아도 되기 때문',
+        '은닉층이 이상치를 자동으로 제거해 주기 때문'
+      ],
+      answer: 1,
+      why: '퍼셉트론 하나는 <b>선형 경계</b> 하나만 만듭니다. XOR 은 직선 하나로 나눌 수 없는 배치이므로 풀리지 않습니다. 은닉층의 노드들이 각각 만든 경계를 다음 층에서 조합하면 <b>휘어진 경계</b>를 표현할 수 있게 됩니다. 이 은닉층을 여러 층으로 쌓은 것이 딥러닝입니다. <b>7차시</b>를 확인해 보세요.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a2c-note',
+  title: '2단원 서·논술형 답안',
+  prompt: '위의 세 문항에 대한 답을 씁니다. 자동 저장되며, <b>복사</b> 버튼으로 한 번에 옮길 수 있습니다.',
+  fields: [
+    { key: 'cm', label: '위 혼동 행렬로 직접 계산해 본 값 (정확도 / 정밀도 / 재현율)', type: 'text', placeholder: '예: 0.85 / 0.80 / 0.67' },
+    { key: 'topic', label: '문항 2에서 고른 문제의 학습 유형', type: 'select', options: ['지도학습 · 분류', '지도학습 · 회귀', '비지도학습 · 군집', '아직 정하지 못했다'] },
+    { key: 'q1', label: '문항 1 — 훈련 99% / 테스트 62% 의 원인과 개선 방법', type: 'textarea', rows: 6, placeholder: '이 현상의 이름은 …이다. 원인은 … 개선 방법으로는 첫째 …, 둘째 …' },
+    { key: 'q2', label: '문항 2 — 나의 기계학습 문제 설계 (데이터 · 속성 · 유형 · 알고리즘 · 평가)', type: 'textarea', rows: 7, placeholder: '문제: … / 데이터: … / 속성: … / 학습 유형과 근거: … / 알고리즘: … / 평가 지표와 근거: … / 전처리 계획: …' },
+    { key: 'q3', label: '문항 3 — (가) 식중독 위험 판별과 (나) 스팸 차단에서 중요한 지표', type: 'textarea', rows: 6, placeholder: '(가) 중요한 지표: … 이유: 잘못된 판정 중 …의 피해가 크기 때문 / (나) 중요한 지표: … 이유: …' },
+    { key: 'weak', label: '단원 평가에서 틀린 문항 번호와, 다시 볼 차시', type: 'text', placeholder: '예: 5번·6번 → 6차시' }
+  ]
+});
+
+AI.rubric('#self1', {
+  id: 'a2c-rubric',
+  items: [
+    { std: '12인기02-01', text: '나는 기계학습으로 풀 만한 문제를 스스로 정의하고, 그 문제에 필요한 데이터가 무엇인지 정해 모을 수 있다.' },
+    { std: '12인기02-02', text: '나는 결측치와 이상치를 찾아 처리하고 정규화를 적용해, 문제 해결에 쓸 핵심 속성을 뽑아낼 수 있다.' },
+    { std: '12인기02-03', text: '나는 정답(라벨)의 유무와 예측하려는 값의 종류를 근거로 알맞은 기계학습 유형과 알고리즘을 고를 수 있다.' },
+    { std: '12인기02-04', text: '나는 데이터를 훈련용과 테스트용으로 나누어 학습시키고, 혼동 행렬로 정밀도와 재현율을 계산해 성능을 평가할 수 있다.' },
+    { std: '12인기02-05', text: '나는 퍼셉트론과 은닉층의 역할을 설명하고, 인공신경망과 딥러닝의 관계 및 활용 분야를 말할 수 있다.' },
+    { std: '12인기02-06', text: '나는 딥러닝을 활용해 실생활이나 다른 교과의 문제를 해결해 보고, 그 결과의 성능을 근거를 들어 평가할 수 있다.' }
+  ]
+});
+</script>
+</body>
+</html>

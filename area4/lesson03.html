@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3차시 함께 만들다 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+/* 이 차시 전용 — 파이썬 코드 창 */
+pre.code-pane {
+  margin: 0; padding: 13px 0; overflow-x: auto;
+  background: var(--surface-3); border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono); font-size: 13px; line-height: 2.05; color: var(--ink);
+}
+pre.code-pane .cl { display: block; white-space: pre; padding: 0 15px; min-height: 1.4em; }
+pre.code-pane .ln { display: inline-block; width: 2.1em; margin-right: 1.1em; text-align: right; color: var(--ink-4); user-select: none; }
+pre.code-pane .k { color: var(--accent-ink); font-weight: 700; }
+pre.code-pane .s { color: var(--ok); }
+pre.code-pane .c { color: var(--ink-4); font-style: italic; }
+pre.code-pane .nm { color: var(--warn); font-weight: 650; }
+pre.code-pane .fn { color: var(--ink); font-weight: 650; }
+select.code-sel {
+  width: auto; min-width: 9.2em; padding: 1px 5px; display: inline-block; vertical-align: baseline;
+  font-family: var(--font-mono); font-size: 12.5px; font-weight: 700;
+  color: var(--accent-ink); background: var(--surface);
+  border: 2px dashed var(--accent); border-radius: 7px;
+}
+select.code-sel.ok { border-style: solid; border-color: var(--ok); color: var(--ok); background: var(--ok-soft); }
+select.code-sel.no { border-style: solid; border-color: var(--no); color: var(--no); background: var(--no-soft); }
+.mark-list { margin: 0; padding-left: 1.3em; font-size: 14px; }
+.mark-list li { margin: .35em 0; }
+.role-svg text { font-family: var(--font-sans); }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 생각 열기</div>
+      <p>네 명이 한 팀이 되어 “교실 미세먼지 예측” 프로젝트를 시작했습니다. 첫 시간에 이렇게 나누었습니다.</p>
+      <ul>
+        <li><b>가온</b>은 데이터를 모으고, <b>나리</b>는 모델을 만들고, <b>다온</b>은 성능을 검사하고, <b>라온</b>은 기록과 발표를 맡습니다.</li>
+        <li>일주일 뒤 모여 보니 가온의 표는 열 이름이 <span class="mono">pm10</span>인데 나리의 코드는 <span class="mono">PM10</span>을 찾고 있었고, 다온은 나리가 쓴 데이터가 <b>어느 버전인지</b> 알 수 없었습니다.</li>
+      </ul>
+      <p>각자 열심히 일했는데도 <b>합쳐지지 않았습니다</b>. 무엇이 빠졌던 걸까요?</p>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 나눈다는 것과 함께한다는 것</summary>
+        <div class="more-body">
+          역할을 나누는 것만으로는 협력이 되지 않습니다. <b>서로의 결과물이 맞물리는 지점</b>(열 이름, 파일 이름, 데이터 버전)을 미리 정해 두고, <b>무엇을 왜 바꿨는지 기록</b>해야 합쳐집니다. 이 차시에서는 그 맞물리는 지점을 <b>파이프라인</b>이라는 이름으로 정리하고, 실제 파이썬 코드로 이어 봅니다.
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 협력적 문제 해결 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>역할을 나누고, 다시 바꿔 보기</h2></div>
+
+    <p>인공지능 프로젝트는 혼자 끝내기 어렵습니다. 데이터를 모으는 일, 모델을 고르는 일, 성능을 검사하는 일, 결과를 정리해 알리는 일이 모두 필요하기 때문입니다. 그래서 팀을 만들 때는 먼저 <span class="term">역할 분담</span>을 합니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>네 사람 팀의 역할 분담 예시 — 팀 인원이 셋이면 기록·발표를 나누어 겸합니다.</caption>
+        <thead><tr><th>역할</th><th>하는 일</th><th>남겨야 하는 결과물</th></tr></thead>
+        <tbody>
+          <tr><td><b>데이터 담당</b></td><td>데이터를 찾아 모으고, 결측치와 이상치를 정리한다</td><td>정리된 데이터 파일 + 열 이름 설명표</td></tr>
+          <tr><td><b>모델 담당</b></td><td>기계학습 유형과 알고리즘을 고르고 학습시킨다</td><td>학습 코드 + 저장된 모델 파일</td></tr>
+          <tr><td><b>검증 담당</b></td><td>훈련·테스트 성능을 재고 틀린 사례를 모아 본다</td><td>성능 표(정확도·정밀도·재현율) + 오류 목록</td></tr>
+          <tr><td><b>기록·발표 담당</b></td><td>회의와 변경 사항을 적고 결과를 정리해 알린다</td><td>작업 기록 + 발표 자료</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>그런데 역할을 정해 놓고 <b>끝까지 그것만</b> 하면 문제가 생깁니다. 데이터 담당은 모델이 무엇을 필요로 하는지 모르고, 모델 담당은 데이터가 왜 그렇게 생겼는지 모르게 됩니다. 그래서 프로젝트 중간에 한 번은 <b>서로 바꿔 보는 시간</b>을 갖습니다. 남의 자리에 앉아 보면 “왜 열 이름을 통일해야 하는지”가 몸으로 이해됩니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념</div>
+      <p><b>협력적 문제 해결</b>은 일을 나누어 빨리 끝내는 것이 아니라, <b>서로의 결과물이 맞물리도록 약속을 정하고 그 약속을 함께 지키는 것</b>이다. 약속에는 파일 이름, 열 이름, 데이터 버전, 회의 주기, 기록 방법이 포함된다.</p>
+    </div>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 흔한 실수</div>
+      <p>“각자 만들고 마지막에 합치자”는 계획은 거의 실패합니다. 합치는 데 드는 시간이 만드는 시간보다 길어지기 때문입니다. 대신 <b>아주 작게 만들어 자주 합치기</b>를 반복합니다. 데이터 10줄, 속성 2개, 모델 1개로 <b>처음부터 끝까지 한 번</b> 돌려 본 뒤 살을 붙이는 방식입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. 짝 프로그래밍 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>한 대의 컴퓨터, 두 사람</h2></div>
+
+    <p><b class="blank" data-a="짝 프로그래밍|페어 프로그래밍|pair programming" data-hint="두 사람이 한 대의 컴퓨터로 함께 코드를 쓰는 방법">짝 프로그래밍</b>은 두 사람이 한 짝이 되어 <b>컴퓨터 한 대</b>로 함께 프로그래밍하는 방법입니다. 컴퓨터는 두 사람 사이 정확히 가운데에 둡니다. 자리가 한쪽으로 치우치면 관계도 치우쳐, 한 사람이 구경꾼이 되기 쉽습니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">⌨️</span>
+        <h4><b class="blank" data-a="운전자|드라이버|driver" data-hint="자동차에 비유하면 직접 핸들을 잡는 사람">운전자</b> (driver)</h4>
+        <p>키보드를 잡고 <b>지금 이 줄</b>을 씁니다. 문법, 변수 이름, 들여쓰기처럼 가까운 것에 집중합니다. 생각을 소리 내어 말하며 씁니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🧭</span>
+        <h4><b class="blank" data-a="안내자|내비게이터|navigator" data-hint="자동차에 비유하면 지도를 보며 길을 알려 주는 사람">안내자</b> (navigator)</h4>
+        <p>손은 키보드에서 떼고 <b>전체 흐름</b>을 봅니다. “그 변수 이름이 위와 다른데?”, “이 단계 다음은 분할이었지?” 하고 짚어 줍니다.</p>
+      </div>
+    </div>
+
+    <p>두 사람은 <b>5~10분마다 역할을 바꿉니다</b>. 계속 운전만 하면 시야가 좁아지고, 계속 안내만 하면 손이 굳습니다. 짝 프로그래밍의 가장 큰 효과는 코드를 빨리 쓰는 것이 아니라 <b>오류를 일찍 발견하는 것</b>입니다. 혼자 쓰면 몇 시간 헤맬 오타를 옆 사람이 몇 초 만에 찾아 줍니다.</p>
+
+    <div class="box box-info">
+      <div class="box-label">🔍 실력 차이가 있어도 괜찮은 이유</div>
+      <p>실력이 낮은 쪽은 상대의 <b>생각하는 과정</b>을 지켜보며 배웁니다. 실력이 높은 쪽은 설명하면서 자기 이해의 빈틈을 발견합니다. 다만 한 가지 규칙이 필요합니다. <b>운전대는 반드시 번갈아 잡는다</b> — 한 사람이 계속 잡으면 짝 프로그래밍이 아니라 시범 관람이 됩니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. 작업 기록과 버전 관리 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>무엇을 왜 바꿨는지 남기기</h2></div>
+
+    <p>정확도가 0.71에서 0.86으로 올랐습니다. 무엇 덕분일까요? 그날 세 가지를 동시에 바꿨다면 <b>아무도 답할 수 없습니다</b>. 그래서 프로젝트에는 <b class="blank" data-a="버전 관리|버전관리|형상 관리" data-hint="변경 이력을 저장해 두고 필요하면 이전 상태로 되돌리는 일">버전 관리</b>가 필요합니다. 파일을 <span class="mono">최종.py</span>, <span class="mono">최종_진짜.py</span>, <span class="mono">최종_진짜최종.py</span>로 늘려 가는 방식은 버전 관리가 아닙니다.</p>
+
+    <div class="box box-concept">
+      <div class="box-label">📘 개념</div>
+      <p><b>버전 관리</b>는 <b>언제 · 누가 · 무엇을 · 왜</b> 바꿨는지를 기록해 두고, 필요하면 이전 상태로 되돌릴 수 있게 하는 일이다. 전문 도구(Git 등)를 쓰지 않아도, 표 한 장에 이 네 가지를 적기만 하면 버전 관리의 핵심은 지킬 수 있다.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>작업 기록표 예시 — 한 번에 <b>한 가지만</b> 바꾸고 그 결과를 적는 것이 요령이다.</caption>
+        <thead><tr><th>날짜</th><th>누가</th><th>무엇을 바꿨나</th><th>왜</th><th>테스트 정확도</th></tr></thead>
+        <tbody>
+          <tr><td>5/12</td><td>가온</td><td>결측치 12행을 평균 대체로 처리</td><td>행을 지우면 데이터가 너무 줄어서</td><td class="num">0.71 → 0.74</td></tr>
+          <tr><td>5/14</td><td>나리</td><td>k-NN의 k를 3에서 5로</td><td>k=3은 잡음에 민감해 보여서</td><td class="num">0.74 → 0.78</td></tr>
+          <tr><td>5/15</td><td>나리</td><td>정규화를 분할 <b>뒤</b>로 옮김</td><td>테스트 정보가 새어 들고 있었음</td><td class="num">0.86 → 0.81</td></tr>
+          <tr><td>5/18</td><td>다온</td><td>‘요일’ 속성 추가</td><td>주말과 평일의 차이가 커 보여서</td><td class="num">0.81 → 0.86</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>세 번째 줄을 보면 정확도가 <b>떨어졌습니다</b>. 그런데 이것은 나쁜 변경이 아닙니다. 그전의 0.86은 <b>부풀려진 점수</b>였고, 0.81이 진짜 실력이었을 뿐입니다. 기록이 없다면 이 사실을 알아채지 못하고 잘못된 점수를 발표했을 것입니다.</p>
+  </section>
+
+  <!-- ============ 4. 파이프라인 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>인공지능 프로그램의 파이프라인</h2></div>
+
+    <p>인공지능 프로그램은 거의 언제나 같은 순서를 지납니다. 이렇게 앞 단계의 결과물이 뒤 단계의 입력이 되며 이어지는 처리 흐름을 <b class="blank" data-hint="물이 관을 따라 흐르듯 단계가 이어지는 처리 흐름">파이프라인</b>이라고 부릅니다. 팀원들은 각자 다른 단계를 맡더라도 이 순서만 공유하면 결과물이 맞물립니다.</p>
+
+    <div class="box" style="padding:18px 12px">
+      <svg class="role-svg" viewBox="0 0 880 215" width="100%" role="img" aria-label="인공지능 프로그램 파이프라인 8단계 흐름도" style="max-width:880px;display:block;margin:0 auto">
+        <defs>
+          <marker id="pl-arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="var(--accent)"></path>
+          </marker>
+        </defs>
+        <g fill="var(--accent-soft)" stroke="var(--accent-line)" stroke-width="1.5">
+          <rect x="6" y="14" width="190" height="56" rx="11"></rect>
+          <rect x="226" y="14" width="190" height="56" rx="11"></rect>
+          <rect x="446" y="14" width="190" height="56" rx="11"></rect>
+          <rect x="666" y="14" width="190" height="56" rx="11"></rect>
+          <rect x="666" y="145" width="190" height="56" rx="11"></rect>
+          <rect x="446" y="145" width="190" height="56" rx="11"></rect>
+          <rect x="226" y="145" width="190" height="56" rx="11"></rect>
+          <rect x="6" y="145" width="190" height="56" rx="11"></rect>
+        </g>
+        <g stroke="var(--accent)" stroke-width="2" fill="none" marker-end="url(#pl-arw)">
+          <line x1="200" y1="42" x2="220" y2="42"></line>
+          <line x1="420" y1="42" x2="440" y2="42"></line>
+          <line x1="640" y1="42" x2="660" y2="42"></line>
+          <line x1="761" y1="74" x2="761" y2="141"></line>
+          <line x1="662" y1="173" x2="642" y2="173"></line>
+          <line x1="442" y1="173" x2="422" y2="173"></line>
+          <line x1="222" y1="173" x2="202" y2="173"></line>
+        </g>
+        <g fill="var(--ink)" font-size="14" font-weight="700" text-anchor="middle">
+          <text x="101" y="40">① 데이터 불러오기</text>
+          <text x="321" y="40">② 결측치·이상치 처리</text>
+          <text x="541" y="40">③ 속성과 정답 나누기</text>
+          <text x="761" y="40">④ 훈련·테스트 분할</text>
+          <text x="761" y="171">⑤ 정규화</text>
+          <text x="541" y="171">⑥ 모델 선택과 학습</text>
+          <text x="321" y="171">⑦ 성능 평가</text>
+          <text x="101" y="171">⑧ 예측과 저장</text>
+        </g>
+        <g fill="var(--ink-3)" font-size="11.5" text-anchor="middle" font-family="monospace">
+          <text x="101" y="59">pd.read_csv()</text>
+          <text x="321" y="59">df.fillna()</text>
+          <text x="541" y="59">X, y</text>
+          <text x="761" y="59">train_test_split()</text>
+          <text x="761" y="190">StandardScaler()</text>
+          <text x="541" y="190">model.fit()</text>
+          <text x="321" y="190">accuracy_score()</text>
+          <text x="101" y="190">model.predict()</text>
+        </g>
+      </svg>
+    </div>
+
+    <p>이 가운데 순서를 <b>절대 바꾸면 안 되는</b> 지점이 있습니다. ④ 분할과 ⑤ 정규화입니다. 정규화의 기준(평균과 표준편차)을 <b class="blank" data-a="훈련 데이터|훈련데이터|학습 데이터" data-hint="모델을 학습시키는 데 쓰는 쪽 데이터">훈련 데이터</b>만 보고 만들어야 하는데, 분할보다 먼저 정규화하면 테스트 데이터의 평균까지 기준에 섞여 듭니다. 이렇게 테스트 데이터의 정보가 학습 과정으로 새어 드는 일을 <b class="blank" data-a="데이터 누출|데이터 유출|정보 누출|leakage" data-hint="테스트 데이터의 정보가 학습 쪽으로 새어 드는 일">데이터 누출</b>이라고 합니다.</p>
+
+    <div class="box box-warn">
+      <div class="box-label">⚠️ 데이터 누출을 시험에 비유하면</div>
+      <p>기말고사 문제를 미리 보고 공부한 학생의 점수는 실력을 나타내지 못합니다. 데이터 누출이 있으면 정확도가 <b>실제보다 높게</b> 나오고, 발표할 때는 뿌듯하지만 새 데이터에서는 형편없이 틀립니다. ② <b class="blank" data-hint="결측치·이상치를 다듬어 데이터를 정리하는 단계">전처리</b> 중에서도 <b>전체의 평균·최댓값 같은 통계값을 배우는 작업</b>(정규화, 평균 대체)은 반드시 분할 뒤에, 훈련 데이터만 보고 해야 합니다. 반대로 오타를 고치거나 중복 행을 지우는 일처럼 <b>행 하나만 보면 되는 정리</b>는 분할 전에 해도 괜찮습니다.</p>
+    </div>
+
+    <h3 class="sub-head">자주 쓰는 라이브러리 세 가지</h3>
+    <p>파이프라인의 각 단계를 처음부터 직접 만들 필요는 없습니다. 이미 잘 만들어져 공개된 코드 묶음, 즉 <b class="blank" data-hint="미리 만들어 둔 코드를 모아 놓아 불러 쓰는 묶음">라이브러리</b>를 불러 쓰면 됩니다.</p>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">🐼</span>
+        <h4><b class="blank" data-a="pandas|판다스" data-hint="표 형태의 데이터를 읽고 다루는 라이브러리, 이름이 곰 이름을 닮았다">pandas</b></h4>
+        <p>표(행과 열) 데이터를 읽고 다룹니다. <span class="mono">read_csv()</span>로 파일을 읽고, <span class="mono">describe()</span>로 요약하고, <span class="mono">fillna()</span>로 결측치를 채웁니다. ①②③ 단계 담당입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🔬</span>
+        <h4><b class="blank" data-a="scikit-learn|사이킷런|사이킷 런|sklearn" data-hint="기계학습 알고리즘이 모여 있는 라이브러리, 불러올 때는 sklearn">scikit-learn</b></h4>
+        <p>기계학습 알고리즘과 평가 도구가 모여 있습니다. 분할·정규화·학습·평가가 모두 여기 있습니다. ④⑤⑥⑦ 단계 담당입니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">📈</span>
+        <h4><b class="blank" data-a="matplotlib|맷플롯립" data-hint="그래프를 그리는 라이브러리, 이름에 plot이 들어 있다">matplotlib</b></h4>
+        <p>그래프를 그립니다. 데이터의 분포를 보거나 성능 변화를 꺾은선으로 그려 발표 자료에 넣습니다. 모든 단계에서 <b>눈으로 확인</b>할 때 씁니다.</p>
+      </div>
+    </div>
+
+    <p>scikit-learn의 좋은 점은 어떤 알고리즘이든 사용법이 똑같다는 것입니다. 학습은 <b class="blank" data-a="fit|fit()" data-hint="scikit-learn에서 학습시키는 메서드 이름, 영어로 '맞추다'">fit</b>, 예측은 <b class="blank" data-a="predict|predict()" data-hint="학습한 모델로 새 값을 알아맞히는 메서드 이름">predict</b>입니다. k-NN에서 결정 트리로, 결정 트리에서 신경망으로 바꿀 때 <b>모델을 만드는 한 줄만</b> 고치면 됩니다.</p>
+  </section>
+
+  <!-- ============ 5. 코드를 다루는 세 단계 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>코드를 다루는 세 단계</h2></div>
+
+    <p>프로그래밍이 아직 익숙하지 않아도 인공지능 프로젝트를 할 수 있습니다. 코드는 처음부터 백지에 쓰는 것이 아니라, <b>세 단계로 나누어</b> 익히기 때문입니다.</p>
+
+    <div class="table-wrap">
+      <table class="tb">
+        <caption>학습자 수준에 따라 코드 작성 방식을 달리 구성한다 — 자기 자리를 골라 시작하면 된다.</caption>
+        <thead><tr><th>단계</th><th>무엇을 하나</th><th>목표</th><th>이 차시의 활동</th></tr></thead>
+        <tbody>
+          <tr><td><b>1단계 실행하며 이해</b></td><td>완성된 코드를 그대로 실행하고, 출력값이 무엇을 뜻하는지 한 줄씩 설명해 본다</td><td>각 줄이 파이프라인의 어느 단계인지 말할 수 있다</td><td>파이프라인 조립 시뮬레이터</td></tr>
+          <tr><td><b>2단계 고쳐 보기</b></td><td>숫자나 이름 하나를 바꿔 실행하고 결과가 어떻게 달라지는지 본다</td><td>어떤 값이 성능을 바꾸는지 감을 잡는다</td><td><span class="mono">test_size</span>, <span class="mono">n_neighbors</span> 바꿔 보기</td></tr>
+          <tr><td><b>3단계 완성하기</b></td><td>비어 있는 부분을 스스로 채워 코드를 동작하게 만든다</td><td>파이프라인을 코드로 옮길 수 있다</td><td>파이썬 코드 빈칸 채우기</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-ok">
+      <div class="box-label">✅ 이렇게 하면 막히지 않는다</div>
+      <p>코드가 오류를 내면 <b>맨 아래 줄부터</b> 읽습니다. 파이썬은 마지막 줄에 오류의 종류와 이유를 적어 줍니다. <span class="mono">FileNotFoundError</span>는 파일 이름·경로 문제, <span class="mono">KeyError</span>는 열 이름 문제, <span class="mono">ValueError</span>는 데이터 모양이나 자료형 문제입니다. 오류 메시지는 혼내는 말이 아니라 <b>가장 친절한 힌트</b>입니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 6. 시뮬레이터 1 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>파이프라인을 조립해 보기</h2><span class="sec-tag">시뮬레이터 1</span></div>
+    <div id="sim1"></div>
+  </section>
+
+  <!-- ============ 7. 시뮬레이터 2 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>파이썬 코드를 완성해 보기</h2><span class="sec-tag">시뮬레이터 2</span></div>
+    <div id="sim2"></div>
+  </section>
+
+  <!-- ============ 8. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>정리하며 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 9. 확인 문제 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">9</span><h2>확인 문제</h2></div>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 10. 활동 기록 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">10</span><h2>활동 기록</h2></div>
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 더 알아보기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>더 알아보기</h2></div>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">코드</span> 완성된 전체 코드와, 회귀로 바꾸는 방법</summary>
+      <div class="more-body">
+        <p>시뮬레이터 2의 정답 코드입니다. 이 코드는 <b>분류</b> 문제(품종 맞히기)를 풉니다.</p>
+        <pre style="margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;white-space:pre-wrap">import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+
+df = pd.read_csv('iris.csv')
+X = df[['sepal_length', 'sepal_width', 'petal_length', 'petal_width']]
+y = df['species']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s = scaler.transform(X_test)
+
+model = KNeighborsClassifier(n_neighbors=5)
+model.fit(X_train_s, y_train)
+
+pred = model.predict(X_test_s)
+print('정확도:', accuracy_score(y_test, pred))</pre>
+        <p style="margin-top:12px"><b>숫자를 예측하는 회귀</b>로 바꾸려면 세 줄만 고칩니다. <span class="mono">KNeighborsClassifier</span> → <span class="mono">KNeighborsRegressor</span>, <span class="mono">accuracy_score</span> → <span class="mono">mean_absolute_error</span>, 그리고 <span class="mono">y</span>에 범주가 아닌 숫자 열을 넣습니다. <span class="mono">fit</span>과 <span class="mono">predict</span>는 그대로입니다 — 이것이 scikit-learn을 배우면 여러 알고리즘을 한꺼번에 쓸 수 있는 이유입니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">심화</span> Pipeline 객체 — 순서를 아예 코드로 묶어 버리기</summary>
+      <div class="more-body">
+        <p>정규화를 분할 뒤에 해야 한다는 규칙은 사람이 지키기 쉽지 않습니다. scikit-learn은 이 순서를 <b>객체로 묶어</b> 실수를 막는 방법을 제공합니다.</p>
+        <pre style="margin:0;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;white-space:pre-wrap">from sklearn.pipeline import make_pipeline
+
+pipe = make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=5))
+pipe.fit(X_train, y_train)          # 정규화 기준을 훈련 데이터에서만 배운다
+print(pipe.score(X_test, y_test))   # 테스트에는 같은 기준을 적용만 한다</pre>
+        <p style="margin-top:12px"><span class="mono">pipe.fit()</span> 한 번으로 “훈련 데이터로 기준 만들기 → 변환 → 학습”이 순서대로 일어납니다. 파이프라인이라는 이름이 코드에도 그대로 등장하는 셈입니다. 교차 검증(<span class="mono">cross_val_score</span>)과 함께 쓰면 각 겹마다 기준을 새로 만들어 주므로 데이터 누출을 원천적으로 막을 수 있습니다.</p>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">사례</span> 실제 개발 팀은 어떻게 협력할까</summary>
+      <div class="more-body">
+        <p>회사의 인공지능 팀도 우리와 크게 다르지 않습니다. 다만 약속을 도구로 강제합니다.</p>
+        <ul style="margin:0">
+          <li><b>매일 15분 회의</b> — 어제 한 일, 오늘 할 일, 막힌 것 세 가지만 말합니다. 길게 하지 않는 것이 규칙입니다.</li>
+          <li><b>변경마다 기록</b> — 코드를 저장할 때 “왜 바꿨는지”를 한 줄 적습니다. 이 한 줄이 몇 달 뒤 자신을 구합니다.</li>
+          <li><b>서로의 코드 읽기</b> — 남이 쓴 코드를 한 명 이상이 읽고 나서야 합칩니다. 짝 프로그래밍의 확장판입니다.</li>
+          <li><b>실험 기록판</b> — 바꾼 것과 성능을 표로 쌓습니다. 우리가 만든 작업 기록표와 같은 역할입니다.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="more-box">
+      <summary><span class="plus-tag">연결</span> 다음 차시로 — 만들었는데 성능이 낮으면?</summary>
+      <div class="more-body">
+        파이프라인을 잘 조립해 코드를 돌렸는데 정확도가 0.68로 나왔다면, 이제 무엇을 해야 할까요? 데이터를 더 모을까요, 알고리즘을 바꿀까요, 아니면 값들을 조정할까요? 시간은 한정되어 있습니다. 다음 차시에서는 <b>평가 결과를 읽고 무엇부터 고칠지 결정하는 방법</b>과, 성능만이 아니라 <b>사회적 영향</b>까지 함께 점검하는 방법을 배웁니다.
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 4, lesson: 3,
+  title: '함께 만들다',
+  sub: '협력적 개발과 파이프라인 구현',
+  lead: '역할을 나누는 것만으로는 협력이 되지 않습니다. 짝 프로그래밍으로 함께 코드를 읽고, <b>파이프라인</b>이라는 공통 순서를 약속하고, 무엇을 왜 바꿨는지 남기는 것 — 이 세 가지가 팀의 결과물을 맞물리게 합니다. 마지막에는 실제로 동작하는 scikit-learn 코드를 직접 완성해 봅니다.',
+  standards: ['12인기04-03'],
+  keywords: ['협력', '파이프라인', '라이브러리', '짝 프로그래밍', '코드 읽기'],
+  goals: [
+    '프로젝트 역할을 나누고 짝 프로그래밍으로 협력하는 방법을 설명할 수 있다.',
+    '인공지능 프로그램의 파이프라인 단계를 순서대로 배열하고, 순서를 바꾸면 <b>데이터 누출</b>이 생기는 지점을 지적할 수 있다.',
+    '주어진 기계학습 코드의 빈 부분을 채워 완성하고, 각 줄이 파이프라인의 어느 단계인지 설명할 수 있다.'
+  ]
+});
+</script>
+
+<!-- ===================== 시뮬레이터 1: 파이프라인 조립 ===================== -->
+<script>
+(function () {
+  var BLOCKS = [
+    { n: '데이터 불러오기', f: "pd.read_csv('iris.csv')" },
+    { n: '결측치·이상치 처리', f: "df.fillna() · df.dropna()" },
+    { n: '속성과 정답 나누기', f: "X = df[[...]] · y = df['species']" },
+    { n: '훈련·테스트 분할', f: "train_test_split(X, y, test_size=0.2)" },
+    { n: '정규화 기준 만들고 변환', f: "scaler.fit_transform(X_train)" },
+    { n: '모델 선택과 학습', f: "model = KNeighborsClassifier() · model.fit()" },
+    { n: '성능 평가', f: "accuracy_score(y_test, pred)" },
+    { n: '예측과 모델 저장', f: "model.predict() · joblib.dump(model, 'model.joblib')" }
+  ];
+
+  /* 인접 순서 규칙 — 7개를 모두 지키면 곧 정답 순서다 */
+  var RULES = [
+    { a: 0, b: 1, m: '<b>불러오기 → 전처리</b>: 파일을 읽지 않으면 다듬을 표 자체가 없습니다. <span class="mono">df</span>가 만들어지기 전에 <span class="mono">df.fillna()</span>를 쓰면 이름 오류가 납니다.' },
+    { a: 1, b: 2, m: '<b>전처리 → 속성·정답 나누기</b>: 지워질 행을 먼저 나눠 두면 X와 y의 행 수가 어긋나 학습이 되지 않습니다. 표를 정리한 뒤에 나눕니다.' },
+    { a: 2, b: 3, m: '<b>속성·정답 나누기 → 분할</b>: <span class="mono">train_test_split(X, y)</span>에 넘길 X와 y가 아직 없습니다. 무엇을 문제로, 무엇을 정답으로 볼지 먼저 정해야 합니다.' },
+    { a: 3, b: 4, m: '⚠️ <b>분할 → 정규화</b> (이 차시의 핵심): 정규화 기준인 평균·표준편차를 분할보다 먼저 계산하면 <b>테스트 데이터의 정보가 기준에 섞여 듭니다</b>. 시험 문제를 미리 훔쳐본 것과 같아서 정확도가 실제보다 높게 나옵니다. 이것이 <b>데이터 누출</b>입니다.' },
+    { a: 4, b: 5, m: '<b>정규화 → 학습</b>: 학습한 뒤에 값의 크기를 바꾸면 모델이 배운 기준과 어긋납니다. 변환된 데이터로 학습해야 합니다.' },
+    { a: 5, b: 6, m: '<b>학습 → 평가</b>: 학습하지 않은 모델은 예측을 할 수 없으니 평가할 것도 없습니다. <span class="mono">fit()</span> 다음이 평가입니다.' },
+    { a: 6, b: 7, m: '<b>평가 → 예측·저장</b>: 성능을 확인하지 않고 저장하면 얼마나 믿을 수 있는 모델인지 아무도 모릅니다. 평가가 먼저입니다.' }
+  ];
+
+  var RUN = [
+    { t: '📄 <b>데이터 불러오기</b> — iris.csv 읽음 · <b>150행 × 5열</b> (속성 4개 + 품종 1개)', k: 'rows', v: '150' },
+    { t: '🧹 <b>결측치·이상치 처리</b> — 결측치 3칸을 해당 열의 중앙값으로 대체, 꽃잎 길이가 지나치게 큰 이상치 1행 제거 → <b>149행</b>', k: 'rows', v: '149' },
+    { t: '✂️ <b>속성과 정답 나누기</b> — X: 149행 × 4열 / y: 149개 (setosa 50 · versicolor 49 · virginica 50)', k: null },
+    { t: '🔀 <b>훈련·테스트 분할</b> — test_size=0.2 → 훈련 <b>119행</b> · 테스트 <b>30행</b> (품종 비율 유지)', k: 'split', v: '119 / 30' },
+    { t: '📏 <b>정규화</b> — 훈련 119행의 평균·표준편차로 기준 생성(꽃잎 길이 평균 3.78, 표준편차 1.76) → 훈련·테스트를 <b>같은 기준</b>으로 변환', k: null },
+    { t: '🤖 <b>모델 선택과 학습</b> — KNeighborsClassifier(n_neighbors=5) 를 훈련 119행으로 학습 완료', k: null },
+    { t: '📊 <b>성능 평가</b> — 테스트 30개 중 <b>29개 정답</b> → 정확도 <b>0.967</b> (틀린 1개는 versicolor를 virginica로 예측)', k: 'acc', v: '0.967' },
+    { t: '💾 <b>예측과 저장</b> — 새 데이터 [5.1, 3.5, 1.4, 0.2] → <b>setosa</b> 로 예측 · model.joblib 저장 완료', k: null }
+  ];
+
+  var body = AI.sim.panel('#sim1', {
+    title: '파이프라인 조립 — 순서를 맞춰 실행하기',
+    tag: '순서 배열',
+    desc: '아래 8개 블록이 <b>뒤섞여</b> 있습니다. ▲▼ 버튼으로 올바른 파이프라인 순서를 만든 뒤 <b>검증</b>을 누르세요. 순서가 맞으면 <b>실행</b> 버튼이 열리고, 각 단계의 산출물을 로그로 확인할 수 있습니다.'
+  });
+
+  var cur = AI.sim.shuffle([0, 1, 2, 3, 4, 5, 6, 7], AI.sim.rng(20260804));
+  if (cur.every(function (v, i) { return v === i; })) cur.reverse();
+
+  var list = AI.h('div', { class: 'q-order' });
+  var verdict = AI.h('div', { class: 'box box-info', style: { display: 'none', marginTop: '14px' } });
+  var log = AI.ui.log();
+  var stats = AI.ui.stats([
+    { key: 'rows', label: '데이터 행 수' },
+    { key: 'split', label: '훈련 / 테스트' },
+    { key: 'acc', label: '테스트 정확도' }
+  ]);
+  var verified = false;
+
+  function swap(i, j) {
+    var t = cur[i]; cur[i] = cur[j]; cur[j] = t;
+    verified = false;
+    runBtn.disabled = true;
+    verdict.style.display = 'none';
+    render();
+  }
+
+  function render() {
+    list.innerHTML = '';
+    cur.forEach(function (bi, pos) {
+      var b = BLOCKS[bi];
+      var row = AI.h('div', { class: 'order-item' },
+        AI.h('span', { class: 'oh', text: pos + 1 }),
+        AI.h('span', { class: 'otxt' },
+          AI.h('b', { text: b.n }),
+          AI.h('br'),
+          AI.h('span', { class: 'mono', style: { fontSize: '11.5px' }, text: b.f })
+        ),
+        AI.h('span', { class: 'oc' },
+          AI.h('button', { type: 'button', title: '위로', disabled: pos === 0, onclick: function () { swap(pos, pos - 1); } }, '▲'),
+          AI.h('button', { type: 'button', title: '아래로', disabled: pos === cur.length - 1, onclick: function () { swap(pos, pos + 1); } }, '▼')
+        )
+      );
+      list.appendChild(row);
+    });
+  }
+
+  function verify() {
+    var pos = [];
+    cur.forEach(function (bi, i) { pos[bi] = i; });
+    var bad = RULES.filter(function (r) { return pos[r.a] > pos[r.b]; });
+
+    [].forEach.call(list.children, function (row, i) {
+      row.classList.remove('ok', 'no');
+      row.classList.add(cur[i] === i ? 'ok' : 'no');
+    });
+
+    verdict.style.display = '';
+    if (!bad.length) {
+      verified = true;
+      runBtn.disabled = false;
+      verdict.className = 'box box-ok';
+      verdict.innerHTML = '<div class="box-label">✅ 순서가 맞습니다</div>' +
+        '<p>특히 <b>④ 분할 → ⑤ 정규화</b> 순서를 지킨 것이 중요합니다. 정규화 기준을 훈련 데이터만 보고 만들었으므로, 뒤에 나오는 정확도는 <b>믿을 수 있는 점수</b>입니다.</p>' +
+        '<p style="color:var(--ink-3);font-size:14px">이제 <b>▶ 실행</b> 버튼을 눌러 각 단계가 무엇을 만들어 내는지 확인해 보세요.</p>';
+    } else {
+      verified = false;
+      runBtn.disabled = true;
+      verdict.className = 'box box-warn';
+      verdict.innerHTML = '<div class="box-label">⚠️ 어긋난 곳이 ' + bad.length + '군데 있습니다</div>' +
+        '<ul class="mark-list">' + bad.map(function (r) { return '<li>' + r.m + '</li>'; }).join('') + '</ul>' +
+        '<p style="margin-top:10px;color:var(--ink-3);font-size:14px">초록색 줄은 자리가 맞는 블록, 붉은색 줄은 자리가 틀린 블록입니다.</p>';
+    }
+  }
+
+  var step = 0;
+  var loop = AI.sim.loop({
+    fps: 1.1,
+    step: function () {
+      if (step >= RUN.length) return false;
+      var s = RUN[step];
+      log.add(s.t, step === RUN.length - 1);
+      if (s.k) stats.set(s.k, s.v);
+      step++;
+      if (step >= RUN.length) {
+        log.add('✔ 파이프라인 8단계를 모두 통과했습니다. 이제 저장한 모델을 다른 데이터에 쓸 수 있습니다.', true);
+        return false;
+      }
+      return true;
+    }
+  });
+
+  function run() {
+    if (!verified) { AI.toast('먼저 검증을 통과해야 실행할 수 있어요'); return; }
+    log.clear();
+    stats.set('rows', '–'); stats.set('split', '–'); stats.set('acc', '–');
+    step = 0;
+    log.add('▶ 파이프라인 실행 시작 — 붓꽃 데이터 150행으로 품종을 분류합니다.');
+    loop.play();
+  }
+
+  var runBtn = AI.ui.btn('▶ 실행', run, 'primary');
+  runBtn.disabled = true;
+
+  body.appendChild(list);
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('✔ 검증', verify, 'primary'),
+    runBtn,
+    AI.ui.btn('🔀 다시 섞기', function () {
+      cur = AI.sim.shuffle(cur, AI.sim.rng(Date.now() % 99991));
+      if (cur.every(function (v, i) { return v === i; })) cur.reverse();
+      verified = false; runBtn.disabled = true;
+      verdict.style.display = 'none';
+      loop.pause(); log.clear();
+      render();
+    }, 'ghost')
+  ));
+  body.appendChild(verdict);
+  body.appendChild(stats.el);
+  body.appendChild(log.el);
+
+  render();
+  log.add('블록 순서를 맞춘 뒤 <b>검증</b>을 눌러 주세요.');
+})();
+</script>
+
+<!-- ===================== 시뮬레이터 2: 파이썬 코드 빈칸 채우기 ===================== -->
+<script>
+(function () {
+  var body = AI.sim.panel('#sim2', {
+    title: '붓꽃 품종 분류 코드 완성하기 — scikit-learn',
+    tag: '코드 완성',
+    desc: '아래 코드는 <b>실제로 동작하는 파이썬 코드</b>입니다. 점선으로 표시된 7곳을 드롭다운에서 골라 채운 뒤 <b>채점</b>을 눌러 보세요. 틀린 칸은 다시 고를 수 있습니다.'
+  });
+
+  /* ---- 빈칸 정의 ---- */
+  var BL = [
+    {
+      opts: ['0.2', '20', '0.8', '2'], a: '0.2',
+      why: '<span class="mono">test_size</span>는 <b>0과 1 사이의 비율</b>로 줍니다. 0.2면 전체의 20%를 테스트용으로 떼어 놓습니다. 20을 넣으면 “20개”라는 뜻이 되고, 0.8을 넣으면 테스트가 80%가 되어 학습할 데이터가 거의 남지 않습니다.'
+    },
+    {
+      opts: ['fit_transform', 'transform', 'predict', 'fit_predict'], a: 'fit_transform',
+      why: '훈련 데이터에서는 기준(평균·표준편차)을 <b>배우고(fit)</b> 동시에 <b>변환(transform)</b> 해야 하므로 <span class="mono">fit_transform</span>입니다. 두 일을 한 번에 하는 편의 메서드입니다.'
+    },
+    {
+      opts: ['transform', 'fit_transform', 'fit', 'score'], a: 'transform',
+      why: '테스트 데이터에는 <b>변환만</b> 적용합니다. 여기서 <span class="mono">fit_transform</span>을 쓰면 테스트 데이터의 평균이 새 기준이 되어 <b>데이터 누출</b>이 생기고, 훈련 때와 다른 기준이 적용되어 성능도 왜곡됩니다.'
+    },
+    {
+      opts: ['KNeighborsClassifier', 'KNeighborsRegressor', 'KMeans', 'LinearRegression'], a: 'KNeighborsClassifier',
+      why: '품종(setosa·versicolor·virginica)이라는 <b>범주</b>를 맞히는 <b>분류</b> 문제이므로 이름이 <span class="mono">Classifier</span>로 끝나야 합니다. <span class="mono">Regressor</span>는 숫자 예측(회귀), <span class="mono">KMeans</span>는 정답 없이 묶는 비지도학습(군집)입니다.'
+    },
+    {
+      opts: ['fit', 'train', 'learn', 'study'], a: 'fit',
+      why: 'scikit-learn에서 학습시키는 메서드는 언제나 <span class="mono">fit(속성, 정답)</span>입니다. <span class="mono">train</span>이나 <span class="mono">learn</span>이라는 메서드는 없어서 <span class="mono">AttributeError</span>가 납니다. 알고리즘이 무엇이든 이름이 같다는 것이 scikit-learn의 장점입니다.'
+    },
+    {
+      opts: ['predict', 'fit', 'transform', 'evaluate'], a: 'predict',
+      why: '학습한 모델로 새 데이터의 답을 알아맞히는 메서드는 <span class="mono">predict(속성)</span>입니다. 여기서 <span class="mono">fit</span>을 쓰면 테스트 데이터로 다시 학습해 버려 평가가 무의미해집니다.'
+    },
+    {
+      opts: ['y_test, pred', 'pred, y_test', 'X_test, pred', 'y_train, pred'], a: 'y_test, pred',
+      why: 'scikit-learn의 평가 함수는 <b>첫 인자가 정답(y_true), 둘째가 예측(y_pred)</b>입니다. 정확도는 두 인자를 바꿔도 값이 같지만, <b>정밀도·재현율·혼동 행렬</b>은 순서를 바꾸면 결과가 달라집니다. 그래서 처음부터 정답을 먼저 쓰는 습관을 들여야 합니다. <span class="mono">X_test</span>는 속성이므로 정답 자리에 올 수 없습니다.'
+    }
+  ];
+
+  /* ---- 코드 (HTML 강조 / 평문) — @n@ 이 빈칸 자리 ---- */
+  var CODE = [
+    ['<span class="k">import</span> pandas <span class="k">as</span> pd', 'import pandas as pd'],
+    ['<span class="k">from</span> sklearn.model_selection <span class="k">import</span> train_test_split', 'from sklearn.model_selection import train_test_split'],
+    ['<span class="k">from</span> sklearn.preprocessing <span class="k">import</span> StandardScaler', 'from sklearn.preprocessing import StandardScaler'],
+    ['<span class="k">from</span> sklearn.neighbors <span class="k">import</span> KNeighborsClassifier', 'from sklearn.neighbors import KNeighborsClassifier'],
+    ['<span class="k">from</span> sklearn.metrics <span class="k">import</span> accuracy_score', 'from sklearn.metrics import accuracy_score'],
+    ['', ''],
+    ['<span class="c"># ① 데이터 불러오기 — 속성(X)과 정답(y)을 나눈다</span>', '# 1) 데이터 불러오기 - 속성(X)과 정답(y)을 나눈다'],
+    ['df = pd.<span class="fn">read_csv</span>(<span class="s">&#39;iris.csv&#39;</span>)', "df = pd.read_csv('iris.csv')"],
+    ['X = df[[<span class="s">&#39;sepal_length&#39;</span>, <span class="s">&#39;sepal_width&#39;</span>, <span class="s">&#39;petal_length&#39;</span>, <span class="s">&#39;petal_width&#39;</span>]]', "X = df[['sepal_length', 'sepal_width', 'petal_length', 'petal_width']]"],
+    ['y = df[<span class="s">&#39;species&#39;</span>]', "y = df['species']"],
+    ['', ''],
+    ['<span class="c"># ② 훈련 데이터와 테스트 데이터로 나눈다</span>', '# 2) 훈련 데이터와 테스트 데이터로 나눈다'],
+    ['X_train, X_test, y_train, y_test = <span class="fn">train_test_split</span>(X, y, test_size=@0@, random_state=<span class="nm">42</span>, stratify=y)', 'X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=@0@, random_state=42, stratify=y)'],
+    ['', ''],
+    ['<span class="c"># ③ 정규화 — 기준(평균·표준편차)은 훈련 데이터만 보고 만든다</span>', '# 3) 정규화 - 기준(평균, 표준편차)은 훈련 데이터만 보고 만든다'],
+    ['scaler = <span class="fn">StandardScaler</span>()', 'scaler = StandardScaler()'],
+    ['X_train_s = scaler.@1@(X_train)', 'X_train_s = scaler.@1@(X_train)'],
+    ['X_test_s = scaler.@2@(X_test)', 'X_test_s = scaler.@2@(X_test)'],
+    ['', ''],
+    ['<span class="c"># ④ 모델을 만들고 훈련 데이터로 학습시킨다</span>', '# 4) 모델을 만들고 훈련 데이터로 학습시킨다'],
+    ['model = @3@(n_neighbors=<span class="nm">5</span>)', 'model = @3@(n_neighbors=5)'],
+    ['model.@4@(X_train_s, y_train)', 'model.@4@(X_train_s, y_train)'],
+    ['', ''],
+    ['<span class="c"># ⑤ 테스트 데이터로 성능을 평가한다</span>', '# 5) 테스트 데이터로 성능을 평가한다'],
+    ['pred = model.@5@(X_test_s)', 'pred = model.@5@(X_test_s)'],
+    ['<span class="k">print</span>(<span class="s">&#39;정확도:&#39;</span>, <span class="fn">accuracy_score</span>(@6@))', "print('정확도:', accuracy_score(@6@))"]
+  ];
+
+  var sels = [];
+
+  function makeSel(i) {
+    var b = BL[i];
+    /* 선택지 순서를 섞어 정답 위치를 예측할 수 없게 한다 */
+    var shuffled = AI.sim.shuffle(b.opts, AI.sim.rng(101 + i * 37));
+    var s = AI.h('select', { class: 'code-sel', 'aria-label': (i + 1) + '번 빈칸' },
+      AI.h('option', { value: '' }, '⬚ ' + (i + 1) + '번'),
+      shuffled.map(function (o) { return AI.h('option', { value: o }, o); })
+    );
+    s.addEventListener('change', function () { s.classList.remove('ok', 'no'); });
+    sels[i] = s;
+    return s;
+  }
+
+  var pre = AI.h('pre', { class: 'code-pane' });
+  CODE.forEach(function (pair, li) {
+    var line = AI.h('span', { class: 'cl' }, AI.h('span', { class: 'ln', text: String(li + 1) }));
+    var parts = pair[0].split(/@(\d)@/);
+    parts.forEach(function (p, i) {
+      if (i % 2 === 1) { line.appendChild(makeSel(Number(p))); return; }
+      if (!p) return;
+      var tmp = document.createElement('span');
+      tmp.innerHTML = p;
+      while (tmp.firstChild) line.appendChild(tmp.firstChild);
+    });
+    pre.appendChild(line);
+  });
+  body.appendChild(pre);
+
+  var result = AI.h('div', { class: 'box box-info', style: { display: 'none', marginTop: '14px' } });
+
+  function grade() {
+    var c = 0, blank = 0, rows = [];
+    BL.forEach(function (b, i) {
+      var s = sels[i], v = s.value;
+      s.classList.remove('ok', 'no');
+      if (!v) { blank++; rows.push('<li><b>' + (i + 1) + '번</b> — 아직 고르지 않았습니다.</li>'); return; }
+      var ok = (v === b.a);
+      s.classList.add(ok ? 'ok' : 'no');
+      if (ok) c++;
+      rows.push('<li><b>' + (i + 1) + '번</b> ' + (ok ? '✅' : '❌ <span class="mono">' + v + '</span> → 정답 <span class="mono">' + b.a + '</span>') + ' — ' + b.why + '</li>');
+    });
+    result.style.display = '';
+    result.className = 'box ' + (c === BL.length ? 'box-ok' : 'box-warn');
+    result.innerHTML = '<div class="box-label">' + (c === BL.length ? '🎉 코드 완성' : '📝 채점 결과') + '</div>' +
+      '<p><b>' + c + ' / ' + BL.length + ' 정답</b>' + (blank ? ' · 빈칸 ' + blank + '개가 비어 있습니다.' : '') +
+      (c === BL.length ? ' — 이 코드는 그대로 실행됩니다. <b>코드 복사</b>로 가져가 코랩에서 돌려 보세요.' : ' — 붉은 칸을 다시 골라 보세요.') + '</p>' +
+      '<ul class="mark-list">' + rows.join('') + '</ul>';
+  }
+
+  function reveal() {
+    BL.forEach(function (b, i) {
+      sels[i].value = b.a;
+      sels[i].classList.remove('no');
+      sels[i].classList.add('ok');
+    });
+    result.style.display = '';
+    result.className = 'box box-ok';
+    result.innerHTML = '<div class="box-label">📗 완성된 코드</div>' +
+      '<p>7개 빈칸을 정답으로 채웠습니다. 위 코드를 위에서 아래로 읽으며 <b>파이프라인 8단계 중 어느 단계인지</b> 짝지어 보세요.</p>' +
+      '<ul class="mark-list">' + BL.map(function (b, i) {
+        return '<li><b>' + (i + 1) + '번 = <span class="mono">' + b.a + '</span></b> — ' + b.why + '</li>';
+      }).join('') + '</ul>';
+  }
+
+  function plainCode() {
+    return CODE.map(function (pair) {
+      return pair[1].replace(/@(\d)@/g, function (_, d) {
+        return sels[Number(d)].value || ('___' + (Number(d) + 1) + '___');
+      });
+    }).join('\n');
+  }
+
+  function copyCode() {
+    var txt = plainCode();
+    var done = BL.every(function (b, i) { return sels[i].value === b.a; });
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(txt).then(function () {
+        AI.toast(done ? '완성된 코드를 복사했어요' : '지금 고른 답 그대로 복사했어요');
+      });
+    } else {
+      AI.toast('이 환경에서는 복사를 지원하지 않아요');
+    }
+  }
+
+  body.appendChild(AI.h('div', { class: 'sim-controls' },
+    AI.ui.btn('✔ 채점', grade, 'primary'),
+    AI.ui.btn('📗 완성된 코드 보기', reveal, 'ghost'),
+    AI.ui.btn('📋 코드 복사', copyCode, 'ghost'),
+    AI.ui.btn('↺ 다시 풀기', function () {
+      sels.forEach(function (s) { s.value = ''; s.classList.remove('ok', 'no'); });
+      result.style.display = 'none';
+    }, 'ghost')
+  ));
+  body.appendChild(result);
+
+  body.appendChild(AI.el(
+    '<div class="box box-info" style="margin-top:14px">' +
+    '<div class="box-label">💻 이 코드를 코랩에서 실행하는 방법</div>' +
+    '<ol style="margin:0">' +
+    '<li>구글 코랩에서 새 노트북을 만들고, 왼쪽 <b>파일</b> 탭에 <span class="mono">iris.csv</span>를 끌어다 올린다. (열 이름은 코드의 이름과 똑같아야 한다.)</li>' +
+    '<li>코드 칸에 위 코드를 붙여 넣고 <b>Shift+Enter</b>를 눌러 실행한다. <span class="mono">import</span>는 이미 설치되어 있어 따로 준비할 것이 없다.</li>' +
+    '<li>맨 아래에 <span class="mono">정확도: 0.9666…</span> 처럼 출력되면 성공이다. 오류가 나면 <b>맨 아래 줄</b>의 오류 이름부터 읽는다.</li>' +
+    '</ol></div>'
+  ));
+})();
+</script>
+
+<!-- ===================== 낱말 채우기 · 확인 문제 · 활동 기록 ===================== -->
+<script>
+AI.cloze('#cloze1', {
+  id: 'a4l3-cloze',
+  title: '핵심 문장 완성하기',
+  sub: '아래 낱말을 눌러 고른 뒤, 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['파이프라인', '운전자', '안내자', '데이터 누출', 'pandas', 'scikit-learn', 'matplotlib', '버전 관리', 'fit', 'predict', '실행'],
+  sents: [
+    { text: '데이터 불러오기부터 예측·저장까지 정해진 순서로 이어지는 처리 흐름을 {0}(이)라고 한다.', answers: [['파이프라인']] },
+    { text: '짝 프로그래밍에서 키보드를 잡고 코드를 쓰는 사람은 {0}, 손을 떼고 전체 흐름과 오류를 살피는 사람은 {1}(이)다.', answers: [['운전자'], ['안내자']] },
+    { text: '훈련·테스트 분할보다 정규화를 먼저 하면 테스트 데이터의 정보가 기준에 섞여 {0}이(가) 생긴다.', answers: [['데이터 누출']] },
+    { text: '표 데이터를 읽고 다루는 라이브러리는 {0}, 기계학습 알고리즘과 평가 도구를 제공하는 라이브러리는 {1}, 그래프를 그리는 라이브러리는 {2}(이)다.', answers: [['pandas'], ['scikit-learn'], ['matplotlib']] },
+    { text: '무엇을 왜 바꿨는지 기록해 두고 필요하면 이전 상태로 되돌릴 수 있게 하는 일을 {0}(이)라고 한다.', answers: [['버전 관리']] },
+    { text: 'scikit-learn에서 모델을 학습시키는 메서드는 {0}, 학습한 모델로 새 값을 예측하는 메서드는 {1}(이)다.', answers: [['fit'], ['predict']] },
+    { text: '코드를 다룰 때는 먼저 완성된 코드를 {0}하며 이해하고, 다음으로 일부를 고쳐 보고, 마지막으로 빈 부분을 완성한다.', answers: [['실행']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '3차시 확인 문제',
+  items: [
+    {
+      type: 'order',
+      q: '인공지능 프로그램의 파이프라인을 <b>올바른 순서</b>로 배열하시오.',
+      items: [
+        '데이터 불러오기',
+        '결측치·이상치 처리',
+        '속성(X)과 정답(y) 나누기',
+        '훈련·테스트 분할',
+        '정규화 기준 만들고 변환',
+        '모델 선택과 학습',
+        '성능 평가',
+        '예측과 모델 저장'
+      ],
+      answer: [0, 1, 2, 3, 4, 5, 6, 7],
+      why: '앞 단계의 결과물이 뒤 단계의 입력이 되도록 이어집니다. 특히 <b>분할 다음에 정규화</b>가 와야 한다는 점이 중요합니다. 순서를 뒤집으면 테스트 데이터의 평균·표준편차가 기준에 섞여 데이터 누출이 생깁니다.'
+    },
+    {
+      type: 'mc',
+      q: '정규화를 <b>훈련·테스트 분할보다 먼저</b> 하면 어떤 문제가 생기는가?',
+      choices: [
+        '학습 시간이 크게 늘어난다',
+        '테스트 데이터의 정보가 기준에 섞여 정확도가 실제보다 높게 나온다',
+        '결측치가 다시 생긴다',
+        '모델을 저장할 수 없게 된다'
+      ],
+      answer: 1,
+      why: '정규화의 기준은 평균과 표준편차입니다. 이것을 전체 데이터로 계산하면 <b>테스트 데이터의 값이 기준에 반영</b>됩니다. 시험 문제를 미리 본 학생의 점수처럼, 발표할 때는 좋아 보이지만 새 데이터에서는 성능이 뚝 떨어집니다. 이것이 <b>데이터 누출</b>입니다.'
+    },
+    {
+      type: 'ox',
+      q: '짝 프로그래밍에서는 실력이 더 좋은 사람이 계속 키보드를 잡고, 다른 사람은 지켜보며 배우는 것이 좋다.',
+      answer: false,
+      why: '운전자와 안내자는 <b>5~10분마다 번갈아 바꿉니다</b>. 한 사람이 계속 잡으면 다른 사람은 구경꾼이 되어 협력이 아니라 시범 관람이 됩니다. 컴퓨터를 두 사람 가운데에 두는 이유도 서로 수평인 관계를 유지하기 위한 것입니다.'
+    },
+    {
+      type: 'match',
+      q: '다음 일을 맡기에 알맞은 라이브러리를 짝지으시오.',
+      left: [
+        'CSV 파일을 읽어 표로 만들고 결측치를 채운다',
+        '훈련·테스트 분할과 k-NN 학습을 한다',
+        '라운드별 정확도 변화를 꺾은선으로 그린다',
+        '정확도·정밀도·재현율을 계산한다'
+      ],
+      right: ['pandas', 'scikit-learn', 'matplotlib'],
+      answer: [0, 1, 2, 1],
+      why: 'pandas는 표 데이터, scikit-learn은 기계학습(분할·학습·평가), matplotlib은 그래프를 담당합니다. 평가 함수인 <span class="mono">accuracy_score</span>도 scikit-learn의 <span class="mono">metrics</span>에 들어 있습니다.'
+    },
+    {
+      type: 'short',
+      q: 'scikit-learn에서 어떤 알고리즘을 쓰더라도 학습시킬 때 호출하는 메서드의 이름은 무엇인가?',
+      answer: ['fit', 'fit()', 'model.fit', 'model.fit()'],
+      placeholder: '예: ○○○',
+      why: '<span class="mono">fit(속성, 정답)</span>입니다. 예측은 <span class="mono">predict()</span>입니다. 알고리즘을 바꿀 때 <b>모델을 만드는 한 줄만</b> 고치면 나머지 코드가 그대로 동작하는 것이 scikit-learn의 큰 장점입니다.'
+    },
+    {
+      type: 'multi',
+      q: '팀의 <b>작업 기록(버전 관리)</b>에 대한 설명으로 옳은 것을 <b>모두</b> 고르시오.',
+      choices: [
+        '언제·누가·무엇을·왜 바꿨는지를 남긴다',
+        '한 번에 여러 가지를 동시에 바꾸고 결과를 한꺼번에 적는 것이 효율적이다',
+        '성능이 떨어진 변경도 기록해 두어야 한다',
+        '필요하면 이전 상태로 되돌릴 수 있어야 한다'
+      ],
+      answer: [0, 2, 3],
+      why: '②가 틀렸습니다. 한 번에 여러 가지를 바꾸면 <b>무엇 덕분에 성능이 변했는지 알 수 없습니다</b>. 한 번에 하나만 바꾸는 것이 원칙입니다. 성능이 떨어진 변경도 남겨야 합니다 — 데이터 누출을 고쳐 점수가 내려간 경우처럼, 떨어진 점수가 오히려 진짜 실력일 수 있습니다.'
+    },
+    {
+      type: 'mc',
+      q: '다음 중 <b>분할 전에 해도 괜찮은</b> 전처리는 무엇인가?',
+      choices: [
+        '전체 데이터의 평균으로 결측치를 채우기',
+        '전체 데이터의 평균·표준편차로 정규화하기',
+        '열 이름의 오타를 고치고 완전히 중복된 행을 지우기',
+        '전체 데이터의 최댓값으로 나누어 0~1로 맞추기'
+      ],
+      answer: 2,
+      why: '기준을 <b>전체 데이터에서 배우는 작업</b>(평균 대체, 정규화, 최댓값 나누기)은 모두 분할 뒤에 훈련 데이터만 보고 해야 합니다. 반면 오타 수정이나 중복 행 삭제처럼 <b>행 하나만 보면 되는 정리</b>는 다른 행의 정보를 쓰지 않으므로 분할 전에 해도 누출이 생기지 않습니다.'
+    },
+    {
+      type: 'ox',
+      q: '<span class="mono">accuracy_score(pred, y_test)</span> 처럼 인자 순서를 바꿔 쓰면 정확도 값이 달라진다.',
+      answer: false,
+      why: '정확도는 “같은 개수 ÷ 전체”이므로 두 인자를 바꿔도 <b>값은 같습니다</b>. 하지만 <b>정밀도·재현율·혼동 행렬</b>은 어느 쪽이 정답인지에 따라 결과가 달라집니다. 그래서 scikit-learn의 규칙대로 <b>정답(y_true)을 먼저</b> 쓰는 습관을 들여야 합니다.'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a4l3-note',
+  title: '협력 개발 활동 기록',
+  prompt: '두 시뮬레이터를 모두 해 본 뒤 아래를 채워 보세요. <b>짝과 번갈아 운전대를 잡으며</b> 작성하는 것이 이 활동의 목적입니다.',
+  fields: [
+    { key: 'role', label: '우리 팀에서 내가 맡은 역할', type: 'select', options: ['데이터 담당', '모델 담당', '검증 담당', '기록·발표 담당'] },
+    { key: 'pair', label: '짝 프로그래밍 짝의 이름', type: 'text', placeholder: '예: 김나리' },
+    { key: 'acc', label: '시뮬레이터 1에서 실행 로그에 나온 최종 테스트 정확도', type: 'text', placeholder: '예: 0.967 (30개 중 29개)' },
+    { key: 'score', label: '시뮬레이터 2 코드 빈칸 채점 결과 (첫 시도)', type: 'text', placeholder: '예: 5 / 7' },
+    {
+      key: 'wrong', label: '시뮬레이터 2에서 틀렸던 칸과, 왜 그것이 정답인지 자기 말로 적어 보세요.',
+      type: 'textarea', rows: 4,
+      placeholder: '예) 3번을 fit_transform으로 골랐다. 테스트 데이터에 다시 fit을 하면 기준이 바뀌어서 …'
+    },
+    {
+      key: 'leak', label: '파이프라인에서 순서를 절대 바꾸면 안 되는 지점은 어디이고, 왜 그런가요?',
+      type: 'textarea', rows: 3,
+      placeholder: '예) 분할과 정규화 사이다. 정규화 기준을 …'
+    },
+    {
+      key: 'plan', label: '우리 팀이 앞으로 지킬 협력 약속 3가지 (열 이름·파일 이름·기록 방법 등)',
+      type: 'textarea', rows: 4,
+      placeholder: '1) 열 이름은 모두 소문자와 밑줄로 쓴다.\n2) 데이터 파일 이름 끝에 날짜를 붙인다.\n3) 코드를 바꿀 때마다 무엇을 왜 바꿨는지 한 줄 적는다.'
+    }
+  ]
+});
+</script>
+</body>
+</html>

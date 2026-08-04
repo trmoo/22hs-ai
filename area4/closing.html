@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>단원 마무리 · 인공지능 프로젝트 · 인공지능 기초</title>
+<link rel="stylesheet" href="../assets/css/textbook.css">
+<style>
+  .cmap-wrap { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); padding: 14px 16px 10px; margin: 0 0 16px; overflow-x: auto; }
+  .cmap { width: 100%; min-width: 680px; height: auto; display: block; color: var(--line-strong); }
+  .cmap .ed { fill: none; stroke: currentColor; stroke-width: 1.8; marker-end: url(#a4arw); }
+  .cmap .ed.back { stroke: var(--warn); stroke-dasharray: 6 4; marker-end: url(#a4arwW); }
+  .cmap .nb { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1.6; }
+  .cmap .nb.acc { fill: var(--accent-soft); stroke: var(--accent-line); }
+  .cmap .nb.grp { fill: none; stroke: var(--accent-line); stroke-width: 1.6; stroke-dasharray: 5 4; }
+  .cmap .nb.fin { fill: var(--ok-soft); stroke: var(--ok-line); }
+  .cmap .st { fill: var(--surface); stroke: var(--accent-line); stroke-width: 1.3; }
+  .cmap .nt { fill: var(--ink); font-weight: 750; font-size: 14px; text-anchor: middle; }
+  .cmap .nl { fill: var(--ink); font-weight: 700; font-size: 13px; text-anchor: middle; }
+  .cmap .ns { fill: var(--ink-3); font-weight: 600; font-size: 11.5px; text-anchor: middle; }
+  .cmap .stt { fill: var(--ink); font-weight: 700; font-size: 11.5px; text-anchor: middle; }
+  .cmap .stn { fill: var(--accent-ink); font-weight: 800; font-size: 11px; text-anchor: middle; }
+  .cmap .bd { fill: var(--accent-soft); stroke: var(--accent-line); stroke-width: 1; }
+  .cmap .bt { fill: var(--accent-ink); font-weight: 800; font-size: 9.5px; text-anchor: middle; }
+  .cmap .el { fill: var(--accent-ink); font-weight: 700; font-size: 11px; text-anchor: middle; }
+  .cmap .elw { fill: var(--warn); font-weight: 700; font-size: 11px; text-anchor: middle; }
+  .lesson-card .lc-title, .lesson-card .lc-sub { display: block; }
+  .essay-q { padding: 14px 16px; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--radius); background: var(--surface); margin: 0 0 12px; }
+  .essay-q .eq-no { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; color: var(--accent-ink); margin-bottom: 6px; }
+  .essay-q p:last-child { margin-bottom: 0; }
+  .rub-tb td:first-child { font-weight: 700; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="tb-top"></div>
+
+<main class="wrap">
+
+  <!-- ============ 생각 열기 ============ -->
+  <section class="section">
+    <div class="box box-think">
+      <div class="box-label">🤔 돌아보며 열기</div>
+      <p>1단원에서 인공지능이 <b>답을 찾는 원리</b>를, 2단원에서 <b>데이터로 배우는 방법</b>을, 3단원에서 <b>따져 봐야 할 것</b>을 배웠습니다. 4단원은 그 모든 것을 한 번에 쓰는 단원이었습니다.</p>
+      <p style="font-size:18px;font-weight:750;color:var(--accent-ink);text-align:center;margin:14px 0">“그래서, 무엇을 만들 것인가?”</p>
+      <p>프로젝트는 좋은 모델을 만드는 일이 아닙니다. <b>풀 만한 문제를 고르는 일</b>에서 시작해, 계획을 세우고, 함께 만들고, 결과를 보고 고치는 일 전체입니다. 성능이 0.99인 모델이라도 아무도 겪지 않는 문제를 풀었다면 그 프로젝트는 실패입니다.</p>
+      <p>이 단원에서 배운 순서를 한 문장으로 줄이면 이렇습니다. <b>문제에서 출발해, 절차를 지키고, 함께 만들고, 고쳐서 완성한다.</b></p>
+      <details class="more-box" style="margin:12px 0 0">
+        <summary><span class="plus-tag">힌트</span> 네 차시를 하나의 흐름으로 이어 보기</summary>
+        <div class="more-body">
+          인류가 함께 정한 과제 목록(SDGs)에서 다룰 만한 주제를 좁혀 내고(1차시), 인공지능 문제 해결 절차에 맞춰 계획을 세우고(2차시), 역할을 나누어 파이프라인을 구현하고(3차시), 평가 결과와 사회적 영향을 함께 보며 고쳐 완성합니다(4차시).
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 1. 개념 지도 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">1</span><h2>한 장으로 보는 4단원 개념 지도</h2><span class="sec-tag">1~4차시</span></div>
+
+    <p>이 단원의 지도는 <b>위에서 아래로 흐르지만, 한 군데에서 되돌아옵니다</b>. 주황색 점선이 그 되돌아오는 화살표입니다. 평가에서 끝나지 않고 다시 절차로 돌아가는 것이 프로젝트의 본질입니다.</p>
+
+    <div class="cmap-wrap">
+      <svg class="cmap" viewBox="0 0 920 770" role="img" aria-label="4단원 인공지능 프로젝트 개념 지도. 지속가능발전목표에서 프로젝트 주제를 도출하고, 인공지능 문제 해결 5단계(문제 정의, 데이터 수집과 전처리, 유형과 알고리즘 선정, 모델 생성, 성능 평가와 수정)에 따라 계획을 세운 뒤, 협력적 개발과 평가·성능 개선을 거치며, 평가 결과는 다시 절차로 되돌아간다. 마지막으로 사회적 영향을 점검하여 소프트웨어를 완성한다.">
+        <defs>
+          <marker id="a4arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="currentColor"></path>
+          </marker>
+          <marker id="a4arwW" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="var(--warn)"></path>
+          </marker>
+        </defs>
+
+        <!-- 간선 -->
+        <path class="ed" d="M460,88 V132"></path>
+        <text class="el" x="556" y="116">다룰 수 있게 좁힌다</text>
+        <path class="ed" d="M460,206 V244"></path>
+        <text class="el" x="546" y="230">절차에 맞춰 계획한다</text>
+
+        <path class="ed" d="M460,392 V412 H230 V440"></path>
+        <path class="ed" d="M460,392 V412 H690 V440"></path>
+        <text class="el" x="300" y="406">역할을 나눈다</text>
+        <text class="el" x="628" y="406">성능을 재고 고친다</text>
+        <path class="ed" d="M420,484 H500"></path>
+
+        <!-- 되돌아가는 화살표: 평가·개선 → 5단계 -->
+        <path class="ed back" d="M880,462 H902 V312 H886"></path>
+        <text class="elw" x="852" y="304">다시 절차로</text>
+
+        <path class="ed" d="M230,528 V556 H460 V584"></path>
+        <path class="ed" d="M690,528 V556 H460 V584"></path>
+        <path class="ed" d="M460,672 V702"></path>
+
+        <!-- 노드 -->
+        <g>
+          <rect class="nb acc" x="270" y="14" width="380" height="74" rx="12"></rect>
+          <rect class="bd" x="280" y="23" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="301" y="35.5">1차시</text>
+          <text class="nt" x="460" y="58">지속가능발전목표(SDGs)</text>
+          <text class="ns" x="460" y="76">2015년 유엔 총회 · 17개 목표 · 169개 세부 목표</text>
+        </g>
+        <g>
+          <rect class="nb" x="270" y="132" width="380" height="74" rx="12"></rect>
+          <rect class="bd" x="280" y="141" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="301" y="153.5">1차시</text>
+          <text class="nt" x="460" y="176">프로젝트 주제 도출</text>
+          <text class="ns" x="460" y="194">구체적 · 데이터 확보 가능 · 학생 수준 · 의미 있음</text>
+        </g>
+
+        <!-- 5단계 절차 묶음 -->
+        <g>
+          <rect class="nb grp" x="20" y="244" width="860" height="148" rx="14"></rect>
+          <rect class="bd" x="32" y="253" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="53" y="265.5">2차시</text>
+          <text class="nt" x="460" y="268">인공지능 문제 해결 절차 5단계</text>
+          <rect class="st" x="34" y="286" width="162" height="92" rx="9"></rect>
+          <text class="stn" x="115" y="306">①</text>
+          <text class="stt" x="115" y="328">문제 정의</text>
+          <text class="ns" x="115" y="348">무엇을 판단할지</text>
+          <text class="ns" x="115" y="364">한 문장으로</text>
+          <rect class="st" x="206" y="286" width="162" height="92" rx="9"></rect>
+          <text class="stn" x="287" y="306">②</text>
+          <text class="stt" x="287" y="328">데이터 수집·전처리</text>
+          <text class="ns" x="287" y="348">결측치 · 이상치</text>
+          <text class="ns" x="287" y="364">정규화 · 속성 선택</text>
+          <rect class="st" x="378" y="286" width="162" height="92" rx="9"></rect>
+          <text class="stn" x="459" y="306">③</text>
+          <text class="stt" x="459" y="328">유형·알고리즘 선정</text>
+          <text class="ns" x="459" y="348">지도 · 비지도 · 강화</text>
+          <text class="ns" x="459" y="364">분류 · 예측 · 군집</text>
+          <rect class="st" x="550" y="286" width="162" height="92" rx="9"></rect>
+          <text class="stn" x="631" y="306">④</text>
+          <text class="stt" x="631" y="328">모델 생성</text>
+          <text class="ns" x="631" y="348">훈련 데이터로</text>
+          <text class="ns" x="631" y="364">학습 진행</text>
+          <rect class="st" x="722" y="286" width="158" height="92" rx="9"></rect>
+          <text class="stn" x="801" y="306">⑤</text>
+          <text class="stt" x="801" y="328">성능 평가·수정</text>
+          <text class="ns" x="801" y="348">테스트 데이터로</text>
+          <text class="ns" x="801" y="364">평가 후 개선</text>
+        </g>
+
+        <g>
+          <rect class="nb" x="40" y="440" width="380" height="88" rx="12"></rect>
+          <rect class="bd" x="50" y="449" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="71" y="461.5">3차시</text>
+          <text class="nl" x="230" y="486">협력적 개발과 구현</text>
+          <text class="ns" x="230" y="504">역할 분담 · 짝 프로그래밍</text>
+          <text class="ns" x="230" y="518">파이프라인 · 라이브러리 활용</text>
+        </g>
+        <g>
+          <rect class="nb" x="500" y="440" width="380" height="88" rx="12"></rect>
+          <rect class="bd" x="510" y="449" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="531" y="461.5">4차시</text>
+          <text class="nl" x="690" y="486">평가와 성능 개선</text>
+          <text class="ns" x="690" y="504">오류 분석 · 데이터 · 전처리</text>
+          <text class="ns" x="690" y="518">특성 · 알고리즘 · 하이퍼파라미터</text>
+        </g>
+
+        <g>
+          <rect class="nb acc" x="230" y="584" width="460" height="88" rx="12"></rect>
+          <rect class="bd" x="240" y="593" width="42" height="17" rx="5"></rect>
+          <text class="bt" x="261" y="605.5">4차시</text>
+          <text class="nt" x="460" y="628">사회적 영향 점검</text>
+          <text class="ns" x="460" y="646">편향과 공정성 · 프라이버시 · 투명성</text>
+          <text class="ns" x="460" y="660">안전과 오용 · 지속가능성</text>
+        </g>
+        <g>
+          <rect class="nb fin" x="250" y="702" width="420" height="58" rx="12"></rect>
+          <text class="nt" x="460" y="728">완성된 인공지능 소프트웨어</text>
+          <text class="ns" x="460" y="746">성능 + 협업 + 윤리적 고려를 모두 갖춘 결과물</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">🧭 지도를 읽는 세 가지 방법</div>
+      <ul style="margin:0">
+        <li><b>위에서 아래로</b> — 인류의 과제 → 우리의 주제 → 절차 → 구현 → 개선 → 점검 → 완성입니다. 어느 한 칸을 건너뛰면 그 대가가 아래 칸에서 나타납니다. 주제를 대충 고르면 절차가 흔들리고, 절차를 건너뛰면 개선할 근거가 없습니다.</li>
+        <li><b>주황색 점선을 따라 거꾸로</b> — 평가는 <b>끝이 아니라 되돌아가는 지점</b>입니다. 성능이 낮다는 사실만으로는 아무것도 나아지지 않습니다. ②로 돌아갈지(데이터가 부족한가) ③으로 돌아갈지(알고리즘이 맞지 않는가)를 <b>오류 분석</b>으로 정해야 합니다.</li>
+        <li><b>맨 아래 칸을 먼저 보고 거꾸로</b> — 완성된 결과물이 갖춰야 할 것이 세 가지(성능·협업·윤리)라면, 그 세 가지는 각각 어느 칸에서 만들어졌는지 짚어 보세요. 윤리는 마지막에 덧붙이는 것이 아니라 <b>주제를 고를 때부터</b> 함께 따라옵니다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 2. 차시별 핵심 정리 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">2</span><h2>차시별 핵심 정리</h2></div>
+    <div class="table-wrap">
+      <table class="tb">
+        <thead><tr><th style="width:80px">차시</th><th>꼭 알아야 할 개념</th><th>한 줄 요약</th><th>자주 나오는 오해</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>1차시</b><br><span style="font-size:12px;color:var(--ink-4)">SDGs와 주제</span></td>
+            <td>지속가능발전목표(2015년 유엔 총회, 17개 목표·169개 세부 목표), 좋은 주제의 네 조건</td>
+            <td>인류가 함께 정한 과제 목록에서 출발해, 우리가 실제로 다룰 수 있는 크기로 <b>좁혀</b> 주제를 만든다.</td>
+            <td>“큰 목표를 그대로 주제로 삼으면 훌륭하다”<br>→ ‘환경을 지킨다’는 주제가 아니라 <b>목표</b>입니다. 무엇을 입력하면 무엇을 판단하는지가 나와야 주제입니다.</td>
+          </tr>
+          <tr>
+            <td><b>2차시</b><br><span style="font-size:12px;color:var(--ink-4)">절차와 계획</span></td>
+            <td>인공지능 문제 해결 5단계, 계획서 구성 요소, 단계별 산출물</td>
+            <td>문제 정의 → 데이터 수집·전처리 → 유형·알고리즘 선정 → 모델 생성 → 성능 평가·수정의 순서로 계획을 <b>구안</b>한다.</td>
+            <td>“절차는 한 번 지나가면 끝난다”<br>→ 실제 프로젝트는 평가에서 <b>앞 단계로 되돌아가기</b>를 여러 번 반복합니다.</td>
+          </tr>
+          <tr>
+            <td><b>3차시</b><br><span style="font-size:12px;color:var(--ink-4)">협력과 구현</span></td>
+            <td>역할 분담, 짝 프로그래밍, 파이프라인 순서, 데이터 누출, 라이브러리 활용</td>
+            <td>파이프라인 순서를 지켜 함께 구현한다. 특히 <b>전처리보다 분할을 먼저</b> 해야 테스트 데이터 정보가 새지 않는다.</td>
+            <td>“코드를 잘 쓰는 사람이 다 만들면 효율적이다”<br>→ 평가 기준에 <b>협업 능력</b>이 들어 있고, 한 사람만 이해한 코드는 고칠 수 없습니다.</td>
+          </tr>
+          <tr>
+            <td><b>4차시</b><br><span style="font-size:12px;color:var(--ink-4)">평가와 개선</span></td>
+            <td>오류 분석, 다섯 가지 개선 전략, 개선 사이클, 사회적 영향 점검, 평가 루브릭</td>
+            <td>평가 결과의 <b>원인</b>을 찾아 그에 맞는 개선을 하고, 성능과 함께 사회적 영향까지 점검해 완성한다.</td>
+            <td>“하이퍼파라미터를 계속 바꾸면 성능이 오른다”<br>→ 병목이 <b>데이터의 양과 질</b>일 때는 아무리 조정해도 거의 오르지 않습니다. 원인부터 찾아야 합니다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 3. 핵심 용어 빈칸 점검 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">3</span><h2>핵심 용어 빈칸 점검</h2><span class="sec-tag">본문 빈칸 14개</span></div>
+    <p>아래 요약문은 4단원 전체를 훑습니다. 위쪽의 <b>빈칸 채우기 모드</b>를 켜고 스스로 채워 보세요.</p>
+
+    <h3 class="sub-head">주제를 고르는 일</h3>
+    <p><b class="blank" data-a="지속가능발전목표|SDGs|에스디지" data-hint="영어 약자로 SDGs">지속가능발전목표</b>는 <b class="blank" data-a="2015" data-hint="유엔 총회에서 결의한 해">2015</b>년 유엔 총회에서 결의한 것으로, 총 <b class="blank" data-a="17" data-hint="주요 목표의 개수">17</b>개의 주요 목표와 <b class="blank" data-a="169" data-hint="세부 목표의 개수">169</b>개의 세부 목표로 이루어져 있습니다. 이 목록은 지금 인류가 어떤 위기에 놓여 있는지를 보여 줍니다.</p>
+    <p>목표는 그 자체로 주제가 되지 않습니다. 좋은 프로젝트 주제는 <b>구체적</b>이고, <b class="blank" data-a="데이터|자료" data-hint="모델을 학습시키는 데 반드시 필요한 것">데이터</b>를 구할 수 있고, 학생 수준에서 다룰 수 있으며, 의미가 있어야 합니다. 큰 목표에서 다룰 수 있는 문제로 <b>좁혀</b> 가는 것이 1차시의 핵심 작업이었습니다.</p>
+
+    <h3 class="sub-head">절차를 지키는 일</h3>
+    <p>인공지능 문제 해결 절차는 다섯 단계입니다. <b class="blank" data-a="문제 정의|문제정의" data-hint="첫 번째 단계 — 무엇을 판단할지 정하는 일">문제 정의</b> → 데이터 수집 및 전처리 → 기계학습 <b class="blank" data-a="유형|종류" data-hint="지도학습·비지도학습·강화학습을 가리키는 말">유형</b>과 알고리즘 선정 → 모델 생성 → <b class="blank" data-a="성능 평가|성능평가|평가" data-hint="테스트 데이터로 잘 맞히는지 재는 단계">성능 평가</b> 및 수정입니다.</p>
+    <p>이 절차는 한 방향으로 흐르지 않습니다. 마지막 단계에서 문제가 발견되면 앞 단계로 <b>되돌아가</b> 다시 진행합니다. 그래서 프로젝트 계획서에는 일정과 역할뿐 아니라 <b>예상되는 위험</b>도 함께 적어 둡니다.</p>
+
+    <h3 class="sub-head">함께 만드는 일</h3>
+    <p>협력적 개발에서는 역할을 나누되 서로 바꿔 보며 전체를 이해합니다. 두 사람이 한 화면을 보며 한 사람은 코드를 쓰고 한 사람은 방향을 살피는 방식을 <b class="blank" data-a="짝 프로그래밍|짝프로그래밍|페어 프로그래밍" data-hint="두 사람이 한 컴퓨터로 함께 코딩하는 방법">짝 프로그래밍</b>이라고 합니다.</p>
+    <p>파이프라인 순서에서 가장 조심할 점은 <b>전처리와 분할의 순서</b>입니다. 전체 데이터로 평균을 구해 정규화한 뒤에 나누면, 테스트 데이터의 정보가 훈련 과정에 새어 들어갑니다. 이것을 데이터 <b class="blank" data-a="누출|유출|누수" data-hint="정보가 새어 나가는 것 — leakage">누출</b>이라고 하며, 그래서 <b>분할을 먼저</b> 해야 합니다.</p>
+
+    <h3 class="sub-head">고쳐서 완성하는 일</h3>
+    <p>성능이 낮을 때는 먼저 무엇을 어떻게 틀렸는지 살피는 <b class="blank" data-a="오류 분석|오류분석|에러 분석" data-hint="틀린 사례를 유형별로 모아 보는 일">오류 분석</b>을 합니다. 그 결과에 따라 데이터를 더 모으거나, 전처리를 개선하거나, 좋은 속성을 만들거나(<b class="blank" data-a="특성 공학|특성공학|피처 엔지니어링" data-hint="문제에 도움이 되는 새 속성을 만들어 내는 일">특성 공학</b>), 알고리즘을 바꾸거나, 하이퍼파라미터를 조정합니다.</p>
+    <p>훈련 성능만 오르고 테스트 성능이 오르지 않으면 <b class="blank" data-a="과대적합|과적합|오버피팅" data-hint="훈련 데이터에만 지나치게 맞춰진 상태">과대적합</b>을 의심해야 합니다. 그리고 성능이 목표에 닿았더라도 끝이 아닙니다. 편향과 공정성, 프라이버시, 투명성, 안전과 오용 가능성 등 <b class="blank" data-a="사회적 영향|사회적영향" data-hint="3단원에서 배운, 기술이 사회에 미치는 것">사회적 영향</b>을 점검해야 비로소 완성입니다.</p>
+    <p>프로젝트 평가는 결과물의 완성도만 보지 않습니다. 주제의 적절성, 문제 해결 방식의 <b class="blank" data-a="창의성|창의력" data-hint="남과 다른 방식으로 생각해 내는 힘">창의성</b>, 다른 사람과의 협업 능력을 함께 봅니다.</p>
+  </section>
+
+  <!-- ============ 4. 낱말 채우기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">4</span><h2>단원 용어 낱말 채우기</h2></div>
+    <div id="cloze1"></div>
+  </section>
+
+  <!-- ============ 5. 단원 평가 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">5</span><h2>단원 평가</h2><span class="sec-tag">11문항 · 기본 4 · 적용 4 · 통합 3</span></div>
+    <p>틀린 문항의 해설에 <b>돌아가야 할 차시</b>가 함께 적혀 있습니다.</p>
+    <div id="quiz1"></div>
+  </section>
+
+  <!-- ============ 6. 서·논술형 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">6</span><h2>서·논술형 문항</h2></div>
+
+    <div class="essay-q">
+      <div class="eq-no">📄 서술형 1</div>
+      <p>지속가능발전목표 중 하나를 고르고, 그 목표를 겨냥한 인공지능 프로젝트 주제를 <b>한 문장으로</b> 쓰시오. 그리고 그 주제가 ‘좋은 주제의 조건’ 네 가지를 어떻게 만족하는지 각각 설명하시오.</p>
+      <details class="more-box" style="margin:10px 0 0">
+        <summary><span class="plus-tag">평가 기준</span> 좋은 답에 들어가야 할 요소</summary>
+        <div class="more-body">
+          <ul style="margin:0">
+            <li>고른 목표의 <b>번호와 명칭</b>을 정확히 밝혔는가</li>
+            <li>주제 문장에 <b>무엇을 입력받아 무엇을 판단·예측하는지</b>가 드러나는가 (‘환경 보호’처럼 목표를 그대로 옮겨 적지 않았는가)</li>
+            <li>구체성 · 데이터 확보 가능성 · 학생 수준 적합성 · 의미 있음의 <b>네 조건을 각각</b> 언급했는가</li>
+            <li>데이터 확보 방안이 <b>실제로 가능한 수준</b>으로 적혀 있는가 (어디서, 어떻게, 몇 개쯤)</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="essay-q">
+      <div class="eq-no">📄 서술형 2</div>
+      <p>어떤 모둠이 만든 분류 모델의 훈련 정확도는 0.97, 테스트 정확도는 0.62였다. 이 결과를 어떻게 해석해야 하는지 쓰고, 인공지능 문제 해결 절차의 <b>어느 단계로 되돌아가</b> 무엇을 해야 하는지 두 가지 이상 제안하시오.</p>
+      <details class="more-box" style="margin:10px 0 0">
+        <summary><span class="plus-tag">평가 기준</span> 좋은 답에 들어가야 할 요소</summary>
+        <div class="more-body">
+          <ul style="margin:0">
+            <li>두 값의 <b>큰 차이</b>를 근거로 <b>과대적합</b>이라고 진단했는가</li>
+            <li>진단의 이유를 설명했는가 (훈련 데이터에만 지나치게 맞춰져 새 데이터에 일반화되지 못함)</li>
+            <li>되돌아갈 단계를 <b>구체적으로 지목</b>했는가 (② 데이터 수집·전처리 또는 ③ 유형·알고리즘 선정)</li>
+            <li>제안이 진단과 <b>짝이 맞는가</b> — 데이터 늘리기, 모델 단순화, 특성 수 줄이기 등. ‘학습을 더 오래 시킨다’처럼 과대적합을 악화시키는 제안을 하지 않았는가</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="essay-q">
+      <div class="eq-no">📄 논술형 3</div>
+      <p>성능 지표가 목표에 도달한 인공지능 소프트웨어라도 그대로 사용해서는 안 되는 경우가 있다. 3단원에서 배운 내용과 연결하여, 프로젝트를 마무리하기 전에 <b>반드시 점검해야 할 사회적 영향</b>을 세 가지 이상 들고, 각각을 어떻게 확인할 수 있는지 구체적인 방법과 함께 논술하시오.</p>
+      <details class="more-box" style="margin:10px 0 0">
+        <summary><span class="plus-tag">평가 기준</span> 좋은 답에 들어가야 할 요소</summary>
+        <div class="more-body">
+          <ul style="margin:0">
+            <li>점검 항목을 <b>세 가지 이상</b> 들었는가 (편향과 공정성, 프라이버시, 투명성·설명 가능성, 안전과 오용, 지속가능성 등)</li>
+            <li>각 항목마다 <b>확인 방법</b>이 구체적인가 (예: 집단별로 나누어 정확도·재현율을 따로 계산해 격차를 본다)</li>
+            <li>3단원의 개념(데이터 편향, 대리 변수, 설명 가능성, 책임의 귀속 등)을 <b>정확하게</b> 끌어왔는가</li>
+            <li>‘성능이 좋으면 된다’는 관점의 한계를 <b>자기 논리로</b> 반박했는가</li>
+            <li>개발자 · 사용자 · 운영관리자 중 <b>둘 이상의 관점</b>을 고려했는가</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div id="note1"></div>
+  </section>
+
+  <!-- ============ 7. 자가평가 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">7</span><h2>성취기준 자가평가</h2></div>
+    <p>각 문항을 읽고 지금 나의 수준을 솔직하게 표시하세요. <b>D 또는 E</b>를 고른 항목은 아래 8번에서 해당 차시로 바로 돌아갈 수 있습니다.</p>
+    <div id="self1"></div>
+  </section>
+
+  <!-- ============ 8. 돌아가기 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">8</span><h2>부족한 곳으로 돌아가기</h2></div>
+    <div class="lesson-list">
+      <a class="lesson-card" href="lesson01.html">
+        <span class="lc-no"><b>1</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">인류의 숙제 17개</span>
+          <span class="lc-sub">SDGs가 무엇인지, 좋은 주제로 좁히는 법이 헷갈린다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기04-01</span><span class="lc-sim">🕹 SDGs 17목표 탐색기 · 주제 좁히기 워크시트</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card" href="lesson02.html">
+        <span class="lc-no"><b>2</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">계획이 반이다</span>
+          <span class="lc-sub">5단계 절차의 순서와 각 단계에서 할 일이 헷갈린다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기04-02</span><span class="lc-sim">🕹 5단계 기획 워크벤치 · 절차 순서 맞추기</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card" href="lesson03.html">
+        <span class="lc-no"><b>3</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">함께 만들다</span>
+          <span class="lc-sub">파이프라인 순서, 데이터 누출, 코드 구현이 헷갈린다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기04-03</span><span class="lc-sim">🕹 파이프라인 조립 · 파이썬 코드 빈칸 채우기</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+      <a class="lesson-card" href="lesson04.html">
+        <span class="lc-no"><b>4</b><small>차시</small></span>
+        <span class="lc-body">
+          <span class="lc-title">고쳐야 완성된다</span>
+          <span class="lc-sub">오류 분석과 개선 전략, 사회적 영향 점검이 헷갈린다면</span>
+          <span class="lc-meta"><span class="lc-std">12인기04-04</span><span class="lc-sim">🕹 모델 개선 사이클 게임 · 사회적 영향 점검표</span></span>
+        </span>
+        <span class="lc-go">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ 마무리 ============ -->
+  <section class="section">
+    <div class="sec-head"><span class="sec-num">＋</span><h2>이제, 직접 해 볼 차례</h2></div>
+
+    <div class="box box-ok">
+      <div class="box-label">🎓 네 단원을 모두 마쳤습니다</div>
+      <p>1단원에서 인공지능이 <b>탐색과 추론</b>으로 답을 찾는 원리를 배웠고, 2단원에서 <b>데이터로 학습하는</b> 모델을 직접 만들고 평가했습니다. 3단원에서는 그 기술을 <b>비판적으로 따져 보는</b> 눈을 길렀고, 4단원에서는 그 모든 것을 묶어 <b>프로젝트로 만드는</b> 절차를 익혔습니다.</p>
+      <p>이제 남은 것은 하나입니다. <b>실제로 만들어 보는 것.</b></p>
+    </div>
+
+    <div class="card-grid">
+      <div class="mini-card">
+        <span class="icon">1️⃣</span>
+        <h4>주제를 확정하세요</h4>
+        <p>1차시의 <b>주제 좁히기 워크시트</b>에 적어 둔 문장을 다시 읽어 보세요. 아직 크다면 한 번 더 좁힙니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">2️⃣</span>
+        <h4>계획서를 완성하세요</h4>
+        <p>2차시의 <b>기획 워크벤치</b>에서 다섯 단계를 모두 채우고 인쇄해 모둠원과 나눠 가지세요.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">3️⃣</span>
+        <h4>작게 먼저 만드세요</h4>
+        <p>3차시의 코드를 바탕으로 <b>가장 단순한 버전</b>을 먼저 완성합니다. 처음부터 완벽할 필요는 없습니다.</p>
+      </div>
+      <div class="mini-card">
+        <span class="icon">4️⃣</span>
+        <h4>고치고 점검하세요</h4>
+        <p>4차시의 <b>개선 사이클</b>과 <b>사회적 영향 점검표</b>를 따라 결과를 다듬고 마무리합니다.</p>
+      </div>
+    </div>
+
+    <div class="box box-think">
+      <div class="box-label">📊 학습 기록 확인하기</div>
+      <p>지금까지 작성한 활동 기록과 자가평가는 <b>내 학습 포트폴리오</b>에 모두 모여 있습니다. 그대로 인쇄하면 제출용 학습 결과물이 되고, 파일로 내보내면 다른 컴퓨터에서 이어서 쓸 수 있습니다.</p>
+      <p style="margin-top:12px"><a class="btn primary" href="../portfolio.html" style="text-decoration:none">📊 내 학습 포트폴리오 열기</a></p>
+    </div>
+  </section>
+
+</main>
+
+<div id="tb-bottom"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+AI.page({
+  area: 4, lesson: 'closing',
+  title: '단원 마무리',
+  sub: '인공지능 프로젝트 — 핵심 정리와 단원 평가',
+  lead: '주제를 고르는 일에서 시작해 절차·협력·개선까지, 4단원 전체를 한 장의 개념 지도로 정리하고 <b>단원 평가 11문항</b>과 <b>성취기준 자가평가</b>로 스스로 점검합니다.',
+  standards: ['12인기04-01', '12인기04-02', '12인기04-03', '12인기04-04'],
+  keywords: ['지속가능발전목표', '문제 해결 절차', '협력적 개발', '데이터 누출', '성능 개선', '사회적 영향'],
+  goals: [
+    '4단원의 핵심 개념을 개념 지도로 연결하여 설명할 수 있다.',
+    '인공지능 문제 해결 절차 다섯 단계를 순서대로 적용하고, 평가 결과에 따라 되돌아갈 단계를 판단할 수 있다.',
+    '성취기준별로 자신의 성취 수준을 점검하고 보완할 차시를 스스로 찾을 수 있다.'
+  ]
+});
+</script>
+
+<script>
+AI.cloze('#cloze1', {
+  id: 'a4c-cloze',
+  title: '4단원 핵심 용어 정리',
+  sub: '아래 낱말을 눌러 고른 뒤 빈칸을 눌러 채워 보세요. 낱말은 한 번씩만 씁니다.',
+  bank: ['지속가능발전목표', '169', '문제 정의', '성능 평가', '짝 프로그래밍', '데이터 누출',
+         '오류 분석', '특성 공학', '과대적합', '루브릭'],
+  sents: [
+    { text: '2015년 유엔 총회에서 결의한 {0}은(는) 17개 주요 목표와 {1}개 세부 목표로 이루어져 있다.',
+      answers: [['지속가능발전목표'], ['169']] },
+    { text: '인공지능 문제 해결 절차의 첫 단계는 {0}이고, 마지막 단계는 {1} 및 수정이다.',
+      answers: [['문제 정의'], ['성능 평가']] },
+    { text: '두 사람이 한 화면을 보며 한 명은 코드를 쓰고 한 명은 방향을 살피는 협력 방식을 {0}(이)라고 한다.',
+      answers: [['짝 프로그래밍']] },
+    { text: '전처리를 분할보다 먼저 하면 테스트 데이터의 정보가 훈련에 새어 드는 {0}이(가) 발생한다.',
+      answers: [['데이터 누출']] },
+    { text: '성능이 낮을 때는 먼저 무엇을 어떻게 틀렸는지 살피는 {0}을(를) 해야 한다.',
+      answers: [['오류 분석']] },
+    { text: '문제 해결에 도움이 되는 새로운 속성을 만들어 내는 일을 {0}(이)라고 한다.',
+      answers: [['특성 공학']] },
+    { text: '훈련 성능은 높은데 테스트 성능이 낮으면 {0}을(를) 의심해야 한다.',
+      answers: [['과대적합']] },
+    { text: '프로젝트를 다각적으로 평가하기 위해 항목과 수준을 미리 정해 둔 표를 {0}(이)라고 한다.',
+      answers: [['루브릭']] }
+  ]
+});
+
+AI.quiz('#quiz1', {
+  title: '4단원 단원 평가',
+  sub: '기본 이해 4문항 · 적용 4문항 · 통합 분석 3문항. 해설에 돌아갈 차시가 적혀 있습니다.',
+  items: [
+    {
+      type: 'mc',
+      q: '지속가능발전목표(SDGs)에 대한 설명으로 <b>옳은</b> 것은?',
+      choices: [
+        '2015년 유엔 총회에서 결의했고, 17개 주요 목표와 169개 세부 목표로 이루어져 있다',
+        '2000년 유엔 총회에서 결의했고, 8개 목표로 이루어져 있다',
+        '17개 주요 목표와 17개 세부 목표로 이루어져 있다',
+        '각국 정부가 각자 다르게 정한 목표라서 공통 목록이 없다'
+      ],
+      answer: 0,
+      why: '지속가능발전목표는 <b>2015년 유엔 총회</b>에서 결의한 것으로 <b>17개 주요 목표와 169개 세부 목표</b>로 구성되며, 2030년까지 달성을 목표로 합니다. → <b>1차시</b>'
+    },
+    {
+      type: 'order',
+      q: '인공지능 문제 해결 절차를 <b>올바른 순서</b>로 배열하시오.',
+      items: [
+        '문제 정의',
+        '문제 해결에 적합한 데이터 수집 및 전처리',
+        '기계학습 유형과 알고리즘 선정',
+        '기계학습을 통한 모델 생성',
+        '성능 평가 및 수정'
+      ],
+      answer: [0, 1, 2, 3, 4],
+      why: '문제를 먼저 정의해야 어떤 데이터가 필요한지 알 수 있고, 데이터의 모양이 정해져야 알고리즘을 고를 수 있습니다. → <b>2차시</b>'
+    },
+    {
+      type: 'ox',
+      q: '성능 평가는 프로젝트의 마지막 단계이므로, 평가가 끝나면 앞 단계로 되돌아갈 일은 없다.',
+      answer: false,
+      why: '인공지능 문제 해결 절차는 <b>반복적</b>입니다. 평가 결과가 나쁘면 원인에 따라 데이터 수집·전처리 단계나 알고리즘 선정 단계로 <b>되돌아가</b> 다시 진행합니다. → <b>2차시 · 4차시</b>'
+    },
+    {
+      type: 'short',
+      q: '두 사람이 한 컴퓨터에서 한 명은 코드를 작성하고 다른 한 명은 방향과 오류를 살피며 번갈아 역할을 바꾸는 협력 개발 방식을 무엇이라 하는가?',
+      answer: ['짝 프로그래밍', '짝프로그래밍', '페어 프로그래밍', 'pair programming'],
+      placeholder: '예: ○○ 프로그래밍',
+      why: '<b>짝 프로그래밍</b>입니다. 운전자(코드 작성)와 안내자(검토) 역할을 번갈아 맡아 서로의 이해를 높입니다. → <b>3차시</b>'
+    },
+    {
+      type: 'mc',
+      q: '다음 주제 중 프로젝트 주제로 <b>가장 적절한</b> 것은?',
+      choices: [
+        '인공지능으로 환경을 보호한다',
+        '기후변화 문제를 인공지능으로 해결한다',
+        '우리 학교 분리배출장 사진으로 재활용 가능 여부를 자동 판정한다',
+        '인공지능을 이용해 지구를 지킨다'
+      ],
+      answer: 2,
+      why: '①②④는 <b>목표</b>이지 주제가 아닙니다. 좋은 주제는 <b>무엇을 입력받아 무엇을 판단하는지</b>가 드러나고, 데이터를 실제로 구할 수 있으며, 학생 수준에서 다룰 수 있어야 합니다. ③은 사진(입력)으로 재활용 가능 여부(출력)를 판정한다는 것이 분명합니다. → <b>1차시</b>'
+    },
+    {
+      type: 'mc',
+      q: '어떤 모둠이 전체 데이터의 평균으로 정규화를 한 뒤에 훈련·테스트 데이터로 나누었다. 이때 생기는 문제는?',
+      choices: [
+        '정규화 효과가 사라져 모델이 학습되지 않는다',
+        '테스트 데이터의 정보가 훈련 과정에 새어 들어가 성능이 실제보다 좋게 나온다',
+        '훈련 데이터가 부족해져 과소적합이 일어난다',
+        '아무 문제가 없다. 정규화는 순서와 무관하다'
+      ],
+      answer: 1,
+      why: '전체 데이터의 평균에는 <b>테스트 데이터의 정보가 포함</b>되어 있습니다. 이를 훈련에 쓰면 <b>데이터 누출</b>이 일어나 평가 결과가 실제보다 좋게 나옵니다. 그래서 <b>분할을 먼저</b> 한 뒤 훈련 데이터만으로 전처리 기준을 정해야 합니다. → <b>3차시</b>'
+    },
+    {
+      type: 'mc',
+      q: '훈련 정확도 0.98, 테스트 정확도 0.61인 모델을 개선하려 할 때 <b>가장 적절하지 않은</b> 조치는?',
+      choices: [
+        '훈련 데이터를 더 많이 모은다',
+        '모델을 더 단순하게 만든다',
+        '같은 데이터로 학습을 훨씬 더 오래 반복한다',
+        '불필요한 속성을 줄인다'
+      ],
+      answer: 2,
+      why: '두 값의 큰 차이는 <b>과대적합</b>의 신호입니다. 같은 데이터로 학습을 더 오래 하면 훈련 데이터에 더 맞춰져 <b>과대적합이 심해집니다</b>. 데이터를 늘리거나 모델을 단순화하는 것이 옳은 방향입니다. → <b>4차시 · 2단원 6차시</b>'
+    },
+    {
+      type: 'match',
+      q: '다음 상황에 가장 알맞은 개선 전략을 짝지으시오.',
+      left: [
+        '데이터가 200개뿐이고 종류도 편중되어 있다',
+        '입력 속성에 결측치와 이상치가 많이 남아 있다',
+        '선형 모델로는 데이터의 곡선 관계를 잡지 못한다',
+        '모델은 적절한데 성능이 조금 부족해 마지막 미세 조정이 필요하다'
+      ],
+      right: ['데이터 추가 수집', '전처리 개선', '알고리즘 교체', '하이퍼파라미터 조정'],
+      answer: [0, 1, 2, 3],
+      why: '개선은 <b>병목이 무엇인지</b>에 따라 달라집니다. 데이터가 부족할 때 하이퍼파라미터를 조정해도 성능은 거의 오르지 않습니다. 그래서 <b>오류 분석으로 원인을 먼저</b> 찾아야 합니다. → <b>4차시</b>'
+    },
+    {
+      type: 'multi',
+      q: '프로젝트 평가 루브릭에 반영해야 할 항목으로 <b>옳은 것을 모두</b> 고르시오.',
+      choices: [
+        '인공지능 소프트웨어의 완성도',
+        '주제의 적절성',
+        '문제 해결 방식의 창의성',
+        '다른 사람과의 협업 능력'
+      ],
+      answer: [0, 1, 2, 3],
+      why: '모두 옳습니다. 프로젝트 평가는 결과물의 완성도뿐 아니라 <b>주제의 적절성, 문제 해결 방식의 창의성, 협업 능력</b> 등 다각적인 측면을 골고루 반영해 평가합니다. → <b>4차시</b>'
+    },
+    {
+      type: 'mc',
+      q: '어떤 모둠의 채용 추천 모델이 테스트 정확도 0.93을 기록했다. 이 프로젝트를 마무리하기 전에 <b>반드시</b> 해야 할 일은?',
+      choices: [
+        '정확도를 0.99까지 올리기 위해 학습을 계속한다',
+        '집단별로 나누어 정확도와 재현율을 따로 계산해 격차가 있는지 확인한다',
+        '더 복잡한 알고리즘으로 바꿔 성능을 높인다',
+        '정확도가 0.9를 넘었으므로 그대로 사용한다'
+      ],
+      answer: 1,
+      why: '전체 정확도가 높아도 <b>특정 집단에서만 성능이 낮을 수 있습니다</b>. 집단별로 지표를 따로 계산해 격차를 확인하는 것이 편향 점검의 기본입니다. 성능 지표만으로는 공정성을 알 수 없습니다. → <b>4차시 · 3단원 4차시</b>'
+    },
+    {
+      type: 'multi',
+      q: '이 과목 전체(1~4단원)를 프로젝트에 활용하는 방식으로 <b>옳은 것을 모두</b> 고르시오.',
+      choices: [
+        '길찾기나 일정 배치처럼 최적의 조합을 찾는 문제에는 1단원의 탐색 알고리즘을 쓸 수 있다',
+        '데이터에 결측치와 이상치가 있으면 2단원의 전처리 방법으로 다듬는다',
+        '모델의 성능은 2단원의 혼동 행렬과 정밀도·재현율로 평가한다',
+        '사회적 영향 점검은 프로젝트가 모두 끝난 뒤에 하면 충분하다'
+      ],
+      answer: [0, 1, 2],
+      why: '④가 틀렸습니다. 사회적 영향은 <b>주제를 고를 때부터</b> 고려해야 합니다. 데이터를 어떻게 모을지, 누구에게 영향을 주는지를 처음부터 따져야 하며, 마지막에 덧붙이는 절차가 아닙니다. → <b>1~4단원 전체</b>'
+    }
+  ]
+});
+
+AI.note('#note1', {
+  id: 'a4c-essay',
+  title: '서·논술형 답안 작성',
+  prompt: '위의 세 문항에 대한 답을 작성하세요. 각 문항의 <b>평가 기준</b>을 펼쳐 확인한 뒤 쓰면 좋습니다. 작성한 내용은 자동 저장되고 <b>내 학습 포트폴리오</b>에서 인쇄할 수 있습니다.',
+  fields: [
+    { key: 'e1goal', label: '서술형 1 — 고른 목표 (번호와 명칭)', type: 'text', placeholder: '예: 12번 책임 있는 소비와 생산' },
+    { key: 'e1topic', label: '서술형 1 — 프로젝트 주제 (한 문장)', type: 'text', placeholder: '예: 급식 잔반 사진으로 음식물 낭비량을 자동 추정한다' },
+    { key: 'e1why', label: '서술형 1 — 네 조건을 어떻게 만족하는가', type: 'textarea', rows: 5,
+      placeholder: '구체성: … / 데이터 확보: … / 학생 수준: … / 의미: …' },
+    { key: 'e2', label: '서술형 2 — 훈련 0.97, 테스트 0.62 결과의 해석과 되돌아갈 단계', type: 'textarea', rows: 6,
+      placeholder: '진단: … / 이유: … / 되돌아갈 단계와 조치 두 가지 이상: …' },
+    { key: 'e3', label: '논술형 3 — 반드시 점검해야 할 사회적 영향과 확인 방법', type: 'textarea', rows: 8,
+      placeholder: '① 항목 — 확인 방법 …\n② 항목 — 확인 방법 …\n③ 항목 — 확인 방법 …\n성능만 보는 관점의 한계: …' },
+    { key: 'reflect', label: '단원을 마치며 — 프로젝트에서 가장 어려울 것 같은 단계와 그 이유', type: 'textarea', rows: 3,
+      placeholder: '예) 데이터를 모으는 단계가 가장 어려울 것 같다. 왜냐하면 …' }
+  ]
+});
+
+AI.rubric('#self1', {
+  id: 'a4c-self',
+  items: [
+    { std: '12인기04-01', text: '나는 지속가능발전목표를 이해하고, 그중 인공지능으로 접근할 수 있는 목표를 찾아 <b>프로젝트 주제를 한 문장으로 도출</b>할 수 있다.' },
+    { std: '12인기04-02', text: '나는 인공지능 문제 해결 절차 다섯 단계를 순서대로 설명하고, 그에 맞춰 <b>프로젝트 수행 계획을 구안</b>할 수 있다.' },
+    { std: '12인기04-03', text: '나는 역할을 나누어 협력하면서 파이프라인 순서를 지켜 <b>인공지능 소프트웨어를 개발</b>할 수 있다.' },
+    { std: '12인기04-04', text: '나는 평가 결과의 원인을 분석해 알맞은 개선을 적용하고, <b>사회적 영향까지 점검</b>하여 소프트웨어를 완성할 수 있다.' }
+  ]
+});
+</script>
+</body>
+</html>
