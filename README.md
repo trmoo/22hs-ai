@@ -7,8 +7,6 @@
 
 **https://trmoo.github.io/22hs-ai/**
 
-> 링크가 아직 열리지 않으면 저장소 **Settings → Pages**에서 Source를 `main` / `/ (root)`로 지정해 주세요. 1~2분 뒤 공개됩니다.
-
 ## 구성
 
 | 구성 | 수량 |
