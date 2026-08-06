@@ -507,6 +507,10 @@ body.blank-mode .blank { background: none; padding: 0; }
 .tb-footer .fwrap { max-width: var(--maxw-wide); margin: 0 auto; padding: 0 20px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
 .tb-footer .spacer { flex: 1 1 auto; }
 .tb-footer a { color: var(--ink-3); }
+/* 저작권 · 이용 조건 */
+.tb-footer .flic { max-width: var(--maxw-wide); margin: 14px auto 0; padding: 13px 20px 0; border-top: 1px solid var(--line); font-size: 12.5px; line-height: 1.9; color: var(--ink-4); }
+.tb-footer .flic b { color: var(--ink-2); font-weight: 750; }
+.tb-footer .flic a { color: var(--ink-3); text-decoration: underline; }
 
 /* ---------- 17. 학습 도구 독 ---------- */
 .dock { position: fixed; right: 16px; bottom: 16px; z-index: 70; display: flex; flex-direction: column; align-items: flex-end; gap: 9px; }
@@ -538,7 +542,12 @@ body.blank-mode .blank { background: none; padding: 0; }
 /* ---------- 19. 인쇄 ---------- */
 @media print {
   :root { --bg: #fff; --surface: #fff; --surface-2: #fff; --surface-3: #f2f2f2; --line: #bbb; --ink: #000; --ink-2: #222; --ink-3: #444; }
-  .tb-header, .dock, .nav-foot, .tb-footer, .blank-bar, .q-actions, .q-foot, .sim-controls, .note-foot { display: none !important; }
+  .tb-header, .dock, .nav-foot, .blank-bar, .q-actions, .q-foot, .sim-controls, .note-foot { display: none !important; }
+  /* 인쇄물에도 저작권 표시는 남긴다 (이동 링크만 감춤) */
+  .tb-footer { display: block !important; background: none; border-top: 0; padding: 8px 0 0; }
+  .tb-footer .fwrap { display: none !important; }
+  .tb-footer .flic { margin-top: 0; padding: 8px 0 0; border-top: 1px solid #bbb; font-size: 8.5pt; line-height: 1.6; color: #444; }
+  .tb-footer .flic b { color: #000; }
   body { background: #fff; font-size: 11pt; }
   .hero { padding: 0 0 14px; background: none; }
   .section { break-inside: avoid; margin-bottom: 20px; }

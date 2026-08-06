@@ -1164,6 +1164,12 @@
         h('a', { href: base + 'index.html' }, '단원 목록'),
         h('a', { href: base + 'portfolio.html' }, '내 학습'),
         h('a', { href: '#', onclick: e => { e.preventDefault(); global.print(); } }, '인쇄')
+      ),
+      h('div', { class: 'flic' },
+        h('div', {}, '제작 및 문의 : ',
+          h('a', { href: 'mailto:enssam21@gmail.com' }, 'enssam21@gmail.com')),
+        h('div', {}, '이 웹페이지의 무단 배포 및 상업적 이용을 금합니다. 학교 수업 목적으로만 이용해 주세요.'),
+        h('div', {}, h('b', {}, '© 2026 티쳐무'), ' · 모든 권리 보유')
       )
     );
   }
